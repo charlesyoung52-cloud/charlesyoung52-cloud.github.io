@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Unarmed Security Course | Platforms Training Academy</title>
+    
+    <!-- Meta and OpenGraph -->
+    <meta name="description" content="Official 20-Hour Online Unarmed Security Course from Platforms Training Academy in Chicago, IL. Interactive Coursera-style lessons, tactical scenario simulations, check-on-learning quizzes, and official 50-question state qualification examination.">
+    <meta name="author" content="Platforms Training Academy - Charles Young">
+    <link rel="icon" type="image/png" href="assets/logo_full_color.png">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Stylesheet matching platformstraining.com -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- PDF Generation Libraries -->
+    <script src="assets/pdf-lib.min.js"></script>
+    <script src="assets/cert_template_base64.js"></script>
+</head>
+<body>
+
+    <!-- Top Sticky Header Navigation -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="brand-wrapper" title="Return to Course Overview">
+                <img src="assets/logo_full_color.png" alt="Platforms Training Academy Logo" class="brand-logo">
+                <div class="brand-info">
+                    <h1>PLATFORMS TRAINING ACADEMY</h1>
+                    <span>Online Unarmed Security Course &bull; Chicago, IL</span>
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <button class="nav-btn active" data-view="overview">
+                    <i class="fas fa-home"></i> Overview
+                </button>
+                <button class="nav-btn" data-view="lesson">
+                    <i class="fas fa-book-open"></i> Lessons (1-10)
+                </button>
+                <button class="nav-btn" data-view="exam" id="nav-btn-exam">
+                    <i class="fas fa-file-alt"></i> Official Exam (50 Qs)
+                </button>
+            </nav>
+
+            <div class="header-actions">
+                <button class="btn-guide-header" onclick="app.openNavigationGuide()" title="Course Navigation Guide">
+                    <i class="fas fa-compass"></i> Guide
+                </button>
+                <button class="btn-save-progress" onclick="app.manualSaveProgress()" title="Save Course Progress">
+                    <i class="fas fa-save"></i> Save Progress
+                </button>
+                <button class="header-profile-btn" onclick="app.openLoginModal()" title="Student Account & Profile">
+                    <i class="fas fa-user-circle"></i> <span id="header-student-name-display">Student Officer</span> <span class="profile-online-dot"></span>
+                </button>
+                <button class="icon-btn btn-speech" title="Read Aloud / Text-to-Speech">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Progress Bar -->
+        <div class="course-progress-strip">
+            <div class="course-progress-fill" id="global-progress-fill"></div>
+        </div>
+    </header>
+
+    <!-- Main Container Views -->
+    <main class="app-main">
+
+        <!-- ===============================================================
+             VIEW 1: Course Overview & Syllabus
+             =============================================================== -->
+        <section id="view-overview" class="view-section active">
+            <div class="hero-banner">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <span class="badge-tag">IDFPR Certified &bull; 20-Hour Curriculum</span>
+                        <h2>Interactive Online Unarmed Security Course</h2>
+                        <p>
+                            Welcome to the official Online Unarmed Security Course from <strong>Platforms Training Academy</strong>. 
+                            This comprehensive Coursera-style curriculum fulfills the state-mandated 20 hours of instruction across 10 in-depth modules required to qualify and certify you as an unarmed security officer in the State of Illinois (225 ILCS 447).
+                        </p>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">20</span>
+                                <span class="stat-label">Course Hours</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">10</span>
+                                <span class="stat-label">Core Modules</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">50</span>
+                                <span class="stat-label">Exam Questions</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">75%</span>
+                                <span class="stat-label">Passing Standard</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn-primary" onclick="app.startOrResumeCourse()">
+                                <i class="fas fa-play"></i> Start / Resume Course
+                            </button>
+                            <button class="btn-secondary" onclick="app.showView('exam')">
+                                <i class="fas fa-clipboard-check"></i> Take 50-Question Exam
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hero-media">
+                        <video class="hero-video" controls autoplay muted loop playsinline poster="assets/q_arrest_patrol.jpg">
+                            <source src="assets/platforms_intro.mp4" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                    </div>
+                </div>
+            <!-- Student Orientation & Course Navigation Banner -->
+            <div class="orientation-banner-card">
+                <div class="orientation-banner-text">
+                    <h3><i class="fas fa-compass" style="color:var(--brand-green);"></i> Student Orientation: How to Navigate & Complete This Course</h3>
+                    <p>
+                        This state-mandated 20-hour curriculum requires sequential mastery of all 10 modules (Study Material, Tactical Scenario Simulator, and Check on Learning) before unlocking the 50-Question Examination. Your progress auto-saves continuously, or you can log in to save and resume on any device.
+                    </p>
+                </div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="app.openNavigationGuide()">
+                        <i class="fas fa-book-reader"></i> View Navigation Guide
+                    </button>
+                    <button class="btn-primary" onclick="app.openLoginModal()">
+                        <i class="fas fa-user-check"></i> Student Login / Save Progress
+                    </button>
+                </div>
+            </div>
+
+            <!-- Curriculum Syllabus Breakdown -->
+            <h3 class="section-title">20-Hour Course Curriculum (10 Comprehensive Modules)</h3>
+            <div class="lessons-grid" id="overview-lessons-grid">
+                <!-- Dynamically rendered via app.js -->
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 2: Coursera-Style Lesson Viewer with Tabs & Progression
+             =============================================================== -->
+        <section id="view-lesson" class="view-section">
+            <div class="lesson-layout">
+                <!-- Sidebar Lessons Menu -->
+                <aside class="lesson-sidebar">
+                    <h3 class="sidebar-heading">Course Modules</h3>
+                    <ul class="sidebar-list" id="lesson-sidebar-list">
+                        <!-- Populated dynamically via app.js with lock states -->
+                    </ul>
+                </aside>
+
+                <!-- Main Lesson Reader -->
+                <article class="lesson-main-content">
+                    <div class="lesson-header-meta">
+                        <span class="badge-tag" id="lesson-meta-badge">Lesson 1 &bull; 2 Hours</span>
+                        <button class="btn-secondary btn-speech" style="padding: 6px 14px; font-size: 0.85rem;">
+                            <i class="fas fa-volume-up"></i> Listen to Lesson
+                        </button>
+                    </div>
+
+                    <h2 class="lesson-title-main" id="lesson-title-display">The Law of Arrest, Search, and Seizure</h2>
+
+                    <!-- Module Requirements Progress Strip -->
+                    <div class="module-requirements-bar" id="module-requirements-bar">
+                        <!-- Populated by app.js: 3 requirement chips and status -->
+                    </div>
+
+                    <!-- Coursera-Inspired Interactive Module Navigation Tabs -->
+                    <div class="lesson-tabs-nav">
+                        <button class="lesson-tab-btn active" data-tab="study" onclick="app.switchLessonTab('study')">
+                            <i class="fas fa-book-open"></i> Comprehensive Study Material
+                        </button>
+                        <button class="lesson-tab-btn" data-tab="scenario" onclick="app.switchLessonTab('scenario')">
+                            <i class="fas fa-shield-alt"></i> Tactical Scenario Simulator
+                        </button>
+                        <button class="lesson-tab-btn" data-tab="quiz" onclick="app.switchLessonTab('quiz')">
+                            <i class="fas fa-tasks"></i> Check on Learning (Quick Quiz)
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: Comprehensive Study Material -->
+                    <div class="tab-content-panel active" id="tab-study-content">
+                        <!-- Rendered by app.js: Detailed statutory text, case law, tables, callouts, and takeaways -->
+                    </div>
+
+                    <!-- TAB 2: Tactical Scenario Simulator -->
+                    <div class="tab-content-panel" id="tab-scenario-content">
+                        <!-- Rendered by app.js: Branching situational decision tree with feedback -->
+                    </div>
+
+                    <!-- TAB 3: Check on Learning (Forced Remediation Quiz) -->
+                    <div class="tab-content-panel" id="tab-quiz-content">
+                        <!-- Rendered by app.js: 3 mastery questions with statutory remediation links -->
+                    </div>
+
+                    <!-- Bottom Nav -->
+                    <div class="lesson-nav-footer">
+                        <button class="btn-secondary" id="lesson-prev-btn">
+                            <i class="fas fa-arrow-left"></i> Previous Module
+                        </button>
+                        <button class="btn-primary" id="lesson-next-btn">
+                            Next Module <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 3: Official 50-Question Examination
+             =============================================================== -->
+        <section id="view-exam" class="view-section">
+            <!-- Sub-container A: Locked Screen when lessons incomplete -->
+            <div id="exam-locked-view" style="display:none;">
+                <div class="exam-locked-card">
+                    <div class="exam-locked-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2>OFFICIAL 50-QUESTION EXAMINATION LOCKED</h2>
+                    <p>
+                        In accordance with the <strong>Illinois Department of Financial and Professional Regulation (IDFPR)</strong> 
+                        under 225 ILCS 447, candidates must satisfactorily complete all 10 training modules—including all Study Material, 
+                        Tactical Scenario Simulators, and Check-on-Learning Quizzes—before attempting the official qualification examination.
+                    </p>
+
+                    <div class="exam-progress-tracker-box">
+                        <div class="exam-progress-header">
+                            <strong style="color:var(--text-white);"><i class="fas fa-list-check"></i> Module Completion Status:</strong>
+                            <span id="exam-locked-progress-ratio" style="font-weight:700; color:var(--brand-green-bright);">0 / 10 Completed</span>
+                        </div>
+                        <div class="locked-modules-grid" id="locked-modules-status-grid">
+                            <!-- Populated dynamically via app.js -->
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" style="font-size:1.05rem; padding:14px 28px;" onclick="app.resumeEarliestIncompleteLesson()">
+                        <i class="fas fa-arrow-right"></i> Resume Course & Complete Modules
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-container B: Active Exam when unlocked -->
+            <div id="exam-active-view" class="exam-container">
+                <!-- Status & Timer Bar -->
+                <div class="exam-status-bar">
+                    <div class="exam-progress-info">
+                        <span class="exam-pill" id="exam-answered-count">0 / 50 Answered</span>
+                        <span class="exam-pill timer">
+                            <i class="fas fa-stopwatch"></i> <span id="exam-timer-display">00:00</span>
+                        </span>
+                    </div>
+
+                    <div class="exam-requirements">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">
+                            Passing Score: <strong>75%</strong> (38 / 50 items minimum) &bull; Unlimited Retakes
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Topic Domain Filters for 50 Questions -->
+                <div class="topic-filter-bar" id="topic-filter-bar">
+                    <!-- Populated dynamically via app.js -->
+                </div>
+
+                <!-- 1 to 50 Question Navigator Palette -->
+                <div class="palette-container">
+                    <div class="palette-header">
+                        <span><i class="fas fa-th"></i> Question Navigation Grid (1 - 50):</span>
+                        <span><i class="fas fa-flag" style="color:var(--warning);"></i> Flagged</span>
+                    </div>
+                    <div class="palette-grid palette-grid-50" id="palette-grid">
+                        <!-- Rendered dynamically (1 - 50 buttons) -->
+                    </div>
+                </div>
+
+                <!-- Active Question Card -->
+                <div class="question-card">
+                    <div class="question-header">
+                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <span class="question-part-tag" id="question-part-label">Part 1: True or False</span>
+                            <span class="question-number-tag" id="question-number-display" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Question 1 of 50</span>
+                        </div>
+                        <div class="question-tools">
+                            <button class="flag-btn" id="btn-flag-question">
+                                <i class="far fa-flag"></i> Flag
+                            </button>
+                            <button class="icon-btn btn-speech" title="Read Question Aloud">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="question-text" id="question-text-content">
+                        <!-- Question text here -->
+                    </h3>
+
+                    <!-- Visual Illustration (Image or Video) -->
+                    <div class="question-visual-box" id="question-visual-container" style="display:none;">
+                        <!-- Dynamic image/video with caption -->
+                    </div>
+
+                    <!-- Interactive Options Container -->
+                    <div id="question-options-container">
+                        <!-- Options rendered based on type -->
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="question-nav-bar">
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn-secondary" id="exam-prev-btn">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn-secondary" id="btn-clear-question" style="color:var(--text-muted);">
+                            <i class="fas fa-undo"></i> Clear Answer
+                        </button>
+                    </div>
+
+                    <button class="btn-primary" id="exam-next-btn">
+                        Next Question <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 4: Exam Results, Official State Form & Certificate
+             =============================================================== -->
+        <section id="view-results" class="view-section">
+            <div class="exam-container">
+                <div class="results-card">
+                    <div class="score-badge passed" id="results-score-badge">
+                        <span class="score-number" id="results-score-number">48 / 50</span>
+                        <span class="score-pct" id="results-score-percentage">96%</span>
+                    </div>
+
+                    <h2 id="results-status-title">CONGRATULATIONS — YOU PASSED!</h2>
+                    <p class="subtitle" id="results-status-subtitle">
+                        You have successfully completed the 20-Hour Online Unarmed Security Examination for the State of Illinois.
+                    </p>
+
+                    <div class="results-stats-row">
+                        <div class="stat-item">
+                            <span class="stat-value">38 / 50</span>
+                            <span class="stat-label">Minimum to Pass</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">75%</span>
+                            <span class="stat-label">Passing Standard</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="results-status-tag" style="color:var(--brand-green-bright);">CERTIFIED</span>
+                            <span class="stat-label">Qualification Status</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:center; gap:16px;">
+                        <button class="btn-secondary" onclick="app.retakeExam()">
+                            <i class="fas fa-redo"></i> Retake Exam
+                        </button>
+                        <button class="btn-primary" onclick="app.downloadOfficialPdfCertificate()">
+                            <i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Official Illinois Certificate Form (Form IL486-0486) -->
+                <div class="cert-intake-card" id="results-certificate-form-section">
+                    <div class="cert-intake-header">
+                        <h3><i class="fas fa-id-card" style="color:var(--brand-green);"></i> State of Illinois Trainee Record Information</h3>
+                        <p>
+                            Please review and complete the legal details required for your official 
+                            <strong>State of Illinois Form IL486-0486 (Certification of Completion of a Basic Training Course)</strong>.
+                            This information is printed onto your permanent IDFPR record of 20-hour unarmed security training under 225 ILCS 447.
+                        </p>
+                    </div>
+
+                    <!-- Trainee Information Form Grid -->
+                    <div class="cert-form-grid">
+                        <div class="cert-form-group" style="grid-column: span 12;">
+                            <label for="cert-input-name">Full Legal Name (LAST, FIRST, MIDDLE INITIAL):</label>
+                            <input type="text" id="cert-input-name" class="cert-form-input" placeholder="e.g. DOE, JOHN A." value="DOE, JOHN A.">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 6;">
+                            <label for="cert-input-address">Home Street Address:</label>
+                            <input type="text" id="cert-input-address" class="cert-form-input" placeholder="e.g. 1234 S. Michigan Ave, Apt 4B" value="1234 S. Michigan Ave, Apt 4B">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 3;">
+                            <label for="cert-input-city">City:</label>
+                            <input type="text" id="cert-input-city" class="cert-form-input" placeholder="e.g. Chicago" value="Chicago">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 1;">
+                            <label for="cert-input-state">State:</label>
+                            <input type="text" id="cert-input-state" class="cert-form-input" placeholder="IL" value="IL" maxlength="2">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 2;">
+                            <label for="cert-input-zip">ZIP Code:</label>
+                            <input type="text" id="cert-input-zip" class="cert-form-input" placeholder="e.g. 60616" value="60616" maxlength="10">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 3;">
+                            <label for="cert-input-dob">Date of Birth (MM/DD/YYYY):</label>
+                            <input type="text" id="cert-input-dob" class="cert-form-input" placeholder="MM/DD/YYYY" value="05/14/1995">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 3;">
+                            <label for="cert-input-ssn">Social Security Number:</label>
+                            <input type="text" id="cert-input-ssn" class="cert-form-input" placeholder="XXX-XX-XXXX" value="XXX-XX-1234">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 1;">
+                            <label for="cert-input-weight">Weight:</label>
+                            <input type="text" id="cert-input-weight" class="cert-form-input" placeholder="185 lbs" value="185 lbs">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 1;">
+                            <label for="cert-input-height">Height:</label>
+                            <input type="text" id="cert-input-height" class="cert-form-input" placeholder="5' 11&quot;" value="5' 11&quot;">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 2;">
+                            <label for="cert-input-hair">Hair Color:</label>
+                            <input type="text" id="cert-input-hair" class="cert-form-input" placeholder="Black" value="Black">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 2;">
+                            <label for="cert-input-eyes">Eye Color:</label>
+                            <input type="text" id="cert-input-eyes" class="cert-form-input" placeholder="Brown" value="Brown">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 8;">
+                            <label for="cert-input-signature">Trainee Electronic Signature (Type Full Legal Name):</label>
+                            <input type="text" id="cert-input-signature" class="cert-form-input" style="font-family:'Times New Roman', Georgia, serif; font-style:italic; font-size:1.1rem;" placeholder="John A. Doe" value="John A. Doe">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 4;">
+                            <label for="cert-input-trainee-date">Trainee Signature Date:</label>
+                            <input type="text" id="cert-input-trainee-date" class="cert-form-input" readonly value="10/04/2026">
+                        </div>
+                    </div>
+
+                    <!-- Verified Entity & Instructor Box (Read-Only) -->
+                    <div class="cert-readonly-box">
+                        <div class="cert-readonly-header">
+                            <i class="fas fa-stamp" style="color:var(--brand-green);"></i> Authorized Training Entity & Instructor Verification (IDFPR Licensed)
+                        </div>
+                        <div class="cert-readonly-grid">
+                            <div><strong>Entity:</strong> PLATFORMS TRAINING ACADEMY</div>
+                            <div><strong>Facility Address:</strong> 200 E 75th, Chicago, IL 60615</div>
+                            <div><strong>Lead Instructor:</strong> Charles Young</div>
+                            <div><strong>Date Training Completed:</strong> <span class="cert-field-compdate">10/04/2026</span></div>
+                            <div><strong>Instructor Signature:</strong> <em>Charles Young</em></div>
+                            <div><strong>Instructor Signature Date:</strong> <span class="cert-field-compdate">10/04/2026</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div style="display:flex; justify-content:flex-end; gap:16px; flex-wrap:wrap; margin-top:20px;">
+                        <button class="btn-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print Official Certificate
+                        </button>
+                        <button class="btn-primary" onclick="app.downloadOfficialPdfCertificate()">
+                            <i class="fas fa-file-pdf"></i> Download Official State Certificate (PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Live Preview of Official Form IL486-0486 -->
+                <div class="official-state-cert-wrapper">
+                    <div style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; color:#fff; font-size:0.9rem;">
+                            <i class="fas fa-eye"></i> Live Official State Certificate Preview (Form IL486-0486):
+                        </span>
+                        <span style="font-size:0.8rem; color:#aaa;">Updates live as you type above</span>
+                    </div>
+
+                    <div class="official-state-cert-sheet" id="official-state-cert-sheet">
+                        <!-- Top Header Row -->
+                        <table class="il-form-top-table">
+                            <tr>
+                                <td class="il-form-notice-box">
+                                    <strong>IMPORTANT NOTICE:</strong> Completion of this form is necessary for consideration for licensure under 225 ILCS 447/1 et.seq. (Illinois Compiled Statutes). Disclosure of this information is VOLUNTARY. However, failure to comply may result in this form not being processed.
+                                </td>
+                                <td class="il-form-title-box">
+                                    <h2 class="il-form-main-title">Certification of Completion of a</h2>
+                                    <h3 class="il-form-sub-title">Basic Training Course</h3>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Trainee Section Banner -->
+                        <div class="il-section-banner">
+                            TRAINEE: This is your permanent record of training--a duplicate will not be issued.
+                        </div>
+
+                        <!-- Trainee Table Grid -->
+                        <table class="il-grid-table">
+                            <tr>
+                                <td class="il-grid-cell" colspan="6">
+                                    <span class="il-cell-label">NAME (LAST, FIRST, MIDDLE INITIAL)</span>
+                                    <div class="il-cell-value" id="prev-cert-name">DOE, JOHN A.</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="il-grid-cell" colspan="3" style="width:50%;">
+                                    <span class="il-cell-label">HOME STREET ADDRESS</span>
+                                    <div class="il-cell-value" id="prev-cert-address">1234 S. Michigan Ave, Apt 4B</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:20%;">
+                                    <span class="il-cell-label">CITY</span>
+                                    <div class="il-cell-value" id="prev-cert-city">Chicago</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:10%;">
+                                    <span class="il-cell-label">STATE</span>
+                                    <div class="il-cell-value" id="prev-cert-state">IL</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:20%;">
+                                    <span class="il-cell-label">ZIP CODE</span>
+                                    <div class="il-cell-value" id="prev-cert-zip">60616</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="il-grid-cell" style="width:20%;">
+                                    <span class="il-cell-label">DATE OF BIRTH</span>
+                                    <div class="il-cell-value" id="prev-cert-dob">05/14/1995</div>
+                                </td>
+                                <td class="il-grid-cell" colspan="2" style="width:30%;">
+                                    <span class="il-cell-label">SOCIAL SECURITY NUMBER</span>
+                                    <div class="il-cell-value" id="prev-cert-ssn">XXX-XX-1234</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:14%;">
+                                    <span class="il-cell-label">WEIGHT</span>
+                                    <div class="il-cell-value" id="prev-cert-weight">185 lbs</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:12%;">
+                                    <span class="il-cell-label">HEIGHT</span>
+                                    <div class="il-cell-value" id="prev-cert-height">5' 11"</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:12%;">
+                                    <span class="il-cell-label">HAIR COLOR</span>
+                                    <div class="il-cell-value" id="prev-cert-hair">Black</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:12%;">
+                                    <span class="il-cell-label">EYE COLOR</span>
+                                    <div class="il-cell-value" id="prev-cert-eyes">Brown</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p class="il-attest-text">
+                            I hereby certify that I have completed the basic training checked below as required by the Illinois Private Detective, Private Alarm, Private Security, Fingerprint Vendor, and Locksmith Act of 2004.
+                        </p>
+
+                        <div class="il-sig-row">
+                            <div class="il-sig-field">
+                                <span>Signature of Trainee:</span>
+                                <span class="il-sig-underline" id="prev-cert-sig" style="min-width:280px;">John A. Doe</span>
+                            </div>
+                            <div class="il-sig-field">
+                                <span>Date:</span>
+                                <span class="il-sig-underline" id="prev-cert-date" style="min-width:140px;">10/04/2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Instructor Section Banner -->
+                        <div class="il-section-banner">
+                            INSTRUCTOR: This form is to be returned to the trainee after completion. This serves as the trainee's permanent record of completion of 20-hour basic and/or refresher training.
+                        </div>
+
+                        <div class="il-checklist-section">
+                            Check one of the following that apply to the basic training or refresher training that has been completed by the applicant listed above in compliance with the guidelines outlined in the Illinois Private Detective, Private Alarm, Private Security, Fingerprint Vendor, and Locksmith Act of 2004.
+                            
+                            <div class="il-checklist-group-title">20-Hour Basic Training</div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span>Completed Basic Training under Section 15-25 for a Detective Agency</span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span>Completed Basic Training under Section 20-20 for an Alarm Contractor Agency</span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>Completed Basic Training under Section 25-20 for a Security Contractor Agency</strong></span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span>Completed Basic Training under Section 30-20 for a Locksmith Agency</span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span>Completed Basic Training under Section 31-20 for a Fingerprint Vendor</span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>Completed Basic Training under Section 35-45 for a Proprietary Security Force</strong></span>
+                            </div>
+
+                            <div class="il-checklist-group-title" style="margin-top:5px;">8-Hour Training Courses</div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span>Completed 8-Hour Site-Specific Training under Section 25-20 for a Security Contractor Agency</span>
+                            </div>
+                            <div style="text-align:center; font-size:7pt; font-weight:bold; margin:2px 0;">OR</div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span>Completed 8-Hour Refresher Training under Section 25-20 for a Security Contractor Agency</span>
+                            </div>
+                        </div>
+
+                        <!-- Entity & Instructor Details Table -->
+                        <table class="il-grid-table">
+                            <tr>
+                                <td class="il-grid-cell" colspan="4">
+                                    <span class="il-cell-label">NAME OF ENTITY OFFERING TRAINING</span>
+                                    <div class="il-cell-value">PLATFORMS TRAINING ACADEMY</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="il-grid-cell" style="width:45%;">
+                                    <span class="il-cell-label">STREET ADDRESS</span>
+                                    <div class="il-cell-value">200 E 75th</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:25%;">
+                                    <span class="il-cell-label">CITY</span>
+                                    <div class="il-cell-value">Chicago</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:10%;">
+                                    <span class="il-cell-label">STATE</span>
+                                    <div class="il-cell-value">IL</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:20%;">
+                                    <span class="il-cell-label">ZIP CODE</span>
+                                    <div class="il-cell-value">60615</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="il-grid-cell" style="width:45%;">
+                                    <span class="il-cell-label">DATE TRAINING COMPLETED</span>
+                                    <div class="il-cell-value cert-field-compdate">10/04/2026</div>
+                                </td>
+                                <td class="il-grid-cell" colspan="3">
+                                    <span class="il-cell-label">NAME OF INSTRUCTOR</span>
+                                    <div class="il-cell-value">Charles Young</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p class="il-attest-text">
+                            I hereby certify that the above-named trainee successfully completed the training checked above as required by the Illinois Private Detective, Private Alarm, Private Security, Fingerprint Vendor, and Locksmith Act of 2004.
+                        </p>
+
+                        <div class="il-sig-row" style="margin-bottom:28px;">
+                            <div class="il-sig-field">
+                                <span>Signature of Instructor:</span>
+                                <span class="il-sig-underline" style="min-width:280px;">Charles Young</span>
+                            </div>
+                            <div class="il-sig-field">
+                                <span>Date:</span>
+                                <span class="il-sig-underline cert-field-compdate" style="min-width:140px;">10/04/2026</span>
+                            </div>
+                        </div>
+
+                        <div class="il-footer-code">IL486-0486 7/12 (DE)</div>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Question Review -->
+                <div class="review-section">
+                    <h3 class="section-title">Comprehensive Question-by-Question Review (50 Items)</h3>
+                    <div id="results-review-list">
+                        <!-- Populated by app.js -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===============================================================
+         MODAL 1: Course Navigation & Study Guide
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-navigation-guide" onclick="if(event.target===this) app.closeNavigationGuide()">
+        <div class="lms-modal-window">
+            <button class="lms-modal-close-btn" onclick="app.closeNavigationGuide()" title="Close Guide">&times;</button>
+            
+            <h3 class="modal-header-title">
+                <i class="fas fa-compass" style="color:var(--brand-green);"></i> Course Navigation & Study Guide
+            </h3>
+            <p class="modal-header-sub">
+                Official Orientation for Platforms Training Academy Online Unarmed Security (IDFPR 225 ILCS 447)
+            </p>
+
+            <div class="guide-steps-grid">
+                <div class="guide-step-card">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-content">
+                        <h4>10 Core Curriculum Modules (20 Hours)</h4>
+                        <p>
+                            The course contains 10 in-depth modules covering Illinois criminal code, search & seizure, civil liability, use of force, restraints, PERC standards, fire safety, report writing, public relations, and emergency response. You must complete modules in sequential order (1 through 10).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-content">
+                        <h4>The 3-Step Mastery Cycle in Every Module</h4>
+                        <p>
+                            Each module requires completing three distinct sections:
+                            <br>&bull; <strong>Tab 1: Study Material & Field Narration:</strong> Read statutory case law and listen to Lead Instructor Charles Young's colorful real-world tactical case studies. Click "Mark Study Reviewed" when done.
+                            <br>&bull; <strong>Tab 2: Tactical Scenario Simulator:</strong> Choose a response to realistic Chicago post dilemmas and review actionable legal/tactical feedback.
+                            <br>&bull; <strong>Tab 3: Check on Learning:</strong> Answer all 3 questions correctly (100%). If you select an incorrect answer, <em>Forced Remediation</em> automatically jumps to the exact statutory section you need to review.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-content">
+                        <h4>Progression Locks & Advance Rules</h4>
+                        <p>
+                            You cannot skip ahead to later lessons or take the final exam early. Module 2 unlocks only after Module 1 is 100% completed. The "Next Module" button remains locked with a lock badge until all three sections are satisfied.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-content">
+                        <h4>Save Your Progress & Resume Anywhere</h4>
+                        <p>
+                            Your progress auto-saves continuously in your browser. You can click <strong>Save Progress</strong> in the top header at any time. In the Student Profile modal, you can export a progress backup file (<code>.json</code>) to resume your course on another computer, tablet, or phone without losing a single answer.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">5</div>
+                    <div class="guide-step-content">
+                        <h4>Official 50-Question State Qualification Exam</h4>
+                        <p>
+                            Once all 10 modules are mastered, the final exam unlocks. The exam consists of 50 multiple choice questions with a 75% minimum passing threshold (38/50 correct). You have unlimited retakes, an active stopwatch timer, category filter chips, and question flagging.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">6</div>
+                    <div class="guide-step-content">
+                        <h4>Official State Certification (Form IL486-0486)</h4>
+                        <p>
+                            Upon passing the examination, complete the state trainee information intake form. Our system dynamically stamps your legal details and today's date onto the official State of Illinois Basic Training Record, ready for instant PDF download and printing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:right;">
+                <button class="btn-primary" onclick="app.closeNavigationGuide()">
+                    <i class="fas fa-check"></i> Got It — Return to Course
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===============================================================
+         MODAL 2: Student Account, Login & Progress Save/Resume
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-student-login" onclick="if(event.target===this) app.closeLoginModal()">
+        <div class="lms-modal-window">
+            <button class="lms-modal-close-btn" onclick="app.closeLoginModal()" title="Close Profile">&times;</button>
+            
+            <h3 class="modal-header-title">
+                <i class="fas fa-user-circle" style="color:var(--brand-green);"></i> Student Profile & Progress Center
+            </h3>
+            <p class="modal-header-sub">
+                Manage your student credentials, save course progression, and export or resume your state training record.
+            </p>
+
+            <div class="profile-modal-grid">
+                <!-- Column 1: Student Information -->
+                <div class="profile-card-box">
+                    <h4><i class="fas fa-id-badge"></i> Student Officer Credentials</h4>
+                    
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">FULL LEGAL NAME:</label>
+                            <input type="text" id="login-modal-name" class="cert-form-input" style="width:100%;" placeholder="e.g. Officer Marcus Washington">
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">EMAIL ADDRESS / STUDENT ID:</label>
+                            <input type="text" id="login-modal-email" class="cert-form-input" style="width:100%;" placeholder="e.g. mwashington@security.com">
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">EMPLOYER / SECURITY AGENCY (OPTIONAL):</label>
+                            <input type="text" id="login-modal-agency" class="cert-form-input" style="width:100%;" placeholder="e.g. Platforms Security Services">
+                        </div>
+
+                        <button class="btn-primary" style="margin-top:8px;" onclick="app.saveStudentProfileFromModal()">
+                            <i class="fas fa-save"></i> Update Profile Credentials
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Column 2: Progress Stats & Cloud Backup -->
+                <div class="profile-card-box">
+                    <h4><i class="fas fa-chart-line"></i> Real-Time Progress Overview</h4>
+                    
+                    <div class="profile-stat-row">
+                        <span>Modules Completed:</span>
+                        <span id="modal-stat-modules">0 / 10 Mastered</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>Current Active Module:</span>
+                        <span id="modal-stat-active-module">Lesson 1</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>Check-on-Learning Quizzes:</span>
+                        <span id="modal-stat-quizzes">0 / 30 Questions</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>50-Q Final Exam Status:</span>
+                        <span id="modal-stat-exam-status" style="color:#f59e0b;">Locked</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>Last Saved:</span>
+                        <span id="modal-stat-last-saved">Just now</span>
+                    </div>
+
+                    <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                        <button class="btn-secondary" style="font-size:0.85rem; padding:8px 12px; width:100%; text-align:center;" onclick="app.manualSaveProgress()">
+                            <i class="fas fa-cloud-upload-alt"></i> Save Current Progress Now
+                        </button>
+                        
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-secondary" style="font-size:0.85rem; padding:8px 10px; flex:1;" onclick="app.exportProgressFile()" title="Export JSON Progress Backup">
+                                <i class="fas fa-download"></i> Export Progress
+                            </button>
+                            <button class="btn-secondary" style="font-size:0.85rem; padding:8px 10px; flex:1;" onclick="document.getElementById('file-import-progress').click()" title="Resume from Backup File">
+                                <i class="fas fa-upload"></i> Resume from File
+                            </button>
+                            <input type="file" id="file-import-progress" style="display:none;" accept=".json" onchange="app.importProgressFile(event)">
+                        </div>
+
+                        <button class="btn-secondary" style="font-size:0.8rem; padding:6px 10px; color:var(--text-muted); border-color:#333; margin-top:4px;" onclick="app.resetCourseProgress()">
+                            <i class="fas fa-redo"></i> Reset Course Progress
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:right;">
+                <button class="btn-primary" onclick="app.closeLoginModal()">
+                    <i class="fas fa-arrow-right"></i> Continue Course
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="lms-toast" class="lms-toast" style="display:none;">
+        <i class="fas fa-check-circle" style="color:var(--brand-green-bright); font-size:1.3rem;"></i>
+        <span id="lms-toast-msg">Progress saved successfully!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="assets/logo_wordmark.png" alt="Platforms Training Academy Wordmark">
+                <div>
+                    <strong style="color:var(--text-white);">Platforms Training Academy</strong><br>
+                    200 E 75th St, Chicago, IL 60619 &bull; Phone: (773) 873-2591
+                </div>
+            </div>
+            <div class="footer-copy">
+                &copy; 2026 Platforms Training Academy. All rights reserved. &bull; <a href="https://platformstraining.com" target="_blank" style="color:var(--brand-green-bright); text-decoration:none;">platformstraining.com</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
