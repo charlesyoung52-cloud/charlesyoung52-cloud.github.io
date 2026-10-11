@@ -4576,11 +4576,11 @@ button:disabled.btn-primary {
 }
 
 /* ==========================================================================
-   Wix Headless Integration Components
+   Trainee Officer Account Components
    ========================================================================== */
-.wix-integration-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
-    border: 1px solid rgba(16, 185, 129, 0.35);
+.officer-account-card {
+    background: rgba(18, 20, 24, 0.95);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 18px 20px;
     margin-bottom: 20px;
@@ -4589,7 +4589,7 @@ button:disabled.btn-primary {
     overflow: hidden;
 }
 
-.wix-integration-card::before {
+.officer-account-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -4597,191 +4597,6 @@ button:disabled.btn-primary {
     width: 4px;
     height: 100%;
     background: var(--brand-green-bright);
-}
-
-.wix-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.wix-card-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-white);
-    margin: 0;
-}
-
-.wix-card-title i {
-    color: var(--brand-green-bright);
-    font-size: 1.15rem;
-}
-
-.wix-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.wix-status-badge.connected {
-    background: rgba(16, 185, 129, 0.2);
-    border: 1px solid rgba(16, 185, 129, 0.5);
-    color: var(--brand-green-bright);
-}
-
-.wix-status-badge.configured {
-    background: rgba(245, 158, 11, 0.2);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    color: #fbbf24;
-}
-
-.wix-status-badge.standalone {
-    background: rgba(148, 163, 184, 0.15);
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    color: #94a3b8;
-}
-
-.wix-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.wix-status-badge.connected .wix-status-dot {
-    background: var(--brand-green-bright);
-    box-shadow: 0 0 8px var(--brand-green-bright);
-}
-
-.wix-status-badge.configured .wix-status-dot {
-    background: #fbbf24;
-    box-shadow: 0 0 8px #fbbf24;
-}
-
-.wix-status-badge.standalone .wix-status-dot {
-    background: #94a3b8;
-}
-
-.wix-member-info {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: var(--radius-sm);
-    margin-bottom: 12px;
-}
-
-.wix-member-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--brand-green);
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--brand-green-bright);
-    flex-shrink: 0;
-}
-
-.wix-member-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.wix-member-name {
-    font-weight: 700;
-    color: #fff;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.wix-member-email {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.btn-wix-login {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #059669, #10b981);
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: var(--radius-sm);
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-}
-
-.btn-wix-login:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-}
-
-.btn-wix-logout {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 8px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-wix-logout:hover {
-    color: var(--danger);
-    border-color: var(--danger);
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.wix-config-guide-details {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px dashed rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-}
-
-.wix-config-guide-details code {
-    background: rgba(0, 0, 0, 0.4);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: var(--brand-green-bright);
-    font-family: monospace;
 }
 
 /* ==========================================================================

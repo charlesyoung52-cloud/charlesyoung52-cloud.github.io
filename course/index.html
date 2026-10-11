@@ -67,7 +67,7 @@
                 </button>
                 <button class="header-profile-btn" onclick="app.openLoginModal()" title="Student Account & Profile">
                     <i class="fas fa-user-circle"></i> <span id="header-student-name-display">Student Officer</span> <span class="profile-online-dot"></span>
-                    <span id="header-wix-indicator" style="font-size:0.68rem; padding:1px 6px; border-radius:4px; background:rgba(255,255,255,0.1); color:#94a3b8; margin-left:2px; font-weight:600;"><i class="fas fa-shield-alt"></i> <span id="header-wix-text">Account</span></span>
+                    <span id="header-account-indicator" style="font-size:0.68rem; padding:1px 6px; border-radius:4px; background:rgba(128,163,21,0.2); color:var(--brand-green-bright); margin-left:2px; font-weight:600;"><i class="fas fa-shield-alt"></i> <span id="header-account-text">Account</span></span>
                 </button>
             </div>
         </div>
@@ -116,17 +116,23 @@
                         </div>
                     </div>
 
-                    <div class="auth-gate-actions">
-                        <button class="btn-auth-gate-login" onclick="wixClient.login()">
-                            <i class="fas fa-sign-in-alt"></i> Sign In to Access Course
-                        </button>
-                        <div id="auth-gate-loading-msg" style="display:none; color:var(--brand-green-bright); font-size:0.9rem; font-weight:600; margin-top:8px;">
-                            <i class="fas fa-spinner fa-spin"></i> Verifying officer credentials with platformstraining.com...
+                    <div class="auth-gate-form-box" style="margin: 24px 0 16px 0; text-align: left; background: rgba(0,0,0,0.4); padding: 22px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div style="margin-bottom: 14px;">
+                            <label style="font-size:0.82rem; font-weight:600; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">Student Officer Full Name *</label>
+                            <input type="text" id="auth-gate-name-input" placeholder="e.g. MARCUS THURSTON" style="width:100%; padding:12px 14px; background:#0b0d10; border:1px solid #334155; border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                            <span style="font-size:0.75rem; color:#94a3b8; margin-top:4px; display:block;">Enter name exactly as it should appear on your official State Certificate (IL486-0486).</span>
                         </div>
+                        <div style="margin-bottom: 18px;">
+                            <label style="font-size:0.82rem; font-weight:600; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">Email Address *</label>
+                            <input type="email" id="auth-gate-email-input" placeholder="officer@example.com" style="width:100%; padding:12px 14px; background:#0b0d10; border:1px solid #334155; border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                        </div>
+                        <button class="btn-auth-gate-login" onclick="app.officerSignIn()" style="width:100%;">
+                            <i class="fas fa-sign-in-alt"></i> Sign In &amp; Enter Course
+                        </button>
                     </div>
 
                     <div class="auth-gate-secondary-links">
-                        <span>New student? <a href="https://www.platformstraining.com" target="_blank">Enroll at platformstraining.com</a></span>
+                        <span>Return to Main Website: <a href="../index.html">Platforms Home</a></span>
                         <span>&bull;</span>
                         <span>Instructor Access: <a href="javascript:void(0)" onclick="app.openAdminLoginModal()">Enter Instructor PIN</a></span>
                     </div>
@@ -565,9 +571,9 @@
                         </button>
                         <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                             <span style="font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-shield-alt"></i> Official payment handled via Platforms Training Academy</span>
-                            <button class="btn-secondary" style="font-size:0.82rem; padding:8px 14px; border-color:var(--brand-green-bright); color:var(--brand-green-bright);" onclick="wixClient.redirectToCheckout()">
-                                <i class="fas fa-external-link-alt"></i> Pay on platformstraining.com &rarr;
-                            </button>
+                            <a href="../index.html#courses" class="btn-secondary" style="font-size:0.82rem; padding:8px 14px; border-color:var(--brand-green-bright); color:var(--brand-green-bright); text-decoration:none;">
+                                <i class="fas fa-arrow-left"></i> Course Catalog &amp; Financing &rarr;
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1018,62 +1024,27 @@
                 Manage your student credentials, save course progression, and export or resume your state training record.
             </p>
 
-            <!-- Member Single Sign-On & Cloud Sync Card -->
-            <div class="wix-integration-card" id="wix-sso-card">
-                <div class="wix-card-header">
-                    <h4 class="wix-card-title">
-                        <i class="fas fa-id-card-alt"></i> Trainee Member Account &amp; Cloud Sync
+            <!-- Trainee Officer Profile & State Verification Card -->
+            <div class="officer-account-card" style="background: rgba(18, 20, 24, 0.95); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <h4 style="font-size: 1.05rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-id-card-alt text-green"></i> Trainee Officer Account
                     </h4>
-                    <div id="wix-status-badge-container">
-                        <span class="wix-status-badge standalone" id="wix-status-badge">
-                            <span class="wix-status-dot"></span>
-                            <span id="wix-status-text">Standalone Mode</span>
-                        </span>
-                    </div>
+                    <span style="font-size: 0.75rem; background: rgba(128,163,21,0.15); color: var(--brand-green-bright); border: 1px solid rgba(128,163,21,0.3); padding: 3px 10px; border-radius: 12px; font-weight: 600;">
+                        <i class="fas fa-shield-alt"></i> Standalone Academy
+                    </span>
                 </div>
-
-                <!-- Authenticated Member Details (Visible when logged in) -->
-                <div id="wix-authenticated-box" style="display:none;">
-                    <div class="wix-member-info">
-                        <div class="wix-member-avatar" id="wix-member-avatar-initials">SO</div>
-                        <div class="wix-member-details">
-                            <div class="wix-member-name" id="wix-member-display-name">Officer Name</div>
-                            <div class="wix-member-email" id="wix-member-display-email">student@platformstraining.com</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--brand-green); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;" id="officer-avatar-initials">SO</div>
+                        <div>
+                            <div style="font-weight: 700; color: #fff; font-size: 1.05rem;" id="officer-display-name">Student Officer</div>
+                            <div style="font-size: 0.82rem; color: #94a3b8;" id="officer-display-email">student@platformstraining.com</div>
                         </div>
-                        <button class="btn-wix-logout" onclick="wixClient.logout()" title="Sign out of Member Account">
-                            <i class="fas fa-sign-out-alt"></i> Sign Out
-                        </button>
                     </div>
-                    <div style="font-size:0.8rem; color:var(--brand-green-bright); display:flex; align-items:center; gap:6px;">
-                        <i class="fas fa-shield-alt"></i> Connected to platformstraining.com &bull; Auto-syncing course progression &amp; IDFPR certificate.
-                    </div>
-                </div>
-
-                <!-- Unauthenticated / Setup Box (Visible when not logged in) -->
-                <div id="wix-unauthenticated-box">
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin:0 0 12px 0;">
-                        Sign in with your official <strong>platformstraining.com</strong> member account to automatically load your registered officer credentials, sync training progression to the cloud, and verify state exam certification.
-                    </p>
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <button class="btn-wix-login" onclick="wixClient.login()">
-                            <i class="fas fa-user-lock"></i> Sign In to Member Account
-                        </button>
-                        <button class="btn-secondary" style="font-size:0.82rem; padding:8px 12px;" onclick="app.toggleWixSetupGuide()">
-                            <i class="fas fa-cog"></i> Setup / Client ID Guide
-                        </button>
-                    </div>
-
-                    <!-- Collapsible Setup Guide for User -->
-                    <div id="wix-setup-guide" class="wix-config-guide-details" style="display:none;">
-                        <strong style="color:#fff;"><i class="fas fa-key"></i> Connecting Your Wix Site (platformstraining.com):</strong>
-                        <ol style="margin:6px 0 0 16px; padding:0; display:flex; flex-direction:column; gap:4px;">
-                            <li>Log into your Wix Dashboard (<a href="https://manage.wix.com" target="_blank" style="color:var(--brand-green-bright);">manage.wix.com</a>).</li>
-                            <li>Go to <strong>Settings</strong> &rarr; <strong>Headless Settings</strong> (or Developer Tools &rarr; OAuth Apps).</li>
-                            <li>Create an OAuth App named <em>Platforms Online Course</em>.</li>
-                            <li>Add <code>https://charlesyoung52-cloud.github.io</code> and <code>http://127.0.0.1:5000</code> to Allowed Origins &amp; Redirect URIs.</li>
-                            <li>Copy the <strong>Client ID</strong> and paste it into <code>wix-config.js</code>.</li>
-                        </ol>
-                    </div>
+                    <button class="btn-secondary" onclick="app.officerSignOut()" style="font-size: 0.82rem; padding: 6px 14px; color: #f87171; border-color: rgba(239,68,68,0.3);">
+                        <i class="fas fa-sign-out-alt"></i> Switch Officer
+                    </button>
                 </div>
             </div>
 
@@ -1260,12 +1231,9 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="wix-config.js?v=2.9"></script>
-    <script src="wix-sdk.bundle.js?v=2.9"></script>
-    <script src="wix-client.js?v=2.9"></script>
-    <script src="data.js?v=2.9"></script>
-    <script src="app.js?v=2.9"></script>
+    <!-- Standalone Academy Scripts -->
+    <script src="data.js?v=3.0"></script>
+    <script src="app.js?v=3.0"></script>
 </body>
 
 

@@ -76,7 +76,6 @@ class SecurityCourseApp {
         this.updateAdminModeUI();
         this.syncWithBackend();
         this.enforcePermanentMute();
-        this.initWixIntegration();
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId')) {
@@ -95,11 +94,7 @@ class SecurityCourseApp {
             }, 500);
         }
 
-        if (urlParams.get('code') && urlParams.get('state')) {
-            const loadingMsg = document.getElementById('auth-gate-loading-msg');
-            if (loadingMsg) loadingMsg.style.display = 'block';
-            this.showView('auth-gate');
-        } else if (!this.isAuthenticated()) {
+        if (!this.isAuthenticated()) {
             this.showView('auth-gate');
         } else if (!this.isAuthorized()) {
             this.showView('payment-gate');
@@ -273,10 +268,47 @@ class SecurityCourseApp {
 
     isAuthenticated() {
         if (this.isAdminMode) return true;
-        if (window.wixClient && typeof window.wixClient.isLoggedIn === 'function') {
-            return window.wixClient.isLoggedIn();
+        const loggedIn = localStorage.getItem('platforms_officer_logged_in');
+        if (loggedIn === 'true') return true;
+        if (this.studentCertData && this.studentCertData.name && this.studentCertData.name.trim().length > 0 && this.studentCertData.name !== 'Student Officer') {
+            return true;
         }
         return false;
+    }
+
+    officerSignIn() {
+        const nameInput = document.getElementById('auth-gate-name-input');
+        const emailInput = document.getElementById('auth-gate-email-input');
+        const rawName = (nameInput && nameInput.value.trim()) || '';
+        const rawEmail = (emailInput && emailInput.value.trim()) || '';
+
+        if (!rawName) {
+            alert('Please enter your full student officer name for official certification.');
+            if (nameInput) nameInput.focus();
+            return;
+        }
+
+        this.studentCertData.name = rawName.toUpperCase();
+        this.studentEmail = rawEmail || 'student@platformstraining.com';
+        localStorage.setItem('platforms_officer_logged_in', 'true');
+        localStorage.setItem('platforms_student_email', this.studentEmail);
+        this.saveState();
+        this.updateHeaderProfileDisplay();
+
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
+        } else {
+            this.showView('overview');
+        }
+    }
+
+    officerSignOut() {
+        if (confirm('Switch student officer account? Your current progress will remain saved.')) {
+            localStorage.removeItem('platforms_officer_logged_in');
+            this.closeLoginModal();
+            this.updateHeaderProfileDisplay();
+            this.showView('auth-gate');
+        }
     }
 
     isAuthorized() {
@@ -2049,39 +2081,39 @@ class SecurityCourseApp {
     // =========================================================================
     updateHeaderProfileDisplay() {
         const display = document.getElementById('header-student-name-display');
-        const headerWixInd = document.getElementById('header-wix-indicator');
-        const headerWixText = document.getElementById('header-wix-text');
+        const headerAccountInd = document.getElementById('header-account-indicator');
+        const headerAccountText = document.getElementById('header-account-text');
 
         if (!this.isAuthenticated()) {
             if (display) display.textContent = 'Officer Sign-In';
-            if (headerWixInd) {
-                headerWixInd.style.background = 'rgba(245, 158, 11, 0.2)';
-                headerWixInd.style.color = '#fbbf24';
-                headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+            if (headerAccountInd) {
+                headerAccountInd.style.background = 'rgba(245, 158, 11, 0.2)';
+                headerAccountInd.style.color = '#fbbf24';
+                headerAccountInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
             }
-            if (headerWixText) headerWixText.textContent = 'Sign In';
+            if (headerAccountText) headerAccountText.textContent = 'Sign In';
         } else if (!this.isAuthorized()) {
             if (display) {
                 const name = this.studentCertData.name || 'Student Officer';
                 display.textContent = name.length > 20 ? name.substring(0, 18) + '...' : name;
             }
-            if (headerWixInd) {
-                headerWixInd.style.background = 'rgba(245, 158, 11, 0.2)';
-                headerWixInd.style.color = '#fbbf24';
-                headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+            if (headerAccountInd) {
+                headerAccountInd.style.background = 'rgba(245, 158, 11, 0.2)';
+                headerAccountInd.style.color = '#fbbf24';
+                headerAccountInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
             }
-            if (headerWixText) headerWixText.textContent = 'Enrollment Due';
+            if (headerAccountText) headerAccountText.textContent = 'Enrollment Due';
         } else {
             if (display) {
                 const name = this.isAdminMode ? 'Instructor Charles Young' : (this.studentCertData.name || 'Student Officer');
                 display.textContent = name.length > 20 ? name.substring(0, 18) + '...' : name;
             }
-            if (headerWixInd) {
-                headerWixInd.style.background = 'rgba(16, 185, 129, 0.2)';
-                headerWixInd.style.color = 'var(--brand-green-bright)';
-                headerWixInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            if (headerAccountInd) {
+                headerAccountInd.style.background = 'rgba(16, 185, 129, 0.2)';
+                headerAccountInd.style.color = 'var(--brand-green-bright)';
+                headerAccountInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
             }
-            if (headerWixText) headerWixText.textContent = this.isAdminMode ? 'Instructor' : 'Enrolled';
+            if (headerAccountText) headerAccountText.textContent = this.isAdminMode ? 'Instructor' : 'Enrolled';
         }
 
         const officerNameEl = document.getElementById('payment-gate-officer-name');
@@ -2091,34 +2123,12 @@ class SecurityCourseApp {
     }
 
     initiateCourseEnrollmentPayment() {
-        if (window.wixClient && typeof window.wixClient.redirectToCheckout === 'function') {
-            window.wixClient.redirectToCheckout();
-        } else {
-            const checkoutUrl = (window.WIX_CONFIG && window.WIX_CONFIG.checkoutUrl) || "https://www.platformstraining.com";
-            window.open(checkoutUrl, "_blank");
-        }
+        window.location.href = '../#courses';
     }
 
-    async checkExistingPaymentStatus() {
-        if (window.wixClient) {
-            try {
-                const progress = await window.wixClient.fetchProgressFromWix();
-                if (progress && progress.isPaid) {
-                    this.isPaid = true;
-                    localStorage.setItem('platforms_is_paid', 'true');
-                    this.saveState();
-                    this.updateHeaderProfileDisplay();
-                    this.showView('overview');
-                    this.manualSaveProgress("Verified active course enrollment from platformstraining.com!");
-                    return;
-                }
-            } catch (e) {
-                console.warn("Wix payment check notice:", e);
-            }
-        }
-
-        const input = prompt("Enter your Wix Order / Confirmation Number, or student email address used on platformstraining.com:");
-        if (input && input.trim().length >= 4) {
+    checkExistingPaymentStatus() {
+        const input = prompt("Enter your Student ID, Order/Receipt Number, or Registered Email:");
+        if (input && input.trim().length >= 3) {
             this.isPaid = true;
             localStorage.setItem('platforms_is_paid', 'true');
             this.saveState();
@@ -2159,169 +2169,24 @@ class SecurityCourseApp {
         if (modal) modal.classList.remove('open');
     }
 
-    // =========================================================================
-    // Wix Headless Integration & Member State Synchronization
-    // =========================================================================
-    initWixIntegration() {
-        this.updateWixUI = () => {
-            if (!window.wixClient) return;
-            const status = window.wixClient.getStatus();
-            const badge = document.getElementById('wix-status-badge');
-            const badgeText = document.getElementById('wix-status-text');
-            const authBox = document.getElementById('wix-authenticated-box');
-            const unauthBox = document.getElementById('wix-unauthenticated-box');
-            const headerWixInd = document.getElementById('header-wix-indicator');
-            const headerWixText = document.getElementById('header-wix-text');
-
-            if (status.isLoggedIn && status.member) {
-                if (badge) {
-                    badge.className = 'wix-status-badge connected';
-                    if (badgeText) badgeText.textContent = 'Connected (Verified)';
-                }
-                if (authBox) authBox.style.display = 'block';
-                if (unauthBox) unauthBox.style.display = 'none';
-
-                const dispName = document.getElementById('wix-member-display-name');
-                const dispEmail = document.getElementById('wix-member-display-email');
-                const avatarInitials = document.getElementById('wix-member-avatar-initials');
-
-                if (dispName) dispName.textContent = status.member.fullName;
-                if (dispEmail) dispEmail.textContent = status.member.email;
-                if (avatarInitials) {
-                    const parts = (status.member.fullName || 'SO').split(' ');
-                    avatarInitials.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0][0] || 'S');
-                }
-
-                if (headerWixInd) {
-                    headerWixInd.style.background = 'rgba(16, 185, 129, 0.2)';
-                    headerWixInd.style.color = 'var(--brand-green-bright)';
-                    headerWixInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
-                }
-                if (headerWixText) headerWixText.textContent = 'Member';
-            } else if (status.isConfigured) {
-                if (badge) {
-                    badge.className = 'wix-status-badge configured';
-                    if (badgeText) badgeText.textContent = 'Ready to Sign In';
-                }
-                if (authBox) authBox.style.display = 'none';
-                if (unauthBox) unauthBox.style.display = 'block';
-
-                if (headerWixInd) {
-                    headerWixInd.style.background = 'rgba(245, 158, 11, 0.15)';
-                    headerWixInd.style.color = '#fbbf24';
-                    headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.3)';
-                }
-                if (headerWixText) headerWixText.textContent = 'Sign In';
-            } else {
-                if (badge) {
-                    badge.className = 'wix-status-badge standalone';
-                    if (badgeText) badgeText.textContent = 'Standalone Mode';
-                }
-                if (authBox) authBox.style.display = 'none';
-                if (unauthBox) unauthBox.style.display = 'block';
-
-                if (headerWixInd) {
-                    headerWixInd.style.background = 'rgba(255, 255, 255, 0.08)';
-                    headerWixInd.style.color = '#94a3b8';
-                    headerWixInd.style.border = 'none';
-                }
-                if (headerWixText) headerWixText.textContent = 'Account';
-            }
-        };
-
-        const handleLogin = async (member) => {
-            if (!member) return;
-            if (member.fullName) {
-                this.studentCertData.name = member.fullName.toUpperCase();
-            }
-            if (member.email) {
-                this.studentEmail = member.email;
-                localStorage.setItem('platforms_student_email', this.studentEmail);
-            }
-            if (member.address) this.studentCertData.address = member.address;
-            if (member.city) this.studentCertData.city = member.city;
-            if (member.state) this.studentCertData.state = member.state;
-            if (member.zip) this.studentCertData.zip = member.zip;
-
-            this.updateHeaderProfileDisplay();
-            this.syncCertFormToPreview();
-            this.saveState();
-            this.updateWixUI();
-
-            // Try to sync with Wix Data or retrieve existing cloud progress
-            if (window.wixClient) {
-                try {
-                    const cloudProgress = await window.wixClient.fetchProgressFromWix();
-                    if (cloudProgress) {
-                        if (cloudProgress.isPaid) {
-                            this.isPaid = true;
-                            localStorage.setItem('platforms_is_paid', 'true');
-                        }
-                        if (cloudProgress.completedModulesCount > this.getCompletedLessonsCount()) {
-                            console.log("[Wix Headless] Restoring cloud progress from Wix Data:", cloudProgress);
-                            this.manualSaveProgress("Restored verified course progress from platformstraining.com!");
-                        }
-                    } else {
-                        window.wixClient.syncProgressToWix(this);
-                    }
-                } catch (e) {
-                    console.warn("[Wix Headless] Cloud progress check notice:", e);
-                }
-            }
-        };
-
-        window.addEventListener('wix:state-changed', (e) => {
-            this.updateWixUI();
-            this.updateHeaderProfileDisplay();
-            if (e.detail?.isLoggedIn && e.detail?.member) {
-                handleLogin(e.detail.member);
-                if (this.currentView === 'auth-gate') {
-                    this.showView(this.isAuthorized() ? 'overview' : 'payment-gate');
-                }
-            } else if (!this.isAuthenticated() && this.currentView !== 'auth-gate') {
-                this.showView('auth-gate');
-            }
-        });
-
-        window.addEventListener('wix:login-success', (e) => {
-            if (e.detail?.member) {
-                handleLogin(e.detail.member);
-            }
-            this.updateHeaderProfileDisplay();
-            if (this.currentView === 'auth-gate') {
-                this.showView(this.isAuthorized() ? 'overview' : 'payment-gate');
-            }
-        });
-
-        window.addEventListener('wix:logout-success', () => {
-            this.updateWixUI();
-            this.updateHeaderProfileDisplay();
-            this.showView('auth-gate');
-        });
-
-        // Initial UI sync
-        setTimeout(() => this.updateWixUI(), 250);
-    }
-
-    toggleWixSetupGuide() {
-        const guide = document.getElementById('wix-setup-guide');
-        if (guide) {
-            guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
-        }
-    }
-
     openLoginModal() {
         if (!this.isAuthenticated()) {
-            if (window.wixClient) {
-                window.wixClient.login();
-                return;
-            }
             this.showView('auth-gate');
             return;
         }
         const modal = document.getElementById('modal-student-login');
         if (!modal) return;
-        if (this.updateWixUI) this.updateWixUI();
+
+        // Populate officer trainee card
+        const dispName = document.getElementById('officer-display-name');
+        const dispEmail = document.getElementById('officer-display-email');
+        const avatarInitials = document.getElementById('officer-avatar-initials');
+        if (dispName) dispName.textContent = this.studentCertData.name || 'Student Officer';
+        if (dispEmail) dispEmail.textContent = this.studentEmail || 'student@platformstraining.com';
+        if (avatarInitials) {
+            const parts = (this.studentCertData.name || 'SO').split(' ');
+            avatarInitials.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0][0] || 'S');
+        }
 
         // Populate fields
         const nameInput = document.getElementById('login-modal-name');
@@ -2393,9 +2258,6 @@ class SecurityCourseApp {
         localStorage.setItem('platforms_last_saved', this.lastSavedTimestamp);
         this.saveState();
 
-        if (window.wixClient && window.wixClient.isLoggedIn && window.wixClient.isLoggedIn()) {
-            window.wixClient.syncProgressToWix(this);
-        }
 
         const toast = document.getElementById('lms-toast');
         const toastMsg = document.getElementById('lms-toast-msg');
