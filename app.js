@@ -70,7 +70,6 @@ class SecurityCourseApp {
         this.renderOverviewGrid();
         this.renderTopicFilterBar();
         this.renderQuestionPalette();
-        this.showView('overview');
         this.updateGlobalProgress();
         this.updateTodayDates();
         this.updateHeaderProfileDisplay();
@@ -78,6 +77,17 @@ class SecurityCourseApp {
         this.syncWithBackend();
         this.enforcePermanentMute();
         this.initWixIntegration();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('code') && urlParams.get('state')) {
+            const loadingMsg = document.getElementById('auth-gate-loading-msg');
+            if (loadingMsg) loadingMsg.style.display = 'block';
+            this.showView('auth-gate');
+        } else if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+        } else {
+            this.showView('overview');
+        }
     }
 
     enforcePermanentMute() {
@@ -243,6 +253,14 @@ class SecurityCourseApp {
         return LESSONS_DATA.every(l => this.isLessonFullyCompleted(l.id));
     }
 
+    isAuthenticated() {
+        if (this.isAdminMode) return true;
+        if (window.wixClient && typeof window.wixClient.isLoggedIn === 'function') {
+            return window.wixClient.isLoggedIn();
+        }
+        return false;
+    }
+
     getCompletedLessonsCount() {
         return LESSONS_DATA.filter(l => this.isLessonFullyCompleted(l.id)).length;
     }
@@ -253,11 +271,19 @@ class SecurityCourseApp {
     }
 
     startOrResumeCourse() {
+        if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+            return;
+        }
         const targetLesson = this.getEarliestIncompleteLesson();
         this.openLesson(targetLesson);
     }
 
     resumeEarliestIncompleteLesson() {
+        if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+            return;
+        }
         const targetLesson = this.getEarliestIncompleteLesson();
         this.openLesson(targetLesson);
     }
@@ -271,6 +297,12 @@ class SecurityCourseApp {
     // View Routing
     // =========================================================================
     showView(viewName) {
+        // Enforce mandatory sign-in gate before accessing course content
+        if (!this.isAuthenticated() && viewName !== 'auth-gate') {
+            this.showView('auth-gate');
+            return;
+        }
+
         this.stopSpeech();
         this.currentView = viewName;
 
@@ -404,6 +436,10 @@ class SecurityCourseApp {
     }
 
     openLesson(lessonId) {
+        if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+            return;
+        }
         if (!this.isLessonUnlocked(lessonId)) {
             this.handleLockedLessonClick(lessonId);
             return;
@@ -414,6 +450,11 @@ class SecurityCourseApp {
     }
 
     loadLesson(lessonId, tab = 'study') {
+        if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+            return;
+        }
+
         if (!this.isLessonUnlocked(lessonId)) {
             this.handleLockedLessonClick(lessonId);
             lessonId = this.getEarliestIncompleteLesson();
@@ -1963,13 +2004,36 @@ class SecurityCourseApp {
     // =========================================================================
     updateHeaderProfileDisplay() {
         const display = document.getElementById('header-student-name-display');
-        if (display) {
-            const name = this.studentCertData.name || 'Student Officer';
-            display.textContent = name.length > 20 ? name.substring(0, 18) + '...' : name;
+        const headerWixInd = document.getElementById('header-wix-indicator');
+        const headerWixText = document.getElementById('header-wix-text');
+
+        if (!this.isAuthenticated()) {
+            if (display) display.textContent = 'Officer Sign-In';
+            if (headerWixInd) {
+                headerWixInd.style.background = 'rgba(245, 158, 11, 0.2)';
+                headerWixInd.style.color = '#fbbf24';
+                headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+            }
+            if (headerWixText) headerWixText.textContent = 'Sign In';
+        } else {
+            if (display) {
+                const name = this.isAdminMode ? 'Instructor Charles Young' : (this.studentCertData.name || 'Student Officer');
+                display.textContent = name.length > 20 ? name.substring(0, 18) + '...' : name;
+            }
+            if (headerWixInd) {
+                headerWixInd.style.background = 'rgba(16, 185, 129, 0.2)';
+                headerWixInd.style.color = 'var(--brand-green-bright)';
+                headerWixInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            }
+            if (headerWixText) headerWixText.textContent = this.isAdminMode ? 'Instructor' : 'Active';
         }
     }
 
     openNavigationGuide() {
+        if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+            return;
+        }
         const modal = document.getElementById('modal-navigation-guide');
         if (modal) modal.classList.add('open');
     }
@@ -2086,8 +2150,14 @@ class SecurityCourseApp {
 
         window.addEventListener('wix:state-changed', (e) => {
             this.updateWixUI();
+            this.updateHeaderProfileDisplay();
             if (e.detail?.isLoggedIn && e.detail?.member) {
                 handleLogin(e.detail.member);
+                if (this.currentView === 'auth-gate') {
+                    this.showView('overview');
+                }
+            } else if (!this.isAuthenticated() && this.currentView !== 'auth-gate') {
+                this.showView('auth-gate');
             }
         });
 
@@ -2095,10 +2165,16 @@ class SecurityCourseApp {
             if (e.detail?.member) {
                 handleLogin(e.detail.member);
             }
+            this.updateHeaderProfileDisplay();
+            if (this.currentView === 'auth-gate') {
+                this.showView('overview');
+            }
         });
 
         window.addEventListener('wix:logout-success', () => {
             this.updateWixUI();
+            this.updateHeaderProfileDisplay();
+            this.showView('auth-gate');
         });
 
         // Initial UI sync
@@ -2113,6 +2189,14 @@ class SecurityCourseApp {
     }
 
     openLoginModal() {
+        if (!this.isAuthenticated()) {
+            if (window.wixClient) {
+                window.wixClient.login();
+                return;
+            }
+            this.showView('auth-gate');
+            return;
+        }
         const modal = document.getElementById('modal-student-login');
         if (!modal) return;
         if (this.updateWixUI) this.updateWixUI();
@@ -2347,7 +2431,12 @@ class SecurityCourseApp {
             this.closeAdminLoginModal();
             this.renderLessonsSidebar();
             this.renderOverviewGrid();
-            if (this.currentView === 'exam') this.handleExamView();
+            this.updateHeaderProfileDisplay();
+            if (this.currentView === 'auth-gate') {
+                this.showView('overview');
+            } else if (this.currentView === 'exam') {
+                this.handleExamView();
+            }
 
             this.manualSaveProgress("God Mode Activated: All module and exam locks bypassed for Instructor Charles Young!");
             this.openAdminDashboard();
@@ -2363,7 +2452,11 @@ class SecurityCourseApp {
         this.updateAdminModeUI();
         this.renderLessonsSidebar();
         this.renderOverviewGrid();
+        this.updateHeaderProfileDisplay();
         if (this.currentView === 'exam') this.handleExamView();
+        if (!this.isAuthenticated()) {
+            this.showView('auth-gate');
+        }
         this.manualSaveProgress("Admin evaluation mode exited. Standard student progression locks restored.");
     }
 

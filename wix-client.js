@@ -53,7 +53,11 @@ class PlatformsWixClient {
      * Check if student is currently logged in as a Wix Member
      */
     isLoggedIn() {
-        return !!(this.client && this.client.auth && this.client.auth.loggedIn && this.client.auth.loggedIn());
+        if (this.client && this.client.auth && typeof this.client.auth.loggedIn === 'function') {
+            return this.client.auth.loggedIn();
+        }
+        const tokens = this.loadTokens();
+        return !!(tokens && (tokens.accessToken || tokens.refreshToken));
     }
 
     /**
@@ -178,9 +182,8 @@ class PlatformsWixClient {
     async login(customRedirect) {
         if (!this.isConfigured()) {
             alert(
-                "Wix Headless Setup Required:\n\n" +
-                "To enable Wix Member Sign-In, please generate a Headless Client ID in your Wix Studio / Wix Dashboard for platformstraining.com and paste it into wix-config.js.\n\n" +
-                "You can continue using the course in offline/standalone mode without signing in."
+                "Platforms Training Academy Authentication:\n\n" +
+                "Member sign-in is required to access the 20-Hour Unarmed Security Course in compliance with IDFPR regulations. Please ensure your Wix Headless Client ID is active."
             );
             return;
         }

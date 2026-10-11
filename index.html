@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=2.7">
+    <link rel="stylesheet" href="styles.css?v=2.8">
 
 
 
@@ -44,7 +44,7 @@
             </div>
 
             <nav class="main-nav">
-                <button class="nav-btn active" data-view="overview">
+                <button class="nav-btn" data-view="overview">
                     <i class="fas fa-home"></i> Overview
                 </button>
                 <button class="nav-btn" data-view="lesson">
@@ -79,9 +79,62 @@
     <main class="app-main">
 
         <!-- ===============================================================
+             VIEW 0: Mandatory Authentication Gate (Sign-In Required)
+             =============================================================== -->
+        <section id="view-auth-gate" class="view-section active">
+            <div class="auth-gate-wrapper">
+                <div class="auth-gate-card">
+                    <div class="auth-gate-shield-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <span class="auth-gate-badge">
+                        <i class="fas fa-certificate"></i> IDFPR 225 ILCS 447 &bull; Official State Credential Gate
+                    </span>
+                    <h2 class="auth-gate-title">Officer Sign-In Required</h2>
+                    <p class="auth-gate-desc">
+                        In compliance with Illinois Department of Financial and Professional Regulation (IDFPR) standards under 225 ILCS 447, all students must authenticate with their registered trainee account before accessing coursework, statutory modules, or official examinations.
+                    </p>
+
+                    <div class="auth-gate-features-grid">
+                        <div class="auth-gate-feature-item">
+                            <i class="fas fa-book-reader"></i>
+                            <strong>20-Hour Mandated Curriculum</strong>
+                            <p>10 interactive modules covering Illinois Criminal Code, use of force, search &amp; seizure, and patrol duties.</p>
+                        </div>
+                        <div class="auth-gate-feature-item">
+                            <i class="fas fa-award"></i>
+                            <strong>Official State Certification</strong>
+                            <p>State Form IL486-0486 dynamically generated and certified with authentic IDFPR verification.</p>
+                        </div>
+                        <div class="auth-gate-feature-item">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <strong>Cloud Progression Sync</strong>
+                            <p>Your lesson progression, quiz answers, and study notes save continuously across all devices.</p>
+                        </div>
+                    </div>
+
+                    <div class="auth-gate-actions">
+                        <button class="btn-auth-gate-login" onclick="wixClient.login()">
+                            <i class="fas fa-sign-in-alt"></i> Sign In to Access Course
+                        </button>
+                        <div id="auth-gate-loading-msg" style="display:none; color:var(--brand-green-bright); font-size:0.9rem; font-weight:600; margin-top:8px;">
+                            <i class="fas fa-spinner fa-spin"></i> Verifying officer credentials with platformstraining.com...
+                        </div>
+                    </div>
+
+                    <div class="auth-gate-secondary-links">
+                        <span>New student? <a href="https://www.platformstraining.com" target="_blank">Enroll at platformstraining.com</a></span>
+                        <span>&bull;</span>
+                        <span>Instructor Access: <a href="javascript:void(0)" onclick="app.openAdminLoginModal()">Enter Instructor PIN</a></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
              VIEW 1: Course Overview & Syllabus
              =============================================================== -->
-        <section id="view-overview" class="view-section active">
+        <section id="view-overview" class="view-section">
             <div class="hero-banner">
                 <div class="hero-grid">
                     <div class="hero-content">
@@ -1114,11 +1167,11 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="wix-config.js?v=2.7"></script>
-    <script src="wix-sdk.bundle.js?v=2.7"></script>
-    <script src="wix-client.js?v=2.7"></script>
-    <script src="data.js?v=2.7"></script>
-    <script src="app.js?v=2.7"></script>
+    <script src="wix-config.js?v=2.8"></script>
+    <script src="wix-sdk.bundle.js?v=2.8"></script>
+    <script src="wix-client.js?v=2.8"></script>
+    <script src="data.js?v=2.8"></script>
+    <script src="app.js?v=2.8"></script>
 </body>
 
 
