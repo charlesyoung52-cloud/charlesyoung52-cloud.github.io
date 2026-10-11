@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=2.8">
+    <link rel="stylesheet" href="styles.css?v=2.9">
 
 
 
@@ -126,6 +126,97 @@
                         <span>New student? <a href="https://www.platformstraining.com" target="_blank">Enroll at platformstraining.com</a></span>
                         <span>&bull;</span>
                         <span>Instructor Access: <a href="javascript:void(0)" onclick="app.openAdminLoginModal()">Enter Instructor PIN</a></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 0B: Mandatory Course Enrollment & Payment Gate
+             =============================================================== -->
+        <section id="view-payment-gate" class="view-section">
+            <div class="payment-gate-wrapper">
+                <div class="payment-gate-card">
+                    <div class="payment-gate-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span class="payment-gate-badge">
+                        <i class="fas fa-shield-alt"></i> IDFPR Mandated 20-Hour Unarmed Security Certification
+                    </span>
+                    <h2 class="payment-gate-title">Course Enrollment &amp; Payment Required</h2>
+                    <p class="payment-gate-desc">
+                        Welcome, <strong id="payment-gate-officer-name">Student Officer</strong> (<span id="payment-gate-officer-email">student@platformstraining.com</span>). 
+                        Your trainee account is authenticated. In accordance with Platforms Training Academy requirements, students must complete their course enrollment payment before accessing the curriculum, tactical simulators, or qualification examination.
+                    </p>
+
+                    <!-- Price Card Callout -->
+                    <div class="payment-gate-price-card">
+                        <div class="payment-gate-price-info">
+                            <span class="payment-gate-plan-name">20-Hour Online Unarmed Security Course</span>
+                            <span class="payment-gate-plan-sub">State of Illinois IDFPR 225 ILCS 447 Official Certification</span>
+                        </div>
+                        <div class="payment-gate-price-box">
+                            <span class="payment-gate-currency">$</span>
+                            <span class="payment-gate-amount">50</span>
+                            <span class="payment-gate-period">.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Features Grid -->
+                    <div class="payment-gate-features-grid">
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>10 Comprehensive Modules</strong>
+                                <span>Illinois Criminal Code, Use of Force, Search &amp; Seizure, Patrol Procedures, and Law.</span>
+                            </div>
+                        </div>
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>Interactive Tactical Simulators</strong>
+                                <span>Real-world Chicago security scenarios with instant instructor feedback and guidance.</span>
+                            </div>
+                        </div>
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>Studio-Quality Voice Narration</strong>
+                                <span>Listen to full module lessons and tactical case studies narrated by Instructor Charles Young.</span>
+                            </div>
+                        </div>
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>Official State Certificate (IL486-0486)</strong>
+                                <span>IDFPR-compliant vector PDF certificate automatically generated and sealed upon passing.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Actions -->
+                    <div class="payment-gate-actions">
+                        <button class="btn-payment-gate-checkout" onclick="app.initiateCourseEnrollmentPayment()">
+                            <i class="fas fa-lock"></i> Pay Enrollment Fee &amp; Unlock Course ($50.00)
+                        </button>
+                        <div class="payment-gate-guarantee">
+                            <i class="fas fa-shield-alt"></i> Secure Checkout via Platforms Training Academy &bull; Instant Access
+                        </div>
+                    </div>
+
+                    <!-- Secondary Options: Voucher / Verify / Instructor PIN -->
+                    <div class="payment-gate-secondary-options">
+                        <button class="btn-payment-sub-link" onclick="app.checkExistingPaymentStatus()">
+                            <i class="fas fa-sync-alt"></i> I've Already Paid / Verify Order
+                        </button>
+                        <span>&bull;</span>
+                        <button class="btn-payment-sub-link" onclick="app.promptVoucherCode()">
+                            <i class="fas fa-ticket-alt"></i> Agency Voucher Code
+                        </button>
+                        <span>&bull;</span>
+                        <button class="btn-payment-sub-link" onclick="app.openAdminLoginModal()">
+                            <i class="fas fa-key"></i> Instructor Evaluation PIN
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1167,11 +1258,11 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="wix-config.js?v=2.8"></script>
-    <script src="wix-sdk.bundle.js?v=2.8"></script>
-    <script src="wix-client.js?v=2.8"></script>
-    <script src="data.js?v=2.8"></script>
-    <script src="app.js?v=2.8"></script>
+    <script src="wix-config.js?v=2.9"></script>
+    <script src="wix-sdk.bundle.js?v=2.9"></script>
+    <script src="wix-client.js?v=2.9"></script>
+    <script src="data.js?v=2.9"></script>
+    <script src="app.js?v=2.9"></script>
 </body>
 
 

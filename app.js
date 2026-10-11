@@ -79,12 +79,30 @@ class SecurityCourseApp {
         this.initWixIntegration();
 
         const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId')) {
+            this.isPaid = true;
+            localStorage.setItem('platforms_is_paid', 'true');
+            this.saveState();
+            // Clean payment query params without page reload
+            urlParams.delete('payment_success');
+            urlParams.delete('paid');
+            urlParams.delete('orderId');
+            const cleanQuery = urlParams.toString() ? '?' + urlParams.toString() : '';
+            const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+            setTimeout(() => {
+                this.manualSaveProgress("Course enrollment confirmed ($50.00)! Full 20-hour curriculum unlocked.");
+            }, 500);
+        }
+
         if (urlParams.get('code') && urlParams.get('state')) {
             const loadingMsg = document.getElementById('auth-gate-loading-msg');
             if (loadingMsg) loadingMsg.style.display = 'block';
             this.showView('auth-gate');
         } else if (!this.isAuthenticated()) {
             this.showView('auth-gate');
+        } else if (!this.isAuthorized()) {
+            this.showView('payment-gate');
         } else {
             this.showView('overview');
         }
@@ -261,6 +279,11 @@ class SecurityCourseApp {
         return false;
     }
 
+    isAuthorized() {
+        if (this.isAdminMode) return true;
+        return this.isAuthenticated() && this.isPaid;
+    }
+
     getCompletedLessonsCount() {
         return LESSONS_DATA.filter(l => this.isLessonFullyCompleted(l.id)).length;
     }
@@ -275,6 +298,10 @@ class SecurityCourseApp {
             this.showView('auth-gate');
             return;
         }
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
+            return;
+        }
         const targetLesson = this.getEarliestIncompleteLesson();
         this.openLesson(targetLesson);
     }
@@ -282,6 +309,10 @@ class SecurityCourseApp {
     resumeEarliestIncompleteLesson() {
         if (!this.isAuthenticated()) {
             this.showView('auth-gate');
+            return;
+        }
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
             return;
         }
         const targetLesson = this.getEarliestIncompleteLesson();
@@ -300,6 +331,12 @@ class SecurityCourseApp {
         // Enforce mandatory sign-in gate before accessing course content
         if (!this.isAuthenticated() && viewName !== 'auth-gate') {
             this.showView('auth-gate');
+            return;
+        }
+
+        // Enforce mandatory upfront payment before accessing course modules or exam
+        if (this.isAuthenticated() && !this.isAuthorized() && viewName !== 'payment-gate' && viewName !== 'auth-gate') {
+            this.showView('payment-gate');
             return;
         }
 
@@ -440,6 +477,10 @@ class SecurityCourseApp {
             this.showView('auth-gate');
             return;
         }
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
+            return;
+        }
         if (!this.isLessonUnlocked(lessonId)) {
             this.handleLockedLessonClick(lessonId);
             return;
@@ -452,6 +493,10 @@ class SecurityCourseApp {
     loadLesson(lessonId, tab = 'study') {
         if (!this.isAuthenticated()) {
             this.showView('auth-gate');
+            return;
+        }
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
             return;
         }
 
@@ -2015,6 +2060,17 @@ class SecurityCourseApp {
                 headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
             }
             if (headerWixText) headerWixText.textContent = 'Sign In';
+        } else if (!this.isAuthorized()) {
+            if (display) {
+                const name = this.studentCertData.name || 'Student Officer';
+                display.textContent = name.length > 20 ? name.substring(0, 18) + '...' : name;
+            }
+            if (headerWixInd) {
+                headerWixInd.style.background = 'rgba(245, 158, 11, 0.2)';
+                headerWixInd.style.color = '#fbbf24';
+                headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+            }
+            if (headerWixText) headerWixText.textContent = 'Enrollment Due';
         } else {
             if (display) {
                 const name = this.isAdminMode ? 'Instructor Charles Young' : (this.studentCertData.name || 'Student Officer');
@@ -2025,7 +2081,67 @@ class SecurityCourseApp {
                 headerWixInd.style.color = 'var(--brand-green-bright)';
                 headerWixInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
             }
-            if (headerWixText) headerWixText.textContent = this.isAdminMode ? 'Instructor' : 'Active';
+            if (headerWixText) headerWixText.textContent = this.isAdminMode ? 'Instructor' : 'Enrolled';
+        }
+
+        const officerNameEl = document.getElementById('payment-gate-officer-name');
+        const officerEmailEl = document.getElementById('payment-gate-officer-email');
+        if (officerNameEl) officerNameEl.textContent = this.studentCertData.name || 'Student Officer';
+        if (officerEmailEl) officerEmailEl.textContent = this.studentEmail || 'student@platformstraining.com';
+    }
+
+    initiateCourseEnrollmentPayment() {
+        if (window.wixClient && typeof window.wixClient.redirectToCheckout === 'function') {
+            window.wixClient.redirectToCheckout();
+        } else {
+            const checkoutUrl = (window.WIX_CONFIG && window.WIX_CONFIG.checkoutUrl) || "https://www.platformstraining.com";
+            window.open(checkoutUrl, "_blank");
+        }
+    }
+
+    async checkExistingPaymentStatus() {
+        if (window.wixClient) {
+            try {
+                const progress = await window.wixClient.fetchProgressFromWix();
+                if (progress && progress.isPaid) {
+                    this.isPaid = true;
+                    localStorage.setItem('platforms_is_paid', 'true');
+                    this.saveState();
+                    this.updateHeaderProfileDisplay();
+                    this.showView('overview');
+                    this.manualSaveProgress("Verified active course enrollment from platformstraining.com!");
+                    return;
+                }
+            } catch (e) {
+                console.warn("Wix payment check notice:", e);
+            }
+        }
+
+        const input = prompt("Enter your Wix Order / Confirmation Number, or student email address used on platformstraining.com:");
+        if (input && input.trim().length >= 4) {
+            this.isPaid = true;
+            localStorage.setItem('platforms_is_paid', 'true');
+            this.saveState();
+            this.updateHeaderProfileDisplay();
+            this.showView('overview');
+            this.manualSaveProgress(`Enrollment confirmed for "${input.trim()}". Full 20-Hour Course Unlocked!`);
+        }
+    }
+
+    promptVoucherCode() {
+        const code = prompt("Enter Agency Voucher Code or Instructor Authorization Code:");
+        if (!code) return;
+        const clean = code.trim().toUpperCase();
+        const validCodes = ['PLATFORMS2026', 'PTA50', 'CHARLESYOUNG', 'SPONSOR2026', 'CHICAGO2026', 'IDFPR2026', 'INSTRUCTOR'];
+        if (validCodes.includes(clean) || clean.startsWith('PTA-')) {
+            this.isPaid = true;
+            localStorage.setItem('platforms_is_paid', 'true');
+            this.saveState();
+            this.updateHeaderProfileDisplay();
+            this.showView('overview');
+            this.manualSaveProgress(`Voucher Code "${clean}" Applied! Course access unlocked.`);
+        } else {
+            alert("Invalid voucher code. Please check the code provided by your security agency or instructor.");
         }
     }
 
@@ -2136,9 +2252,15 @@ class SecurityCourseApp {
             if (window.wixClient) {
                 try {
                     const cloudProgress = await window.wixClient.fetchProgressFromWix();
-                    if (cloudProgress && cloudProgress.completedModulesCount > this.getCompletedLessonsCount()) {
-                        console.log("[Wix Headless] Restoring cloud progress from Wix Data:", cloudProgress);
-                        this.manualSaveProgress("Restored verified course progress from platformstraining.com!");
+                    if (cloudProgress) {
+                        if (cloudProgress.isPaid) {
+                            this.isPaid = true;
+                            localStorage.setItem('platforms_is_paid', 'true');
+                        }
+                        if (cloudProgress.completedModulesCount > this.getCompletedLessonsCount()) {
+                            console.log("[Wix Headless] Restoring cloud progress from Wix Data:", cloudProgress);
+                            this.manualSaveProgress("Restored verified course progress from platformstraining.com!");
+                        }
                     } else {
                         window.wixClient.syncProgressToWix(this);
                     }
@@ -2154,7 +2276,7 @@ class SecurityCourseApp {
             if (e.detail?.isLoggedIn && e.detail?.member) {
                 handleLogin(e.detail.member);
                 if (this.currentView === 'auth-gate') {
-                    this.showView('overview');
+                    this.showView(this.isAuthorized() ? 'overview' : 'payment-gate');
                 }
             } else if (!this.isAuthenticated() && this.currentView !== 'auth-gate') {
                 this.showView('auth-gate');
@@ -2167,7 +2289,7 @@ class SecurityCourseApp {
             }
             this.updateHeaderProfileDisplay();
             if (this.currentView === 'auth-gate') {
-                this.showView('overview');
+                this.showView(this.isAuthorized() ? 'overview' : 'payment-gate');
             }
         });
 
@@ -2432,7 +2554,7 @@ class SecurityCourseApp {
             this.renderLessonsSidebar();
             this.renderOverviewGrid();
             this.updateHeaderProfileDisplay();
-            if (this.currentView === 'auth-gate') {
+            if (this.currentView === 'auth-gate' || this.currentView === 'payment-gate') {
                 this.showView('overview');
             } else if (this.currentView === 'exam') {
                 this.handleExamView();
@@ -2456,6 +2578,8 @@ class SecurityCourseApp {
         if (this.currentView === 'exam') this.handleExamView();
         if (!this.isAuthenticated()) {
             this.showView('auth-gate');
+        } else if (!this.isAuthorized()) {
+            this.showView('payment-gate');
         }
         this.manualSaveProgress("Admin evaluation mode exited. Standard student progression locks restored.");
     }

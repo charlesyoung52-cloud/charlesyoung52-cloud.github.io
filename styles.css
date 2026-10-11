@@ -4962,5 +4962,247 @@ button:disabled.btn-primary {
     text-decoration: underline;
 }
 
+/* ==========================================================================
+   VIEW 0B: Mandatory Course Enrollment & Payment Gate Styles
+   ========================================================================== */
+.payment-gate-wrapper {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.05), transparent 60%);
+}
+
+.payment-gate-card {
+    background: var(--bg-card);
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    border-radius: var(--radius-md);
+    max-width: 780px;
+    width: 100%;
+    padding: 36px 32px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.1);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.payment-gate-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px auto;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(16, 185, 129, 0.2));
+    border: 2px solid #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fbbf24;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.payment-gate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.payment-gate-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+}
+
+.payment-gate-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto 24px auto;
+}
+
+.payment-gate-price-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    text-align: left;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.payment-gate-plan-name {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.payment-gate-plan-sub {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.payment-gate-price-box {
+    display: flex;
+    align-items: baseline;
+    color: var(--brand-green-bright);
+    font-weight: 800;
+}
+
+.payment-gate-currency {
+    font-size: 1.3rem;
+}
+
+.payment-gate-amount {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.payment-gate-period {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+.payment-gate-features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+    text-align: left;
+}
+
+@media (max-width: 640px) {
+    .payment-gate-features-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.payment-gate-feature {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.payment-gate-feature i {
+    color: var(--brand-green-bright);
+    font-size: 1.1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.payment-gate-feature strong {
+    display: block;
+    font-size: 0.88rem;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.payment-gate-feature span {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.payment-gate-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.btn-payment-gate-checkout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #111827;
+    border: none;
+    padding: 16px 36px;
+    border-radius: var(--radius-sm);
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    max-width: 480px;
+}
+
+.btn-payment-gate-checkout:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.6);
+}
+
+.payment-gate-guarantee {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.payment-gate-secondary-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 18px;
+}
+
+.btn-payment-sub-link {
+    background: none;
+    border: none;
+    color: var(--brand-green-bright);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-payment-sub-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
 
 
