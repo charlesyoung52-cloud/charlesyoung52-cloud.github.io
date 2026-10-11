@@ -22,10 +22,17 @@
 </head>
 <body>
 
+    <!-- Admin Evaluation Mode Banner (Unlocked via Charles Young Admin PIN) -->
+    <div class="admin-mode-banner" id="admin-mode-banner" style="display:none;">
+        <span><i class="fas fa-user-shield"></i> <strong>ADMIN EVALUATION MODE ACTIVE</strong> &bull; All module and exam locks bypassed for Instructor Charles Young</span>
+        <button onclick="app.openAdminDashboard()"><i class="fas fa-chart-line"></i> Analytics Dashboard</button>
+        <button onclick="app.exitAdminMode()"><i class="fas fa-sign-out-alt"></i> Exit Admin Mode</button>
+    </div>
+
     <!-- Top Sticky Header Navigation -->
-    <header class="site-header">
+    <header class="site-header" id="site-header">
         <div class="header-container">
-            <div class="brand-wrapper" title="Return to Course Overview">
+            <div class="brand-wrapper" title="Return to Course Overview" onclick="app.showView('overview')">
                 <img src="assets/logo_full_color.png" alt="Platforms Training Academy Logo" class="brand-logo">
                 <div class="brand-info">
                     <h1>PLATFORMS TRAINING ACADEMY</h1>
@@ -54,9 +61,6 @@
                 </button>
                 <button class="header-profile-btn" onclick="app.openLoginModal()" title="Student Account & Profile">
                     <i class="fas fa-user-circle"></i> <span id="header-student-name-display">Student Officer</span> <span class="profile-online-dot"></span>
-                </button>
-                <button class="icon-btn btn-speech" title="Read Aloud / Text-to-Speech">
-                    <i class="fas fa-volume-up"></i>
                 </button>
             </div>
         </div>
@@ -160,9 +164,7 @@
                 <article class="lesson-main-content">
                     <div class="lesson-header-meta">
                         <span class="badge-tag" id="lesson-meta-badge">Lesson 1 &bull; 2 Hours</span>
-                        <button class="btn-secondary btn-speech" style="padding: 6px 14px; font-size: 0.85rem;">
-                            <i class="fas fa-volume-up"></i> Listen to Lesson
-                        </button>
+                        <span style="font-size:0.85rem; color:var(--text-muted);"><i class="fas fa-shield-alt" style="color:var(--brand-green);"></i> IDFPR Certified 20-Hour Unarmed Security Curriculum</span>
                     </div>
 
                     <h2 class="lesson-title-main" id="lesson-title-display">The Law of Arrest, Search, and Seizure</h2>
@@ -186,7 +188,7 @@
                     </div>
 
                     <!-- TAB 1: Comprehensive Study Material -->
-                    <div class="tab-content-panel active" id="tab-study-content">
+                    <div class="tab-content-panel lesson-body active" id="tab-study-content">
                         <!-- Rendered by app.js: Detailed statutory text, case law, tables, callouts, and takeaways -->
                     </div>
 
@@ -291,9 +293,6 @@
                             <button class="flag-btn" id="btn-flag-question">
                                 <i class="far fa-flag"></i> Flag
                             </button>
-                            <button class="icon-btn btn-speech" title="Read Question Aloud">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
                         </div>
                     </div>
 
@@ -361,24 +360,84 @@
                         </div>
                     </div>
 
-                    <div style="display:flex; justify-content:center; gap:16px;">
+                    <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
                         <button class="btn-secondary" onclick="app.retakeExam()">
                             <i class="fas fa-redo"></i> Retake Exam
                         </button>
-                        <button class="btn-primary" onclick="app.downloadOfficialPdfCertificate()">
+                        <button class="btn-primary" id="btn-results-main-action" onclick="app.handleResultsCertificateAction()">
                             <i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payment Authorization Gate ($50.00 State Certification Fee) -->
+                <div class="payment-checkout-card" id="results-payment-gate" style="display:none;">
+                    <div class="payment-checkout-header">
+                        <div class="payment-title-box">
+                            <h3><i class="fas fa-certificate" style="color:var(--brand-green-bright);"></i> Official 20-Hour Certificate Authorization</h3>
+                            <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">
+                                Illinois Department of Financial and Professional Regulation (IDFPR) Course Certification Fee
+                            </p>
+                        </div>
+                        <div class="payment-price-tag">
+                            <div class="payment-price-amount">$50.00</div>
+                            <div class="payment-price-sub">One-Time Certification Fee</div>
+                        </div>
+                    </div>
+
+                    <ul class="payment-features-list">
+                        <li><i class="fas fa-check-circle"></i> Official State Form IL486-0486 Certification</li>
+                        <li><i class="fas fa-check-circle"></i> Instructor Charles Young Authentic IDFPR Verification</li>
+                        <li><i class="fas fa-check-circle"></i> Secure High-Resolution Vector PDF Download (Single Issuance)</li>
+                        <li><i class="fas fa-check-circle"></i> Permanent IDFPR 20-Hour Unarmed Qualification Record</li>
+                    </ul>
+
+                    <div class="payment-form-box">
+                        <h4 style="color:var(--brand-green-bright); margin-bottom:14px; font-size:1rem;"><i class="fas fa-credit-card"></i> Student Payment Authorization</h4>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px; font-weight:700;">CARDHOLDER NAME</label>
+                                <input type="text" id="pay-cardholder-name" class="cert-form-input" style="width:100%;" placeholder="e.g. Officer Marcus Washington">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px; font-weight:700;">CARD NUMBER</label>
+                                <input type="text" id="pay-card-number" class="cert-form-input" style="width:100%;" placeholder="•••• •••• •••• 4242" value="•••• •••• •••• 4242">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px; font-weight:700;">EXPIRATION &amp; CVC</label>
+                                <input type="text" id="pay-card-expiry" class="cert-form-input" style="width:100%;" placeholder="MM/YY &bull; CVC" value="12/28 &bull; 873">
+                            </div>
+                        </div>
+                        <button class="btn-primary" style="width:100%; padding:14px; font-size:1.05rem;" onclick="app.processCoursePayment()">
+                            <i class="fas fa-lock"></i> Authorize &amp; Unlock Official Certificate ($50.00)
                         </button>
                     </div>
                 </div>
 
                 <!-- Official Illinois Certificate Form (Form IL486-0486) -->
                 <div class="cert-intake-card" id="results-certificate-form-section">
+                    <!-- Certificate Permanently Sealed Banner (Shown when certificate is issued) -->
+                    <div class="cert-sealed-banner" id="cert-sealed-banner" style="display:none;">
+                        <div class="cert-sealed-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="cert-sealed-content">
+                            <h4><i class="fas fa-shield-alt"></i> OFFICIAL CERTIFICATE DOWNLOADED &amp; SEALED</h4>
+                            <p>
+                                In compliance with Illinois Department of Financial and Professional Regulation (IDFPR) standards under 225 ILCS 447, your official basic training certificate (<strong id="sealed-cert-id-tag">PTA-IL-CERT</strong>) has been generated and downloaded.
+                            </p>
+                            <p style="margin-top:6px; color:#f59e0b; font-weight:600;">
+                                <i class="fas fa-exclamation-triangle"></i> SECURITY PROTOCOL ACTIVE: For your personal security and privacy, this certificate has now been permanently deleted from the active session. Please ensure your PDF file is safely saved on your computer or mobile device before leaving this page. Re-downloading and duplicate generation are disabled.
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="cert-intake-header">
                         <h3><i class="fas fa-id-card" style="color:var(--brand-green);"></i> State of Illinois Trainee Record Information</h3>
                         <p>
                             Please review and complete the legal details required for your official 
                             <strong>State of Illinois Form IL486-0486 (Certification of Completion of a Basic Training Course)</strong>.
-                            This information is printed onto your permanent IDFPR record of 20-hour unarmed security training under 225 ILCS 447.
+                            This information is recorded onto your permanent IDFPR record of 20-hour unarmed security training under 225 ILCS 447.
                         </p>
                     </div>
 
@@ -465,12 +524,24 @@
                         </div>
                     </div>
 
-                    <!-- Action Controls -->
-                    <div style="display:flex; justify-content:flex-end; gap:16px; flex-wrap:wrap; margin-top:20px;">
-                        <button class="btn-secondary" onclick="window.print()">
-                            <i class="fas fa-print"></i> Print Official Certificate
-                        </button>
-                        <button class="btn-primary" onclick="app.downloadOfficialPdfCertificate()">
+                    <!-- Security Alert Callout & Action Controls -->
+                    <div class="cert-security-warning-callout" id="cert-pre-download-warning">
+                        <div class="cert-security-warning-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="cert-security-warning-text">
+                            <strong><i class="fas fa-exclamation-triangle"></i> CRITICAL SECURITY NOTICE — IMMEDIATE ACTION REQUIRED:</strong>
+                            <p>
+                                Once you click <strong>"Download Official State Certificate (PDF)"</strong>, your certificate will be generated and then <strong>permanently deleted from this active session for security and privacy protection</strong>.
+                            </p>
+                            <p style="margin-top: 6px; font-weight: 600; color: #fbbf24;">
+                                <i class="fas fa-arrow-circle-right"></i> Please ensure that you have your certificate completely downloaded and saved to your device before leaving or closing this page. You will NOT be able to access, recreate, or re-download the certificate after leaving.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:16px; flex-wrap:wrap; margin-top:16px;">
+                        <button class="btn-primary" id="btn-download-cert-main" onclick="app.downloadOfficialPdfCertificate()" style="padding:14px 28px; font-size:1.05rem;">
                             <i class="fas fa-file-pdf"></i> Download Official State Certificate (PDF)
                         </button>
                     </div>
@@ -761,7 +832,7 @@
                     <div class="guide-step-content">
                         <h4>Official State Certification (Form IL486-0486)</h4>
                         <p>
-                            Upon passing the examination, complete the state trainee information intake form. Our system dynamically stamps your legal details and today's date onto the official State of Illinois Basic Training Record, ready for instant PDF download and printing.
+                            Upon passing the examination, complete the state trainee information intake form. Our system dynamically stamps your legal details and today's date onto the official State of Illinois Basic Training Record, ready for instant secure PDF download. For security, certificates are single-issuance and deleted from the session once downloaded.
                         </p>
                     </div>
                 </div>
@@ -871,6 +942,84 @@
         </div>
     </div>
 
+    <!-- ===============================================================
+         MODAL 3: Instructor / Admin Evaluation PIN Login
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-admin-login" onclick="if(event.target===this) app.closeAdminLoginModal()">
+        <div class="lms-modal-window" style="max-width:440px;">
+            <button class="lms-modal-close-btn" onclick="app.closeAdminLoginModal()" title="Close">&times;</button>
+            <h3 class="modal-header-title">
+                <i class="fas fa-user-shield" style="color:var(--brand-green);"></i> Instructor Evaluation Access
+            </h3>
+            <p class="modal-header-sub">
+                Enter Admin PIN to unlock all 10 modules, freely navigate and evaluate the 50-question exam, and access academy analytics.
+            </p>
+            <div style="margin:20px 0;">
+                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">ADMIN ACCESS PIN:</label>
+                <input type="password" id="admin-pin-input" class="cert-form-input" style="width:100%; font-size:1.2rem; letter-spacing:3px; text-align:center;" placeholder="••••••••••" maxlength="15" onkeydown="if(event.key==='Enter') app.submitAdminLogin()">
+                <div id="admin-pin-error" style="color:var(--danger); font-size:0.85rem; margin-top:8px; display:none;">Invalid PIN. Please try again.</div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button class="btn-secondary" onclick="app.closeAdminLoginModal()">Cancel</button>
+                <button class="btn-primary" onclick="app.submitAdminLogin()"><i class="fas fa-unlock"></i> Unlock God Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===============================================================
+         MODAL 4: Instructor Analytics & Course Metrics Dashboard
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-admin-dashboard" onclick="if(event.target===this) app.closeAdminDashboard()">
+        <div class="lms-modal-window" style="max-width:960px;">
+            <button class="lms-modal-close-btn" onclick="app.closeAdminDashboard()" title="Close Dashboard">&times;</button>
+            <h3 class="modal-header-title">
+                <i class="fas fa-chart-line" style="color:var(--brand-green);"></i> Platforms Training Academy &bull; Course Metrics &amp; Analytics
+            </h3>
+            <p class="modal-header-sub">
+                Real-time instructor dashboard monitoring students, exam performance, certifications, and revenue (Charles Young | Chicago, IL).
+            </p>
+            
+            <div class="admin-dashboard-stats-grid" id="admin-stats-grid">
+                <!-- Dynamically populated via app.loadAdminMetrics() -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px 0; flex-wrap:wrap; gap:10px;">
+                <h4 style="color:var(--text-white); font-size:1rem; margin:0;"><i class="fas fa-users"></i> Registered Students &amp; Certification Status</h4>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="app.refreshAdminMetrics()"><i class="fas fa-sync"></i> Refresh Data</button>
+                    <button class="btn-secondary" style="font-size:0.8rem; padding:6px 12px; color:var(--brand-green-bright); border-color:var(--brand-green);" onclick="app.closeAdminDashboard(); app.showView('exam');"><i class="fas fa-file-alt"></i> Evaluate Exam</button>
+                </div>
+            </div>
+
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email / Agency</th>
+                            <th>Modules Done</th>
+                            <th>Best Exam</th>
+                            <th>Payment ($50)</th>
+                            <th>Certificate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-students-table-body">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">
+                    <i class="fas fa-info-circle"></i> Authorized Access: Charles Young &bull; Chicago, IL &bull; platformstraining.com
+                </div>
+                <button class="btn-primary" onclick="app.closeAdminDashboard()">
+                    <i class="fas fa-times"></i> Close Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Toast Notification -->
     <div id="lms-toast" class="lms-toast" style="display:none;">
         <i class="fas fa-check-circle" style="color:var(--brand-green-bright); font-size:1.3rem;"></i>
@@ -889,6 +1038,7 @@
             </div>
             <div class="footer-copy">
                 &copy; 2026 Platforms Training Academy. All rights reserved. &bull; <a href="https://platformstraining.com" target="_blank" style="color:var(--brand-green-bright); text-decoration:none;">platformstraining.com</a>
+                &bull; <a href="javascript:void(0)" onclick="app.openAdminLoginModal()" style="color:var(--text-muted); text-decoration:none;" title="Instructor Course Evaluation & Analytics"><i class="fas fa-key"></i> Instructor Evaluation</a>
             </div>
         </div>
     </footer>

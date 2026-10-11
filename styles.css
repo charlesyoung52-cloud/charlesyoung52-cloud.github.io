@@ -94,6 +94,13 @@ h1, h2, h3, h4, h5, h6 {
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+.site-header.header-hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .header-container {
@@ -575,34 +582,93 @@ h1, h2, h3, h4, h5, h6 {
 
 .lesson-body {
     font-size: 1.05rem;
-    line-height: 1.75;
-    color: #d1d5db;
+    line-height: 1.8;
+    color: #e2e8f0;
 }
 
-.lesson-body h3 {
-    font-size: 1.35rem;
-    margin: 32px 0 16px 0;
-    color: var(--brand-green-bright);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 8px;
+/* Universal Topic Titles Theme (h3) */
+.lesson-body h3,
+#tab-study-content h3,
+.tab-content-panel h3 {
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px;
+    padding: 16px 24px !important;
+    border-radius: var(--radius-md) !important;
+    margin: 48px 0 24px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    background: linear-gradient(90deg, rgba(0, 255, 136, 0.16) 0%, rgba(15, 23, 42, 0.88) 100%) !important;
+    border-left: 6px solid var(--brand-green-bright) !important;
+    border-top: 1px solid rgba(0, 255, 136, 0.25) !important;
+    border-right: 1px solid rgba(0, 255, 136, 0.1) !important;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.1) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
 }
 
-.lesson-body h4 {
-    font-size: 1.1rem;
-    margin: 20px 0 10px 0;
-    color: var(--text-white);
+/* Universal Subtitles Theme (h4) */
+.lesson-body h4,
+#tab-study-content h4,
+.tab-content-panel h4 {
+    font-size: 1.28rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px;
+    padding: 13px 20px !important;
+    border-radius: var(--radius-md) !important;
+    margin: 36px 0 20px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0.82) 100%) !important;
+    border-left: 5px solid #38bdf8 !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.22) !important;
+    border-right: 1px solid rgba(56, 189, 248, 0.08) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.08) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Component Overrides to preserve internal subheadings */
+.lesson-body .narration-title,
+#tab-study-content .narration-title,
+.tab-content-panel .narration-title {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 4px 0 8px 0 !important;
+    color: #ffffff !important;
+}
+
+.lesson-learning-objectives h4,
+.takeaways-box h4,
+.liability-card h4,
+.elem-card h4,
+.continuum-diagram-header h4,
+.baton-zone-card-header h4,
+.harm-card-header h4,
+.lesson-case-header h4 {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .lesson-body p {
-    margin-bottom: 16px;
+    margin-bottom: 22px;
+    line-height: 1.8;
 }
 
 .lesson-body ul, .lesson-body ol {
-    margin: 0 0 20px 24px;
+    margin: 14px 0 28px 28px;
 }
 
 .lesson-body li {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    line-height: 1.75;
 }
 
 .callout {
@@ -724,13 +790,43 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .lesson-nav-footer {
+    display: none; /* Replaced by in-tab inter-section bottom navigation cards */
+}
+
+.lesson-section-nav-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 40px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 36px;
+    padding: 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
 }
+
+.btn-primary.btn-module-locked,
+.btn-primary:disabled {
+    background: #374151 !important;
+    color: #9ca3af !important;
+    border: 1px solid #4b5563 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: not-allowed !important;
+}
+
+@media (max-width: 600px) {
+    .lesson-section-nav-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .lesson-section-nav-footer button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 
 /* ==========================================================================
    Exam View & Interactive Test Mechanics
@@ -1472,6 +1568,17 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
     font-weight: 700;
     box-shadow: 0 0 14px var(--brand-green-glow);
+}
+
+.lesson-tab-btn.tab-locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.lesson-tab-btn.tab-locked:hover {
+    color: var(--text-muted);
+    background: transparent;
+    border-color: transparent;
 }
 
 .tab-content-panel {
@@ -2737,5 +2844,1074 @@ h1, h2, h3, h4, h5, h6 {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+/* ==========================================================================
+   Unified High-Quality Lesson Audio Narrator Bar
+   ========================================================================== */
+.unified-narrator-bar {
+    background: linear-gradient(135deg, #13171e 0%, #172111 100%);
+    border: 1.5px solid var(--brand-green);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    margin: 16px 0 24px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(128, 163, 21, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.unified-narrator-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--brand-green-bright);
+}
+
+.narrator-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 250px;
+}
+
+.narrator-avatar-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(128, 163, 21, 0.2);
+    border: 1.5px solid var(--brand-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--brand-green-bright);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.narrator-avatar-icon.speaking {
+    animation: narratorPulse 1.4s infinite ease-in-out;
+}
+
+@keyframes narratorPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(148, 193, 31, 0.6); }
+    70% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(148, 193, 31, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(148, 193, 31, 0); }
+}
+
+.narrator-text-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.narrator-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.narrator-badge {
+    background: var(--brand-green);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.8px;
+}
+
+.narrator-voice-name {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.narrator-current-status {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-white);
+}
+
+.narrator-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-narrator-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-weight: 700;
+}
+
+.btn-narrator-action.play {
+    background: var(--brand-green);
+    color: #0a0b0d;
+}
+
+.btn-narrator-action.play:hover {
+    background: var(--brand-green-bright);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(148, 193, 31, 0.4);
+}
+
+.btn-narrator-action.stop {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--danger);
+    color: #fca5a5;
+}
+
+.btn-narrator-action.stop:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+/* ==========================================================================
+   Payment Checkout Gate (IDFPR 20-Hour Certificate Fee: $50.00)
+   ========================================================================== */
+.payment-checkout-card {
+    background: linear-gradient(135deg, #181d24 0%, #152210 100%);
+    border: 2px solid var(--brand-green);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px;
+    margin: 28px 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(128, 163, 21, 0.15);
+}
+
+.payment-checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.payment-title-box h3 {
+    color: var(--text-white);
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.payment-price-tag {
+    background: rgba(128, 163, 21, 0.2);
+    border: 1.5px solid var(--brand-green);
+    border-radius: var(--radius-md);
+    padding: 8px 18px;
+    text-align: right;
+}
+
+.payment-price-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--brand-green-bright);
+    font-family: var(--font-heading);
+    line-height: 1;
+}
+
+.payment-price-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.payment-features-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.payment-features-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: var(--text-light);
+}
+
+.payment-features-list li i {
+    color: var(--brand-green-bright);
+    font-size: 1.1rem;
+}
+
+.payment-form-box {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   Certificate Sealed / Permanent Record Banner
+   ========================================================================== */
+.cert-sealed-banner {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(18, 20, 24, 0.95) 100%);
+    border: 2px solid var(--warning);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.cert-sealed-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.2);
+    border: 2px solid var(--warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--warning);
+    flex-shrink: 0;
+}
+
+.cert-sealed-content h4 {
+    color: var(--warning);
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.cert-sealed-content p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Disabled Form State when Sealed */
+.cert-form-input:disabled {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #8892b0 !important;
+    cursor: not-allowed !important;
+}
+
+/* Trainee signature cursive styling in preview and input */
+#prev-cert-sig {
+    font-family: 'Brush Script MT', 'Dancing Script', 'Times New Roman', cursive, serif !important;
+    font-style: italic !important;
+    font-size: 1.35rem !important;
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+#cert-input-signature {
+    font-family: 'Brush Script MT', 'Dancing Script', 'Times New Roman', cursive, serif !important;
+    font-style: italic !important;
+    font-size: 1.3rem !important;
+}
+
+/* Certificate Security Alert & Single-Download Callouts */
+.cert-security-warning-callout {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(18, 20, 24, 0.95) 100%);
+    border: 2px solid #f59e0b;
+    border-radius: var(--radius-md);
+    padding: 18px 22px;
+    margin: 18px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.cert-security-warning-callout.urgent {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(18, 20, 24, 0.95) 100%);
+    border-color: #ef4444;
+}
+
+.cert-security-warning-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.22);
+    border: 2px solid #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fbbf24;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cert-security-warning-callout.urgent .cert-security-warning-icon {
+    background: rgba(239, 68, 68, 0.22);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+.cert-security-warning-text {
+    flex: 1;
+}
+
+.cert-security-warning-text strong {
+    color: #fbbf24;
+    font-size: 1.05rem;
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.cert-security-warning-callout.urgent .cert-security-warning-text strong {
+    color: #f87171;
+}
+
+.cert-security-warning-text p {
+    color: #e2e8f0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.cert-security-warning-text p strong {
+    display: inline;
+    color: #ffffff;
+}
+
+.btn-primary.disabled-btn,
+button:disabled.btn-primary {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    background: #475569 !important;
+    border-color: #334155 !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================================================
+   Lesson 3: Force Topic Headings (Extra-large, prominent font with badges)
+   ========================================================================== */
+.force-topic-header {
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px;
+    padding: 14px 22px;
+    border-radius: var(--radius-md);
+    margin: 42px 0 22px 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.force-topic-header.non-deadly {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.22) 0%, rgba(15, 23, 42, 0.85) 100%);
+    border-left: 6px solid #22c55e;
+    border-top: 1px solid rgba(34, 197, 94, 0.3);
+    border-right: 1px solid rgba(34, 197, 94, 0.15);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.15);
+    color: #4ade80 !important;
+}
+
+.force-topic-header.deadly {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.24) 0%, rgba(15, 23, 42, 0.85) 100%);
+    border-left: 6px solid #ef4444;
+    border-top: 1px solid rgba(239, 68, 68, 0.3);
+    border-right: 1px solid rgba(239, 68, 68, 0.15);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+    color: #fca5a5 !important;
+}
+
+/* ==========================================================================
+   High-Legibility Interactive Continuum & Baton Diagram Components
+   ========================================================================== */
+.continuum-diagram-container {
+    margin: 36px 0;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    background: #0f172a;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+}
+
+.continuum-diagram-header {
+    background: #1e293b;
+    padding: 18px 24px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.continuum-diagram-header h4 {
+    margin: 0 !important;
+    font-size: 1.3rem !important;
+    color: #f8fafc !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.continuum-tier-card {
+    padding: 20px 24px;
+    border-left: 8px solid;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.continuum-tier-card:last-child {
+    border-bottom: none;
+}
+
+.continuum-tier-card:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tier-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tier-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tier-statute-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.tier-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 18px;
+    font-size: 1.02rem;
+    line-height: 1.65;
+}
+
+@media (max-width: 768px) {
+    .tier-details-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+.tier-subject-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 14px 18px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tier-officer-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 14px 18px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tier-box-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Baton Target Zone Matrix Cards (Lesson 4) */
+.baton-matrix-container {
+    margin: 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.baton-zone-card {
+    border-radius: var(--radius-md);
+    border: 2px solid;
+    padding: 22px 26px;
+    background: #0f172a;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+}
+
+.baton-zone-card.green {
+    border-color: #22c55e;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, #0f172a 100%);
+}
+
+.baton-zone-card.yellow {
+    border-color: #eab308;
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, #0f172a 100%);
+}
+
+.baton-zone-card.red {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, #0f172a 100%);
+}
+
+.baton-zone-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.baton-zone-card-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.baton-zone-card.green .baton-zone-card-title { color: #4ade80; }
+.baton-zone-card.yellow .baton-zone-card-title { color: #fde047; }
+.baton-zone-card.red .baton-zone-card-title { color: #f87171; }
+
+.baton-zone-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.baton-zone-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.1fr;
+    gap: 16px;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 850px) {
+    .baton-zone-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+.baton-grid-col {
+    background: rgba(0, 0, 0, 0.28);
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.baton-grid-col strong {
+    display: block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Great Bodily Harm vs. Bodily Harm Diagnostic Visual Matrix
+   ========================================================================== */
+.harm-diagnostic-container {
+    margin: 36px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+@media (max-width: 900px) {
+    .harm-diagnostic-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.harm-diagnostic-card {
+    border-radius: var(--radius-md);
+    border: 2px solid;
+    padding: 24px;
+    background: #0f172a;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.harm-diagnostic-card.bodily-harm {
+    border-color: #0284c7;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.14) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+.harm-diagnostic-card.great-bodily-harm {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+.harm-card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+}
+
+.harm-card-badge {
+    display: inline-block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.harm-diagnostic-card.bodily-harm .harm-card-badge {
+    background: rgba(2, 132, 199, 0.25);
+    color: #38bdf8;
+    border: 1px solid #0284c7;
+}
+
+.harm-diagnostic-card.great-bodily-harm .harm-card-badge {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    border: 1px solid #ef4444;
+}
+
+.harm-card-title-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.harm-diagnostic-card.bodily-harm .harm-card-title-text { color: #38bdf8; }
+.harm-diagnostic-card.great-bodily-harm .harm-card-title-text { color: #f87171; }
+
+.harm-standard-box {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+.harm-checklist {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 20px 0 !important;
+}
+
+.harm-checklist li {
+    font-size: 1.02rem;
+    line-height: 1.65;
+    margin-bottom: 10px !important;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #e2e8f0;
+}
+
+.harm-checklist li i {
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+.harm-diagnostic-card.bodily-harm .harm-checklist li i { color: #38bdf8; }
+.harm-diagnostic-card.great-bodily-harm .harm-checklist li i { color: #f87171; }
+
+.harm-legal-rule-callout {
+    padding: 16px 18px;
+    border-radius: 6px;
+    border-left: 5px solid;
+    font-size: 0.96rem;
+    line-height: 1.65;
+    margin-top: auto;
+}
+
+.harm-diagnostic-card.bodily-harm .harm-legal-rule-callout {
+    background: rgba(2, 132, 199, 0.15);
+    border-color: #0284c7;
+    color: #bae6fd;
+}
+
+.harm-diagnostic-card.great-bodily-harm .harm-legal-rule-callout {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: #ef4444;
+    color: #fecaca;
+}
+
+/* ==========================================================================
+   AOJ Triad Cards (Dark-mode high-contrast)
+   ========================================================================== */
+.aoj-triad-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin: 24px 0;
+}
+
+.aoj-card {
+    background: #0f172a;
+    border: 2px solid;
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.aoj-card.ability {
+    border-color: #38bdf8;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, #0f172a 100%);
+}
+
+.aoj-card.opportunity {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, #0f172a 100%);
+}
+
+.aoj-card.jeopardy {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, #0f172a 100%);
+}
+
+.aoj-card-header {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.aoj-card.ability .aoj-card-header { color: #38bdf8; }
+.aoj-card.opportunity .aoj-card-header { color: #fbbf24; }
+.aoj-card.jeopardy .aoj-card-header { color: #f87171; }
+
+.aoj-card p {
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+    color: #e2e8f0 !important;
+    margin: 0 !important;
+}
+
+/* ==========================================================================
+   Judicial Case Study Cards (Dark-mode high-contrast, large-print)
+   ========================================================================== */
+.lesson-case-card {
+    border-radius: var(--radius-md);
+    border: 2px solid;
+    border-left: 7px solid;
+    padding: 24px 28px;
+    background: #0f172a;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.lesson-case-card.danger-case {
+    border-color: #ef4444;
+    border-left-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, #0f172a 100%);
+}
+
+.lesson-case-card.warning-case {
+    border-color: #f59e0b;
+    border-left-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, #0f172a 100%);
+}
+
+.lesson-case-card.justified-case {
+    border-color: #22c55e;
+    border-left-color: #22c55e;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, #0f172a 100%);
+}
+
+.lesson-case-card.manslaughter-case {
+    border-color: #a855f7;
+    border-left-color: #a855f7;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, #0f172a 100%);
+}
+
+.lesson-case-card.info-case {
+    border-color: #0284c7;
+    border-left-color: #0284c7;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, #0f172a 100%);
+}
+
+.lesson-case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lesson-case-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.3px;
+}
+
+.lesson-case-card.danger-case .lesson-case-title { color: #f87171; }
+.lesson-case-card.warning-case .lesson-case-title { color: #fbbf24; }
+.lesson-case-card.justified-case .lesson-case-title { color: #4ade80; }
+.lesson-case-card.manslaughter-case .lesson-case-title { color: #c084fc; }
+.lesson-case-card.info-case .lesson-case-title { color: #38bdf8; }
+
+.lesson-case-badge {
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lesson-case-card.danger-case .lesson-case-badge {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    border: 1px solid #ef4444;
+}
+
+.lesson-case-card.warning-case .lesson-case-badge {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fde047;
+    border: 1px solid #f59e0b;
+}
+
+.lesson-case-card.justified-case .lesson-case-badge {
+    background: rgba(34, 197, 94, 0.25);
+    color: #86efac;
+    border: 1px solid #22c55e;
+}
+
+.lesson-case-card.manslaughter-case .lesson-case-badge {
+    background: rgba(168, 85, 247, 0.25);
+    color: #e9d5ff;
+    border: 1px solid #a855f7;
+}
+
+.lesson-case-card.info-case .lesson-case-badge {
+    background: rgba(2, 132, 199, 0.25);
+    color: #7dd3fc;
+    border: 1px solid #0284c7;
+}
+
+.lesson-case-card p {
+    font-size: 1.05rem !important;
+    line-height: 1.75 !important;
+    color: #e2e8f0 !important;
+    margin-bottom: 14px !important;
+}
+
+.lesson-case-card p strong {
+    color: #ffffff;
+}
+
+.lesson-case-takeaway {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 14px 18px;
+    border-radius: 6px;
+    border-left: 4px solid;
+    font-size: 1rem;
+    line-height: 1.65;
+    margin-top: 14px;
+}
+
+.lesson-case-card.danger-case .lesson-case-takeaway { border-color: #ef4444; color: #fecaca; }
+.lesson-case-card.warning-case .lesson-case-takeaway { border-color: #f59e0b; color: #fef08a; }
+.lesson-case-card.justified-case .lesson-case-takeaway { border-color: #22c55e; color: #bbf7d0; }
+.lesson-case-card.manslaughter-case .lesson-case-takeaway { border-color: #a855f7; color: #f3e8ff; }
+.lesson-case-card.info-case .lesson-case-takeaway { border-color: #0284c7; color: #bae6fd; }
+
+/* ==========================================================================
+   Admin Evaluation Mode ("God Mode") & Analytics Dashboard
+   ========================================================================== */
+.admin-mode-banner {
+    background: linear-gradient(90deg, #b45309 0%, #d97706 50%, #92400e 100%);
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+.admin-mode-banner button {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.admin-mode-banner button:hover {
+    background: #000;
+}
+
+.admin-dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    text-align: center;
+}
+
+.admin-stat-val {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--brand-green-bright);
+    font-family: var(--font-heading);
+}
+
+.admin-stat-lbl {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.admin-table-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    max-height: 380px;
+    margin-top: 14px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.admin-table th {
+    background: #111419;
+    padding: 12px 14px;
+    text-align: left;
+    color: var(--brand-green-bright);
+    font-weight: 700;
+    border-bottom: 2px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.admin-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+}
+
+.admin-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Mobile & Touch Optimizations */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 8px 14px;
+        gap: 8px;
+    }
+    .brand-logo {
+        height: 36px;
+    }
+    .brand-info h1 {
+        font-size: 0.92rem;
+    }
+    .brand-info span {
+        display: none;
+    }
+    .btn-guide-header, .btn-save-progress {
+        display: none;
+    }
+    .unified-narrator-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 14px;
+    }
+    .narrator-controls {
+        justify-content: flex-end;
+    }
+    .question-nav-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(18, 20, 24, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 14px 16px;
+        border-top: 1.5px solid var(--brand-green);
+        border-radius: var(--radius-sm);
+        margin: 16px -16px -16px -16px;
+        z-index: 100;
+        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7);
+    }
+    #exam-next-btn {
+        flex: 1;
+        padding: 14px 20px;
+        font-size: 1.05rem;
     }
 }

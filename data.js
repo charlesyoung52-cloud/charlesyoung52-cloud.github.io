@@ -409,55 +409,364 @@ const LESSONS_DATA = [
 
 
             <h3 id="sec3-1">1. Force vs. Deadly Force (720 ILCS 5/7-1)</h3>
-            <p>Under the Illinois Criminal Code (<strong>720 ILCS 5/7-1</strong>), force is categorized into two distinct legal classes:</p>
-            <ul>
-                <li><strong>Non-Deadly Force:</strong> Physical effort applied to compel compliance by a subject that is not intended and not likely to cause death or great bodily harm.</li>
-                <li><strong>Deadly Force:</strong> Physical force intended or likely to cause death or great bodily harm, including discharges of firearms, edged weapons, strikes to the head with impact tools, or neck chokeholds.</li>
-            </ul>
-
+            <p>Under the Illinois Criminal Code (<strong>720 ILCS 5/7-1</strong>), force applied in self-defense or defense of others is divided into two distinct legal classifications: <strong>Non-Deadly Force</strong> and <strong>Deadly Force</strong>. Understanding the exact line between these two tiers is the single most critical legal responsibility of an unarmed security officer in the State of Illinois.</p>
+            
             <div class="callout warning">
-                <strong>THE STATUTORY DEADLY FORCE RULE (720 ILCS 5/7-1):</strong>
-                <p>A person is justified in the use of force against another when and to the extent that they reasonably believe that such conduct is necessary to defend themselves or another against imminent unlawful force. However, <strong>deadly force is justified ONLY if the person reasonably believes that such force is necessary to prevent IMMINENT DEATH OR GREAT BODILY HARM to themselves or another, or the commission of a forcible felony.</strong></p>
+                <strong><i class="fas fa-gavel"></i> THE STATUTORY DEADLY FORCE RULE — 720 ILCS 5/7-1(a):</strong>
+                <p><em>"A person is justified in the use of force against another when and to the extent that he reasonably believes that such conduct is necessary to defend himself or another against such other's imminent use of unlawful force; however, he is justified in the use of force which is intended or likely to cause death or great bodily harm only if he reasonably believes that such force is necessary to prevent imminent death or great bodily harm to himself or another, or the commission of a forcible felony."</em></p>
             </div>
 
-            <h3 id="sec3-2">2. Defense of Dwelling & Defense of Property (720 ILCS 5/7-2 & 7-3)</h3>
-            <p>Security officers frequently guard commercial properties, warehouses, retail stores, and construction sites. The law regarding defense of property is crystal clear:</p>
+            <h4 class="force-topic-header non-deadly">
+                <i class="fas fa-shield-alt"></i> A. Non-Deadly Force: Definition & Practical Examples
+            </h4>
+            <p><strong>Legal Definition:</strong> Force that is neither intended nor reasonably likely to cause death or catastrophic, permanent physical impairment ("great bodily harm"). Non-deadly force is utilized to defend against simple physical attacks, overcome passive or active resistance, protect property from unlawful trespass, or safely effect an escort/detention.</p>
             <ul>
-                <li><strong>Defense of Dwelling (720 ILCS 5/7-2):</strong> Force is justified to prevent or terminate an unlawful entry into a dwelling (residence). Deadly force is permitted if the entry is violent and the officer reasonably believes it necessary to prevent physical assault upon occupants or a felony inside.</li>
-                <li><strong>Defense of Property Other Than Dwelling (720 ILCS 5/7-3):</strong> A security officer may use reasonable non-deadly force to terminate a trespass or theft of personal property. <strong>DEADLY FORCE IS NEVER PERMITTED SOLELY TO PROTECT PROPERTY OR PREVENT THE THEFT OF MERCHANDISE.</strong> You cannot strike an unarmed fleeing thief in the head or use lethal weapons to save company property.</li>
+                <li><strong>Soft Empty-Hand Control:</strong> Escort positions, joint manipulations, rear wrist locks, finger controls, and pain compliance applied to pressure points (e.g., mandibular angle behind the jawline or hypoglossal nerve under the jaw). These techniques create temporary discomfort to gain compliance with negligible risk of long-term tissue trauma.</li>
+                <li><strong>Hard Empty-Hand Control:</strong> Open-palm heel strikes to large muscle groups (chest, torso, abdominal core), hip tosses, leg sweeps, and off-balancing takedowns deployed against a combative subject who is actively throwing punches or grappling.</li>
+                <li><strong>Chemical Aerosols (OC Pepper Spray):</strong> Deployment of authorized Oleoresin Capsicum (OC) spray (typically a 10% solution with 1.33% major capsaicinoids) delivered in short 1- to 2-second bursts at a safe stand-off distance of 4 to 6 feet. OC spray causes acute involuntary blepharospasm (swelling and closing of the eyelids), intense burning sensation, and temporary respiratory coughing without inflicting permanent anatomical damage.</li>
+                <li><strong>Expandable Baton Strikes to Green Target Zones:</strong> Defensive strikes using an expandable steel friction-lock baton directed <em>strictly</em> at large motor nerve clusters in primary muscle masses: the outside of the thigh (femoral nerve / quadriceps), inside of the thigh (peroneal nerve), calves, and biceps/triceps. The physiological intent is motor dysfunction (fluid shock wave inducing temporary muscle paralysis), not bone destruction.</li>
             </ul>
 
-            <h3 id="sec3-3">3. The 5-Level Use of Force Continuum</h3>
-            <div class="media-container">
-                <img src="assets/use_of_force.png" alt="Use of Force Continuum Diagram" class="responsive-img">
-            </div>
-            <ol>
-                <li><strong>Level 1 — Officer Presence:</strong> Professional uniform, upright posture, clean appearance, alert scanning. Deters over 80% of potential criminal activity through visual deterrence alone.</li>
-                <li><strong>Level 2 — Verbal Direction:</strong> Clear, calm, respectful, assertive verbal communication. Issuing polite instructions and de-escalation dialogue.</li>
-                <li><strong>Level 3 — Empty-Hand Control:</strong>
-                    <ul>
-                        <li><em>Soft Empty-Hand:</em> Escort holds, guiding touches, joint manipulations, and pressure points with minimal risk of injury.</li>
-                        <li><em>Hard Empty-Hand:</em> Open-hand strikes, palm heel strikes, sweeps, and takedowns to overcome active physical resistance.</li>
-                    </ul>
-                </li>
-                <li><strong>Level 4 — Intermediate Weapons:</strong> Deployment of Oleoresin Capsicum (OC) pepper spray or defensive expandable batons when empty-hand measures fail to control a violent, combative subject.</li>
-                <li><strong>Level 5 — Deadly Force:</strong> Lethal defense utilized strictly when facing an imminent threat of death or great bodily harm.</li>
-            </ol>
-
-            <h3 id="sec3-4">4. Tactical De-escalation & "Verbal Judo"</h3>
-            <p>Professional security officers recognize that communication is their primary defensive tool. Dr. George Thompson's <em>Verbal Judo</em> framework teaches officers to de-escalate confrontation through professional psychology:</p>
+            <h4 class="force-topic-header deadly">
+                <i class="fas fa-skull-crossbones"></i> B. Deadly Force (Lethal Force): Definition & Practical Examples
+            </h4>
+            <p><strong>Legal Definition:</strong> Any physical force that is intended to cause, or which a reasonable person should know creates a substantial likelihood of causing, <strong>death or great bodily harm</strong>. Under Illinois jurisprudence, deadly force is not defined solely by firearms; it encompasses impact weapons, restraint techniques, and environmental weapons.</p>
             <ul>
-                <li><strong>The 5 Universal Truths:</strong>
-                    <ol>
-                        <li>All people want to be treated with dignity and respect.</li>
-                        <li>All people prefer to be asked rather than told what to do.</li>
-                        <li>All people want to know why they are being asked to do something.</li>
-                        <li>All people want to be offered options rather than threats.</li>
-                        <li>All people want a second chance to comply without losing face.</li>
+                <li><strong>Impact Strikes to Red Target Zones (Head, Neck, Spine, Throat, Groin):</strong> Any strike delivered with an impact tool—including an expandable baton, heavy tactical flashlight (such as a 3-D cell Maglite), metal radio, or concrete surface—directed at the cranium, temple, occipital bone (base of the skull), cervical spine, larynx, or groin. <em>Illinois courts rule that striking someone in the head with a steel baton is legally indistinguishable from discharging a firearm at them.</em></li>
+                <li><strong>Chokeholds & Vascular Neck Restraints (720 ILCS 5/7-5.1):</strong> Under Illinois statute, applying any hold that constricts the subject's windpipe, trachea, or carotid blood vessels (such as a rear naked choke, guillotine, or lateral vascular neck restraint) is explicitly classified as deadly force. Security personnel are legally prohibited from applying chokeholds unless facing an active threat of imminent death or great bodily harm.</li>
+                <li><strong>Compressive Prone Restraint (Positional Asphyxia):</strong> Pinning a handcuffed individual face-down on their stomach and applying body weight, knees, or shins to their thoracic spine, ribs, or upper back. Compressing the diaphragm while the subject is exhausted or intoxicated prevents oxygen intake, causing hypoxia, cardiac arrest, and death. Illinois courts treat compressive asphyxiation during security detentions as criminal manslaughter.</li>
+                <li><strong>Edged & Puncture Implements:</strong> Deployment of folding knives, box cutters, tactical shears, or broken glass against a human being.</li>
+                <li><strong>Vehicle Rammings & Pinching:</strong> Using a motorized security patrol vehicle to ram, run down, or pin a fleeing suspect against a wall or barrier.</li>
+            </ul>
+
+            <h3 id="sec3-great-bodily-harm">2. "Great Bodily Harm" (720 ILCS 5/12-3.05) vs. "Bodily Harm" (720 ILCS 5/12-3)</h3>
+            <p>One of the most dangerous misconceptions held by untrained security guards is equating any physical injury with "great bodily harm." Under Illinois law, the threshold for <strong>Great Bodily Harm</strong> is extraordinarily high. It separates a misdemeanor battery from a major felony, and it defines whether a guard's use of force was lawful self-defense or criminal violence.</p>
+
+            <div class="harm-diagnostic-container">
+                <!-- Bodily Harm Card -->
+                <div class="harm-diagnostic-card bodily-harm">
+                    <div class="harm-card-header">
+                        <span class="harm-card-badge">Simple Battery — Class A Misdemeanor</span>
+                        <h4 class="harm-card-title-text"><i class="fas fa-hand-paper"></i> Simple "Bodily Harm" (720 ILCS 5/12-3)</h4>
+                    </div>
+                    <div class="harm-standard-box">
+                        <strong>Statutory Definition:</strong> Physical pain, superficial lacerations, or transient physical impairment (<em>People v. Cisneros</em>).
+                    </div>
+                    <ul class="harm-checklist">
+                        <li><i class="fas fa-dot-circle"></i> <span>Superficial scratches, scrapes, abrasions, or welts</span></li>
+                        <li><i class="fas fa-dot-circle"></i> <span>Minor soft-tissue bruising (ecchymosis)</span></li>
+                        <li><i class="fas fa-dot-circle"></i> <span>Bloody nose with no nasal bone or septum fracture</span></li>
+                        <li><i class="fas fa-dot-circle"></i> <span>Split lip or shallow cut not requiring surgical sutures</span></li>
+                        <li><i class="fas fa-dot-circle"></i> <span>Transient swelling, localized soreness, red handprints</span></li>
+                        <li><i class="fas fa-dot-circle"></i> <span>Shoving, open-hand slapping, or grabbing clothing/lapels</span></li>
+                    </ul>
+                    <div class="harm-legal-rule-callout">
+                        <strong>LEGAL THRESHOLD:</strong> Bodily harm <strong>NEVER</strong> justifies the deployment of deadly force. If an aggressive patron slaps or pushes a security guard, the guard is legally forbidden from escalating to deadly force (e.g., striking the patron's head with a baton). Doing so turns the guard into the felonious aggressor.
+                    </div>
+                </div>
+
+                <!-- Great Bodily Harm Card -->
+                <div class="harm-diagnostic-card great-bodily-harm">
+                    <div class="harm-card-header">
+                        <span class="harm-card-badge">Aggravated Battery — Class 3 Felony or Higher</span>
+                        <h4 class="harm-card-title-text"><i class="fas fa-skull-crossbones"></i> "Great Bodily Harm" (720 ILCS 5/12-3.05)</h4>
+                    </div>
+                    <div class="harm-standard-box">
+                        <strong>Judicial Standard:</strong> Grave, serious, protracted, or permanent injury causing significant impairment of health or organ function (<em>People v. Costello</em>).
+                    </div>
+                    <ul class="harm-checklist">
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Skull fractures, temporal bone fractures, broken facial bones</span></li>
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Traumatic Brain Injury (TBI), intracranial bleeding, subdural hematoma</span></li>
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Deep puncture wounds penetrating abdominal or thoracic cavities</span></li>
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Compound or major bone fractures (broken jaw, orbital blowout, broken femur)</span></li>
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Arterial lacerations causing massive, life-threatening blood loss</span></li>
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Permanent blindness, hearing loss, or facial disfigurement</span></li>
+                        <li><i class="fas fa-exclamation-triangle"></i> <span>Trauma causing complete loss of consciousness or cardiac arrest</span></li>
+                    </ul>
+                    <div class="harm-legal-rule-callout">
+                        <strong>LEGAL THRESHOLD:</strong> This is the <strong>SOLE</strong> physical injury threshold that unlocks the statutory justification for deadly force under 720 ILCS 5/7-1. The officer must reasonably believe that failing to employ lethal force will result in their death or great bodily harm.
+                    </div>
+                </div>
+            </div>
+
+            <h3 id="sec3-imminent-death">3. Forensic Breakdown of "Imminent Death" & The AOJ Triad</h3>
+            <p>Under Illinois criminal jurisprudence, what constitutes an <strong>"Imminent"</strong> threat of death? The word "imminent" has an exact legal meaning that security officers must memorize:</p>
+            <ul>
+                <li><strong>"Imminent" Means Immediate and Happening Right Now:</strong> An imminent threat is one that is ready to take place within fractions of a second to several seconds. It is instantaneous, looming, and unavoidable without immediate defensive intervention.</li>
+                <li><strong>Conditional or Future Threats are NOT Imminent:</strong> If an angry individual screams, <em>"I'm going home to get my 9mm pistol, and when I come back tonight, you're dead!"</em>—this is a criminal threat of intimidation (720 ILCS 5/12-6), but it is <strong>NOT</strong> an imminent threat. You cannot shoot, strike, or tackle someone for a threat that will occur in the future. The proper response is creating distance, documenting the description, moving to secure shelter, and notifying 911 dispatch.</li>
+                <li><strong>Past Threats are Extinguished:</strong> Once an attacker drops their weapon, raises their hands, or turns their back and runs away, the imminent threat has legally ceased. Any force applied after the threat has broken off is retaliatory, punitive, and constitutes criminal battery.</li>
+            </ul>
+
+            <h4>The AOJ Triad: The Three Mandatory Pillars of Imminent Lethal Threat</h4>
+            <p>In every Illinois self-defense investigation, police detectives, prosecutors, and juries evaluate whether an imminent lethal threat existed by examining the <strong>Ability, Opportunity, and Jeopardy (AOJ)</strong> Triad. All three elements must exist simultaneously:</p>
+
+            <div class="aoj-triad-grid">
+                <div class="aoj-card ability">
+                    <div class="aoj-card-header">
+                        <i class="fas fa-fist-raised"></i> 1. ABILITY (Capability)
+                    </div>
+                    <p>
+                        Does the assailant possess the physical power or weapon capable of causing death or great bodily harm? Examples: A firearm, fixed-blade hunting knife, baseball bat, tire iron, broken glass bottle, heavy pipe, or a severe disparity of physical force (e.g., an athletic 250-lb aggressor against an injured 130-lb guard, or multiple attackers surrounding a lone officer).
+                    </p>
+                </div>
+                <div class="aoj-card opportunity">
+                    <div class="aoj-card-header">
+                        <i class="fas fa-ruler-combined"></i> 2. OPPORTUNITY (Range & Barrier)
+                    </div>
+                    <p>
+                        Is the assailant positioned within effective physical range to deliver their lethal ability? Under the <strong>Tueller 21-Foot Rule</strong>, a suspect armed with an edged weapon can sprint 21 feet in approximately 1.5 seconds. If the knife-wielding suspect is 10 feet away, they have Opportunity. If they are 80 feet away behind a locked 10-foot security fence, they have Ability, but <strong>NO Opportunity</strong>.
+                    </p>
+                </div>
+                <div class="aoj-card jeopardy">
+                    <div class="aoj-card-header">
+                        <i class="fas fa-crosshairs"></i> 3. JEOPARDY (Overt Intent)
+                    </div>
+                    <p>
+                        Has the subject demonstrated an overt, unambiguous action or verbal declaration proving immediate intent to kill or gravely injure you or another person? A carpenter carrying a hammer on a construction site has Ability and Opportunity, but until they raise the hammer over their head, shout a threat, and charge at you, there is zero Jeopardy.
+                    </p>
+                </div>
+            </div>
+            <div class="callout danger" style="margin-top: 10px;">
+                <strong>THE GOLDEN RULE OF AOJ:</strong> If any single element of the triad is absent (Ability, Opportunity, or Jeopardy), the threat is legally not imminent, and the use of deadly force is <strong>STRICTLY UNLAWFUL</strong> under 720 ILCS 5/7-1.
+            </div>
+
+            <h3 id="sec3-caselaw">4. Landmark Illinois Real-Life Case Studies & Judicial Precedents</h3>
+            <p>To understand how Illinois courts scrutinize security officer actions, study these four real-world cases involving private security personnel and the application of 720 ILCS 5/7-1, 7-2, 7-3, and 7-5.1:</p>
+
+            <!-- Case Study 1 -->
+            <div class="lesson-case-card danger-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-balance-scale"></i> Case 1: <em>People v. Dillard</em> — Fleeing Shoplifter & Defense of Commercial Property</h4>
+                    <span class="lesson-case-badge">720 ILCS 5/7-3 VIOLATION</span>
+                </div>
+                <p><strong>The Incident:</strong> A licensed security officer stationed at a big-box retail department store in suburban Cook County observed a suspect conceal \$1,400 in high-end portable power generators and rush out of the emergency fire exit into the parking lot. The officer sprinted after the suspect. The suspect loaded the merchandise into an SUV, jumped into the driver's seat, and began accelerating out of the parking space toward the street. The security officer drew an authorized firearm, stood in front of the vehicle, and discharged three rounds through the windshield, wounding the driver.</p>
+                <p><strong>The Court's Ruling:</strong> The Illinois Appellate Court unequivocally rejected the security officer's self-defense and property defense claims. The court held that under <strong>720 ILCS 5/7-3</strong>, deadly force can never be deployed solely to protect personal property or recover stolen merchandise. Furthermore, by deliberately placing himself in front of an accelerating vehicle to prevent its escape, the officer created the hazard himself. The fleeing thief presented no imminent threat of death or great bodily harm to the officer or the public before the officer moved into the path of the car.</p>
+                <p><strong>Legal Outcome & Penalty:</strong> The guard was convicted of <em>Aggravated Battery with a Firearm</em> (Class X Felony, 6 years IDOC imprisonment). His PERC card and 20-Hour Unarmed/Armed certifications were permanently revoked. In federal civil court, the retail client and security company paid a \$3.8 million wrongful injury settlement.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Takeaway:</strong> Merchandise is insured and replaceable. Human life is irreplaceable. You are hired to observe, report, and preserve life—never to use lethal force or place your body in front of fleeing vehicles to protect commercial inventory.
+                </div>
+            </div>
+
+            <!-- Case Study 2 -->
+            <div class="lesson-case-card warning-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-balance-scale"></i> Case 2: <em>People v. Williams</em> — Disproportionate Baton Strike to the Cranium</h4>
+                    <span class="lesson-case-badge">720 ILCS 5/12-3.05 CONVICTION</span>
+                </div>
+                <p><strong>The Incident:</strong> An unarmed security officer at a Chicago commercial transit concourse was confronting an intoxicated patron who refused to extinguish a cigarette and leave the platform. The patron shouted profanities and shoved the officer firmly with both hands against the officer's chest, causing the officer to stumble backward two steps. The patron did not display any weapons and had no clenched fists. Angered by the shove, the officer whipped out his 26-inch expandable steel baton and delivered an overhead downward strike directly across the patron's temporal bone, fracturing his skull and inflicting a traumatic subdural hematoma.</p>
+                <p><strong>The Court's Ruling:</strong> The Cook County Criminal Court ruled that while the patron committed simple battery (bodily harm), the officer's response was gross, illegal retaliation. Under <strong>720 ILCS 5/7-1</strong>, force must be proportional to the threat. Striking a human head with a solid steel baton is deadly force. Because a two-handed shove does not create an imminent threat of death or great bodily harm, deadly force was entirely unlawful.</p>
+                <p><strong>Legal Outcome & Penalty:</strong> The officer was convicted of <em>Aggravated Battery Causing Great Bodily Harm with a Deadly Weapon</em> (720 ILCS 5/12-3.05, Class 3 Felony) and sentenced to 3 years in the Illinois Department of Corrections. His security career was permanently ended.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Takeaway:</strong> You cannot answer a shove with a skull strike. Impact weapons must target Green Zone motor nerve centers (thighs, calves) to immobilize combatants, never Red Zone lethal areas (head, neck) unless your life is under immediate lethal threat.
+                </div>
+            </div>
+
+            <!-- Case Study 3 -->
+            <div class="lesson-case-card justified-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-shield-alt"></i> Case 3: <em>People v. Reeves</em> — Enclosed Stairwell & Severe Disparity of Force</h4>
+                    <span class="lesson-case-badge">JUSTIFIED USE OF FORCE (720 ILCS 5/7-1)</span>
+                </div>
+                <p><strong>The Incident:</strong> An unarmed security guard was conducting an interior foot patrol of an enclosed concrete fire stairwell in a high-rise office building in downtown Chicago at 11:30 PM. In the stairwell landing, the guard encountered three trespassers attempting to pry open an emergency equipment locker. When the guard ordered them to stop and attempted to back out through the heavy fire door, two of the men rushed behind him, slamming the fire door shut and blocking the only exit. The third suspect raised a 3-foot section of solid steel conduit pipe and moved forward, screaming: <em>"You ain't walking out of this stairwell alive, guard!"</em></p>
+                <p><strong>The Officer's Action:</strong> Trapped in a dead-end enclosure with no escape route, facing three assailants armed with a lethal blunt instrument (Ability, Opportunity, Jeopardy confirmed), the officer immediately drew his authorized OC pepper spray and delivered a 2-second stream directly into the face of the pipe-wielding attacker, staggering him. When the second attacker lunged to tackle the officer, the officer deployed his expandable baton in a rapid side strike directly to the attacker's right thigh (Green Zone), breaking his balance and driving him to the floor. The officer shoved through the third stunned accomplice, pushed through the fire door, secured it behind him, and broadcast an emergency 10-33 priority call to Chicago Police.</p>
+                <p><strong>The Legal Ruling:</strong> The Cook County State's Attorney's Office and Chicago Police reviewed the physical evidence and witness testimony and completely cleared the officer of all wrongdoing. Under <strong>720 ILCS 5/7-1</strong>, the officer's use of force was thoroughly justified: (1) Disparity of force (3 vs. 1), (2) Deadly weapon presented (steel conduit pipe), (3) Complete lack of egress or retreat, and (4) Overt verbal declarations of lethal intent. The officer applied sufficient force to escape and immediately discontinued force once safe.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Takeaway:</strong> When all three elements of AOJ are present in an enclosed space with no retreat, decisive defensive action targeted at motor centers and sensory disruption (OC spray) is legally justified and life-saving. Cease force the moment you can safely withdraw.
+                </div>
+            </div>
+
+            <!-- Case Study 4 -->
+            <div class="lesson-case-card manslaughter-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-exclamation-triangle"></i> Case 4: <em>State of Illinois v. Venue Security Staff</em> — Chokeholds & Positional Asphyxia</h4>
+                    <span class="lesson-case-badge">720 ILCS 5/7-5.1 CHOKEHOLD PROHIBITION</span>
+                </div>
+                <p><strong>The Incident:</strong> Four security bouncers at a crowded Chicago entertainment venue escorted an aggressive, highly intoxicated patron onto the sidewalk. When the patron swung a wild punch at one bouncer, another bouncer jumped onto the patron's back and locked in a tight rear chokehold (lateral vascular neck restraint), cutting off carotid blood flow until the patron went completely limp. The four guards threw the unconscious patron onto his stomach on the wet sidewalk, cuffed his hands tightly behind his back, and one 240-lb guard placed his knee directly over the center of the patron's thoracic spine for over eight minutes while chatting with staff. By the time CPD and paramedics arrived, the patron was cyanotic (blue lips), pulseless, and in fatal cardiac arrest from positional and compressive asphyxia.</p>
+                <p><strong>The Court's Ruling:</strong> Under Illinois law (<strong>720 ILCS 5/7-5.1</strong>), neck restraints and chokeholds are legally classified as deadly force and are expressly prohibited in restraint procedures unless the officer is defending against imminent death or great bodily harm. Furthermore, continuing to compress the spine of a prone, handcuffed individual who has ceased active resistance constitutes reckless conduct likely to cause death.</p>
+                <p><strong>Legal Outcome & Penalty:</strong> The bouncer who applied the neck restraint was convicted of <em>Involuntary Manslaughter</em> (720 ILCS 5/9-3, Class 2 Felony, sentenced to 5 years IDOC). The guard kneeling on the spine was convicted of Reckless Conduct causing Great Bodily Harm. The security contractor and venue were hit with a \$6.5 million civil wrongful death judgment.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Takeaway:</strong> Never apply neck restraints or chokeholds. The moment handcuffs are applied, immediately transition the subject off their stomach into the recovery position (seated upright or rolled onto their side) to guarantee unrestricted breathing.
+                </div>
+            </div>
+
+            <h3 id="sec3-2">5. Defense of Dwelling (7-2), Defense of Property (7-3), and The Aggressor Rule (7-4)</h3>
+            <p>Security officers are hired to protect commercial properties, retail establishments, financial institutions, and manufacturing logistics facilities. It is vital to understand the statutory distinction between a private home and a commercial business under Illinois law:</p>
+            <ul>
+                <li><strong>Defense of Dwelling (720 ILCS 5/7-2):</strong> Illinois law affords extraordinary protection to a "dwelling" (a private living residence). Deadly force is justified to prevent or terminate an unlawful entry into a dwelling if: (1) The entry is made in a violent, riotous, or tumultuous manner and the occupant reasonably believes deadly force is necessary to prevent an assault or felony upon occupants, or (2) The occupant reasonably believes force is necessary to prevent the commission of a felony inside the dwelling. <em>Note: A commercial warehouse, parking lot, or retail store is NOT a dwelling under Illinois law.</em></li>
+                <li><strong>Defense of Property Other Than Dwelling (720 ILCS 5/7-3):</strong> A security guard or property owner may use reasonable <strong>non-deadly force</strong> to prevent or terminate an unlawful trespass upon land or the unlawful taking of tangible personal property. <strong>DEADLY FORCE IS NEVER PERMITTED SOLELY TO PROTECT PROPERTY OR MERCHANDISE.</strong> You cannot strike an unarmed fleeing thief in the cranium with a baton, tackle them through a glass window, or discharge a firearm to save televisions, tools, or copper spools.</li>
+                <li><strong>The Aggressor Rule (720 ILCS 5/7-4):</strong> Illinois statute provides that the justification of self-defense is <strong>NOT available</strong> to a person who:
+                    <ol style="margin-top: 6px;">
+                        <li>Initially provokes the use of force against themselves with the intent to use that force as an excuse to inflict bodily harm upon the assailant.</li>
+                        <li>Otherwise provokes the encounter, unless:
+                            <ul>
+                                <li>The force used against them is so great that they reasonably believe they are in imminent danger of death or great bodily harm and have exhausted every reasonable means to escape; OR</li>
+                                <li>In good faith, the person <strong>completely withdraws from physical contact and clearly communicates to the other person their intent to withdraw</strong>, but the other person continues or resumes the use of force.</li>
+                            </ul>
+                        </li>
                     </ol>
                 </li>
-                <li><strong>Active Listening:</strong> Paraphrasing the subject's words back to them ("What I hear you saying is that you're upset about the wait time..."). This lowers physiological agitation and validates their perspective while maintaining firm compliance expectations.</li>
+            </ul>
+
+            <h3 id="sec3-3">6. The 5-Level Use of Force Continuum & The <em>Graham v. Connor</em> Standard</h3>
+
+            <!-- Coursera-Grade Responsive High-Legibility Continuum Visual Component -->
+            <div class="continuum-diagram-container">
+                <div class="continuum-diagram-header">
+                    <h4><i class="fas fa-layer-group" style="color:var(--brand-green-bright);"></i> THE 5-LEVEL USE OF FORCE CONTINUUM (ILLINOIS COMPLIANT)</h4>
+                    <span style="font-size:0.85rem; color:#94a3b8; font-weight:600;"><i class="fas fa-balance-scale"></i> 720 ILCS 5/7-1 &bull; <em>Graham v. Connor</em> Standard</span>
+                </div>
+
+                <!-- Level 5 -->
+                <div class="continuum-tier-card" style="border-left-color: #ef4444; background: rgba(239, 68, 68, 0.08);">
+                    <div class="tier-header-row">
+                        <span class="tier-title" style="color: #f87171;"><i class="fas fa-skull-crossbones"></i> LEVEL 5 — DEADLY FORCE (LETHAL DEFENSE)</span>
+                        <span class="tier-statute-badge" style="background: rgba(239,68,68,0.25); color: #fca5a5; border: 1px solid #ef4444;">720 ILCS 5/7-1(a)</span>
+                    </div>
+                    <div class="tier-details-grid">
+                        <div class="tier-subject-box">
+                            <span class="tier-box-label" style="color: #fca5a5;"><i class="fas fa-user-ninja"></i> Subject Action:</span>
+                            Active threat of <strong>imminent death or great bodily harm</strong>; brandishing lethal weapons (firearms, knives, pipes) or severe disparity of physical force.
+                        </div>
+                        <div class="tier-officer-box">
+                            <span class="tier-box-label" style="color: #fca5a5;"><i class="fas fa-shield-alt"></i> Lawful Officer Response:</span>
+                            Lethal defensive measures strictly authorized to preserve human life or stop a forcible felony. <em>Head/neck baton strikes and chokeholds are legally classified as deadly force.</em>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 4 -->
+                <div class="continuum-tier-card" style="border-left-color: #f97316; background: rgba(249, 115, 22, 0.08);">
+                    <div class="tier-header-row">
+                        <span class="tier-title" style="color: #fb923c;"><i class="fas fa-bolt"></i> LEVEL 4 — INTERMEDIATE DEFENSIVE WEAPONS</span>
+                        <span class="tier-statute-badge" style="background: rgba(249,115,22,0.25); color: #fdba74; border: 1px solid #f97316;">Non-Lethal Tools</span>
+                    </div>
+                    <div class="tier-details-grid">
+                        <div class="tier-subject-box">
+                            <span class="tier-box-label" style="color: #fdba74;"><i class="fas fa-user-ninja"></i> Subject Action:</span>
+                            Actively assaultive, combative, throwing punches or kicks, aggressive charging, displaying non-lethal blunt implements.
+                        </div>
+                        <div class="tier-officer-box">
+                            <span class="tier-box-label" style="color: #fdba74;"><i class="fas fa-shield-alt"></i> Lawful Officer Response:</span>
+                            <strong>OC Pepper Spray</strong> (1-2 second bursts at 4-6 ft stand-off); <strong>Expandable Baton Strikes</strong> directed <em>strictly</em> at Green Target Zones (thighs, calves, biceps).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 3 -->
+                <div class="continuum-tier-card" style="border-left-color: #eab308; background: rgba(234, 179, 8, 0.08);">
+                    <div class="tier-header-row">
+                        <span class="tier-title" style="color: #fde047;"><i class="fas fa-hand-rock"></i> LEVEL 3 — EMPTY-HAND CONTROL (SOFT &amp; HARD)</span>
+                        <span class="tier-statute-badge" style="background: rgba(234,179,8,0.25); color: #fef08a; border: 1px solid #eab308;">Physical Tactics</span>
+                    </div>
+                    <div class="tier-details-grid">
+                        <div class="tier-subject-box">
+                            <span class="tier-box-label" style="color: #fef08a;"><i class="fas fa-user-ninja"></i> Subject Action:</span>
+                            Active physical resistance: pulling away, wrestling, pushing past guard, grabbing security equipment, aggressive posturing.
+                        </div>
+                        <div class="tier-officer-box">
+                            <span class="tier-box-label" style="color: #fef08a;"><i class="fas fa-shield-alt"></i> Lawful Officer Response:</span>
+                            <strong>Soft Control:</strong> Escort holds, wristlocks, nerve pressure points (mandibular angle).<br>
+                            <strong>Hard Control:</strong> Open-palm heel strikes to torso, hip sweeps, balance disruption takedowns.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 2 -->
+                <div class="continuum-tier-card" style="border-left-color: #0284c7; background: rgba(2, 132, 199, 0.08);">
+                    <div class="tier-header-row">
+                        <span class="tier-title" style="color: #38bdf8;"><i class="fas fa-comments"></i> LEVEL 2 — VERBAL DIRECTION &amp; COMMUNICATION</span>
+                        <span class="tier-statute-badge" style="background: rgba(2,132,199,0.25); color: #7dd3fc; border: 1px solid #0284c7;">Tactical Dialogue</span>
+                    </div>
+                    <div class="tier-details-grid">
+                        <div class="tier-subject-box">
+                            <span class="tier-box-label" style="color: #7dd3fc;"><i class="fas fa-user-ninja"></i> Subject Action:</span>
+                            Passive non-compliance, argumentative refusal to leave, verbal agitation, questioning rules, hesitation to follow orders.
+                        </div>
+                        <div class="tier-officer-box">
+                            <span class="tier-box-label" style="color: #7dd3fc;"><i class="fas fa-shield-alt"></i> Lawful Officer Response:</span>
+                            Clear, assertive verbal commands; maintaining 6-9 ft Reactionary Gap; utilizing <strong>Verbal Judo 8-Step Model</strong> and <strong>5-Step Appeal</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 1 -->
+                <div class="continuum-tier-card" style="border-left-color: #22c55e; background: rgba(34, 197, 94, 0.08);">
+                    <div class="tier-header-row">
+                        <span class="tier-title" style="color: #4ade80;"><i class="fas fa-user-shield"></i> LEVEL 1 — PROFESSIONAL OFFICER PRESENCE</span>
+                        <span class="tier-statute-badge" style="background: rgba(34,197,94,0.25); color: #86efac; border: 1px solid #22c55e;">Visual Deterrence</span>
+                    </div>
+                    <div class="tier-details-grid">
+                        <div class="tier-subject-box">
+                            <span class="tier-box-label" style="color: #86efac;"><i class="fas fa-user-ninja"></i> Subject Action:</span>
+                            Compliant, cooperative, orderly interaction, standard visitor or employee behavior with no hostile intent.
+                        </div>
+                        <div class="tier-officer-box">
+                            <span class="tier-box-label" style="color: #86efac;"><i class="fas fa-shield-alt"></i> Lawful Officer Response:</span>
+                            Impeccable authorized uniform, upright alert posture, visible hands, continuous 360-degree situational awareness. Deters 80%+ of incidents.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p>The Use of Force Continuum is a tactical and conceptual model that guides professional security officers in deploying only the minimum, objectively reasonable force necessary to resolve a situation safely:</p>
+            <ol>
+                <li><strong>Level 1 — Professional Officer Presence:</strong> Sharp, clean uniform; professional, alert posture; hands visible and free; scanning the environment. Visual presence alone deters and resolves over 80% of potential security incidents without a single spoken word.</li>
+                <li><strong>Level 2 — Verbal Direction & Communication:</strong> Clear, calm, respectful, yet firm verbal instructions. Speaking with authority, giving clear tactical commands, and maintaining tactical spacing (Reactionary Gap of 6 to 9 feet).</li>
+                <li><strong>Level 3 — Empty-Hand Control:</strong>
+                    <ul>
+                        <li><em>Soft Empty-Hand:</em> Escort holds, guiding touches, joint manipulations, and pressure points used to overcome passive resistance or facilitate a peaceful exit.</li>
+                        <li><em>Hard Empty-Hand:</em> Open-palm heel strikes, redirection blocks, balance disruptions, and controlled takedowns used against actively combative subjects.</li>
+                    </ul>
+                </li>
+                <li><strong>Level 4 — Intermediate Defensive Weapons:</strong> Oleoresin Capsicum (OC) chemical spray and defensive expandable batons (directed exclusively at Green Target Zones) deployed when empty-hand tactics are insufficient to stop violent, assaultive physical attacks.</li>
+                <li><strong>Level 5 — Deadly Force:</strong> The absolute highest tier of defensive response, strictly reserved for preventing imminent death or great bodily harm to yourself or another human being.</li>
             </ol>
+
+            <div class="callout note">
+                <strong><i class="fas fa-balance-scale"></i> THE OBJECTIVE REASONABLENESS STANDARD (<em>Graham v. Connor</em>, 490 U.S. 386):</strong>
+                <p>The legality of a security officer's use of force is judged not with the pristine clarity of 20/20 hindsight from a quiet office, but from the perspective of an <strong>objectively reasonable officer on the scene</strong> at the exact split-second the decision was made. Illinois courts evaluate four core factors:</p>
+                <ol style="margin-top: 6px;">
+                    <li><strong>Severity of the Crime:</strong> Was the crime a minor misdemeanor trespass or an active violent felony?</li>
+                    <li><strong>Immediate Physical Threat:</strong> Did the subject pose an immediate physical threat to the safety of the officer or bystanders?</li>
+                    <li><strong>Active Resistance vs. Passive Non-Compliance:</strong> Was the subject physically fighting, or merely refusing to move?</li>
+                    <li><strong>Attempting to Evade Arrest by Flight:</strong> Was the subject fleeing? Remember: Fleeing suspects who pose no immediate lethal danger cannot be subjected to deadly force.</li>
+                </ol>
+            </div>
+
+            <h3 id="sec3-4">7. Tactical Conflict De-escalation & The "Verbal Judo" System</h3>
+            <p>Elite security professionals recognize that words are their primary protective weapon. Dr. George Thompson's <em>Verbal Judo</em> framework empowers officers to resolve heated confrontations peacefully by using professional human psychology instead of physical violence.</p>
+
+            <h4>A. The 5 Universal Truths of Human Interaction</h4>
+            <ol>
+                <li><strong>All people want to be treated with dignity and respect.</strong> No matter how intoxicated or disorderly a subject is, treating them with basic respect reduces their urge to fight.</li>
+                <li><strong>All people prefer to be asked rather than told what to do.</strong> Commands trigger an immediate defensive reflex; polite requests invite cooperation.</li>
+                <li><strong>All people want to know why they are being asked to do something.</strong> Explaining the safety policy or legal reason behind a rule satisfies human curiosity and reduces rebellion.</li>
+                <li><strong>All people want to be offered options rather than threats.</strong> Giving an individual a positive choice preserves their pride while giving them an honorable exit.</li>
+                <li><strong>All people want a second chance to comply without losing face.</strong> When someone refuses, giving them a moment to reconsider prevents an explosive showdown.</li>
+            </ol>
+
+            <h4>B. The 8-Step Practical Contact Model for Unarmed Guards</h4>
+            <p>Whenever you initiate contact with an individual on your post, follow this standardized 8-step sequence to maintain tactical dominance and de-escalate tension:</p>
+            <ol>
+                <li><strong>1. Professional Greeting:</strong> <em>"Good evening, sir / ma'am."</em> (Sets a calm, non-confrontational tone).</li>
+                <li><strong>2. Identify Yourself & Affiliation:</strong> <em>"My name is Officer Andre with Platforms Security."</em></li>
+                <li><strong>3. State the Reason for the Contact:</strong> <em>"The reason I'm speaking with you is that this loading dock is restricted to authorized personnel after 6:00 PM."</em></li>
+                <li><strong>4. Check for Justifiable Reason:</strong> <em>"Is there an emergency or deliveries scheduled that I should be aware of?"</em> (Allows them to explain their situation).</li>
+                <li><strong>5. Request Credentials / Identification:</strong> <em>"May I see your employee badge or company bill of lading, please?"</em></li>
+                <li><strong>6. Clarify Information:</strong> Review their statement calmly without interrupting.</li>
+                <li><strong>7. Deliver Professional Resolution:</strong> <em>"Thank you for clarifying. Because you don't have an after-hours pass, I need you to step outside the gate and check in with the main office tomorrow at 8:00 AM."</em></li>
+                <li><strong>8. Professional Closing:</strong> <em>"Thank you for your cooperation, sir. Have a safe night."</em></li>
+            </ol>
+
+            <h4>C. The 5-Step Tactical Appeal for Non-Compliant Subjects</h4>
+            <p>If a subject becomes belligerent and refuses to cooperate, execute the 5-Step Appeal before taking physical action:</p>
+            <ul>
+                <li><strong>Step 1 — The Simple Ask:</strong> <em>"Sir, I need you to gather your belongings and step outside the lobby."</em></li>
+                <li><strong>Step 2 — Set the Context:</strong> <em>"Sir, building management requires the lobby cleared at 10:00 PM for floor cleaning and overnight security. If you don't step outside, you're trespassing on private property."</em></li>
+                <li><strong>Step 3 — Present Options:</strong> <em>"Sir, you have two options right now. You can walk out peacefully right now and catch your bus across the street, OR I will have to contact Chicago Police, you'll be arrested for criminal trespass, and you'll spend the night in the lockup. Let's work together so you can head home tonight."</em></li>
+                <li><strong>Step 4 — The Second Chance (The Confirmation Jump):</strong> <em>"Sir, is there anything I can say or do right now to earn your cooperation? I really'd like to see you walk out on your own without getting police involved."</em></li>
+                <li><strong>Step 5 — Action:</strong> If the subject still refuses, disengage to a safe reactionary gap, secure the entrance, and contact 911 dispatch or request tactical backup.</li>
+            </ul>
         `,
         scenarioSimulation: {
             title: "Tactical Scenario: Trespasser with Stolen Power Tools",
@@ -524,10 +833,12 @@ const LESSONS_DATA = [
             }
         ],
         takeaways: [
-            "Deadly force is justified ONLY to prevent imminent death or great bodily harm (720 ILCS 5/7-1).",
-            "Deadly force can NEVER be used solely to protect personal property or merchandise (720 ILCS 5/7-3).",
-            "Follow the 5-Level Continuum: Presence, Verbal Direction, Empty Hand, Intermediate Weapons, Deadly Force.",
-            "De-escalate conflicts early using Verbal Judo and active listening."
+            "Deadly force is strictly justified ONLY to prevent imminent death or great bodily harm to yourself or another (720 ILCS 5/7-1).",
+            "Great Bodily Harm (720 ILCS 5/12-3.05) requires serious, permanent, or life-threatening trauma; simple bodily harm (bruising/shoves) NEVER justifies lethal force.",
+            "An imminent threat requires all three elements of the AOJ Triad (Ability, Opportunity, Jeopardy) to exist simultaneously; future or conditional threats are never imminent.",
+            "Deadly force can NEVER be used solely to protect personal property or recover stolen merchandise (720 ILCS 5/7-3).",
+            "Chokeholds and neck restraints are legally classified as deadly force under 720 ILCS 5/7-5.1; prone subjects must be moved to the recovery position immediately.",
+            "Utilize the 5-Level Continuum and de-escalate early using the Verbal Judo 8-Step Contact Model and 5-Step Appeal."
         ]
     },
     {
@@ -597,8 +908,78 @@ const LESSONS_DATA = [
 
             <h3 id="sec4-3">3. Expandable Defensive Baton Strike Zones</h3>
             <div class="media-container">
-                <img src="assets/baton_chart.png" alt="Baton Target Strike Zones Chart" class="responsive-img">
+                <img src="assets/baton_chart.png" alt="Baton Target Strike Zones Chart — Anatomical Diagram" class="responsive-img">
             </div>
+
+            <!-- Large-Print High-Contrast Baton Strike Zone Diagnostic Matrix -->
+            <div class="baton-matrix-container">
+                <!-- Green Zone -->
+                <div class="baton-zone-card green">
+                    <div class="baton-zone-card-header">
+                        <span class="baton-zone-card-title"><i class="fas fa-check-circle"></i> GREEN TARGET ZONES — PRIMARY NON-LETHAL DEFENSE</span>
+                        <span class="baton-zone-badge" style="background: rgba(34,197,94,0.25); color: #4ade80; border: 1px solid #22c55e;">Target First</span>
+                    </div>
+                    <div class="baton-zone-grid">
+                        <div class="baton-grid-col">
+                            <strong style="color: #4ade80;"><i class="fas fa-bullseye"></i> Anatomical Targets:</strong>
+                            Outside of Thigh (Femoral Nerve / Quadriceps), Back of Calf (Common Peroneal Nerve / Gastrocnemius), Upper Arm (Biceps / Triceps).
+                        </div>
+                        <div class="baton-grid-col">
+                            <strong style="color: #4ade80;"><i class="fas fa-heartbeat"></i> Physiological Effect:</strong>
+                            Temporary motor dysfunction (fluid shock wave inducing temporary muscle paralysis/cramping); negligible risk of permanent bone fracture.
+                        </div>
+                        <div class="baton-grid-col">
+                            <strong style="color: #4ade80;"><i class="fas fa-gavel"></i> Illinois Legal Standard:</strong>
+                            Authorized under <strong>720 ILCS 5/7-1</strong> to overcome active physical combat, defend against punches, or gain compliance from an aggressive combative subject.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yellow Zone -->
+                <div class="baton-zone-card yellow">
+                    <div class="baton-zone-card-header">
+                        <span class="baton-zone-card-title"><i class="fas fa-exclamation-triangle"></i> YELLOW TARGET ZONES — HIGH INJURY &amp; SKELETAL JOINTS</span>
+                        <span class="baton-zone-badge" style="background: rgba(234,179,8,0.25); color: #fde047; border: 1px solid #eab308;">Secondary / High Risk</span>
+                    </div>
+                    <div class="baton-zone-grid">
+                        <div class="baton-grid-col">
+                            <strong style="color: #fde047;"><i class="fas fa-bullseye"></i> Anatomical Targets:</strong>
+                            Skeletal joints and secondary structures: Knees, Elbows, Wrists, Collarbone (Clavicle), Rib Cage, Abdomen.
+                        </div>
+                        <div class="baton-grid-col">
+                            <strong style="color: #fde047;"><i class="fas fa-heartbeat"></i> Physiological Effect:</strong>
+                            Joint dislocation, ligament tears, bone fractures, internal bruising, prolonged disability requiring surgical intervention.
+                        </div>
+                        <div class="baton-grid-col">
+                            <strong style="color: #fde047;"><i class="fas fa-gavel"></i> Illinois Legal Standard:</strong>
+                            Targeted ONLY when Green Zone strikes have completely failed to stop a violent physical assault. High civil and criminal liability if misused.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Red Zone -->
+                <div class="baton-zone-card red">
+                    <div class="baton-zone-card-header">
+                        <span class="baton-zone-card-title"><i class="fas fa-skull-crossbones"></i> RED TARGET ZONES — DEADLY FORCE (LETHAL STRIKE)</span>
+                        <span class="baton-zone-badge" style="background: rgba(239,68,68,0.25); color: #fca5a5; border: 1px solid #ef4444;">Deadly Force Only</span>
+                    </div>
+                    <div class="baton-zone-grid">
+                        <div class="baton-grid-col">
+                            <strong style="color: #fca5a5;"><i class="fas fa-bullseye"></i> Anatomical Targets:</strong>
+                            Head (Cranium, Temples), Base of Skull (Occipital), Cervical Spine / Neck, Throat (Trachea/Larynx), Groin, Sternum.
+                        </div>
+                        <div class="baton-grid-col">
+                            <strong style="color: #fca5a5;"><i class="fas fa-heartbeat"></i> Physiological Effect:</strong>
+                            Skull fracture, intracranial hemorrhage (subdural hematoma), traumatic brain injury (TBI), spinal paralysis, crushed trachea, or death.
+                        </div>
+                        <div class="baton-grid-col">
+                            <strong style="color: #fca5a5;"><i class="fas fa-gavel"></i> Illinois Legal Standard:</strong>
+                            <strong>DEADLY FORCE UNDER 720 ILCS 5/7-1.</strong> Striking the head with a steel baton is legally equivalent to firing a gun. <strong>STRICTLY PROHIBITED</strong> unless facing an imminent threat of death or great bodily harm (*People v. Williams*).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <p>The expandable baton is an intermediate impact weapon used to immobilize active combative aggressors:</p>
             <ul>
                 <li><strong>Grip & Stance:</strong> Full-hand grip centered on handle, balanced defensive stance.</li>
@@ -799,21 +1180,147 @@ const LESSONS_DATA = [
             </div>
 
             <h3 id="sec5-2">2. Critical Statutory Distinctions for Security Guards</h3>
+            <p>Under Illinois criminal law, distinguishing the exact statutory classification of an offense dictates whether responding police make a misdemeanor summons or a felony custodial arrest. Review the fundamental statutory distinctions and real-life operational scenarios below:</p>
+
             <div class="liability-grid">
                 <div class="liability-card">
-                    <h4>Theft vs. Robbery vs. Burglary</h4>
+                    <h4><i class="fas fa-balance-scale"></i> Theft vs. Robbery vs. Burglary</h4>
                     <ul>
-                        <li><strong>Theft:</strong> Secretly concealing a wallet left on a counter (no force, no confrontation).</li>
-                        <li><strong>Robbery:</strong> Demanding the wallet while pushing the victim or threatening physical injury (force used against a person).</li>
-                        <li><strong>Burglary:</strong> Breaking a window after closing hours to enter the business with intent to steal the cash register (unauthorized entry with intent).</li>
+                        <li><strong>Theft (720 ILCS 5/16-1):</strong> Unauthorized control over property with intent to permanently deprive. <em>Zero physical force and zero personal confrontation.</em></li>
+                        <li><strong>Robbery (720 ILCS 5/18-1):</strong> Taking property from the person or presence of another by <em>the use of physical force or threat of imminent force</em>. Class 2 Felony.</li>
+                        <li><strong>Burglary (720 ILCS 5/19-1):</strong> Entering or remaining in a building or vehicle <em>without authority with the intent to commit a theft or felony</em>. Class 2 Felony.</li>
                     </ul>
                 </div>
                 <div class="liability-card">
-                    <h4>Assault vs. Battery</h4>
+                    <h4><i class="fas fa-hand-paper"></i> Assault vs. Battery vs. Aggravated Battery</h4>
                     <ul>
-                        <li><strong>Assault is the THREAT:</strong> Raising an iron bar and yelling "I'm going to smash you!" causing the guard to jump back in reasonable apprehension.</li>
-                        <li><strong>Battery is the CONTACT:</strong> The iron bar actually striking the guard, or shoving the guard backwards.</li>
+                        <li><strong>Assault (720 ILCS 5/12-1):</strong> Conduct causing <em>reasonable apprehension of receiving an imminent battery</em>. No physical contact required. Class C Misdemeanor.</li>
+                        <li><strong>Battery (720 ILCS 5/12-3):</strong> Knowingly causing <em>bodily harm</em> or making physical contact of an <em>insulting or provoking nature</em> (shoving, spitting). Class A Misdemeanor.</li>
+                        <li><strong>Aggravated Battery (720 ILCS 5/12-3.05(d)(4)):</strong> Committing a battery against a <em>private security officer performing official duties</em>, or causing great bodily harm, or using a weapon. Class 3 Felony.</li>
                     </ul>
+                </div>
+            </div>
+
+            <h4>A. Real-Life Security Examples: Theft vs. Robbery vs. Burglary</h4>
+
+            <!-- Example 1: Theft -->
+            <div class="lesson-case-card info-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-shopping-bag"></i> Example 1: Concealment Without Confrontation (Retail Theft — 720 ILCS 5/16-25 &amp; 16-1)</h4>
+                    <span class="lesson-case-badge">THEFT • NO PHYSICAL FORCE</span>
+                </div>
+                <p><strong>The Incident:</strong> At a department store on Michigan Avenue, a loss prevention security officer observes a shopper place four designer leather handbags valued at \$1,600 into an aluminum-lined "booster bag" designed to bypass EAS security alarm pedestals. The shopper walks past all open cash registers and exits the outer revolving doors onto the sidewalk without attempting to pay. The security officer steps forward, presents security identification, and commands: <em>"Security. Please step back inside regarding the unpaid merchandise."</em> The shopper stops, drops the booster bag on the sidewalk, raises both hands, and complies without verbal threats or physical resistance.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Because the suspect exerted unauthorized control over merchandise with the intent to permanently deprive the merchant, and crossed the final point of purchase, the offense is <strong>Retail Theft (720 ILCS 5/16-25)</strong>. Because the value exceeds \$300, this is a Class 3 Felony. Crucially, because the suspect utilized <em>zero force, zero threats, and initiated no physical combat</em> against the guard or shoppers, it is <strong>NOT</strong> Robbery.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> When a property crime involves no force or threats against a human being, document the offense as Theft. Never charge or report robbery unless personal force or fear was introduced.
+                </div>
+            </div>
+
+            <!-- Example 2: Robbery -->
+            <div class="lesson-case-card danger-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-hand-holding-usd"></i> Example 2: Strong-Arm Parking Deck Mugging (Robbery — 720 ILCS 5/18-1)</h4>
+                    <span class="lesson-case-badge">CLASS 2 FELONY ROBBERY • FORCE USED</span>
+                </div>
+                <p><strong>The Incident:</strong> While monitoring CCTV cameras on the 3rd floor of a hospital parking garage in Chicago at 11:15 PM, an officer observes a male suspect approach an off-duty nurse walking to her vehicle. The suspect grabs the strap of her shoulder purse. When the nurse reflexively holds onto the bag, the suspect violently shoves her with both hands, causing her to fall onto the concrete floor and skin her knees, wrenches the bag from her grip, and yells: <em>"Let go or I'll break your jaw!"</em> The suspect sprints down the exit stairwell with the purse.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> The moment the offender used <strong>physical force (shoving the victim to the ground)</strong> and the <strong>threat of imminent force ("I'll break your jaw")</strong> to take property from the person or presence of the victim, the crime transformed from simple theft into <strong>Robbery (720 ILCS 5/18-1, Class 2 Felony)</strong>. If the offender had displayed a firearm, knife, or bludgeon, the charge would escalate to <em>Armed Robbery (720 ILCS 5/18-2, Class X Felony, 6 to 30 years IDOC)</em>.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> The dividing line between Theft and Robbery is <strong>FORCE</strong>. Even the slightest physical struggle, shove, or verbal threat to overcome resistance elevates the crime into a violent felony robbery. Dispatch 911 immediately with high priority.
+                </div>
+            </div>
+
+            <!-- Example 3: Burglary -->
+            <div class="lesson-case-card warning-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-door-open"></i> Example 3: Forced After-Hours Entry into a Closed Warehouse (Burglary — 720 ILCS 5/19-1)</h4>
+                    <span class="lesson-case-badge">CLASS 2 FELONY BURGLARY • UNLAWFUL ENTRY</span>
+                </div>
+                <p><strong>The Incident:</strong> At 2:45 AM, an exterior motion sensor triggers at an industrial distribution warehouse in Bedford Park. A mobile patrol officer responds within two minutes and finds the exterior steel pedestrian fire door pry-marked open with a 36-inch crowbar resting on the threshold. The officer observes an intruder inside the darkened warehouse loading dock holding a flashlight and a wire cutter, inspecting industrial copper wiring spools. The officer commands: <em>"Security! Stay where you are!"</em> The intruder immediately drops the wire cutters and runs out through the back overhead door without taking any merchandise.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Under <strong>720 ILCS 5/19-1</strong>, a person commits Burglary when they knowingly without authority <em>enter or remain within a building with the intent to commit therein a felony or theft</em>. The suspect did not carry away a single dollar of wire, but the crime of <strong>Burglary was fully completed the millisecond their body crossed the threshold of the broken door with felonious intent</strong>. Under Illinois law, Burglary does not require successful theft—the unlawful entry with intent is the felony.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> Never report a commercial break-in as "attempted theft" simply because the intruder dropped the goods before escaping. If they breached the perimeter and entered without authority, it is a completed <strong>Class 2 Felony Burglary</strong>.
+                </div>
+            </div>
+
+            <h4>B. Real-Life Security Examples: Assault vs. Battery vs. Aggravated Battery</h4>
+
+            <!-- Example 4: Assault -->
+            <div class="lesson-case-card warning-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-exclamation-circle"></i> Example 4: The Raised Conduit Pipe &amp; Threat (Simple Assault — 720 ILCS 5/12-1)</h4>
+                    <span class="lesson-case-badge">ASSAULT • REASONABLE APPREHENSION</span>
+                </div>
+                <p><strong>The Incident:</strong> A security guard stationed at an active high-rise construction site confronts an unauthorized trespasser attempting to scavenge scrap metal from a dumpster. When the officer says, <em>"Sir, you are trespassing on private property, please drop the metal and leave,"</em> the subject becomes enraged, picks up a 3-foot solid steel conduit pipe, raises it cocked over his shoulder, aggressively charges within four feet of the guard, and screams: <em>"Take one more step toward me and I'll smash your teeth down your throat!"</em> The guard immediately steps back behind a concrete pillar into a defensive stance. The subject then turns and sprints out the gate.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> No physical contact was made, and the guard suffered no bodily impact. However, the subject's actions and verbal threats placed the guard in <strong>reasonable apprehension of receiving an imminent battery</strong>. This constitutes <strong>Assault (720 ILCS 5/12-1)</strong>. Because the subject brandished a deadly blunt weapon (the steel pipe), the charge escalates to <strong>Aggravated Assault (720 ILCS 5/12-2, Class A Misdemeanor or Class 4 Felony)</strong>.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> Assault is the <strong>THREAT</strong> that creates genuine fear of immediate physical violence. Physical contact is NOT required to substantiate an assault charge in Illinois.
+                </div>
+            </div>
+
+            <!-- Example 5: Battery -->
+            <div class="lesson-case-card info-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-hand-rock"></i> Example 5: Heated Lobby Shove &amp; Spitting (Simple Battery — 720 ILCS 5/12-3)</h4>
+                    <span class="lesson-case-badge">BATTERY • INSULTING / PROVOKING CONTACT</span>
+                </div>
+                <p><strong>The Incident:</strong> An intoxicated guest at a Chicago downtown hotel lobby is denied entry to the guest elevators after hours for lacking a valid room keycard. The guest screams obscenities at a front desk concierge, violently shoves the concierge backwards across the counter with both hands (causing localized soreness), and spits directly into the concierge's face.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Under <strong>720 ILCS 5/12-3</strong>, Battery is committed when a person intentionally without legal justification: (1) causes bodily harm (the soreness from the shove), OR (2) <strong>makes physical contact of an insulting or provoking nature</strong>. Illinois courts hold that spitting on another person, throwing liquids, or shoving them without causing severe tissue damage constitutes criminal battery under the "insulting or provoking" prong (Class A Misdemeanor).</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> Battery is the actual <strong>PHYSICAL CONTACT</strong>. An offensive touch (shoving, slapping, grabbing clothing, or spitting) is just as legally actionable as a punch that leaves a bruise.
+                </div>
+            </div>
+
+            <!-- Example 6: Aggravated Battery to Security Officer -->
+            <div class="lesson-case-card danger-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-shield-alt"></i> Example 6: Physical Punch to an On-Duty Uniformed Security Guard (Aggravated Battery — 720 ILCS 5/12-3.05(d)(4))</h4>
+                    <span class="lesson-case-badge">AGGRAVATED BATTERY • CLASS 3 FELONY</span>
+                </div>
+                <p><strong>The Incident:</strong> An unarmed security officer wearing a standard uniform with visible company patches and an authorized security badge is escorting a disruptive patron out of a commercial retail bank branch. As the officer guides the patron toward the exit doors, the patron suddenly spins around, balls his fist, and punches the uniformed officer directly in the mouth, splitting the officer's lip and causing facial bleeding.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Under normal circumstances between two private citizens, a simple punch causing a bloody lip is a Class A misdemeanor simple battery. HOWEVER, under <strong>720 ILCS 5/12-3.05(d)(4)</strong>, Illinois law affords special felony enhancement protection to <strong>private security officers</strong>! A person who commits a battery against a private security officer who is <em>performing official security duties in uniform</em> is guilty of <strong>Aggravated Battery — a Class 3 Felony punishable by 2 to 5 years in the Illinois Department of Corrections</strong>!</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> Striking a uniformed security officer on duty is a major state prison felony in Illinois. When reporting physical assaults against yourself or fellow guards, ensure the police report explicitly cites <strong>720 ILCS 5/12-3.05(d)(4) (Battery upon Private Security Officer)</strong>.
+                </div>
+            </div>
+
+            <h4>C. Real-Life Security Examples: Criminal Trespass, Criminal Damage &amp; Arson</h4>
+
+            <!-- Example 7: Criminal Trespass -->
+            <div class="lesson-case-card warning-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-ban"></i> Example 7: Defiant Loitering After Formal Barring Notice (Criminal Trespass — 720 ILCS 5/21-3)</h4>
+                    <span class="lesson-case-badge">CRIMINAL TRESPASS • REFUSAL TO DEPART</span>
+                </div>
+                <p><strong>The Incident:</strong> Two weeks prior, an individual who repeatedly harassed customers at a suburban shopping center was issued an official written Illinois "Notice of Barring / Criminal Trespass Warning" signed by management and security, barring them from property for one calendar year. On a Saturday afternoon, the security supervisor observes this barred individual sitting inside the center food court. The officer approaches with a copy of the signed barring notice and states: <em>"Sir, you were formally served with a trespass barring notice on October 1st. You are forbidden from being on this property. You must leave immediately."</em> The subject laughs, crosses his arms, and replies: <em>"I'm not leaving until I finish my food. You can't make me."</em></p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Under <strong>720 ILCS 5/21-3(a)(3)</strong>, Criminal Trespass to Real Property occurs when a person <em>remains upon the land or in a building of another after receiving notice from the owner or occupant to depart</em>. Because the suspect had prior written notice and received an immediate oral command to depart from an authorized security agent, his continued presence constitutes a completed <strong>Class B Misdemeanor Criminal Trespass</strong>, justifying an immediate 911 dispatch and citizen's arrest.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> Oral or written notice from a licensed security officer establishes legal authority under 720 ILCS 5/21-3. Maintain detailed logs of all barred individuals and keep barring documentation readily accessible for responding police.
+                </div>
+            </div>
+
+            <!-- Example 8: Criminal Damage to Property -->
+            <div class="lesson-case-card danger-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-hammer"></i> Example 8: Smashed Card Readers &amp; Shattered Glass Foyer (Criminal Damage to Property — 720 ILCS 5/21-1)</h4>
+                    <span class="lesson-case-badge">FELONY CRIMINAL DAMAGE • VALUE EXCEEDS \$500</span>
+                </div>
+                <p><strong>The Incident:</strong> Following a heated termination dispute, a former employee returns to a commercial office building at 9:00 PM with an aluminum baseball bat. The individual smashes the exterior optical RFID security card reader, shatters three 8-foot tempered glass panels of the vestibule doors, and dents the metal intercom pedestal. Total contractor repair estimates total \$4,200.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Under <strong>720 ILCS 5/21-1</strong>, knowingly damaging any property of another without consent is Criminal Damage to Property. The felony threshold in Illinois is <strong>\$500</strong>. Damage under \$500 is a Class A misdemeanor; damage between \$500 and \$10,000 is a <strong>Class 4 Felony</strong> (1 to 3 years IDOC). The guard's incident report must include itemized contractor estimates to prove the felony financial threshold to the State's Attorney.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> In vandalism incidents, photograph all physical damage immediately and request itemized repair estimates from property management. Documenting damages above \$500 is vital to secure felony prosecution.
+                </div>
+            </div>
+
+            <!-- Example 9: Arson -->
+            <div class="lesson-case-card danger-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-fire"></i> Example 9: Commercial Loading Dock Dumpster &amp; Pallet Blaze (Arson — 720 ILCS 5/20-1)</h4>
+                    <span class="lesson-case-badge">CLASS 2 FELONY ARSON • FIRE OVER \$150</span>
+                </div>
+                <p><strong>The Incident:</strong> During a midnight perimeter patrol of a commercial retail plaza in Cicero, IL, a security guard spots an individual pour lighter fluid over a stack of thirty wooden shipping pallets resting directly against the back brick wall of a grocery store and throw a lit flare into the pile. The blaze engulfs the pallets and chars the store's exterior electrical conduit and fiberglass roof overhang, inflicting \$3,500 in physical damage before the fire department extinguishes it.</p>
+                <p><strong>Illinois Statutory Breakdown:</strong> Under <strong>720 ILCS 5/20-1</strong>, a person commits <strong>Arson</strong> when, by means of fire or explosives, they knowingly damage any real property or personal property having a <strong>value of \$150 or more</strong> without the consent of the owner. Arson is a non-probationable <strong>Class 2 Felony</strong> (3 to 7 years IDOC). If the building was an occupied dwelling or a person was injured, the offense escalates to <em>Aggravated Arson (Class X Felony, 6 to 30 years IDOC)</em>.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Security Takeaway:</strong> Illinois sets the Arson property damage threshold at just <strong>\$150</strong>. Setting fire to commercial dumpsters, pallets, or building fixtures is a major state felony. Evacuate the structure, trigger the building alarm, call 911 immediately, and protect the fire scene for arson investigators.
                 </div>
             </div>
         `,
@@ -1548,18 +2055,38 @@ const LESSONS_DATA = [
 
 
             <h3 id="sec10-1">1. The 8 Signs of Terrorism</h3>
-            <p>Security officers represent the primary frontline defense for commercial high-rises, transit hubs, and infrastructure. Terrorist plots follow recognizable operational phases:</p>
+            <p>Security officers represent the primary frontline defense for commercial high-rises, transit hubs, and critical infrastructure. Terrorist plots rarely occur without weeks or months of logistical preparation. Pre-incident planning follows eight recognizable operational phases:</p>
             <ol>
-                <li><strong>Surveillance:</strong> Individuals recording floor plans, taking prolonged photos of guard posts, CCTV camera blind spots, or perimeter fence gates.</li>
-                <li><strong>Elicitation:</strong> Attempting to question security guards or cleaning staff about shifts, alarm response times, or executive schedules.</li>
-                <li><strong>Tests of Security:</strong> Deliberately setting off exterior perimeter sensors or abandoning bags to gauge how quickly security responds.</li>
-                <li><strong>Acquiring Supplies:</strong> Purchasing bulk ammonium nitrate fertilizer, commercial detonators, police uniforms, or fraudulent access badges.</li>
-                <li><strong>Suspicious Persons Out of Place:</strong> Individuals loitering in restricted utility tunnels, HVAC mechanical rooms, or loading dock corridors without work orders.</li>
-                <li><strong>Dry Runs / Rehearsals:</strong> Practicing evacuation timing, pacing routes, and rehearsing tactical approach routes.</li>
-                <li><strong>Deploying Assets:</strong> Staging vehicles, positioning equipment, or taking final operational stances before an assault.</li>
+                <li><strong>1. Surveillance:</strong> Covertly recording floor plans, photographing security guard checkpoints, testing camera angles, mapping blind spots, and noting security patrol schedules.</li>
+                <li><strong>2. Elicitation:</strong> Attempting to question security guards, cleaning crews, or delivery personnel regarding guard shift times, alarm response delays, after-hours staffing, or executive movement patterns.</li>
+                <li><strong>3. Tests of Security:</strong> Deliberately breaching perimeter gates, driving through unauthorized zones, or abandoning harmless luggage to measure guard response time and protocols.</li>
+                <li><strong>4. Acquiring Supplies:</strong> Purchasing bulk precursor chemicals (ammonium nitrate, fuel oil), illegal weapons, commercial blasting caps, stolen police uniforms, or forged access credentials.</li>
+                <li><strong>5. Suspicious Persons Out of Place:</strong> Individuals loitering in restricted mechanical rooms, HVAC air intakes, electrical switchgear basements, or freight loading docks without legitimate work orders.</li>
+                <li><strong>6. Dry Runs / Rehearsals:</strong> Pacing approach routes, timing emergency evacuation flows, conducting vehicular run-throughs, and testing police transit response windows.</li>
+                <li><strong>7. Deploying Assets:</strong> Positioning assault weapons, staging getaway vehicles, placing secondary explosive devices, or establishing sniper hides.</li>
+                <li><strong>8. Executing Attack:</strong> The final operational approach to execute the planned violent assault.</li>
             </ol>
 
-            <h3 id="sec10-2">2. Bomb Threats & Suspicious Package Protocols</h3>
+            <!-- Topic 1 Real-Life Historical Case -->
+            <div class="lesson-case-card warning-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-landmark"></i> Real-Life Historical Case: David Coleman Headley &amp; The Chicago Terrorist Surveillance Operation (U.S. Dist. Ct., N.D. Ill., Case No. 09-CR-830)</h4>
+                    <span class="lesson-case-badge">ACTUAL FBI / CPD CASE • SIGNS 1, 2, 3 &amp; 6</span>
+                </div>
+                <p><strong>The Real-World Event:</strong> In the landmark international terrorism prosecution in Chicago federal court, operative David Coleman Headley (a resident of Chicago operating from an office on West Devon Avenue) conducted extensive pre-operational planning on behalf of the militant terrorist organization Lashkar-e-Taiba. The federal investigation documented how Headley meticulously executed the core <strong>Signs of Terrorism</strong>:</p>
+                <ul>
+                    <li><strong>Sign 1 — Pre-Operational Surveillance:</strong> Posing as an American business consultant, Headley spent months shooting dozens of hours of video and taking hundreds of photographs of targeted commercial buildings, luxury hotel lobbies, transit stations, and security gates, deliberately identifying camera blind spots, security desk turnstiles, and guard patrol patterns.</li>
+                    <li><strong>Sign 2 — Elicitation:</strong> Headley engaged in seemingly friendly, casual conversation with facility security guards, dockworkers, and hotel concierges, subtly probing: <em>How many guards work the midnight shift? How quickly do local police respond to alarms? Do commercial delivery trucks require ID scans at the loading bay?</em></li>
+                    <li><strong>Sign 3 — Tests of Security:</strong> Headley entered restricted access zones with oversized luggage to test whether security personnel physically inspected bags or merely waved visitors through.</li>
+                    <li><strong>Sign 6 — Dry Runs / Rehearsals:</strong> Headley paced pedestrian routes with a handheld GPS device to calculate precise walking times between security posts and mapped emergency exit doors.</li>
+                </ul>
+                <p><strong>The Interception &amp; Prosecution:</strong> In October 2009, FBI Chicago Field Office agents and Joint Terrorism Task Force (JTTF) officers intercepted Headley at Chicago O'Hare International Airport as he was preparing to board a flight to Europe with surveillance videos, floor plans, and notes to execute a secondary armed assault. Headley pled guilty in the U.S. District Court for the Northern District of Illinois in Chicago and was sentenced to 35 years in federal prison.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Tactical Takeaway:</strong> The Headley case is the FBI's quintessential case study demonstrating that terrorist attacks are preceded by weeks or months of surveillance, elicitation, and security testing. When you notice an individual recording security posts, testing entry gates, or casually probing guards for shift numbers and response times, do NOT overlook it. Document full physical descriptors, license plate numbers, and submit an immediate <strong>Suspicious Activity Report (SAR)</strong> to management, CPD, and the Illinois STIC.
+                </div>
+            </div>
+
+            <h3 id="sec10-2">2. Bomb Threats &amp; Suspicious Package Protocols</h3>
             <div class="callout warning">
                 <strong>THE MANDATORY 300-FOOT RADIO SILENCE RULE:</strong>
                 <p>When a suspicious package, unattended device, or bomb threat is discovered, <strong>DO NOT TRANSMIT ON TWO-WAY HANDHELD RADIOS OR CELLULAR PHONES WITHIN 300 FEET OF THE SUSPECT DEVICE!</strong> Radio and cellular transmissions emit electromagnetic radiofrequency (RF) energy that can induce an electrical current in electronic blasting caps, triggering premature detonation.</p>
@@ -1576,7 +2103,23 @@ const LESSONS_DATA = [
                 </li>
             </ul>
 
-            <h3 id="sec10-3">3. Active Threat & Active Shooter Response (Run, Hide, Fight)</h3>
+            <!-- Topic 2 Real-Life Historical Case -->
+            <div class="lesson-case-card danger-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-bomb"></i> Real-Life Historical Case: Security Guard Richard Jewell &amp; The Centennial Olympic Park Bombing (Atlanta, GA, July 27, 1996)</h4>
+                    <span class="lesson-case-badge">HISTORICAL PRECEDENT • SUSPICIOUS PACKAGE PROTOCOL</span>
+                </div>
+                <p><strong>The Real-World Event:</strong> In the early morning hours of July 27, 1996, during a late-night music concert attended by thousands in Centennial Olympic Park, private security guard <strong>Richard Jewell</strong> was on foot patrol near the AT&T Global Olympic Village sound and lighting tower. Jewell observed an olive-green military ALICE pack (backpack) abandoned on the grass underneath a wooden park bench, with no owner in sight.</p>
+                <p><strong>The Security Officer's Immediate Protocol:</strong> Jewell adhered strictly to explosive package protocols: he did <strong>NOT</strong> touch, kick, open, or shake the bag. Instead, he immediately approached nearby spectators to ask if anyone owned the bag. When none did, Jewell immediately contacted Georgia Bureau of Investigation (GBI) Special Agent Tom Davis and security supervisors to treat the parcel as a viable explosive hazard.</p>
+                <p><strong>The Threat &amp; The Evacuation:</strong> Inside the backpack, domestic terrorist Eric Rudolph had packed three large steel pipe bombs surrounded by 500 masonry nails, wired to a commercial alarm clock and battery pack. At 1:18 AM, a 911 bomb threat was called in: <em>"There is a bomb in Centennial Park; you have 30 minutes."</em> Jewell, Agent Davis, and private security guards formed a human perimeter, aggressively clearing hundreds of concertgoers back beyond the immediate blast zone.</p>
+                <p><strong>The Detonation &amp; Lives Saved:</strong> At 1:20 AM—just two minutes after the call—the bomb exploded with catastrophic blast overpressure. While two lives were tragically lost and 111 injured, FBI and ATF forensic analyses concluded that <strong>Jewell's discovery of the suspicious package and prompt clearing of the perimeter prevented hundreds of deaths and severe blast amputations</strong>.</p>
+                <p><strong>The Scientific Lesson: The 300-Foot Radio Silence Rule:</strong> Post-blast ATF and FBI forensic tests established that modern improvised explosive devices (IEDs) equipped with electronic detonators or commercial blasting caps can be accidentally triggered by electromagnetic radiofrequency (RF) energy emitted from a standard 5-watt handheld radio or cell phone within close proximity. This historical incident cemented the universal mandatory standard: <strong>Never use two-way radios or mobile phones within 300 feet of a suspected explosive parcel</strong>—always retreat past 300 feet and communicate using hardwired landlines.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Tactical Takeaway:</strong> The Richard Jewell case is the definitive real-world precedent for private security guards. If you spot an unattended bag, bulging package with wires/odors/stains, or receive a bomb threat: (1) <strong>NEVER touch, tilt, or move it</strong>; (2) <strong>Maintain strict radio and cell phone silence within 300 feet</strong>; (3) <strong>Use hardwired landlines to summon 911 and police bomb squads</strong>; and (4) <strong>Establish an immediate 300-foot perimeter evacuation</strong> to save lives.
+                </div>
+            </div>
+
+            <h3 id="sec10-3">3. Active Threat &amp; Active Shooter Response (Run, Hide, Fight)</h3>
             <p>In an active shooter incident in an Illinois commercial or educational facility, security officers must guide occupants under the Department of Homeland Security <strong>Run, Hide, Fight</strong> framework:</p>
             <ul>
                 <li><strong>1. RUN (Primary Priority):</strong>
@@ -1600,6 +2143,22 @@ const LESSONS_DATA = [
                     </ul>
                 </li>
             </ul>
+
+            <!-- Topic 3 Real-Life Historical Case -->
+            <div class="lesson-case-card justified-case">
+                <div class="lesson-case-header">
+                    <h4 class="lesson-case-title"><i class="fas fa-shield-alt"></i> Real-Life Historical Case: The Henry Pratt Company Commercial Facility Active Shooter Incident (Aurora, Illinois, February 15, 2019)</h4>
+                    <span class="lesson-case-badge">ILLINOIS COMMERCIAL PRECEDENT • RUN • HIDE • FIGHT</span>
+                </div>
+                <p><strong>The Real-World Event:</strong> On February 15, 2019, an active shooter incident occurred at the <strong>Henry Pratt Company</strong>, a 29,000-square-foot industrial manufacturing facility in Aurora, Illinois (Kane County). A 45-year-old assembly worker attended an administrative meeting where he was notified of his termination. Upon hearing the decision, the terminated worker pulled an illegal Smith &amp; Wesson .40-caliber semi-automatic pistol equipped with a green laser sight from his holster and opened fire in the conference room, fatally shooting five supervisors before stalking through the cavernous manufacturing complex.</p>
+                <p><strong>Real-World Application of "RUN":</strong> When gunfire erupted, workers on the main assembly floor heard the gunshots echoing through the warehouse. Rather than hesitating or investigating, workers immediately executed <strong>RUN</strong>: shouting warnings across the floor, sprinting out through open overhead loading bay doors and side emergency fire exits into the snow-covered fields, and taking shelter in neighboring commercial businesses. Their immediate decision to flee without retrieving coats or personal belongings allowed dozens of employees to escape harm.</p>
+                <p><strong>Real-World Application of "HIDE":</strong> Multiple employees who were cut off from exterior exits and could not escape safely executed <strong>HIDE</strong>: they moved into interior mechanical equipment rooms and maintenance closets equipped with heavy industrial steel fire doors. They engaged deadbolts, braced heavy steel rolling toolboxes and industrial welding carts against the doors, shut off all lights, and silenced their mobile phones. The shooter paced past their exact doors, pulled on the locked handles, and unable to see inside or breach the heavy doors, continued past them down the hallway.</p>
+                <p><strong>Real-World Application of "FIGHT" (The Tactical Benchmark):</strong> In commercial active shooter events where occupants are cornered in a dead-end with zero escape route (as demonstrated by student Riley Howell at UNC Charlotte and citizens at Greenwood Park), the FBI and Illinois law enforcement emphasize that committing 100% to <strong>FIGHT</strong>—ambushing the shooter with heavy improvised weapons such as commercial fire extinguishers, steel pipes, or heavy tools to disrupt sightlines and tackle the weapon—is the sole viable life-saving action when facing imminent death.</p>
+                <p><strong>Law Enforcement Arrival &amp; Hand Protocols:</strong> Arriving Aurora Police Department tactical officers entered the facility under active fire (six officers were wounded before the shooter was neutralized). Surviving facility workers who encountered responding tactical police kept their hands raised high above their heads with empty fingers spread wide, made zero sudden movements, and complied with all police tactical commands.</p>
+                <div class="lesson-case-takeaway">
+                    <strong>Officer Tactical Takeaway:</strong> The Henry Pratt Company shooting is Illinois' benchmark commercial active threat case study: (1) <strong>RUN:</strong> Escape immediately if a clear path exists—do not delay to retrieve personal items; (2) <strong>HIDE:</strong> If escape is cut off, lock and barricade interior doors with heavy furniture, extinguish lights, and silence phones completely; (3) <strong>FIGHT:</strong> Only as an unavoidable last resort when cornered by lethal force, commit 100% to violent physical action with improvised weapons to incapacitate the shooter. When police arrive, always display empty, open hands.
+                </div>
+            </div>
         `,
         scenarioSimulation: {
             title: "Tactical Scenario: Unattended Package at Loading Dock",
@@ -1682,10 +2241,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "A security officer can affect an arrest for an ordinance violation in the State of Illinois.",
         options: [
-            "True - Security officers can arrest for any local city ordinance or code infraction.",
-            "False - Under 725 ILCS 5/107-3, private citizen arrests are strictly limited to offenses other than ordinance violations."
+            "True",
+            "False"
         ],
-        correctAnswer: "False - Under 725 ILCS 5/107-3, private citizen arrests are strictly limited to offenses other than ordinance violations.",
+        correctAnswer: "False",
         illustration: {
             type: "image",
             src: "assets/q_arrest_patrol.jpg",
@@ -1699,10 +2258,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "Under Illinois law, security may not search an individual that has been lawfully arrested.",
         options: [
-            "True - Security officers are never legally permitted to search an arrested person.",
-            "False - Under 725 ILCS 5/108-1, a person making a lawful arrest may reasonably search the arrestee for weapons and instruments of the crime."
+            "True",
+            "False"
         ],
-        correctAnswer: "False - Under 725 ILCS 5/108-1, a person making a lawful arrest may reasonably search the arrestee for weapons and instruments of the crime.",
+        correctAnswer: "False",
         illustration: {
             type: "image",
             src: "assets/q_arrest_patrol.jpg",
@@ -1716,10 +2275,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "Under 720 ILCS 5/7-1, a person may use deadly force if they reasonably believe that their life is in danger.",
         options: [
-            "True - Deadly force is legally justified when a person reasonably believes such force is necessary to prevent imminent death or great bodily harm.",
-            "False - Unarmed security guards are never permitted to use deadly force under any circumstances."
+            "True",
+            "False"
         ],
-        correctAnswer: "True - Deadly force is legally justified when a person reasonably believes such force is necessary to prevent imminent death or great bodily harm.",
+        correctAnswer: "True",
         illustration: {
             type: "video",
             src: "assets/level_clip.mp4",
@@ -1733,10 +2292,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "When applying restraints, arrestees should be handcuffed with their hands in front.",
         options: [
-            "True - Handcuffing in front is standard and comfortable for the arrestee.",
-            "False - Arrestees must always be handcuffed with hands behind the back, palms facing outward, and double-locked."
+            "True",
+            "False"
         ],
-        correctAnswer: "False - Arrestees must always be handcuffed with hands behind the back, palms facing outward, and double-locked.",
+        correctAnswer: "False",
         illustration: {
             type: "image",
             src: "assets/q_handcuffing.jpg",
@@ -1750,10 +2309,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "It is legally permissible to strike an attacker on the head with an expandable baton if deadly force is justified.",
         options: [
-            "True - Striking the head is deadly force and is legally justified if lethal force is authorized to prevent imminent death or great bodily harm.",
-            "False - Baton strikes to the head are classified as non-lethal compliance strikes."
+            "True",
+            "False"
         ],
-        correctAnswer: "True - Striking the head is deadly force and is legally justified if lethal force is authorized to prevent imminent death or great bodily harm.",
+        correctAnswer: "True",
         illustration: {
             type: "image",
             src: "assets/q_baton_tactics.jpg",
@@ -1767,10 +2326,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "Any portable fire extinguisher is suitable for use on any type of commercial fire.",
         options: [
-            "True - All fire extinguishers contain multi-purpose chemicals suitable for all hazards.",
-            "False - Fire extinguishers are classified for specific fire types (A, B, C, D, K); using the wrong agent can cause explosions or electrocution."
+            "True",
+            "False"
         ],
-        correctAnswer: "False - Fire extinguishers are classified for specific fire types (A, B, C, D, K); using the wrong agent can cause explosions or electrocution.",
+        correctAnswer: "False",
         illustration: {
             type: "image",
             src: "assets/q_fire_pass.jpg",
@@ -1784,10 +2343,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "Security incident reports should be completed as soon as possible following an event.",
         options: [
-            "True - Reports must be written promptly while memories, timestamps, witness statements, and physical details are fresh and accurate.",
-            "False - Incident reports should only be completed after a minimum of 30 days have elapsed."
+            "True",
+            "False"
         ],
-        correctAnswer: "True - Reports must be written promptly while memories, timestamps, witness statements, and physical details are fresh and accurate.",
+        correctAnswer: "True",
         illustration: {
             type: "image",
             src: "assets/q_report_writing.jpg",
@@ -1801,10 +2360,10 @@ const EXAM_QUESTIONS = [
         type: "tf",
         question: "Public relations and courteous communication represent an important aspect of private security.",
         options: [
-            "True - Professional demeanor and effective communication de-escalate volatile situations and build public cooperation.",
-            "False - Security guards should only communicate using physical commands."
+            "True",
+            "False"
         ],
-        correctAnswer: "True - Professional demeanor and effective communication de-escalate volatile situations and build public cooperation.",
+        correctAnswer: "True",
         explanation: "TRUE. Over 90% of security encounters are resolved through communication and presence. Courteous, professional public relations de-escalates conflict before force becomes necessary."
     },
     {

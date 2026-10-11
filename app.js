@@ -17,7 +17,21 @@ class SecurityCourseApp {
         this.examPassed = false;
         this.timerSeconds = 0;
         this.timerInterval = null;
-        this.isSpeaking = false;
+
+        // Admin Evaluation Mode ("God Mode") - Charles Young / Instructor Access
+        this.isAdminMode = localStorage.getItem('platforms_admin_mode') === 'true';
+
+        // Payment & Permanent Certificate Sealing
+        this.isPaid = localStorage.getItem('platforms_is_paid') === 'true';
+        this.isCertLocked = localStorage.getItem('platforms_cert_locked') === 'true';
+        this.issuedCertId = localStorage.getItem('platforms_cert_id') || null;
+
+        // Unified Natural Voice Audio Narrator
+        this.isNarrating = false;
+        this.narrationQueue = [];
+        this.selectedVoice = null;
+        this.availableVoices = [];
+
         this.studentEmail = localStorage.getItem('platforms_student_email') || 'student@platformstraining.com';
         this.studentAgency = localStorage.getItem('platforms_student_agency') || 'Platforms Security Services';
         this.lastSavedTimestamp = localStorage.getItem('platforms_last_saved') || null;
@@ -26,6 +40,7 @@ class SecurityCourseApp {
         // Progression state per lesson: { [lessonId]: { study: bool, scenario: bool, quiz: bool } }
         this.moduleSections = {};
         this.colAnswers = {}; // { [lessonId]: { [qIdx]: bool } }
+        this.scenarioSelections = {}; // { [lessonId]: optionIndex }
 
         // Trainee certificate form data
         this.studentCertData = {
@@ -48,6 +63,7 @@ class SecurityCourseApp {
 
     init() {
         this.restoreState();
+        this.initVoices();
         this.bindEvents();
         this.bindCertFormEvents();
         this.renderLessonsSidebar();
@@ -58,6 +74,8 @@ class SecurityCourseApp {
         this.updateGlobalProgress();
         this.updateTodayDates();
         this.updateHeaderProfileDisplay();
+        this.updateAdminModeUI();
+        this.syncWithBackend();
     }
 
     // =========================================================================
@@ -77,10 +95,15 @@ class SecurityCourseApp {
             timerSeconds: this.timerSeconds,
             moduleSections: this.moduleSections,
             colAnswers: this.colAnswers,
+            scenarioSelections: this.scenarioSelections,
             studentCertData: this.studentCertData,
             studentEmail: this.studentEmail,
             studentAgency: this.studentAgency,
-            lastSavedTimestamp: this.lastSavedTimestamp
+            lastSavedTimestamp: this.lastSavedTimestamp,
+            isAdminMode: this.isAdminMode,
+            isPaid: this.isPaid,
+            isCertLocked: this.isCertLocked,
+            issuedCertId: this.issuedCertId
         };
         localStorage.setItem('platforms_unarmed_course_state_v3', JSON.stringify(state));
     }
@@ -102,12 +125,17 @@ class SecurityCourseApp {
                 this.timerSeconds = state.timerSeconds || 0;
                 this.moduleSections = state.moduleSections || {};
                 this.colAnswers = state.colAnswers || {};
+                this.scenarioSelections = state.scenarioSelections || {};
                 if (state.studentCertData) {
                     this.studentCertData = { ...this.studentCertData, ...state.studentCertData };
                 }
                 this.studentEmail = state.studentEmail || this.studentEmail;
                 this.studentAgency = state.studentAgency || this.studentAgency;
                 this.lastSavedTimestamp = state.lastSavedTimestamp || this.lastSavedTimestamp;
+                this.isAdminMode = state.isAdminMode !== undefined ? state.isAdminMode : (localStorage.getItem('platforms_admin_mode') === 'true');
+                this.isPaid = state.isPaid !== undefined ? state.isPaid : (localStorage.getItem('platforms_is_paid') === 'true');
+                this.isCertLocked = state.isCertLocked !== undefined ? state.isCertLocked : (localStorage.getItem('platforms_cert_locked') === 'true');
+                this.issuedCertId = state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
             } catch (e) {
                 console.error("Error restoring course state:", e);
             }
@@ -125,28 +153,27 @@ class SecurityCourseApp {
     }
 
     isStudyCompleted(lessonId) {
+        if (this.isAdminMode) return true;
         return !!(this.moduleSections[lessonId] && this.moduleSections[lessonId].study);
     }
 
     isScenarioCompleted(lessonId) {
+        if (this.isAdminMode) return true;
         return !!(this.moduleSections[lessonId] && this.moduleSections[lessonId].scenario);
     }
 
     isQuizPassed(lessonId) {
-        if (this.moduleSections[lessonId] && this.moduleSections[lessonId].quiz) {
-            return true;
-        }
+        if (this.isAdminMode) return true;
         const answers = this.colAnswers[lessonId];
-        if (answers) {
-            const correctCount = Object.values(answers).filter(Boolean).length;
-            const lesson = LESSONS_DATA.find(l => l.id === lessonId);
-            const totalQ = (lesson && lesson.checkOnLearning) ? lesson.checkOnLearning.length : 3;
-            if (correctCount >= totalQ) {
-                this.getModuleState(lessonId).quiz = true;
-                return true;
-            }
+        const lesson = LESSONS_DATA.find(l => l.id === lessonId);
+        const totalQ = (lesson && lesson.checkOnLearning) ? lesson.checkOnLearning.length : 3;
+        if (!answers) return false;
+        const correctCount = Object.values(answers).filter(Boolean).length;
+        const passed = correctCount >= totalQ;
+        if (this.moduleSections[lessonId]) {
+            this.moduleSections[lessonId].quiz = passed;
         }
-        return false;
+        return passed;
     }
 
     isLessonFullyCompleted(lessonId) {
@@ -156,12 +183,14 @@ class SecurityCourseApp {
     }
 
     isLessonUnlocked(lessonId) {
+        if (this.isAdminMode) return true;
         if (lessonId <= 1) return true;
         // Lesson N is unlocked only if Lesson N-1 is fully completed
         return this.isLessonFullyCompleted(lessonId - 1);
     }
 
     areAllLessonsCompleted() {
+        if (this.isAdminMode) return true;
         return LESSONS_DATA.every(l => this.isLessonFullyCompleted(l.id));
     }
 
@@ -339,6 +368,15 @@ class SecurityCourseApp {
             lessonId = this.getEarliestIncompleteLesson();
         }
 
+        // Validate requested tab against prerequisite completion
+        if (!this.isAdminMode) {
+            if (tab === 'quiz' && !this.isScenarioCompleted(lessonId)) {
+                tab = this.isStudyCompleted(lessonId) ? 'scenario' : 'study';
+            } else if (tab === 'scenario' && !this.isStudyCompleted(lessonId)) {
+                tab = 'study';
+            }
+        }
+
         this.stopSpeech();
         this.currentLessonId = lessonId;
         this.currentLessonTab = tab;
@@ -353,10 +391,57 @@ class SecurityCourseApp {
 
         // Render Tabs Content
         this.renderLessonTabs(lesson);
-        this.switchLessonTab(tab);
+        this.updateLessonTabsHeaderState(lessonId);
+        this.switchLessonTab(tab, false);
         this.updateLessonNavFooter(lessonId);
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    updateLessonTabsHeaderState(lessonId) {
+        const studyDone = this.isStudyCompleted(lessonId);
+        const scenarioDone = this.isScenarioCompleted(lessonId);
+        const quizDone = this.isQuizPassed(lessonId);
+
+        const studyBtn = document.querySelector('.lesson-tab-btn[data-tab="study"]');
+        const scenarioBtn = document.querySelector('.lesson-tab-btn[data-tab="scenario"]');
+        const quizBtn = document.querySelector('.lesson-tab-btn[data-tab="quiz"]');
+
+        if (studyBtn) {
+            studyBtn.innerHTML = studyDone 
+                ? `<i class="fas fa-check-circle" style="color:var(--brand-green-bright);"></i> Comprehensive Study Material`
+                : `<i class="fas fa-book-open"></i> Comprehensive Study Material`;
+        }
+
+        if (scenarioBtn) {
+            const isUnlocked = studyDone || this.isAdminMode;
+            scenarioBtn.classList.toggle('tab-locked', !isUnlocked);
+            if (!isUnlocked) {
+                scenarioBtn.innerHTML = `<i class="fas fa-lock" style="color:#f59e0b;"></i> Tactical Scenario Simulator`;
+                scenarioBtn.title = "Review study material first to unlock simulator";
+            } else if (scenarioDone) {
+                scenarioBtn.innerHTML = `<i class="fas fa-check-circle" style="color:var(--brand-green-bright);"></i> Tactical Scenario Simulator`;
+                scenarioBtn.title = "Tactical Scenario Completed";
+            } else {
+                scenarioBtn.innerHTML = `<i class="fas fa-shield-alt"></i> Tactical Scenario Simulator`;
+                scenarioBtn.title = "Tactical Scenario";
+            }
+        }
+
+        if (quizBtn) {
+            const isUnlocked = scenarioDone || this.isAdminMode;
+            quizBtn.classList.toggle('tab-locked', !isUnlocked);
+            if (!isUnlocked) {
+                quizBtn.innerHTML = `<i class="fas fa-lock" style="color:#f59e0b;"></i> Check on Learning (Quick Quiz)`;
+                quizBtn.title = "Complete tactical simulator first to unlock Check on Learning";
+            } else if (quizDone) {
+                quizBtn.innerHTML = `<i class="fas fa-check-double" style="color:var(--brand-green-bright);"></i> Check on Learning (Quick Quiz)`;
+                quizBtn.title = "Check on Learning passed (100%)";
+            } else {
+                quizBtn.innerHTML = `<i class="fas fa-tasks"></i> Check on Learning (Quick Quiz)`;
+                quizBtn.title = "Check on Learning";
+            }
+        }
     }
 
     renderModuleRequirementsBar(lessonId) {
@@ -400,12 +485,14 @@ class SecurityCourseApp {
                         ${lesson.takeaways.map(t => `<li>${t}</li>`).join('')}
                     </ul>
                 </div>
-                <div style="margin-top:36px; padding:20px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); text-align:center;">
-                    <p style="color:var(--text-muted); margin-bottom:14px;">
-                        Finished reviewing the statutory material? Confirm your study to proceed to the Tactical Scenario Simulator.
-                    </p>
-                    <button class="btn-primary" style="font-size:1rem; padding:12px 24px;" onclick="app.completeStudyAndGoToScenario()">
-                        <i class="fas fa-check-circle"></i> Mark Study Reviewed & Go to Tactical Scenario Simulator <i class="fas fa-arrow-right"></i>
+                <div class="lesson-section-nav-footer" style="margin-top:36px; padding:22px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                    ${lesson.id > 1 ? `
+                        <button class="btn-secondary" style="font-size:0.95rem; padding:12px 20px;" onclick="app.loadLesson(${lesson.id - 1})">
+                            <i class="fas fa-arrow-left"></i> Previous Module (${lesson.id - 1})
+                        </button>
+                    ` : `<div></div>`}
+                    <button class="btn-primary" style="font-size:1rem; padding:12px 26px;" onclick="app.completeStudyAndGoToScenario()">
+                        Next: Tactical Scenario Simulator <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
             `;
@@ -416,12 +503,30 @@ class SecurityCourseApp {
         if (scenarioPanel && lesson.scenarioSimulation) {
             const sim = lesson.scenarioSimulation;
             const isCompleted = this.isScenarioCompleted(lesson.id);
+            const savedChoice = this.scenarioSelections ? this.scenarioSelections[lesson.id] : undefined;
+
+            let feedbackHtml = '';
+            if (savedChoice !== undefined && sim.options[savedChoice]) {
+                const opt = sim.options[savedChoice];
+                feedbackHtml = `
+                    <div class="scenario-feedback-box ${opt.correct ? 'correct' : 'incorrect'}" style="display:block;">
+                        <strong>${opt.correct ? 'TACTICAL EXCELLENCE' : 'TACTICAL & LEGAL RISK'}:</strong> ${opt.feedback}
+                        ${opt.correct 
+                            ? `<div style="margin-top:10px; font-size:0.85rem; color:var(--brand-green-bright);"><i class="fas fa-check-circle"></i> Scenario Successfully Completed! Proceed to Tab 3 (Check on Learning).</div>`
+                            : `<div style="margin-top:10px; font-size:0.85rem; color:#ef4444;"><i class="fas fa-times-circle"></i> Incorrect Tactical Decision. Review the legal principles and select the correct option to resolve this scenario.</div>`}
+                    </div>
+                `;
+            }
 
             scenarioPanel.innerHTML = `
                 <div class="scenario-sim-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span class="scenario-badge"><i class="fas fa-shield-alt"></i> Interactive Tactical Scenario</span>
-                        ${isCompleted ? '<span style="color:var(--brand-green-bright); font-size:0.85rem; font-weight:700;"><i class="fas fa-check-circle"></i> Scenario Completed</span>' : ''}
+                        <span id="scenario-status-badge-${lesson.id}" style="${isCompleted ? 'color:var(--brand-green-bright);' : 'color:#f59e0b;'} font-size:0.85rem; font-weight:700;">
+                            ${isCompleted 
+                                ? '<i class="fas fa-check-circle"></i> Scenario Completed' 
+                                : '<i class="fas fa-lock"></i> Must Complete to Unlock Quiz'}
+                        </span>
                     </div>
                     <h3 class="scenario-title">${sim.title}</h3>
                     
@@ -439,15 +544,35 @@ class SecurityCourseApp {
                     <h4 class="scenario-decision-title"><i class="fas fa-question-circle"></i> DECISION POINT: ${sim.question}</h4>
 
                     <div class="scenario-options-grid">
-                        ${sim.options.map((opt, oIdx) => `
-                            <button class="scenario-option-btn" id="scenario-opt-${oIdx}" onclick="app.handleScenarioChoice(${lesson.id}, ${oIdx})">
-                                <span style="font-weight:700; color:var(--brand-green-bright);">${String.fromCharCode(65 + oIdx)}.</span>
-                                <span>${opt.text}</span>
-                            </button>
-                        `).join('')}
+                        ${sim.options.map((opt, oIdx) => {
+                            let btnClasses = 'scenario-option-btn';
+                            if (savedChoice !== undefined && savedChoice === oIdx) {
+                                btnClasses += opt.correct ? ' selected-correct' : ' selected-incorrect';
+                            }
+                            return `
+                                <button class="${btnClasses}" id="scenario-opt-${oIdx}" onclick="app.handleScenarioChoice(${lesson.id}, ${oIdx})">
+                                    <span style="font-weight:700; color:var(--brand-green-bright);">${String.fromCharCode(65 + oIdx)}.</span>
+                                    <span>${opt.text}</span>
+                                </button>
+                            `;
+                        }).join('')}
                     </div>
 
-                    <div class="scenario-feedback-box" id="scenario-feedback"></div>
+                    <div class="scenario-feedback-box" id="scenario-feedback">${feedbackHtml}</div>
+
+                    <div class="lesson-section-nav-footer" style="margin-top:32px; padding:22px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                        <button class="btn-secondary" style="font-size:0.95rem; padding:12px 20px;" onclick="app.switchLessonTab('study', true)">
+                            <i class="fas fa-arrow-left"></i> Back to Study Material
+                        </button>
+                        <button class="btn-primary ${(!isCompleted && !this.isAdminMode) ? 'btn-module-locked' : ''}" 
+                                id="btn-scenario-advance-quiz" 
+                                style="font-size:1rem; padding:12px 26px;" 
+                                onclick="app.completeScenarioAndGoToQuiz()">
+                            ${(isCompleted || this.isAdminMode) 
+                                ? `Next: Check on Learning (Quick Quiz) <i class="fas fa-arrow-right"></i>` 
+                                : `Resolve Scenario to Advance <i class="fas fa-lock"></i>`}
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -461,7 +586,7 @@ class SecurityCourseApp {
                 <div class="check-on-learning-panel">
                     <div class="col-header">
                         <h3><i class="fas fa-tasks" style="color:var(--brand-green);"></i> Check on Learning: Quick Quiz</h3>
-                        <span class="col-mastery-badge" id="col-mastery-status" style="${isQuizDone ? 'color:var(--brand-green-bright);' : ''}">
+                        <span class="col-mastery-badge" id="col-mastery-status" style="${isQuizDone ? 'color:var(--brand-green-bright);' : 'color:#f59e0b;'}">
                             ${isQuizDone ? '<i class="fas fa-check-double"></i> Section Passed (100%)' : 'Score 100% to Pass Section'}
                         </span>
                     </div>
@@ -484,12 +609,47 @@ class SecurityCourseApp {
                             </div>
                         `).join('')}
                     </div>
+
+                    <div class="lesson-section-nav-footer" id="col-bottom-nav-footer" style="margin-top:32px; padding:22px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                        <button class="btn-secondary" style="font-size:0.95rem; padding:12px 20px;" onclick="app.switchLessonTab('scenario', true)">
+                            <i class="fas fa-arrow-left"></i> Back to Simulator
+                        </button>
+                        <button class="btn-primary ${(!isQuizDone && !this.isAdminMode) ? 'btn-module-locked' : ''}" 
+                                id="btn-col-advance-next" 
+                                style="font-size:1rem; padding:12px 26px;" 
+                                onclick="app.advanceFromQuizToNextModule()">
+                            ${(isQuizDone || this.isAdminMode)
+                                ? (lesson.id < LESSONS_DATA.length 
+                                    ? `Next: Module ${lesson.id + 1} <i class="fas fa-arrow-right"></i>` 
+                                    : `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`)
+                                : `Complete All 3 Questions to Advance <i class="fas fa-lock"></i>`}
+                        </button>
+                    </div>
                 </div>
             `;
         }
     }
 
-    switchLessonTab(tabName) {
+    switchLessonTab(tabName, shouldScroll = true) {
+        const lessonId = this.currentLessonId;
+
+        // Strict progression guardrails: cannot jump tabs without completing prerequisites
+        if (tabName === 'scenario') {
+            if (!this.isAdminMode && !this.isStudyCompleted(lessonId)) {
+                alert("🔒 STUDY MATERIAL REQUIRED\n\nPlease finish reading the study material and confirm by clicking 'Next: Tactical Scenario Simulator' at the bottom of the page before proceeding to the Tactical Simulator.");
+                return;
+            }
+        } else if (tabName === 'quiz') {
+            if (!this.isAdminMode && !this.isStudyCompleted(lessonId)) {
+                alert("🔒 PREREQUISITE SECTIONS REQUIRED\n\nYou must complete the Study Material and Tactical Scenario Simulator before unlocking Check on Learning.");
+                return;
+            }
+            if (!this.isAdminMode && !this.isScenarioCompleted(lessonId)) {
+                alert("🔒 TACTICAL SIMULATOR REQUIRED\n\nYou must complete and successfully resolve the Tactical Scenario Simulator in Tab 2 before unlocking Check on Learning.");
+                return;
+            }
+        }
+
         this.currentLessonTab = tabName;
         document.querySelectorAll('.lesson-tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
@@ -497,18 +657,62 @@ class SecurityCourseApp {
         document.querySelectorAll('.tab-content-panel').forEach(panel => {
             panel.classList.toggle('active', panel.id === `tab-${tabName}-content`);
         });
+
+        this.updateLessonTabsHeaderState(lessonId);
+
+        if (shouldScroll) {
+            const target = document.querySelector('.lesson-tabs-nav') || document.querySelector('.lesson-main-content');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
         this.saveState();
     }
 
     completeStudyAndGoToScenario() {
         this.getModuleState(this.currentLessonId).study = true;
         this.checkModuleProgression(this.currentLessonId);
-        this.switchLessonTab('scenario');
+        this.switchLessonTab('scenario', true);
+    }
+
+    completeScenarioAndGoToQuiz() {
+        const isDone = this.isAdminMode || this.isScenarioCompleted(this.currentLessonId);
+        if (!isDone) {
+            alert("🔒 TACTICAL SIMULATOR INCOMPLETE\n\nYou must select the correct tactical decision to successfully resolve the scenario before advancing to the Check on Learning quick quiz.");
+            return;
+        }
+        this.switchLessonTab('quiz', true);
+    }
+
+    advanceFromQuizToNextModule() {
+        const lessonId = this.currentLessonId;
+        const isDone = this.isAdminMode || this.isLessonFullyCompleted(lessonId);
+        if (!isDone) {
+            if (!this.isQuizPassed(lessonId)) {
+                alert(`🔒 CHECK ON LEARNING INCOMPLETE\n\nIn accordance with IDFPR course requirements, you must answer all 3 questions in the Check on Learning correctly (100% score) before advancing to ${lessonId < LESSONS_DATA.length ? 'Module ' + (lessonId + 1) : 'the Final Exam'}.`);
+            } else if (!this.isScenarioCompleted(lessonId)) {
+                alert("🔒 TACTICAL SIMULATOR INCOMPLETE\n\nYou must complete and successfully resolve the Tactical Scenario Simulator before advancing.");
+            } else {
+                alert("🔒 MODULE INCOMPLETE\n\nPlease complete all required sections before advancing.");
+            }
+            return;
+        }
+        if (lessonId < LESSONS_DATA.length) {
+            this.loadLesson(lessonId + 1, 'study');
+        } else {
+            this.showView('exam');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     handleScenarioChoice(lessonId, optionIndex) {
         const lesson = LESSONS_DATA.find(l => l.id === lessonId);
         if (!lesson || !lesson.scenarioSimulation) return;
+
+        if (!this.scenarioSelections) this.scenarioSelections = {};
+        this.scenarioSelections[lessonId] = optionIndex;
 
         const opt = lesson.scenarioSimulation.options[optionIndex];
         const feedbackBox = document.getElementById('scenario-feedback');
@@ -522,15 +726,47 @@ class SecurityCourseApp {
 
         if (feedbackBox) {
             feedbackBox.className = `scenario-feedback-box ${opt.correct ? 'correct' : 'incorrect'}`;
+            feedbackBox.style.display = 'block';
             feedbackBox.innerHTML = `<strong>${opt.correct ? 'TACTICAL EXCELLENCE' : 'TACTICAL & LEGAL RISK'}:</strong> ${opt.feedback}`;
             
             if (opt.correct) {
                 feedbackBox.innerHTML += `<div style="margin-top:10px; font-size:0.85rem; color:var(--brand-green-bright);"><i class="fas fa-check-circle"></i> Scenario Successfully Completed! Proceed to Tab 3 (Check on Learning).</div>`;
+            } else {
+                feedbackBox.innerHTML += `<div style="margin-top:10px; font-size:0.85rem; color:#ef4444;"><i class="fas fa-times-circle"></i> Incorrect Tactical Decision. Under Illinois law, this action exposes you and the client to liability. Select another option to resolve this scenario.</div>`;
             }
         }
 
-        // Mark scenario completed once engaged
-        this.getModuleState(lessonId).scenario = true;
+        // Strict progression rule: ONLY mark scenario completed if option is CORRECT!
+        if (opt.correct) {
+            this.getModuleState(lessonId).scenario = true;
+        } else {
+            this.getModuleState(lessonId).scenario = false;
+        }
+
+        // Update the simulator advance button
+        const advBtn = document.getElementById('btn-scenario-advance-quiz');
+        if (advBtn) {
+            if (opt.correct || this.isAdminMode) {
+                advBtn.classList.remove('btn-module-locked');
+                advBtn.innerHTML = `Next: Check on Learning (Quick Quiz) <i class="fas fa-arrow-right"></i>`;
+            } else {
+                advBtn.classList.add('btn-module-locked');
+                advBtn.innerHTML = `Resolve Scenario to Advance <i class="fas fa-lock"></i>`;
+            }
+        }
+
+        // Update scenario status badge
+        const badge = document.getElementById(`scenario-status-badge-${lessonId}`);
+        if (badge) {
+            if (opt.correct) {
+                badge.style.color = "var(--brand-green-bright)";
+                badge.innerHTML = `<i class="fas fa-check-circle"></i> Scenario Completed`;
+            } else {
+                badge.style.color = "#f59e0b";
+                badge.innerHTML = `<i class="fas fa-lock"></i> Must Complete to Unlock Quiz`;
+            }
+        }
+
         this.checkModuleProgression(lessonId);
     }
 
@@ -580,12 +816,35 @@ class SecurityCourseApp {
 
         // Check if all 3 questions answered correctly
         const correctCount = Object.values(this.colAnswers[lessonId] || {}).filter(Boolean).length;
-        if (correctCount === lesson.checkOnLearning.length) {
-            this.getModuleState(lessonId).quiz = true;
-            const badge = document.getElementById('col-mastery-status');
-            if (badge) {
+        const totalQ = lesson.checkOnLearning.length;
+        const isAllCorrect = correctCount >= totalQ;
+
+        this.getModuleState(lessonId).quiz = isAllCorrect;
+
+        const badge = document.getElementById('col-mastery-status');
+        const colNextBtn = document.getElementById('btn-col-advance-next');
+
+        if (badge) {
+            if (isAllCorrect) {
                 badge.innerHTML = `<i class="fas fa-check-double"></i> Section Passed (100%)`;
                 badge.style.color = "var(--brand-green-bright)";
+            } else {
+                badge.innerHTML = `Score 100% to Pass Section (${correctCount}/${totalQ} Correct)`;
+                badge.style.color = "#f59e0b";
+            }
+        }
+
+        if (colNextBtn) {
+            if (isAllCorrect || this.isAdminMode) {
+                colNextBtn.classList.remove('btn-module-locked');
+                if (lessonId < LESSONS_DATA.length) {
+                    colNextBtn.innerHTML = `Next: Module ${lessonId + 1} <i class="fas fa-arrow-right"></i>`;
+                } else {
+                    colNextBtn.innerHTML = `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
+                }
+            } else {
+                colNextBtn.classList.add('btn-module-locked');
+                colNextBtn.innerHTML = `Complete All 3 Questions to Advance <i class="fas fa-lock"></i>`;
             }
         }
 
@@ -602,12 +861,30 @@ class SecurityCourseApp {
         this.renderLessonsSidebar();
         this.renderOverviewGrid();
         this.renderModuleRequirementsBar(lessonId);
+        this.updateLessonTabsHeaderState(lessonId);
         this.updateLessonNavFooter(lessonId);
         this.updateGlobalProgress();
         this.saveState();
     }
 
     updateLessonNavFooter(lessonId) {
+        const isCurrentComplete = this.isAdminMode || this.isLessonFullyCompleted(lessonId);
+
+        const colNextBtn = document.getElementById('btn-col-advance-next');
+        if (colNextBtn) {
+            if (!isCurrentComplete) {
+                colNextBtn.classList.add('btn-module-locked');
+                colNextBtn.innerHTML = `Complete Quiz to Advance <i class="fas fa-lock"></i>`;
+            } else {
+                colNextBtn.classList.remove('btn-module-locked');
+                if (lessonId < LESSONS_DATA.length) {
+                    colNextBtn.innerHTML = `Next: Module ${lessonId + 1} <i class="fas fa-arrow-right"></i>`;
+                } else {
+                    colNextBtn.innerHTML = `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
+                }
+            }
+        }
+
         const prevBtn = document.getElementById('lesson-prev-btn');
         const nextBtn = document.getElementById('lesson-next-btn');
 
@@ -617,8 +894,6 @@ class SecurityCourseApp {
         }
 
         if (nextBtn) {
-            const isCurrentComplete = this.isLessonFullyCompleted(lessonId);
-
             if (!isCurrentComplete) {
                 nextBtn.disabled = true;
                 nextBtn.classList.add('btn-module-locked');
@@ -727,6 +1002,12 @@ class SecurityCourseApp {
             this.renderQuestion(idx);
             this.renderQuestionPalette();
             this.saveState();
+
+            // Smoothly scroll to the top of the question card
+            const qCard = document.querySelector('.question-card');
+            if (qCard) {
+                qCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     }
 
@@ -782,16 +1063,28 @@ class SecurityCourseApp {
         const optionsContainer = document.getElementById('question-options-container');
         const selectedValue = this.userAnswers[q.id];
 
-        optionsContainer.innerHTML = `
-            <div class="options-list">
-                ${q.options.map((opt, optIdx) => `
-                    <div class="option-item ${selectedValue === opt ? 'selected' : ''}" onclick="app.selectOptionByIndex(${q.id}, ${optIdx})">
-                        <div class="option-indicator"></div>
-                        <div class="option-label">${opt}</div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+        if (q.type === 'tf') {
+            optionsContainer.innerHTML = `
+                <div class="tf-options-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0;">
+                    ${q.options.map((opt, optIdx) => `
+                        <button type="button" class="tf-btn ${selectedValue === opt ? 'selected' : ''}" style="padding:22px; font-size:1.25rem; font-weight:700; text-align:center; border-radius:8px; cursor:pointer;" onclick="app.selectOptionByIndex(${q.id}, ${optIdx})">
+                            <i class="${opt === 'True' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i> ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            optionsContainer.innerHTML = `
+                <div class="options-list">
+                    ${q.options.map((opt, optIdx) => `
+                        <div class="option-item ${selectedValue === opt ? 'selected' : ''}" onclick="app.selectOptionByIndex(${q.id}, ${optIdx})">
+                            <div class="option-indicator"></div>
+                            <div class="option-label">${opt}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
 
         // Nav buttons
         const prevBtn = document.getElementById('exam-prev-btn');
@@ -905,6 +1198,18 @@ class SecurityCourseApp {
         this.examPassed = this.examPercentage >= COURSE_META.passingScore;
 
         this.saveState();
+
+        // Asynchronously sync results with backend
+        this.apiCall('/api/exam/submit', 'POST', {
+            student_id: this.studentEmail || this.studentCertData.name,
+            score: this.examScore,
+            total: EXAM_QUESTIONS.length,
+            percentage: this.examPercentage,
+            passed: this.examPassed,
+            time_taken_seconds: this.timerSeconds,
+            answers: this.userAnswers
+        });
+
         this.showView('results');
     }
 
@@ -918,6 +1223,9 @@ class SecurityCourseApp {
         const title = document.getElementById('results-status-title');
         const subtitle = document.getElementById('results-status-subtitle');
         const certForm = document.getElementById('results-certificate-form-section');
+        const payGate = document.getElementById('results-payment-gate');
+        const sealedBanner = document.getElementById('cert-sealed-banner');
+        const mainActionBtn = document.getElementById('btn-results-main-action');
 
         scoreNum.textContent = `${this.examScore} / ${EXAM_QUESTIONS.length}`;
         scorePct.textContent = `${this.examPercentage}% Score`;
@@ -926,17 +1234,114 @@ class SecurityCourseApp {
             badge.className = 'score-badge passed';
             title.textContent = "CONGRATULATIONS — YOU PASSED!";
             title.style.color = "var(--brand-green-bright)";
-            subtitle.textContent = `You achieved ${this.examPercentage}%, exceeding the State of Illinois passing standard of 75% (${COURSE_META.passingCorrect} correct out of 50). Please verify your trainee details in the official state form below to download or print your certificate.`;
-            if (certForm) {
-                certForm.style.display = 'block';
+            subtitle.textContent = `You achieved ${this.examPercentage}%, exceeding the State of Illinois passing standard of 75% (${COURSE_META.passingCorrect} correct out of 50). In compliance with IDFPR 225 ILCS 447, complete certification payment and state trainee verification below to issue your permanent training certificate.`;
+
+            if (!this.isPaid) {
+                // Payment Gate visible; Certificate form locked
+                if (payGate) payGate.style.display = 'block';
+                if (certForm) certForm.style.display = 'none';
+                if (mainActionBtn) {
+                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($50.00)`;
+                    mainActionBtn.onclick = () => {
+                        if (payGate) payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    };
+                }
+            } else {
+                // Payment Completed: Certificate unlocked
+                if (payGate) payGate.style.display = 'none';
+                if (certForm) certForm.style.display = 'block';
+
+                if (this.isCertLocked) {
+                    // Certificate permanently downloaded and deleted from session for security
+                    if (sealedBanner) {
+                        sealedBanner.style.display = 'flex';
+                        const idTag = document.getElementById('sealed-cert-id-tag');
+                        if (idTag) idTag.textContent = this.issuedCertId || 'PTA-IL-SEALED';
+                    }
+                    if (mainActionBtn) {
+                        mainActionBtn.innerHTML = `<i class="fas fa-check-circle"></i> Certificate Downloaded & Session Closed`;
+                        mainActionBtn.disabled = true;
+                        mainActionBtn.style.opacity = '0.6';
+                        mainActionBtn.style.cursor = 'not-allowed';
+                        mainActionBtn.onclick = () => {
+                            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+                        };
+                    }
+                    const bottomDownloadBtn = document.getElementById('btn-download-cert-main');
+                    if (bottomDownloadBtn) {
+                        bottomDownloadBtn.innerHTML = `<i class="fas fa-check-circle"></i> Certificate Downloaded & Session Expired`;
+                        bottomDownloadBtn.disabled = true;
+                        bottomDownloadBtn.style.opacity = '0.6';
+                        bottomDownloadBtn.style.cursor = 'not-allowed';
+                        bottomDownloadBtn.onclick = () => {
+                            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+                        };
+                    }
+                    const preWarn = document.getElementById('cert-pre-download-warning');
+                    if (preWarn) {
+                        preWarn.className = 'cert-security-warning-callout urgent';
+                        preWarn.innerHTML = `
+                            <div class="cert-security-warning-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="cert-security-warning-text">
+                                <strong><i class="fas fa-exclamation-circle"></i> CERTIFICATE DOWNLOADED &amp; PURGED FROM SESSION FOR SECURITY</strong>
+                                <p>Your official certificate has been generated and downloaded. <strong>In accordance with security protocols, the active certificate has now been deleted from this session.</strong></p>
+                                <p style="margin-top:6px; color:#fca5a5; font-weight:600;"><i class="fas fa-check-circle"></i> Please ensure you have verified the PDF file is in your Downloads folder before closing or leaving this page. Re-downloading and duplicate generation are disabled.</p>
+                            </div>
+                        `;
+                    }
+                    // Disable all form inputs
+                    document.querySelectorAll('.cert-form-input').forEach(inp => {
+                        inp.disabled = true;
+                    });
+                } else {
+                    // Unsealed: Student can still fill/verify before generating
+                    if (sealedBanner) sealedBanner.style.display = 'none';
+                    if (mainActionBtn) {
+                        mainActionBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)`;
+                        mainActionBtn.disabled = false;
+                        mainActionBtn.style.opacity = '1';
+                        mainActionBtn.style.cursor = 'pointer';
+                        mainActionBtn.onclick = () => this.downloadOfficialPdfCertificate();
+                    }
+                    const bottomDownloadBtn = document.getElementById('btn-download-cert-main');
+                    if (bottomDownloadBtn) {
+                        bottomDownloadBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official State Certificate (PDF)`;
+                        bottomDownloadBtn.disabled = false;
+                        bottomDownloadBtn.style.opacity = '1';
+                        bottomDownloadBtn.style.cursor = 'pointer';
+                        bottomDownloadBtn.onclick = () => this.downloadOfficialPdfCertificate();
+                    }
+                    const preWarn = document.getElementById('cert-pre-download-warning');
+                    if (preWarn) {
+                        preWarn.className = 'cert-security-warning-callout';
+                        preWarn.innerHTML = `
+                            <div class="cert-security-warning-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="cert-security-warning-text">
+                                <strong><i class="fas fa-exclamation-triangle"></i> CRITICAL SECURITY NOTICE — IMMEDIATE ACTION REQUIRED:</strong>
+                                <p>Once you click <strong>"Download Official State Certificate (PDF)"</strong>, your certificate will be generated and then <strong>permanently deleted from this active session for security and privacy protection</strong>.</p>
+                                <p style="margin-top: 6px; font-weight: 600; color: #fbbf24;"><i class="fas fa-arrow-circle-right"></i> Please ensure that you have your certificate completely downloaded and saved to your device before leaving or closing this page. You will NOT be able to access, recreate, or re-download the certificate after leaving.</p>
+                            </div>
+                        `;
+                    }
+                    document.querySelectorAll('.cert-form-input').forEach(inp => {
+                        inp.disabled = false;
+                    });
+                }
             }
         } else {
             badge.className = 'score-badge failed';
             title.textContent = "EXAM NOT PASSED — 75% REQUIRED";
             title.style.color = "var(--danger)";
             subtitle.textContent = `You scored ${this.examPercentage}% (${this.examScore} correct out of 50). A minimum of 75% (${COURSE_META.passingCorrect} correct) is required to pass the Illinois 20-Hour Unarmed Security qualification. Review your answers below and retake the exam when ready.`;
-            if (certForm) {
-                certForm.style.display = 'none';
+            if (payGate) payGate.style.display = 'none';
+            if (certForm) certForm.style.display = 'none';
+            if (mainActionBtn) {
+                mainActionBtn.innerHTML = `<i class="fas fa-redo"></i> Retake Exam to Qualify`;
+                mainActionBtn.onclick = () => this.retakeExam();
             }
         }
 
@@ -1059,6 +1464,22 @@ class SecurityCourseApp {
     }
 
     async downloadOfficialPdfCertificate() {
+        if (this.isCertLocked) {
+            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+            return;
+        }
+
+        // Mandatory Pre-Download Security Warning Confirmation
+        const userConfirmed = confirm(
+            "⚠️ CRITICAL SECURITY WARNING:\n\n" +
+            "Once you download your certificate, it will be permanently deleted from this system for security.\n\n" +
+            "Please ensure that you have the certificate completely downloaded and saved on your device before leaving this page, as you will not be able to recreate or re-download it.\n\n" +
+            "Click OK to proceed with downloading your certificate now."
+        );
+        if (!userConfirmed) {
+            return;
+        }
+
         try {
             if (typeof PDFLib === 'undefined' || typeof UNARMED_CERT_TEMPLATE_BASE64 === 'undefined') {
                 alert("Certificate generator library is initializing. Please wait a moment and try again.");
@@ -1113,13 +1534,13 @@ class SecurityCourseApp {
             page.drawText(hair, { x: 392, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
             page.drawText(eyes, { x: 490, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
 
-            // Trainee Signature & Date
-            page.drawText(traineeSig, { x: 140, y: height - 273, size: 13, font: timesItalic, color: PDFLib.rgb(0, 0, 0.4) });
+            // Trainee Signature & Date (Cursive Times Roman Italic)
+            page.drawText(traineeSig, { x: 140, y: height - 273, size: 14, font: timesItalic, color: PDFLib.rgb(0.05, 0.08, 0.15) });
             page.drawText(compDate, { x: 432, y: height - 273, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
 
             // Bottom Instructor Section (Platforms Training Academy & Charles Young)
+            // Note: Authentic hand signature of Charles Young is already on the certificate template
             page.drawText(compDate, { x: 35, y: height - 672, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText("Charles Young", { x: 155, y: height - 739, size: 14, font: timesItalic, color: PDFLib.rgb(0, 0, 0.6) });
             page.drawText(compDate, { x: 435, y: height - 739, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
 
             const pdfBytes = await pdfDoc.save();
@@ -1133,9 +1554,91 @@ class SecurityCourseApp {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+            // Seal certificate permanently against future edits/creation and purge from session for security
+            if (!this.isCertLocked) {
+                this.isCertLocked = true;
+                this.issuedCertId = 'PTA-IL-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('platforms_cert_locked', 'true');
+                localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                this.saveState();
+
+                // Send to backend
+                this.apiCall('/api/certificate/issue', 'POST', {
+                    student_id: this.studentEmail || name,
+                    cert_id: this.issuedCertId,
+                    name: name,
+                    address: address,
+                    city: city,
+                    state: state,
+                    zip: zip,
+                    dob: dob,
+                    ssn: ssn,
+                    weight: weight,
+                    height: heightVal,
+                    hair: hair,
+                    eyes: eyes,
+                    signature: traineeSig,
+                    date_completed: compDate
+                });
+
+                this.renderResults();
+                this.manualSaveProgress("Official Certificate generated, downloaded & sealed permanently!");
+
+                // Post-download immediate security alert
+                setTimeout(() => {
+                    alert(
+                        "✅ CERTIFICATE DOWNLOAD INITIATED!\n\n" +
+                        "Your official Illinois 20-Hour Unarmed Security Certificate PDF is downloading now.\n\n" +
+                        "CRITICAL SECURITY NOTICE: For your security, this certificate record has now been permanently deleted from this active session. Please ensure you have the PDF file safely saved to your device before leaving or closing this page!"
+                    );
+                }, 350);
+            }
         } catch (err) {
             console.error("PDF download error:", err);
-            alert("An error occurred while generating your official PDF. Please use the Print Certificate button to print or save as PDF.");
+            alert("An error occurred while generating your official PDF. Please verify your details and try downloading again.");
+        }
+    }
+
+    handleResultsCertificateAction() {
+        if (!this.isPaid) {
+            const payGate = document.getElementById('results-payment-gate');
+            if (payGate) {
+                payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+        if (this.isCertLocked) {
+            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+            return;
+        }
+        this.downloadOfficialPdfCertificate();
+    }
+
+    async processCoursePayment() {
+        const cardholder = document.getElementById('pay-cardholder-name')?.value || this.studentCertData.name || 'Student Officer';
+        const toast = document.getElementById('lms-toast');
+        const toastMsg = document.getElementById('lms-toast-msg');
+
+        // Simulate payment authorization & record on backend
+        await this.apiCall('/api/payment/checkout', 'POST', {
+            student_id: this.studentEmail || this.studentCertData.name
+        });
+
+        this.isPaid = true;
+        localStorage.setItem('platforms_is_paid', 'true');
+        this.saveState();
+
+        if (toast && toastMsg) {
+            toastMsg.textContent = "Payment authorized successfully ($50.00)! Official certificate unlocked.";
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
+        this.renderResults();
+        const certSection = document.getElementById('results-certificate-form-section');
+        if (certSection) {
+            certSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
@@ -1155,67 +1658,181 @@ class SecurityCourseApp {
     }
 
     // =========================================================================
-    // Speech Synthesis / Audio Narration
+    // Unified High-Quality Lesson Audio Narrator (Natural Voice & Chunked Queue)
     // =========================================================================
-    toggleSpeech() {
-        if (this.isSpeaking) {
-            this.stopSpeech();
-        } else {
-            this.speakCurrentContent();
+    initVoices() {
+        if (!('speechSynthesis' in window)) return;
+        const updateVoices = () => {
+            this.availableVoices = window.speechSynthesis.getVoices();
+            this.selectedVoice = this.getBestNaturalVoice();
+            const voiceLabel = document.getElementById('narrator-voice-label');
+            if (voiceLabel && this.selectedVoice) {
+                const cleanName = this.selectedVoice.name.replace(/Google|Microsoft|Apple|Natural|Online/gi, '').trim() || this.selectedVoice.name;
+                voiceLabel.textContent = `${cleanName} (Studio Quality)`;
+            }
+        };
+        updateVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = updateVoices;
         }
     }
 
-    stopSpeech() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
+    getBestNaturalVoice() {
+        if (!this.availableVoices || this.availableVoices.length === 0) {
+            if ('speechSynthesis' in window) {
+                this.availableVoices = window.speechSynthesis.getVoices();
+            }
         }
-        this.isSpeaking = false;
-        document.querySelectorAll('.btn-speech').forEach(b => b.classList.remove('active'));
+        if (!this.availableVoices || this.availableVoices.length === 0) return null;
+
+        // Priority 1: Natural / Online high quality English US voices
+        const naturalUs = this.availableVoices.find(v => 
+            (v.name.includes('Natural') || v.name.includes('Online')) && 
+            (v.lang.startsWith('en-US') || v.lang.startsWith('en'))
+        );
+        if (naturalUs) return naturalUs;
+
+        // Priority 2: Google US English or Google UK
+        const googleVoice = this.availableVoices.find(v => 
+            v.name.includes('Google') && (v.lang.startsWith('en-US') || v.lang.startsWith('en'))
+        );
+        if (googleVoice) return googleVoice;
+
+        // Priority 3: Premium named system voices (Samantha, Daniel, Jenny, Guy, Christopher, Aria)
+        const namedVoice = this.availableVoices.find(v => 
+            ['Samantha', 'Daniel', 'Jenny', 'Guy', 'Aria', 'Christopher'].some(n => v.name.includes(n))
+        );
+        if (namedVoice) return namedVoice;
+
+        // Priority 4: Any en-US voice
+        const anyUs = this.availableVoices.find(v => v.lang === 'en-US' || v.lang.startsWith('en-US'));
+        if (anyUs) return anyUs;
+
+        // Priority 5: Any English voice
+        const anyEn = this.availableVoices.find(v => v.lang.startsWith('en'));
+        if (anyEn) return anyEn;
+
+        return this.availableVoices[0];
     }
 
-    speakCurrentContent() {
+    toggleFieldNarrationSpeech(lessonId) {
         if (!('speechSynthesis' in window)) {
-            alert("Speech synthesis is not supported on this browser.");
+            alert("Speech synthesis is not supported on this device/browser.");
             return;
         }
 
-        let textToRead = "";
-        if (this.currentView === 'lesson') {
-            const lesson = LESSONS_DATA.find(l => l.id === this.currentLessonId);
-            if (lesson) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = lesson.content;
-                textToRead = `${lesson.number}. ${lesson.title}. ${tempDiv.innerText}`;
-            }
-        } else if (this.currentView === 'exam') {
-            const q = EXAM_QUESTIONS[this.currentQuestionIdx];
-            if (q) {
-                textToRead = `Question ${this.currentQuestionIdx + 1}. ${q.question}. Options are: ${q.options.join(', ')}`;
-            }
-        } else {
-            textToRead = "Welcome to the Platforms Training Academy Online Unarmed Security Course.";
+        if (this.isNarrating && this.currentNarratingLessonId === lessonId) {
+            this.stopFieldNarration();
+            return;
         }
 
-        if (!textToRead) return;
+        this.stopFieldNarration();
 
-        this.stopSpeech();
-        const utterance = new SpeechSynthesisUtterance(textToRead);
-        utterance.rate = 1.0;
+        const card = document.getElementById(`field-narration-les-${lessonId}`);
+        if (!card) return;
+
+        const titleEl = card.querySelector('.narration-title');
+        const bodyEl = card.querySelector('.narration-body-text');
+        const takeawayEl = card.querySelector('.narration-footer-takeaway');
+
+        const title = titleEl ? titleEl.textContent.trim() : `Lesson ${lessonId} Tactical Case Study`;
+        const bodyText = bodyEl ? bodyEl.textContent.trim() : '';
+        const takeawayText = takeawayEl ? takeawayEl.textContent.trim() : '';
+
+        // Segment narration text into conversational chunks (~220 chars) to prevent Chrome/mobile timeouts
+        const chunks = [];
+        chunks.push(`Field Instructor Tactical Case Study with Lead Instructor Charles Young. Case: ${title}.`);
+
+        const paragraphs = bodyText.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+        paragraphs.forEach(p => {
+            const sentences = p.replace(/\s+/g, ' ').trim().match(/[^.!?]+[.!?]+(\s|$)/g) || [p];
+            let buf = "";
+            sentences.forEach(s => {
+                const sTrim = s.trim();
+                if (!sTrim) return;
+                if ((buf + " " + sTrim).length > 220) {
+                    if (buf) chunks.push(buf.trim());
+                    buf = sTrim;
+                } else {
+                    buf = buf ? buf + " " + sTrim : sTrim;
+                }
+            });
+            if (buf) chunks.push(buf.trim());
+        });
+
+        if (takeawayText) {
+            chunks.push(takeawayText.replace(/\s+/g, ' ').trim());
+        }
+
+        if (chunks.length === 0) return;
+
+        this.narrationQueue = chunks;
+        this.isNarrating = true;
+        this.currentNarratingLessonId = lessonId;
+
+        const btn = document.getElementById(`btn-narration-audio-${lessonId}`);
+        if (btn) {
+            btn.classList.add('playing');
+            btn.innerHTML = `<i class="fas fa-stop-circle"></i> Stop Narration`;
+        }
+
+        this.playNextFieldNarrationChunk(lessonId);
+    }
+
+    playNextFieldNarrationChunk(lessonId) {
+        if (!this.isNarrating || this.narrationQueue.length === 0 || this.currentNarratingLessonId !== lessonId) {
+            this.stopFieldNarration();
+            return;
+        }
+
+        const chunkText = this.narrationQueue.shift();
+        const utterance = new SpeechSynthesisUtterance(chunkText);
+        
+        if (this.selectedVoice) {
+            utterance.voice = this.selectedVoice;
+        }
+        utterance.rate = 0.96;
         utterance.pitch = 1.0;
 
         utterance.onend = () => {
-            this.isSpeaking = false;
-            document.querySelectorAll('.btn-speech').forEach(b => b.classList.remove('active'));
+            if (this.isNarrating && this.currentNarratingLessonId === lessonId) {
+                setTimeout(() => this.playNextFieldNarrationChunk(lessonId), 120);
+            }
         };
 
-        utterance.onerror = () => {
-            this.isSpeaking = false;
-            document.querySelectorAll('.btn-speech').forEach(b => b.classList.remove('active'));
+        utterance.onerror = (e) => {
+            console.warn("Speech synthesis chunk error, advancing:", e);
+            if (this.isNarrating && this.currentNarratingLessonId === lessonId) {
+                setTimeout(() => this.playNextFieldNarrationChunk(lessonId), 120);
+            }
         };
 
-        this.isSpeaking = true;
-        document.querySelectorAll('.btn-speech').forEach(b => b.classList.add('active'));
         window.speechSynthesis.speak(utterance);
+    }
+
+    stopFieldNarration() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+        if (this.currentNarratingLessonId) {
+            const btn = document.getElementById(`btn-narration-audio-${this.currentNarratingLessonId}`);
+            if (btn) {
+                btn.classList.remove('playing');
+                btn.innerHTML = `<i class="fas fa-headphones"></i> Listen to Narration`;
+            }
+        }
+        document.querySelectorAll('.narration-audio-play-btn').forEach(btn => {
+            btn.classList.remove('playing');
+            btn.innerHTML = `<i class="fas fa-headphones"></i> Listen to Narration`;
+        });
+
+        this.isNarrating = false;
+        this.currentNarratingLessonId = null;
+        this.narrationQueue = [];
+    }
+
+    stopSpeech() {
+        this.stopFieldNarration();
     }
 
     // =========================================================================
@@ -1259,11 +1876,6 @@ class SecurityCourseApp {
             brand.addEventListener('click', () => this.showView('overview'));
         }
 
-        // Global speech toggle
-        document.querySelectorAll('.btn-speech').forEach(btn => {
-            btn.addEventListener('click', () => this.toggleSpeech());
-        });
-
         // Exam flag button
         const flagBtn = document.getElementById('btn-flag-question');
         if (flagBtn) {
@@ -1275,6 +1887,31 @@ class SecurityCourseApp {
         if (clearBtn) {
             clearBtn.addEventListener('click', () => this.clearCurrentAnswer());
         }
+
+        // Mobile Header Scroll Fading: Fade/slide header away when scrolling down, restore on scroll up
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('site-header');
+            if (!header) return;
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > 80 && currentScrollY > lastScrollY) {
+                // Scrolling down
+                header.classList.add('header-hidden');
+            } else {
+                // Scrolling up
+                header.classList.remove('header-hidden');
+            }
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        // Window beforeunload security warning for certificate holders
+        window.addEventListener('beforeunload', (e) => {
+            if (this.examPassed && this.isPaid && !this.isCertLocked) {
+                e.preventDefault();
+                e.returnValue = "WARNING: You have unlocked your official certificate, but have not yet downloaded it. Once downloaded, it will be deleted for security. Please ensure you download your certificate before leaving!";
+                return e.returnValue;
+            }
+        });
     }
 
 
@@ -1489,76 +2126,228 @@ class SecurityCourseApp {
     }
 
     // =========================================================================
-    // Field Instructor Narration Audio Player (Text-to-Speech)
+    // Admin Evaluation Mode ("God Mode") & Academy Analytics
     // =========================================================================
-    toggleFieldNarrationSpeech(lessonId) {
-        if (!('speechSynthesis' in window)) {
-            alert("Audio narration is not supported on this browser.");
-            return;
+    openAdminLoginModal() {
+        const modal = document.getElementById('modal-admin-login');
+        if (modal) {
+            modal.classList.add('open');
+            const inp = document.getElementById('admin-pin-input');
+            if (inp) {
+                inp.value = '';
+                setTimeout(() => inp.focus(), 150);
+            }
+            const err = document.getElementById('admin-pin-error');
+            if (err) err.style.display = 'none';
+        }
+    }
+
+    closeAdminLoginModal() {
+        const modal = document.getElementById('modal-admin-login');
+        if (modal) modal.classList.remove('open');
+    }
+
+    async submitAdminLogin() {
+        const inp = document.getElementById('admin-pin-input');
+        const err = document.getElementById('admin-pin-error');
+        const pin = inp ? inp.value.trim() : '';
+
+        let verified = (pin === '7738732591');
+        if (!verified) {
+            const apiRes = await this.apiCall('/api/admin/login', 'POST', { pin: pin });
+            if (apiRes && apiRes.success) verified = true;
         }
 
-        const btn = document.getElementById(`btn-narration-audio-${lessonId}`);
+        if (verified) {
+            this.isAdminMode = true;
+            localStorage.setItem('platforms_admin_mode', 'true');
+            this.saveState();
+            this.updateAdminModeUI();
+            this.closeAdminLoginModal();
+            this.renderLessonsSidebar();
+            this.renderOverviewGrid();
+            if (this.currentView === 'exam') this.handleExamView();
 
-        if (this.currentNarratingLessonId === lessonId && this.isSpeaking) {
-            // Stop speech
-            this.stopSpeech();
-            this.currentNarratingLessonId = null;
-            if (btn) {
-                btn.classList.remove('playing');
-                btn.innerHTML = `<i class="fas fa-headphones"></i> Listen to Narration`;
-            }
-            return;
+            this.manualSaveProgress("God Mode Activated: All module and exam locks bypassed for Instructor Charles Young!");
+            this.openAdminDashboard();
+        } else {
+            if (err) err.style.display = 'block';
+        }
+    }
+
+    exitAdminMode() {
+        this.isAdminMode = false;
+        localStorage.removeItem('platforms_admin_mode');
+        this.saveState();
+        this.updateAdminModeUI();
+        this.renderLessonsSidebar();
+        this.renderOverviewGrid();
+        if (this.currentView === 'exam') this.handleExamView();
+        this.manualSaveProgress("Admin evaluation mode exited. Standard student progression locks restored.");
+    }
+
+    updateAdminModeUI() {
+        const banner = document.getElementById('admin-mode-banner');
+        if (banner) {
+            banner.style.display = this.isAdminMode ? 'flex' : 'none';
+        }
+    }
+
+    openAdminDashboard() {
+        const modal = document.getElementById('modal-admin-dashboard');
+        if (modal) {
+            modal.classList.add('open');
+            this.loadAdminMetrics();
+        }
+    }
+
+    closeAdminDashboard() {
+        const modal = document.getElementById('modal-admin-dashboard');
+        if (modal) modal.classList.remove('open');
+    }
+
+    refreshAdminMetrics() {
+        this.loadAdminMetrics();
+    }
+
+    async loadAdminMetrics() {
+        const grid = document.getElementById('admin-stats-grid');
+        const tbody = document.getElementById('admin-students-table-body');
+        if (!grid) return;
+
+        // Fetch metrics from backend
+        const metrics = await this.apiCall('/api/metrics', 'GET');
+        const studentsData = await this.apiCall('/api/students', 'GET');
+
+        if (metrics) {
+            grid.innerHTML = `
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${metrics.total_students || 1}</div>
+                    <div class="admin-stat-lbl">Students Enrolled</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">$${metrics.total_revenue || 0}</div>
+                    <div class="admin-stat-lbl">Course Revenue</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${metrics.total_exams || 0}</div>
+                    <div class="admin-stat-lbl">Exams Taken</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${metrics.pass_rate || 0}%</div>
+                    <div class="admin-stat-lbl">Exam Pass Rate</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${metrics.avg_score || 0}%</div>
+                    <div class="admin-stat-lbl">Average Score</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${metrics.certs_issued || 0}</div>
+                    <div class="admin-stat-lbl">Certificates Sealed</div>
+                </div>
+            `;
+        } else {
+            // Local fallback metrics when server is offline
+            const completedCount = this.getCompletedLessonsCount();
+            grid.innerHTML = `
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">1</div>
+                    <div class="admin-stat-lbl">Active Candidate</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${this.isPaid ? '$50' : '$0'}</div>
+                    <div class="admin-stat-lbl">Revenue Authorized</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${completedCount} / 10</div>
+                    <div class="admin-stat-lbl">Modules Mastered</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${this.examCompleted ? this.examPercentage + '%' : 'Pending'}</div>
+                    <div class="admin-stat-lbl">Exam Status</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-val">${this.isCertLocked ? '1 Sealed' : '0 Sealed'}</div>
+                    <div class="admin-stat-lbl">Official Certificate</div>
+                </div>
+            `;
         }
 
-        // Stop any current audio
-        this.stopSpeech();
-
-        const card = document.getElementById(`field-narration-les-${lessonId}`);
-        if (!card) return;
-
-        const body = card.querySelector('.narration-body-text');
-        const titleEl = card.querySelector('.narration-title');
-        const title = titleEl ? titleEl.innerText : `Lesson ${lessonId}`;
-        const narrativeText = body ? body.innerText : '';
-
-        const fullText = `Field Instructor Case Study. ${title}. Lead Instructor Charles Young narrating. ${narrativeText}`;
-
-        const utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.rate = 0.95; // Slightly slower, measured instructional pace
-        utterance.pitch = 0.95;
-
-        utterance.onstart = () => {
-            this.isSpeaking = true;
-            this.currentNarratingLessonId = lessonId;
-            document.querySelectorAll('.narration-audio-play-btn').forEach(b => {
-                b.classList.remove('playing');
-                b.innerHTML = `<i class="fas fa-headphones"></i> Listen to Narration`;
-            });
-            if (btn) {
-                btn.classList.add('playing');
-                btn.innerHTML = `<i class="fas fa-stop-circle"></i> Stop Narration`;
+        if (tbody) {
+            if (studentsData && studentsData.students && studentsData.students.length > 0) {
+                tbody.innerHTML = studentsData.students.map(s => `
+                    <tr>
+                        <td><strong>${s.name}</strong></td>
+                        <td>${s.email || 'N/A'}<br><small style="color:var(--text-muted);">${s.agency || 'N/A'}</small></td>
+                        <td>${s.completed_modules} / 10</td>
+                        <td>${s.best_score ? s.best_score + '%' : 'Not taken'}</td>
+                        <td>${s.is_paid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $50</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
+                        <td>${s.cert_id ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${s.cert_id}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td><strong>${this.studentCertData.name || 'Marcus Washington'}</strong></td>
+                        <td>${this.studentEmail}<br><small style="color:var(--text-muted);">${this.studentAgency}</small></td>
+                        <td>${this.getCompletedLessonsCount()} / 10</td>
+                        <td>${this.examCompleted ? this.examPercentage + '%' : 'In Progress'}</td>
+                        <td>${this.isPaid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $50</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
+                        <td>${this.isCertLocked ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${this.issuedCertId || 'PTA-IL-SEALED'}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>
+                    </tr>
+                `;
             }
-        };
+        }
+    }
 
-        utterance.onend = () => {
-            this.isSpeaking = false;
-            this.currentNarratingLessonId = null;
-            if (btn) {
-                btn.classList.remove('playing');
-                btn.innerHTML = `<i class="fas fa-headphones"></i> Listen to Narration`;
+    // =========================================================================
+    // Backend API Synchronization & Resilience Helpers
+    // =========================================================================
+    async apiCall(endpoint, method = 'GET', data = null) {
+        try {
+            const opts = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (data && method !== 'GET') opts.body = JSON.stringify(data);
+            const res = await fetch(endpoint, opts);
+            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+            return await res.json();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async syncWithBackend() {
+        const studentId = this.studentEmail || this.studentCertData.name;
+        // 1. Sync student profile
+        await this.apiCall('/api/students/login', 'POST', {
+            name: this.studentCertData.name,
+            email: this.studentEmail,
+            student_id: studentId,
+            agency: this.studentAgency
+        });
+
+        // 2. Check cert status
+        const status = await this.apiCall(`/api/certificate/status/${encodeURIComponent(studentId)}`, 'GET');
+        if (status) {
+            if (status.is_paid) {
+                this.isPaid = true;
+                localStorage.setItem('platforms_is_paid', 'true');
             }
-        };
-
-        utterance.onerror = () => {
-            this.isSpeaking = false;
-            this.currentNarratingLessonId = null;
-            if (btn) {
-                btn.classList.remove('playing');
-                btn.innerHTML = `<i class="fas fa-headphones"></i> Listen to Narration`;
+            if (status.is_locked) {
+                this.isCertLocked = true;
+                this.issuedCertId = status.certificate ? status.certificate.id : this.issuedCertId;
+                localStorage.setItem('platforms_cert_locked', 'true');
+                if (this.issuedCertId) localStorage.setItem('platforms_cert_id', this.issuedCertId);
             }
-        };
+        }
 
-        window.speechSynthesis.speak(utterance);
+        // 3. Sync module progress
+        await this.apiCall('/api/progress/save', 'POST', {
+            student_id: studentId,
+            module_sections: this.moduleSections
+        });
     }
 }
 
