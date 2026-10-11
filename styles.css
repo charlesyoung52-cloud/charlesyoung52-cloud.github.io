@@ -61,7 +61,14 @@
     --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-* {
+html {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -74,8 +81,18 @@ body {
     font-size: 16px;
     line-height: 1.6;
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
     -webkit-font-smoothing: antialiased;
 }
+
+img, video, canvas, svg, iframe {
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
@@ -3983,29 +4000,502 @@ button:disabled.btn-primary {
     }
 
     .unified-narrator-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 12px 14px;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding: 12px 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
+
+    .narrator-info {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
     .narrator-controls {
-        justify-content: flex-end;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        width: 100% !important;
     }
+
+    /* Main Container & View Boundaries */
+    .app-main {
+        padding: 14px 10px 60px 10px !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .view-section {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Overview Hero Banner */
+    .hero-banner {
+        padding: 18px 14px !important;
+        margin-bottom: 20px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .hero-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+        width: 100% !important;
+    }
+
+    .hero-content h2 {
+        font-size: 1.55rem !important;
+        word-break: break-word !important;
+    }
+
+    .hero-actions {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 10px !important;
+    }
+
+    .hero-actions .btn-primary,
+    .hero-actions .btn-secondary {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Curriculum Grid */
+    .lessons-grid {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        gap: 14px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .lesson-card {
+        padding: 16px 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Lesson Reader Layout */
+    .lesson-layout {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+
+    .lesson-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 14px 12px !important;
+        max-height: 260px !important;
+    }
+
+    .lesson-main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+
+    .lesson-title-main {
+        font-size: 1.35rem !important;
+        word-break: break-word !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Critical Fix: Lesson Sub-Tabs Stacking */
+    .lesson-tabs-nav {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 6px !important;
+        padding: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    .lesson-tab-btn {
+        width: 100% !important;
+        font-size: 0.82rem !important;
+        padding: 9px 10px !important;
+        text-align: center !important;
+        justify-content: center !important;
+        white-space: normal !important;
+        box-sizing: border-box !important;
+    }
+
+    .module-requirements-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 10px 12px !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .req-chips-container {
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        gap: 6px !important;
+    }
+
+    .req-chip {
+        font-size: 0.74rem !important;
+        padding: 4px 8px !important;
+    }
+
+    /* Course Headings Universal Fit */
+    h1, h2, h3, h4, h5, h6 {
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        max-width: 100% !important;
+    }
+
+    body h3, #tab-study-content h3, .tab-content-panel h3 {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        font-size: 1.15rem !important;
+        padding: 10px 12px !important;
+        gap: 8px !important;
+        margin: 24px 0 14px 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    body h4, #tab-study-content h4, .tab-content-panel h4 {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        font-size: 1.02rem !important;
+        padding: 8px 10px !important;
+        gap: 6px !important;
+        margin: 18px 0 10px 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Lesson Case Study Cards */
+    .lesson-case-card {
+        padding: 14px 12px !important;
+        border-left-width: 5px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-bottom: 16px !important;
+    }
+
+    .lesson-case-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+
+    .lesson-case-title {
+        font-size: 1.08rem !important;
+        flex-wrap: wrap !important;
+        word-break: break-word !important;
+    }
+
+    .lesson-case-badge {
+        font-size: 0.75rem !important;
+        padding: 3px 8px !important;
+    }
+
+    .lesson-case-takeaway {
+        padding: 10px 12px !important;
+        font-size: 0.92rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Critical Fix: Lesson 5 Criminal Law Offense Rows */
+    .offense-row {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+        padding: 10px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Lesson 3 & 4 Interactive Diagnostic Grids */
+    .harm-diagnostic-container {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+        margin: 18px 0 !important;
+    }
+
+    .harm-diagnostic-card {
+        padding: 14px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .aoj-triad-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .aoj-card {
+        padding: 14px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .baton-zone-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .baton-matrix-card {
+        padding: 14px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .tier-details-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .continuum-tier-card {
+        padding: 12px 12px !important;
+        border-left-width: 5px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .tier-header-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+    }
+
+    /* Common Card Grids */
+    .liability-grid, .elements-grid, .locked-modules-grid, .guide-steps-grid,
+    .cert-readonly-grid, .admin-dashboard-stats-grid, .scenario-options-grid,
+    .profile-modal-grid, .tf-grid {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        gap: 10px !important;
+    }
+
+    .scenario-sim-card {
+        padding: 16px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .takeaways-box {
+        padding: 16px 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 50-Question Exam & Question Palette */
+    .exam-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .exam-status-bar {
+        padding: 8px 10px !important;
+        gap: 6px !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .exam-pill {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .palette-container {
+        padding: 10px 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .palette-grid, .palette-grid-50 {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 5px !important;
+        width: 100% !important;
+    }
+
+    .palette-btn {
+        width: 100% !important;
+        height: 36px !important;
+        font-size: 0.8rem !important;
+        padding: 0 !important;
+    }
+
+    .question-card {
+        padding: 16px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .option-item {
+        padding: 10px 12px !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .option-label {
+        font-size: 0.92rem !important;
+        word-break: break-word !important;
+    }
+
+    /* Critical Fix: Question Nav Bar Zero Edge Bleed */
     .question-nav-bar {
-        position: sticky;
-        bottom: 0;
-        background: rgba(18, 20, 24, 0.98);
-        backdrop-filter: blur(10px);
-        padding: 14px 16px;
-        border-top: 1.5px solid var(--brand-green);
-        border-radius: var(--radius-sm);
-        margin: 16px -16px -16px -16px;
-        z-index: 100;
-        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7);
+        position: sticky !important;
+        bottom: 0 !important;
+        background: rgba(18, 20, 24, 0.98) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        padding: 10px 12px !important;
+        border-top: 1.5px solid var(--brand-green) !important;
+        border-radius: var(--radius-sm) !important;
+        margin: 16px 0 0 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        z-index: 100 !important;
+        box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.7) !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
     }
-    #exam-next-btn {
-        flex: 1;
-        padding: 14px 20px;
-        font-size: 1.05rem;
+
+    #exam-next-btn, #btn-submit-exam, #btn-prev-question, #btn-next-question, #btn-clear-question, #btn-flag-question {
+        flex: 1 1 auto !important;
+        padding: 10px 14px !important;
+        font-size: 0.9rem !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Results & Certificate Form Responsive Fix */
+    .results-card {
+        padding: 18px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .results-stats-row {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .official-state-cert-wrapper {
+        padding: 8px 4px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        box-sizing: border-box !important;
+    }
+
+    .cert-form-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .cert-form-group {
+        grid-column: span 12 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .cert-form-input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .cert-intake-card {
+        padding: 16px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .certificate-wrapper {
+        padding: 10px 6px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .certificate-border {
+        padding: 16px 12px !important;
+        border-width: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .cert-name {
+        font-size: 1.6rem !important;
+        word-break: break-word !important;
+    }
+
+    /* Modal Windows */
+    .lms-modal-window, .lock-modal-card {
+        width: 95% !important;
+        max-width: 95vw !important;
+        padding: 18px 12px !important;
+        margin: 10px auto !important;
+        box-sizing: border-box !important;
+    }
+
+    .profile-card-box {
+        padding: 14px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .admin-table-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Footer */
+    .site-footer {
+        padding: 24px 12px !important;
+        margin-top: 36px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .footer-content {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+
+    .footer-brand {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
     }
 }
+
