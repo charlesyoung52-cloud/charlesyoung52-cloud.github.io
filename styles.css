@@ -79,14 +79,14 @@ html {
     font-family: var(--font-body);
     font-size: 16px;
     line-height: 1.6;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 body {
     background-color: var(--bg-primary);
     color: var(--text-light);
     font-family: var(--font-body);
-    overflow-x: hidden;
+    overflow-x: clip;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -231,17 +231,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   MAIN HEADER (SCROLLS WITH PAGE, THIN PROFILE)
+   MAIN HEADER (STICKY HEADER - REMAINS VISIBLE ON SCROLL)
    ========================================================================== */
 .main-header {
-    background-color: rgba(18, 20, 24, 0.98);
+    background-color: rgba(18, 20, 24, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
-    position: relative; /* Scrolls naturally with page */
-    z-index: 100;
+    position: sticky; /* Remains visible as user scrolls down */
+    top: 0;
+    z-index: 1000;
     height: var(--header-height);
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.main-header.header-scrolled {
+    background-color: rgba(10, 11, 13, 0.98);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    border-bottom-color: rgba(128, 163, 21, 0.3);
 }
 
 .header-inner {

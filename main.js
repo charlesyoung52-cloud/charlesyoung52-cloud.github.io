@@ -274,11 +274,21 @@ document.addEventListener("DOMContentLoaded", () => {
         link.addEventListener("click", closeDrawer);
     });
 
-    // Active Navigation Highlight on Scroll
+    // Active Navigation Highlight on Scroll & Sticky Header State
     const sections = document.querySelectorAll("section[id]");
     const navItems = document.querySelectorAll(".desktop-nav .nav-item");
+    const mainHeader = document.getElementById("main-header");
 
     window.addEventListener("scroll", () => {
+        // Sticky header elevation shadow
+        if (mainHeader) {
+            if (window.pageYOffset > 20) {
+                mainHeader.classList.add("header-scrolled");
+            } else {
+                mainHeader.classList.remove("header-scrolled");
+            }
+        }
+
         let currentSectionId = "";
         const scrollPosition = window.pageYOffset + 120;
 
