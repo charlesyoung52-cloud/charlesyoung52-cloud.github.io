@@ -37,7 +37,7 @@ window.WIX_CONFIG = {
     // Paste your Client ID from the Wix Dashboard here:
     // (Leave empty to use Standalone / Offline LMS Mode)
     // ---------------------------------------------------------------------
-    clientId: "",
+    clientId: "f4231e27-c80e-4621-bf59-9b2f4f2a7fe7",
 
     // ---------------------------------------------------------------------
     // 2. Your Live Premium Wix Site URL
