@@ -3,85 +3,80 @@
  * Handles Course Modals, Category Filtering, Mobile Drawer, and Interactive Actions
  */
 
-// Course Database matching platformstraining.com
+// Course Database matching platformstraining.com requirements
 const COURSE_DATABASE = {
-    "unarmed-20": {
-        title: "20 HR UNARMED SECURITY COURSE",
-        category: "IDFPR Security Officer Credential (PERC)",
-        price: "$100.00",
-        sezzle: "4 bi-weekly payments of $25.00 with Sezzle",
-        duration: "2.5 Days (Monday 9:00 AM – 5:00 PM, Tuesday 9:00 AM – 5:00 PM, Wednesday 9:00 AM – 12:00 PM)",
-        location: "921 E 40th St, Chicago, IL 60653",
-        description: "This is the state-mandated IDFPR course under 225 ILCS 447 for students seeking employment as an unarmed security officer in Illinois. Successful completion qualifies you to apply for and obtain your Permanent Employee Registration Card (PERC).",
-        curriculum: [
-            "Illinois Private Detective, Private Alarm, Private Security Act (225 ILCS 447)",
-            "Statutory powers of arrest and citizen's arrest limits",
-            "Law on Use of Force and Defending Persons and Property (720 ILCS 5/7-1)",
-            "Field patrolling techniques, access control, and observation tactics",
-            "Professional security note-taking and incident report writing",
-            "Fire prevention, HAZMAT safety, and PASS fire extinguisher protocols"
-        ],
-        prerequisites: [
-            "Must be at least 18 years of age",
-            "Standard duty belt required for classroom gear drills"
-        ],
-        cancellation: "No refunds. All classes can be rescheduled within 3 months of the original course date as courses are available."
-    },
     "armed-28": {
         title: "28 HR ARMED SECURITY COURSE",
-        category: "Firearms Control Card (Tan Card)",
+        category: "IDFPR Security Officer Credential (Tan Card)",
         price: "$200.00",
-        sezzle: "4 bi-weekly payments of $50.00 with Sezzle",
         duration: "2.5 Days (Wednesday 1:00 PM – 5:00 PM, Thursday 9:00 AM – 5:00 PM, Friday 9:00 AM – 5:00 PM)",
-        location: "921 E 40th St, Chicago, IL 60653 & Live-Fire Range",
-        description: "This is an IDFPR state course for students who have completed the 20-Hour Unarmed Course and are seeking to obtain a Firearms Control Card (Tan Card) for armed employment. Tuition covers range fees, target, ammunition, and firearm use (if student does not own one).",
+        location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
+        description: "This is the official IDFPR-approved state course for officers seeking to obtain a Firearms Control Card (Tan Card) for armed security employment in Illinois. Tuition covers full classroom instruction, legal updates, duty weapon operations, and live-fire range qualification.",
         curriculum: [
             "Safe gun handling, firearm anatomy, and ballistics",
             "Revolver and semi-automatic handgun operation and marksmanship",
-            "Holster draw techniques, retention, and weapon clearing drills",
-            "Civil and criminal liability for armed security personnel",
-            "IDFPR official live-fire range qualification scoring"
+            "Holster draw techniques, weapon retention, and malfunction clearing",
+            "Civil and criminal liability for armed security personnel (720 ILCS 5/7-1)",
+            "IDFPR official live-fire range qualification scoring at Eagle Sports Range"
         ],
         prerequisites: [
             "Prerequisite: 20-Hour Unarmed Security Course Certificate",
             "Must be at least 21 years of age",
             "Valid FOID Card or eligible to obtain FOID",
-            "No felony convictions & no battery convictions",
+            "No felony convictions & no disqualifying battery convictions",
             "Duty belt and suitable range attire"
         ],
-        cancellation: "No refunds. All classes can be rescheduled within 3 months. Range fees, ammunition, and gun use included for first attempt."
+        cancellation: "No refunds. All classes can be rescheduled within 3 months. Range fees, ammunition, and weapon use included for qualification attempt."
     },
-    "combined-48": {
-        title: "48 HR COMBINED SECURITY COURSE",
-        category: "Complete Security Career Package (PERC + Tan Card)",
-        price: "$300.00",
-        sezzle: "4 bi-weekly payments of $75.00 with Sezzle",
-        duration: "5 Full Days (Monday – Friday)",
-        location: "921 E 40th St, Chicago, IL 60653 & Live-Fire Range",
-        description: "Our comprehensive full-week career accelerator combining both the 20-Hour Unarmed Security Course and 28-Hour Armed Security Course. Graduates receive double certification for immediate deployment as armed or unarmed officers.",
+    "firearm-requal": {
+        title: "SECURITY FIREARM REQUALIFICATION",
+        category: "Armed Security Annual Recertification",
+        price: "$125.00",
+        duration: "Scheduled Range Session",
+        location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
+        description: "Annual qualification course required by the IDFPR to maintain an active Firearms Control Card (Tan Card) for employed armed security officers in Illinois.",
         curriculum: [
-            "All 20 hours of statutory unarmed security training",
-            "All 28 hours of armed firearms security instruction",
-            "Classroom law, report writing, and live-fire range qualification",
-            "Assistance with IDFPR PERC and Firearms Control Card application filing"
+            "Review of safety procedures, holster inspection, and state guidelines",
+            "State-mandated qualification course of fire",
+            "Official instructor sign-off paperwork for employer and IDFPR records"
         ],
         prerequisites: [
-            "Must be at least 21 years of age for armed qualification",
-            "Clean criminal record (no felonies or disqualifying battery)",
-            "Duty belt required"
+            "Current or previously issued Firearms Control Card holder",
+            "Approved duty firearm and retention holster"
         ],
-        cancellation: "No refunds. Rescheduling permitted within 3 months."
+        cancellation: "Rescheduling permitted with 48 hours notice."
+    },
+    "firearm-upgrade": {
+        title: "SECURITY FIREARM UPGRADE QUALIFICATION",
+        category: "Armed Security Multi-Weapon Endorsement",
+        price: "$125.00",
+        duration: "Concurrent Range Session",
+        location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
+        description: "For armed security officers seeking to add secondary firearm endorsements (such as adding semi-automatic handgun to revolver or vice versa) to their IDFPR Tan Card.",
+        curriculum: [
+            "Proficiency and manual of arms on additional weapon platform",
+            "Holster drawing and tactical reloading drills",
+            "Live-fire qualification test on new weapon platform"
+        ],
+        prerequisites: [
+            "Active or pending Armed Security Officer certification",
+            "Firearm to be endorsed and suitable retention holster"
+        ],
+        cancellation: "Standard 3-month rescheduling policy applies."
     },
     "ccl-16": {
         title: "16 HR IL CONCEALED CARRY COURSE",
         category: "Standard Illinois Concealed Carry License (CCL)",
         price: "$200.00",
-        sezzle: "4 bi-weekly payments of $50.00 with Sezzle",
         duration: "2 Full Days (16 Hours Total)",
-        location: "921 E 40th St, Chicago, IL & Range",
+        location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
         description: "Full state curriculum approved by the Illinois State Police (ISP) for individuals seeking their Illinois Concealed Carry License without prior training exemptions.",
         curriculum: [
-            "Firearm safety rules and fundamentals of pistol shooting",
+            "Firearm safety rules and fundamentals of defensive pistol shooting",
             "Holster retention, concealed draw stroke, and malfunction clearing",
             "Illinois Concealed Carry Act (430 ILCS 66) & prohibited carry locations",
             "Federal firearms laws and interstate travel regulations",
@@ -90,59 +85,41 @@ const COURSE_DATABASE = {
         prerequisites: [
             "Must be at least 21 years old",
             "Valid FOID Card or eligible for FOID",
-            "Eye & ear protection and belt for range day"
+            "Suitable belt for range day holster work"
         ],
         cancellation: "No refunds. Classes can be rescheduled within 3 months."
-    },
-    "ccl-12": {
-        title: "12 HR IL CONCEALED CARRY COURSE",
-        category: "Partial Credit CCL (4 Hours Prior Credit)",
-        price: "$175.00",
-        sezzle: "4 bi-weekly payments with Sezzle",
-        duration: "12 Hours Total (Day 1 Afternoon & Day 2)",
-        location: "921 E 40th St, Chicago, IL & Range",
-        description: "For students who possess 4 hours of prior state-recognized training (such as Illinois DNR Hunter Safety, Utah CCL, Florida CCL, or Nevada CCW).",
-        curriculum: [
-            "Advanced defensive mindset and situational awareness",
-            "Full Illinois statutory law breakdown (430 ILCS 66)",
-            "Live-fire range qualification test"
-        ],
-        prerequisites: [
-            "Proof of 4-hour prior approved training certificate",
-            "21+ years old, FOID card eligible"
-        ],
-        cancellation: "Standard 3-month rescheduling policy applies."
     },
     "ccl-8": {
         title: "8 HR IL CONCEALED CARRY COURSE",
         category: "8-Hour Prior Credit CCL (NRA Recognized)",
         price: "$150.00",
-        sezzle: "4 bi-weekly payments with Sezzle",
         duration: "1 Full Day (8 Hours)",
-        location: "921 E 40th St, Chicago, IL & Range",
+        location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
         description: "For students who possess 8 hours of prior recognized NRA firearms training (such as NRA Basic Pistol, NRA Personal Protection in the Home, or NRA Law Enforcement).",
         curriculum: [
             "Illinois Concealed Carry Act comprehensive legal review",
-            "Justifiable use of deadly force under Illinois law",
-            "Live-fire 30-round qualification"
+            "Justifiable use of deadly force under Illinois law (720 ILCS 5/7-1)",
+            "Live-fire 30-round ISP qualification test at Eagle Sports Range"
         ],
         prerequisites: [
             "Official Certificate from recognized 8-hour prior course",
-            "Must be at least 21 years old"
+            "Must be at least 21 years old",
+            "Valid FOID Card or eligibility"
         ],
         cancellation: "Standard 3-month rescheduling policy applies."
     },
     "ccl-military": {
         title: "8 HR IL CCL – MILITARY & LAW ENFORCEMENT",
-        category: "Active & Veteran Service Member Special",
-        price: "$100.00",
-        sezzle: "4 bi-weekly payments of $25.00 with Sezzle",
+        category: "Military & First Responder Special",
+        price: "$125.00",
         duration: "1 Full Day (8 Hours)",
-        location: "921 E 40th St, Chicago, IL & Range",
-        description: "Specially discounted course for active-duty military, veterans with DD-214 honorable discharge, active/retired police officers, and correctional personnel.",
+        location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
+        description: "Specially discounted course for active-duty military, veterans with DD-214 honorable discharge, active/retired police officers, and correctional personnel. Your service grants you 8 hours of prior credit, requiring only this 8-hour law and range qualification session.",
         curriculum: [
-            "Illinois law and lawful use of force updates",
-            "Public interactions and LE contact guidelines for armed citizens",
+            "Illinois statutory law and lawful use of force updates",
+            "Public interactions and law enforcement contact guidelines for armed citizens",
             "Official ISP live-fire range qualification test"
         ],
         prerequisites: [
@@ -154,57 +131,19 @@ const COURSE_DATABASE = {
     "ccl-refresher": {
         title: "3 HR IL CONCEALED CARRY REFRESHER COURSE",
         category: "5-Year State License Renewal",
-        price: "$50.00",
-        sezzle: "Pay in full or use Sezzle",
+        price: "$125.00",
         duration: "3 Hours (Classroom & Range)",
-        location: "921 E 40th St, Chicago, IL & Range",
+        location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
         description: "Required state refresher course every 5 years for Illinois Concealed Carry License holders to renew their permit with the Illinois State Police.",
         curriculum: [
-            "Review of Illinois Concealed Carry Act changes and recent case law",
-            "Mental conditioning and defensive decision-making",
+            "Review of Illinois Concealed Carry Act changes and recent case law updates",
+            "Mental conditioning, situational awareness, and defensive decision-making",
             "Official 30-round live-fire qualification"
         ],
         prerequisites: [
             "Current or expiring Illinois Concealed Carry License",
-            "Personal firearm, holster, and 30 rounds of ammunition"
-        ],
-        cancellation: "Standard 3-month rescheduling policy applies."
-    },
-    "firearm-requal": {
-        title: "SECURITY FIREARM REQUALIFICATION",
-        category: "Annual Armed Security Recertification",
-        price: "$50.00",
-        sezzle: "Pay in full or use Sezzle",
-        duration: "Scheduled Range Session",
-        location: "Range Facility, Chicago, IL",
-        description: "Annual qualification course required by the IDFPR to maintain an active Firearms Control Card (Tan Card) for working armed security officers.",
-        curriculum: [
-            "Review of safety procedures and firearm inspection",
-            "State-mandated qualification course of fire",
-            "Official instructor sign-off paperwork for employer & state records"
-        ],
-        prerequisites: [
-            "Current or previous Firearms Control Card holder",
-            "Approved duty firearm and holster"
-        ],
-        cancellation: "Rescheduling permitted with 48 hours notice."
-    },
-    "firearm-upgrade": {
-        title: "SECURITY FIREARM UPGRADE QUALIFICATION",
-        category: "Multi-Weapon Endorsement",
-        price: "$50.00",
-        sezzle: "Pay in full or use Sezzle",
-        duration: "Concurrent Range Session",
-        location: "Range Facility, Chicago, IL",
-        description: "For armed security officers seeking to add secondary firearm endorsements (e.g. adding semi-automatic to revolver or vice versa) to their IDFPR Tan Card.",
-        curriculum: [
-            "Proficiency and manual of arms on additional weapon platform",
-            "Holster drawing and tactical reloading drills",
-            "Live-fire qualification test on new weapon"
-        ],
-        prerequisites: [
-            "Active or pending Armed Security Officer certification",
-            "Firearm to be endorsed"
+            "Approved firearm and belt holster"
         ],
         cancellation: "Standard 3-month rescheduling policy applies."
     }
@@ -221,8 +160,16 @@ function openCourseModal(courseId) {
         <h3 class="modal-course-title">${course.title}</h3>
         <div class="modal-price-strip">
             <span class="modal-price-number">${course.price}</span>
-            <span class="modal-sezzle-note"><i class="fas fa-credit-card"></i> ${course.sezzle}</span>
         </div>
+
+        ${course.rangeNote ? `
+        <div class="modal-range-included-box" style="background:rgba(128,163,21,0.12); border:1px solid rgba(128,163,21,0.35); border-radius:6px; padding:12px 14px; margin-bottom:16px; font-size:0.88rem; color:#e2e8f0; display:flex; gap:10px; align-items:flex-start;">
+            <i class="fas fa-bullseye text-green" style="font-size:1.1rem; margin-top:2px; color:var(--brand-green-bright);"></i>
+            <div>
+                <strong style="color:#fff;">Range Equipment &amp; Fees Included:</strong><br>
+                ${course.rangeNote}
+            </div>
+        </div>` : ''}
 
         <h5 class="modal-section-h5"><i class="fas fa-clock"></i> Course Duration &amp; Schedule</h5>
         <p class="modal-body-p">${course.duration}</p>
@@ -289,7 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const filterValue = btn.getAttribute("data-filter");
 
             courseCards.forEach(card => {
-                if (filterValue === "all" || card.getAttribute("data-category") === filterValue) {
+                const cardCategory = card.getAttribute("data-category") || "";
+                const categories = cardCategory.split(" ");
+                if (filterValue === "all" || categories.includes(filterValue)) {
                     card.style.display = "flex";
                 } else {
                     card.style.display = "none";
@@ -368,10 +317,6 @@ function handleContactSubmit(e) {
     `;
     feedback.style.display = "block";
 
-    // Also trigger mailto in background if client allows
-    const mailSubject = encodeURIComponent(`Platforms Training Academy Inquiry - ${name}`);
-    const mailBody = encodeURIComponent(`Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nCourse: ${course}\n\nMessage:\n${message}`);
-    
     // Save to localStorage as a submission record
     const submissions = JSON.parse(localStorage.getItem("platforms_inquiries") || "[]");
     submissions.push({ name, phone, email, course, message, date: new Date().toISOString() });

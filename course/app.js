@@ -90,7 +90,7 @@ class SecurityCourseApp {
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
             setTimeout(() => {
-                this.manualSaveProgress("Course enrollment confirmed ($50.00)! Full 20-hour curriculum unlocked.");
+                this.manualSaveProgress("Course enrollment confirmed ($80.00)! Full 20-hour curriculum unlocked.");
             }, 500);
         }
 
@@ -1411,7 +1411,7 @@ class SecurityCourseApp {
                 if (payGate) payGate.style.display = 'block';
                 if (certForm) certForm.style.display = 'none';
                 if (mainActionBtn) {
-                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($50.00)`;
+                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($80.00)`;
                     mainActionBtn.onclick = () => {
                         if (payGate) payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     };
@@ -1800,7 +1800,7 @@ class SecurityCourseApp {
         this.saveState();
 
         if (toast && toastMsg) {
-            toastMsg.textContent = "Payment authorized successfully ($50.00)! Official certificate unlocked.";
+            toastMsg.textContent = "Payment authorized successfully ($80.00)! Official certificate unlocked.";
             toast.style.display = 'flex';
             setTimeout(() => { toast.style.display = 'none'; }, 4000);
         }
@@ -2515,7 +2515,7 @@ class SecurityCourseApp {
                     <div class="admin-stat-lbl">Active Candidate</div>
                 </div>
                 <div class="admin-stat-card">
-                    <div class="admin-stat-val">${this.isPaid ? '$50' : '$0'}</div>
+                    <div class="admin-stat-val">${this.isPaid ? '$80' : '$0'}</div>
                     <div class="admin-stat-lbl">Revenue Authorized</div>
                 </div>
                 <div class="admin-stat-card">
@@ -2541,7 +2541,7 @@ class SecurityCourseApp {
                         <td>${s.email || 'N/A'}<br><small style="color:var(--text-muted);">${s.agency || 'N/A'}</small></td>
                         <td>${s.completed_modules} / 10</td>
                         <td>${s.best_score ? s.best_score + '%' : 'Not taken'}</td>
-                        <td>${s.is_paid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $50</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
+                        <td>${s.is_paid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $80</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
                         <td>${s.cert_id ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${s.cert_id}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>
                     </tr>
                 `).join('');
@@ -2552,7 +2552,7 @@ class SecurityCourseApp {
                         <td>${this.studentEmail}<br><small style="color:var(--text-muted);">${this.studentAgency}</small></td>
                         <td>${this.getCompletedLessonsCount()} / 10</td>
                         <td>${this.examCompleted ? this.examPercentage + '%' : 'In Progress'}</td>
-                        <td>${this.isPaid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $50</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
+                        <td>${this.isPaid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $80</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
                         <td>${this.isCertLocked ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${this.issuedCertId || 'PTA-IL-SEALED'}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>
                     </tr>
                 `;

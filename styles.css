@@ -213,16 +213,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   MAIN STICKY HEADER
+   MAIN HEADER (SCROLLS WITH PAGE)
    ========================================================================== */
 .main-header {
-    background-color: rgba(18, 20, 24, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(18, 20, 24, 0.98);
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    position: relative;
+    z-index: 100;
     height: var(--header-height);
     display: flex;
     align-items: center;
@@ -612,25 +609,44 @@ h1, h2, h3, h4, h5, h6 {
    ========================================================================== */
 .hero-section {
     position: relative;
-    padding: 110px 0 90px 0;
-    background: radial-gradient(circle at 50% 20%, #192015 0%, #0a0b0d 75%);
+    padding: 120px 0 90px 0;
+    background: #0a0b0d;
     border-bottom: 1px solid var(--border-color);
     overflow: hidden;
+}
+
+.hero-bg-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: 1;
+    opacity: 0.35;
+    filter: brightness(0.65) contrast(1.15);
+    pointer-events: none;
 }
 
 .hero-bg-overlay {
     position: absolute;
     inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.72) 0%, rgba(10, 11, 13, 0.94) 85%);
     background-image: 
+        radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.6) 0%, rgba(10, 11, 13, 0.94) 85%),
         linear-gradient(rgba(128, 163, 21, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(128, 163, 21, 0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-size: auto, 40px 40px, 40px 40px;
+    z-index: 2;
     pointer-events: none;
 }
 
 .hero-content-wrapper {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     text-align: center;
     max-width: 960px;
 }
@@ -896,54 +912,24 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--bg-primary);
 }
 
-.sezzle-promo-banner {
-    background: linear-gradient(90deg, #182210 0%, #15181f 100%);
-    border: 1px solid rgba(128, 163, 21, 0.35);
-    border-radius: var(--radius-md);
-    padding: 16px 24px;
+.course-range-perk {
+    margin: 10px 0 6px 0;
+    padding: 8px 12px;
+    background: rgba(128, 163, 21, 0.1);
+    border: 1px solid rgba(128, 163, 21, 0.3);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: #e2e8f0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 34px;
-    flex-wrap: wrap;
-    gap: 16px;
+    gap: 8px;
+    line-height: 1.35;
 }
 
-.sezzle-promo-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-}
-
-.sezzle-logo-img {
-    height: 40px;
-    width: auto;
-}
-
-.sezzle-promo-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.sezzle-promo-text strong {
-    color: var(--text-white);
-    font-size: 1.05rem;
-}
-
-.sezzle-promo-text span {
-    color: #cbd5e1;
-    font-size: 0.88rem;
-}
-
-.sezzle-promo-badge span {
-    background: var(--brand-green);
-    color: #ffffff;
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 20px;
-    letter-spacing: 0.6px;
+.course-range-perk i {
+    color: var(--brand-green-bright);
+    font-size: 0.95rem;
+    flex-shrink: 0;
 }
 
 .course-filter-bar {
@@ -2088,13 +2074,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
 }
 
-.modal-sezzle-note {
-    font-size: 0.85rem;
-    color: #cbd5e1;
-    background: rgba(128, 163, 21, 0.12);
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
-}
+
 
 .modal-section-h5 {
     font-size: 0.95rem;
