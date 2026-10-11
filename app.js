@@ -76,7 +76,46 @@ class SecurityCourseApp {
         this.updateHeaderProfileDisplay();
         this.updateAdminModeUI();
         this.syncWithBackend();
+        this.enforcePermanentMute();
     }
+
+    enforcePermanentMute() {
+        const lockVideo = (vid) => {
+            if (!vid) return;
+            vid.muted = true;
+            vid.volume = 0;
+            vid.controls = false;
+            vid.removeAttribute('controls');
+            vid.setAttribute('playsinline', '');
+            vid.setAttribute('muted', '');
+            vid.setAttribute('disablepictureinpicture', '');
+            vid.addEventListener('volumechange', () => {
+                if (!vid.muted || vid.volume > 0) {
+                    vid.muted = true;
+                    vid.volume = 0;
+                }
+            });
+            vid.addEventListener('contextmenu', (e) => e.preventDefault());
+        };
+
+        document.querySelectorAll('video').forEach(lockVideo);
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(m => {
+                m.addedNodes.forEach(node => {
+                    if (node.nodeName === 'VIDEO') {
+                        lockVideo(node);
+                    } else if (node.querySelectorAll) {
+                        node.querySelectorAll('video').forEach(lockVideo);
+                    }
+                });
+            });
+        });
+        if (document.body) {
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+
 
     // =========================================================================
     // LocalStorage State Management
@@ -1044,10 +1083,11 @@ class SecurityCourseApp {
                     `;
                 } else if (q.illustration.type === 'video') {
                     visualBox.innerHTML = `
-                        <video controls autoplay muted loop playsinline>
+                        <video autoplay muted loop playsinline disablePictureInPicture>
                             <source src="${q.illustration.src}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
+
                         <div class="visual-caption">
                             <strong><i class="fas fa-video"></i> TACTICAL VIDEO DEMONSTRATION:</strong> ${q.illustration.caption}
                         </div>

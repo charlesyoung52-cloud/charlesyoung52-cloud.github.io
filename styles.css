@@ -409,11 +409,28 @@ h1, h2, h3, h4, h5, h6 {
     background: #000;
 }
 
-.hero-video {
+.hero-video,
+video {
     width: 100%;
     height: auto;
     display: block;
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
 }
+
+video::-webkit-media-controls {
+    display: none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
 
 /* Course Curriculum Grid */
 .section-title {
