@@ -1888,21 +1888,12 @@ class SecurityCourseApp {
             clearBtn.addEventListener('click', () => this.clearCurrentAnswer());
         }
 
-        // Mobile Header Scroll Fading: Fade/slide header away when scrolling down, restore on scroll up
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('site-header');
-            if (!header) return;
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > 80 && currentScrollY > lastScrollY) {
-                // Scrolling down
-                header.classList.add('header-hidden');
-            } else {
-                // Scrolling up
-                header.classList.remove('header-hidden');
-            }
-            lastScrollY = currentScrollY;
-        }, { passive: true });
+        // Stationary Header: Keep header firmly anchored at top of page across all devices and mobile
+        const siteHeaderEl = document.getElementById('site-header');
+        if (siteHeaderEl) {
+            siteHeaderEl.classList.remove('header-hidden');
+        }
+
 
         // Window beforeunload security warning for certificate holders
         window.addEventListener('beforeunload', (e) => {

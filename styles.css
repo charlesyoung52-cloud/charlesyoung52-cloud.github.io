@@ -88,20 +88,21 @@ h1, h2, h3, h4, h5, h6 {
    Header & Top Navigation Bar
    ========================================================================== */
 .site-header {
-    background: rgba(18, 20, 24, 0.95);
+    background: rgba(18, 20, 24, 0.98);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 2px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 1000;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
 }
 
 .site-header.header-hidden {
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
 }
+
 
 .header-container {
     max-width: 1440px;
@@ -1481,11 +1482,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
     .hero-banner {
+
         padding: 24px;
     }
     .hero-content h2 {
@@ -3870,24 +3868,120 @@ button:disabled.btn-primary {
     background: rgba(255, 255, 255, 0.03);
 }
 
-/* Mobile & Touch Optimizations */
+/* Mobile Stationary Header & Touch Optimizations */
 @media (max-width: 768px) {
+    .site-header,
+    .site-header.header-hidden {
+        position: sticky !important;
+        top: 0 !important;
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+        z-index: 1000 !important;
+        background: rgba(14, 16, 20, 0.98) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-bottom: 2px solid var(--border-color) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+        width: 100% !important;
+    }
+
     .header-container {
-        padding: 8px 14px;
-        gap: 8px;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 8px 12px !important;
+        gap: 8px 0 !important;
+        max-width: 100% !important;
     }
+
+    .brand-wrapper {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
     .brand-logo {
-        height: 36px;
+        height: 32px !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
     }
+
+    .brand-info {
+        min-width: 0 !important;
+    }
+
     .brand-info h1 {
-        font-size: 0.92rem;
+        font-size: 0.88rem !important;
+        letter-spacing: 0.3px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin: 0 !important;
     }
+
     .brand-info span {
-        display: none;
+        display: none !important;
     }
+
+    .header-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+    }
+
+    .header-profile-btn {
+        padding: 5px 10px !important;
+        font-size: 0.78rem !important;
+        gap: 6px !important;
+        border-radius: var(--radius-sm) !important;
+    }
+
+    .header-profile-btn #header-student-name-display {
+        max-width: 85px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+    }
+
+    .main-nav {
+        width: 100% !important;
+        order: 3 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        white-space: nowrap !important;
+        padding: 4px 0 2px 0 !important;
+        scrollbar-width: none !important;
+    }
+
+    .main-nav::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .nav-btn {
+        flex: 0 0 auto !important;
+        padding: 6px 12px !important;
+        font-size: 0.8rem !important;
+        border-radius: 4px !important;
+        white-space: nowrap !important;
+    }
+
     .btn-guide-header, .btn-save-progress {
-        display: none;
+        display: none !important;
     }
+
     .unified-narrator-bar {
         flex-direction: column;
         align-items: stretch;
