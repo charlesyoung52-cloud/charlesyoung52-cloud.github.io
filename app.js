@@ -77,6 +77,7 @@ class SecurityCourseApp {
         this.updateAdminModeUI();
         this.syncWithBackend();
         this.enforcePermanentMute();
+        this.initWixIntegration();
     }
 
     enforcePermanentMute() {
@@ -1967,9 +1968,143 @@ class SecurityCourseApp {
         if (modal) modal.classList.remove('open');
     }
 
+    // =========================================================================
+    // Wix Headless Integration & Member State Synchronization
+    // =========================================================================
+    initWixIntegration() {
+        this.updateWixUI = () => {
+            if (!window.wixClient) return;
+            const status = window.wixClient.getStatus();
+            const badge = document.getElementById('wix-status-badge');
+            const badgeText = document.getElementById('wix-status-text');
+            const authBox = document.getElementById('wix-authenticated-box');
+            const unauthBox = document.getElementById('wix-unauthenticated-box');
+            const headerWixInd = document.getElementById('header-wix-indicator');
+            const headerWixText = document.getElementById('header-wix-text');
+
+            if (status.isLoggedIn && status.member) {
+                if (badge) {
+                    badge.className = 'wix-status-badge connected';
+                    if (badgeText) badgeText.textContent = 'Connected (Wix)';
+                }
+                if (authBox) authBox.style.display = 'block';
+                if (unauthBox) unauthBox.style.display = 'none';
+
+                const dispName = document.getElementById('wix-member-display-name');
+                const dispEmail = document.getElementById('wix-member-display-email');
+                const avatarInitials = document.getElementById('wix-member-avatar-initials');
+
+                if (dispName) dispName.textContent = status.member.fullName;
+                if (dispEmail) dispEmail.textContent = status.member.email;
+                if (avatarInitials) {
+                    const parts = (status.member.fullName || 'SO').split(' ');
+                    avatarInitials.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0][0] || 'S');
+                }
+
+                if (headerWixInd) {
+                    headerWixInd.style.background = 'rgba(16, 185, 129, 0.2)';
+                    headerWixInd.style.color = 'var(--brand-green-bright)';
+                    headerWixInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                }
+                if (headerWixText) headerWixText.textContent = 'Wix Member';
+            } else if (status.isConfigured) {
+                if (badge) {
+                    badge.className = 'wix-status-badge configured';
+                    if (badgeText) badgeText.textContent = 'Ready to Sign In';
+                }
+                if (authBox) authBox.style.display = 'none';
+                if (unauthBox) unauthBox.style.display = 'block';
+
+                if (headerWixInd) {
+                    headerWixInd.style.background = 'rgba(245, 158, 11, 0.15)';
+                    headerWixInd.style.color = '#fbbf24';
+                    headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+                }
+                if (headerWixText) headerWixText.textContent = 'Wix Link';
+            } else {
+                if (badge) {
+                    badge.className = 'wix-status-badge standalone';
+                    if (badgeText) badgeText.textContent = 'Standalone Mode';
+                }
+                if (authBox) authBox.style.display = 'none';
+                if (unauthBox) unauthBox.style.display = 'block';
+
+                if (headerWixInd) {
+                    headerWixInd.style.background = 'rgba(255, 255, 255, 0.08)';
+                    headerWixInd.style.color = '#94a3b8';
+                    headerWixInd.style.border = 'none';
+                }
+                if (headerWixText) headerWixText.textContent = 'Wix';
+            }
+        };
+
+        const handleLogin = async (member) => {
+            if (!member) return;
+            if (member.fullName) {
+                this.studentCertData.name = member.fullName.toUpperCase();
+            }
+            if (member.email) {
+                this.studentEmail = member.email;
+                localStorage.setItem('platforms_student_email', this.studentEmail);
+            }
+            if (member.address) this.studentCertData.address = member.address;
+            if (member.city) this.studentCertData.city = member.city;
+            if (member.state) this.studentCertData.state = member.state;
+            if (member.zip) this.studentCertData.zip = member.zip;
+
+            this.updateHeaderProfileDisplay();
+            this.syncCertFormToPreview();
+            this.saveState();
+            this.updateWixUI();
+
+            // Try to sync with Wix Data or retrieve existing cloud progress
+            if (window.wixClient) {
+                try {
+                    const cloudProgress = await window.wixClient.fetchProgressFromWix();
+                    if (cloudProgress && cloudProgress.completedModulesCount > this.getCompletedLessonsCount()) {
+                        console.log("[Wix Headless] Restoring cloud progress from Wix Data:", cloudProgress);
+                        this.manualSaveProgress("Restored verified course progress from platformstraining.com!");
+                    } else {
+                        window.wixClient.syncProgressToWix(this);
+                    }
+                } catch (e) {
+                    console.warn("[Wix Headless] Cloud progress check notice:", e);
+                }
+            }
+        };
+
+        window.addEventListener('wix:state-changed', (e) => {
+            this.updateWixUI();
+            if (e.detail?.isLoggedIn && e.detail?.member) {
+                handleLogin(e.detail.member);
+            }
+        });
+
+        window.addEventListener('wix:login-success', (e) => {
+            if (e.detail?.member) {
+                handleLogin(e.detail.member);
+            }
+        });
+
+        window.addEventListener('wix:logout-success', () => {
+            this.updateWixUI();
+        });
+
+        // Initial UI sync
+        setTimeout(() => this.updateWixUI(), 250);
+    }
+
+    toggleWixSetupGuide() {
+        const guide = document.getElementById('wix-setup-guide');
+        if (guide) {
+            guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
     openLoginModal() {
         const modal = document.getElementById('modal-student-login');
         if (!modal) return;
+        if (this.updateWixUI) this.updateWixUI();
 
         // Populate fields
         const nameInput = document.getElementById('login-modal-name');
@@ -2040,6 +2175,10 @@ class SecurityCourseApp {
         this.lastSavedTimestamp = `Today at ${timeStr}`;
         localStorage.setItem('platforms_last_saved', this.lastSavedTimestamp);
         this.saveState();
+
+        if (window.wixClient && window.wixClient.isLoggedIn && window.wixClient.isLoggedIn()) {
+            window.wixClient.syncProgressToWix(this);
+        }
 
         const toast = document.getElementById('lms-toast');
         const toastMsg = document.getElementById('lms-toast-msg');

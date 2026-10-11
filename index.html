@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=2.4">
+    <link rel="stylesheet" href="styles.css?v=2.5">
 
 
 
@@ -64,6 +64,7 @@
                 </button>
                 <button class="header-profile-btn" onclick="app.openLoginModal()" title="Student Account & Profile">
                     <i class="fas fa-user-circle"></i> <span id="header-student-name-display">Student Officer</span> <span class="profile-online-dot"></span>
+                    <span id="header-wix-indicator" style="font-size:0.68rem; padding:1px 6px; border-radius:4px; background:rgba(255,255,255,0.1); color:#94a3b8; margin-left:2px; font-weight:600;"><i class="fab fa-wix"></i> <span id="header-wix-text">Wix</span></span>
                 </button>
             </div>
         </div>
@@ -415,6 +416,12 @@
                         <button class="btn-primary" style="width:100%; padding:14px; font-size:1.05rem;" onclick="app.processCoursePayment()">
                             <i class="fas fa-lock"></i> Authorize &amp; Unlock Official Certificate ($50.00)
                         </button>
+                        <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <span style="font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-shield-alt"></i> Official payment handled via Platforms Training Academy</span>
+                            <button class="btn-secondary" style="font-size:0.82rem; padding:8px 14px; border-color:var(--brand-green-bright); color:var(--brand-green-bright);" onclick="wixClient.redirectToCheckout()">
+                                <i class="fab fa-wix"></i> Pay on platformstraining.com &rarr;
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -864,6 +871,65 @@
                 Manage your student credentials, save course progression, and export or resume your state training record.
             </p>
 
+            <!-- Wix Headless Single Sign-On & Cloud Sync Card -->
+            <div class="wix-integration-card" id="wix-sso-card">
+                <div class="wix-card-header">
+                    <h4 class="wix-card-title">
+                        <i class="fab fa-wix"></i> Wix Headless Member Integration
+                    </h4>
+                    <div id="wix-status-badge-container">
+                        <span class="wix-status-badge standalone" id="wix-status-badge">
+                            <span class="wix-status-dot"></span>
+                            <span id="wix-status-text">Standalone Mode</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Authenticated Wix Member Details (Visible when logged in) -->
+                <div id="wix-authenticated-box" style="display:none;">
+                    <div class="wix-member-info">
+                        <div class="wix-member-avatar" id="wix-member-avatar-initials">SO</div>
+                        <div class="wix-member-details">
+                            <div class="wix-member-name" id="wix-member-display-name">Officer Name</div>
+                            <div class="wix-member-email" id="wix-member-display-email">student@platformstraining.com</div>
+                        </div>
+                        <button class="btn-wix-logout" onclick="wixClient.logout()" title="Sign out of Wix">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </button>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--brand-green-bright); display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-shield-alt"></i> Connected to platformstraining.com &bull; Auto-syncing course progression &amp; IDFPR certificate.
+                    </div>
+                </div>
+
+                <!-- Unauthenticated / Setup Wix Box (Visible when not logged in) -->
+                <div id="wix-unauthenticated-box">
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin:0 0 12px 0;">
+                        Sign in with your official <strong>platformstraining.com</strong> member account to automatically load your registered officer credentials, sync training progression to the cloud, and verify state exam certification.
+                    </p>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <button class="btn-wix-login" onclick="wixClient.login()">
+                            <i class="fab fa-wix"></i> Sign In with Wix Member Account
+                        </button>
+                        <button class="btn-secondary" style="font-size:0.82rem; padding:8px 12px;" onclick="app.toggleWixSetupGuide()">
+                            <i class="fas fa-cog"></i> Setup / Client ID Guide
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Setup Guide for User -->
+                    <div id="wix-setup-guide" class="wix-config-guide-details" style="display:none;">
+                        <strong style="color:#fff;"><i class="fas fa-key"></i> Connecting Your Wix Site (platformstraining.com):</strong>
+                        <ol style="margin:6px 0 0 16px; padding:0; display:flex; flex-direction:column; gap:4px;">
+                            <li>Log into your Wix Dashboard (<a href="https://manage.wix.com" target="_blank" style="color:var(--brand-green-bright);">manage.wix.com</a>).</li>
+                            <li>Go to <strong>Settings</strong> &rarr; <strong>Headless Settings</strong> (or Developer Tools &rarr; OAuth Apps).</li>
+                            <li>Create an OAuth App named <em>Platforms Online Course</em>.</li>
+                            <li>Add <code>https://charlesyoung52-cloud.github.io</code> and <code>http://127.0.0.1:5000</code> to Allowed Origins &amp; Redirect URIs.</li>
+                            <li>Copy the <strong>Client ID</strong> and paste it into <code>wix-config.js</code>.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
             <div class="profile-modal-grid">
                 <!-- Column 1: Student Information -->
                 <div class="profile-card-box">
@@ -1048,8 +1114,11 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="data.js?v=2.4"></script>
-    <script src="app.js?v=2.4"></script>
+    <script src="wix-config.js?v=2.5"></script>
+    <script src="wix-sdk.bundle.js?v=2.5"></script>
+    <script src="wix-client.js?v=2.5"></script>
+    <script src="data.js?v=2.5"></script>
+    <script src="app.js?v=2.5"></script>
 </body>
 
 
