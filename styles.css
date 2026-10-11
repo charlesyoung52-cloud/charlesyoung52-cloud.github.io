@@ -2078,6 +2078,65 @@ video::-webkit-media-controls-panel {
     border-radius: 4px;
 }
 
+.start-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--brand-green-bright);
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 3px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.lesson-card:hover .start-pill {
+    background: var(--brand-green-bright);
+    color: #0f172a;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.resume-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 3px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.lesson-card:hover .resume-pill {
+    background: #38bdf8;
+    color: #0f172a;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.mastered-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--brand-green-bright);
+    background: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    padding: 3px 10px;
+    border-radius: 4px;
+}
+
 /* Exam Locked View */
 .exam-locked-card {
     background: var(--bg-card);

@@ -222,6 +222,15 @@ class SecurityCourseApp {
                this.isQuizPassed(lessonId);
     }
 
+    isLessonStarted(lessonId) {
+        const sec = this.moduleSections[lessonId];
+        if (sec && (sec.study || sec.scenario || sec.quiz)) return true;
+        const answers = this.colAnswers[lessonId];
+        if (answers && Object.keys(answers).length > 0) return true;
+        if (this.scenarioSelections[lessonId] !== undefined) return true;
+        return false;
+    }
+
     isLessonUnlocked(lessonId) {
         if (this.isAdminMode) return true;
         if (lessonId <= 1) return true;
@@ -354,8 +363,10 @@ class SecurityCourseApp {
                             ${!isUnlocked 
                                 ? '<span class="lock-pill"><i class="fas fa-lock"></i> Locked</span>'
                                 : (isCompleted 
-                                    ? '<span style="color:var(--brand-green-bright); font-weight:700;"><i class="fas fa-check-double"></i> Mastered</span>' 
-                                    : '<span style="color:#f59e0b; font-weight:600;"><i class="fas fa-spinner fa-spin"></i> In Progress</span>')}
+                                    ? '<span class="mastered-pill"><i class="fas fa-check-double"></i> Mastered</span>' 
+                                    : (this.isLessonStarted(lesson.id)
+                                        ? '<span class="resume-pill"><i class="fas fa-play-circle"></i> Resume</span>'
+                                        : '<span class="start-pill"><i class="fas fa-play"></i> Start</span>'))}
                         </span>
                     </div>
                 </div>
@@ -1985,7 +1996,7 @@ class SecurityCourseApp {
             if (status.isLoggedIn && status.member) {
                 if (badge) {
                     badge.className = 'wix-status-badge connected';
-                    if (badgeText) badgeText.textContent = 'Connected (Wix)';
+                    if (badgeText) badgeText.textContent = 'Connected (Verified)';
                 }
                 if (authBox) authBox.style.display = 'block';
                 if (unauthBox) unauthBox.style.display = 'none';
@@ -2006,7 +2017,7 @@ class SecurityCourseApp {
                     headerWixInd.style.color = 'var(--brand-green-bright)';
                     headerWixInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
                 }
-                if (headerWixText) headerWixText.textContent = 'Wix Member';
+                if (headerWixText) headerWixText.textContent = 'Member';
             } else if (status.isConfigured) {
                 if (badge) {
                     badge.className = 'wix-status-badge configured';
@@ -2020,7 +2031,7 @@ class SecurityCourseApp {
                     headerWixInd.style.color = '#fbbf24';
                     headerWixInd.style.border = '1px solid rgba(245, 158, 11, 0.3)';
                 }
-                if (headerWixText) headerWixText.textContent = 'Wix Link';
+                if (headerWixText) headerWixText.textContent = 'Sign In';
             } else {
                 if (badge) {
                     badge.className = 'wix-status-badge standalone';
@@ -2034,7 +2045,7 @@ class SecurityCourseApp {
                     headerWixInd.style.color = '#94a3b8';
                     headerWixInd.style.border = 'none';
                 }
-                if (headerWixText) headerWixText.textContent = 'Wix';
+                if (headerWixText) headerWixText.textContent = 'Account';
             }
         };
 
