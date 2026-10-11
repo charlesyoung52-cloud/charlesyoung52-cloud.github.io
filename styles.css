@@ -277,8 +277,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .brand-logo-img {
-    height: 42px;
+    height: 40px;
     width: auto;
+    max-width: 170px;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
@@ -514,7 +515,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .drawer-logo {
-    height: 32px;
+    height: 34px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
 }
 
 .drawer-close-btn {
@@ -2215,11 +2219,9 @@ h1, h2, h3, h4, h5, h6 {
         align-items: center;
         justify-content: space-between;
     }
-    .brand-title {
-        font-size: 0.95rem;
-    }
     .brand-logo-img {
-        height: 36px;
+        height: 34px;
+        max-width: 140px;
     }
     .header-book-btn {
         display: none;
