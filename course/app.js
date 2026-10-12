@@ -2040,9 +2040,9 @@ class SecurityCourseApp {
             });
         });
 
-        // Brand logo click returns to overview
+        // Brand logo click returns to overview only if not a link to another page
         const brand = document.querySelector('.brand-wrapper');
-        if (brand) {
+        if (brand && brand.tagName !== 'A') {
             brand.addEventListener('click', () => this.showView('overview'));
         }
 
