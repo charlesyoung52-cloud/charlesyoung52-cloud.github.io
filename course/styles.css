@@ -219,7 +219,7 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 24px;
-    height: 60px;
+    height: 68px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -241,9 +241,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .brand-logo-img, .brand-logo {
-    height: 40px;
+    height: 48px;
     width: auto;
-    max-width: 170px;
+    max-width: 220px;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
@@ -1584,15 +1584,16 @@ video::-webkit-media-controls-panel {
 }
 
 /* ==========================================================================
-   Footer
+   Footer (Compact & Full-Width Utilization)
    ========================================================================== */
 .site-footer {
     background: #060708;
     border-top: 1px solid var(--border-color);
-    padding: 40px 24px;
-    margin-top: 60px;
+    padding: 16px 32px;
+    margin-top: 30px;
     color: var(--text-dark);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
+    width: 100%;
 }
 
 .footer-content {
@@ -1602,7 +1603,8 @@ video::-webkit-media-controls-panel {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 16px;
+    width: 100%;
 }
 
 .footer-brand {
@@ -1612,7 +1614,10 @@ video::-webkit-media-controls-panel {
 }
 
 .footer-brand img {
-    height: 32px;
+    height: 34px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
 }
 
 /* ==========================================================================
