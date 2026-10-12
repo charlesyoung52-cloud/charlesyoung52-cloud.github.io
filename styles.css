@@ -2217,8 +2217,35 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ==========================================================================
    RESPONSIVE BREAKPOINTS (STATIONARY/STICKY HEADER & ZERO OVERFLOW)
-   ========================================================================== */
-@media (max-width: 1024px) {
+    ========================================================================== */
+@media (max-width: 1260px) and (min-width: 1081px) {
+    .nav-item {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+    .nav-item-online {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    .header-book-btn {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+    .brand-logo-img {
+        height: 42px;
+        max-width: 190px;
+    }
+}
+
+@media (max-width: 1080px) {
+    .badge-nra {
+        display: none !important;
+    }
+    .top-sep:last-of-type,
+    .top-loc {
+        display: none !important;
+    }
     .main-header {
         position: -webkit-sticky !important;
         position: sticky !important;
@@ -2229,10 +2256,15 @@ h1, h2, h3, h4, h5, h6 {
         right: 0 !important;
     }
     .desktop-nav {
-        display: none;
+        display: none !important;
     }
     .mobile-toggle-btn {
-        display: block;
+        display: block !important;
+    }
+    .header-book-btn {
+        display: inline-flex;
+        padding: 8px 14px;
+        font-size: 0.85rem;
     }
     .hero-main-title {
         font-size: 2.6rem;
@@ -2261,7 +2293,8 @@ h1, h2, h3, h4, h5, h6 {
     .contact-split-grid {
         grid-template-columns: 1fr;
     }
-    .footer-top-row {
+    .footer-top-row,
+    .footer-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
@@ -2276,12 +2309,12 @@ h1, h2, h3, h4, h5, h6 {
         left: 0 !important;
         right: 0 !important;
     }
-    .badge-nra {
-        display: none;
+    .badge-military {
+        display: none !important;
     }
-    .top-sep:last-of-type,
-    .top-loc {
-        display: none;
+    .top-contact-links .top-link:nth-of-type(2),
+    .top-contact-links .top-sep {
+        display: none !important;
     }
     .site-footer {
         padding: 20px 0 12px 0;
