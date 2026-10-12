@@ -112,6 +112,13 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.3;
 }
 
+.top-bar-container {
+    width: 100%;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
 .top-credential-inner {
     display: flex;
     justify-content: space-between;
@@ -1660,6 +1667,24 @@ video::-webkit-media-controls-panel {
         flex-direction: column;
         align-items: center;
         gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .badge-nra {
+        display: none;
+    }
+    .top-sep:last-of-type,
+    .top-loc {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .top-credential-inner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
     }
 }
 
