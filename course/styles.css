@@ -180,10 +180,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     gap: 6px;
     white-space: nowrap;
-}
-
-.top-link:hover {
-    color: var(--brand-green-bright);
+    cursor: default;
 }
 
 .top-link i {
