@@ -620,7 +620,7 @@
         </div>
     </div>
 
-    <script src="config.js?v=1.0"></script>
+    <script src="config.js?v=2.0"></script>
     <script>
         const ADMIN_PIN = "7738732591";
         let allStudents = [];
@@ -664,13 +664,18 @@
             loadSmtpConfig();
         }
 
+        function getApiBaseUrl() {
+            return (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+        }
+
         async function loadEmailJsConfig() {
             let service = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.serviceId) || localStorage.getItem('platforms_emailjs_service_id') || '';
             let template = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.templateId) || localStorage.getItem('platforms_emailjs_template_id') || '';
             let key = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.publicKey) || localStorage.getItem('platforms_emailjs_public_key') || '';
 
+            const baseUrl = getApiBaseUrl();
             try {
-                const res = await fetch('/api/auth/emailjs-config');
+                const res = await fetch(baseUrl + '/api/auth/emailjs-config');
                 if (res.ok) {
                     const data = await res.json();
                     if (data.public_key) {
@@ -710,8 +715,9 @@
             localStorage.setItem('platforms_emailjs_template_id', template);
             localStorage.setItem('platforms_emailjs_public_key', key);
 
+            const baseUrl = getApiBaseUrl();
             try {
-                await fetch('/api/auth/emailjs-config', {
+                await fetch(baseUrl + '/api/auth/emailjs-config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ service_id: service, template_id: template, public_key: key })
@@ -814,8 +820,9 @@
             let fromEmail = 'charlesyoung@platformstraining.com';
             let hasPassword = false;
 
+            const baseUrl = getApiBaseUrl();
             try {
-                const res = await fetch('/api/auth/smtp-config');
+                const res = await fetch(baseUrl + '/api/auth/smtp-config');
                 if (res.ok) {
                     const data = await res.json();
                     host = data.host || '';
@@ -858,8 +865,9 @@
             const fromEmail = (document.getElementById('admin-smtp-from').value || '').trim();
             const feedback = document.getElementById('smtp-feedback');
 
+            const baseUrl = getApiBaseUrl();
             try {
-                const res = await fetch('/api/auth/smtp-config', {
+                const res = await fetch(baseUrl + '/api/auth/smtp-config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -906,8 +914,9 @@
                 feedback.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Dispatching test email via server SMTP to ${testEmail}...`;
             }
 
+            const baseUrl = getApiBaseUrl();
             try {
-                const res = await fetch('/api/admin/test-smtp', {
+                const res = await fetch(baseUrl + '/api/admin/test-smtp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: testEmail })
@@ -947,7 +956,7 @@
         }
 
         async function fetchData() {
-            const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            const baseUrl = getApiBaseUrl();
             try {
                 // 1. Fetch metrics
                 const metricsRes = await fetch(baseUrl + '/api/metrics');

@@ -204,6 +204,14 @@ class SecurityCourseApp {
             localStorage.setItem('platforms_exam_attempts', String(this.examAttempts));
         }
         this.syncToLocalRegistry();
+
+        const studentId = this.studentEmail || (this.studentCertData && this.studentCertData.name);
+        if (studentId) {
+            this.apiCall('/api/progress/save', 'POST', {
+                student_id: studentId,
+                module_sections: this.moduleSections
+            });
+        }
     }
 
     restoreState() {
@@ -3621,8 +3629,12 @@ class SecurityCourseApp {
             };
             if (data && method !== 'GET') opts.body = JSON.stringify(data);
             const res = await fetch(url, opts);
-            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-            return await res.json();
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                return await res.json();
+            }
+            if (!res.ok) return null;
+            return await res.text();
         } catch (e) {
             return null;
         }

@@ -13,5 +13,5 @@ window.PLATFORMS_CONFIG = {
 
     // 2. Central Backend API URL for Cross-Device Student Progress & Admin Roster
     // When connected to a cloud backend (e.g. Render/Railway), all devices sync here in real time.
-    apiBaseUrl: ""
+    apiBaseUrl: "https://charlesyoung52-cloud-github-io.onrender.com"
 };
