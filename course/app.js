@@ -51,11 +51,11 @@ class SecurityCourseApp {
         this.pendingAuthEmail = '';
         this.isResettingPassword = false;
 
-        // EmailJS Configuration for Real MFA Emails
+        // EmailJS Configuration for Real MFA Emails (Reads from central config.js or storage)
         this.emailJsConfig = {
-            serviceId: localStorage.getItem('platforms_emailjs_service_id') || '',
-            templateId: localStorage.getItem('platforms_emailjs_template_id') || '',
-            publicKey: localStorage.getItem('platforms_emailjs_public_key') || ''
+            serviceId: (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.serviceId) || localStorage.getItem('platforms_emailjs_service_id') || '',
+            templateId: (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.templateId) || localStorage.getItem('platforms_emailjs_template_id') || '',
+            publicKey: (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.publicKey) || localStorage.getItem('platforms_emailjs_public_key') || ''
         };
         
         // Progression state per lesson: { [lessonId]: { study: bool, scenario: bool, quiz: bool } }
@@ -3613,12 +3613,14 @@ class SecurityCourseApp {
     // =========================================================================
     async apiCall(endpoint, method = 'GET', data = null) {
         try {
+            const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
             const opts = {
                 method,
                 headers: { 'Content-Type': 'application/json' }
             };
             if (data && method !== 'GET') opts.body = JSON.stringify(data);
-            const res = await fetch(endpoint, opts);
+            const res = await fetch(url, opts);
             if (!res.ok) throw new Error(`HTTP error ${res.status}`);
             return await res.json();
         } catch (e) {

@@ -620,6 +620,7 @@
         </div>
     </div>
 
+    <script src="config.js?v=1.0"></script>
     <script>
         const ADMIN_PIN = "7738732591";
         let allStudents = [];
@@ -664,9 +665,9 @@
         }
 
         async function loadEmailJsConfig() {
-            let service = localStorage.getItem('platforms_emailjs_service_id') || '';
-            let template = localStorage.getItem('platforms_emailjs_template_id') || '';
-            let key = localStorage.getItem('platforms_emailjs_public_key') || '';
+            let service = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.serviceId) || localStorage.getItem('platforms_emailjs_service_id') || '';
+            let template = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.templateId) || localStorage.getItem('platforms_emailjs_template_id') || '';
+            let key = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.publicKey) || localStorage.getItem('platforms_emailjs_public_key') || '';
 
             try {
                 const res = await fetch('/api/auth/emailjs-config');
@@ -946,9 +947,10 @@
         }
 
         async function fetchData() {
+            const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
             try {
                 // 1. Fetch metrics
-                const metricsRes = await fetch('/api/metrics');
+                const metricsRes = await fetch(baseUrl + '/api/metrics');
                 if (metricsRes.ok) {
                     const m = await metricsRes.json();
                     document.getElementById('stat-total-students').textContent = m.total_students || 0;
@@ -959,7 +961,7 @@
                 }
 
                 // 2. Fetch students list
-                const studentsRes = await fetch('/api/students');
+                const studentsRes = await fetch(baseUrl + '/api/students');
                 if (studentsRes.ok) {
                     const data = await studentsRes.json();
                     allStudents = data.students || [];
