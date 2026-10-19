@@ -1078,6 +1078,33 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid rgba(128, 163, 21, 0.4);
 }
 
+.badge-perc {
+    background: rgba(128, 163, 21, 0.22);
+    color: #a3d922;
+    border: 1px solid rgba(128, 163, 21, 0.55);
+    box-shadow: 0 0 10px rgba(128, 163, 21, 0.25);
+}
+
+.btn-card-online {
+    background: linear-gradient(135deg, #a3d922 0%, #80A315 100%) !important;
+    color: #0a0b0d !important;
+    font-weight: 800 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(128, 163, 21, 0.35) !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
+
+.btn-card-online:hover {
+    background: linear-gradient(135deg, #b8f026 0%, #90b818 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(128, 163, 21, 0.5) !important;
+    color: #000000 !important;
+}
+
 .badge-armed {
     background: rgba(239, 68, 68, 0.15);
     color: #f87171;

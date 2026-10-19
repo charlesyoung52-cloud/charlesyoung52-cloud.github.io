@@ -5,6 +5,30 @@
 
 // Course Database matching platformstraining.com requirements
 const COURSE_DATABASE = {
+    "unarmed-20": {
+        title: "20 HR UNARMED SECURITY COURSE",
+        category: "IDFPR State-Mandated Security Training (PERC Card)",
+        price: "$80.00",
+        duration: "Self-Paced (20 Hours Online)",
+        location: "100% Online LMS Portal (Phone, Tablet, or PC)",
+        rangeNote: "No range session required. Study all 10 modules, interactive scenarios, and practice quizzes 100% online.",
+        description: "Official IDFPR-approved 20-hour curriculum required for all unarmed security officers in Illinois to obtain a Permanent Employee Registration Card (PERC). Complete your training 100% online at your own pace 24/7, pass the practice exam, and immediately download your official certificate of completion.",
+        curriculum: [
+            "Illinois Private Detective, Private Alarm, Private Security Act of 2004 (225 ILCS 447)",
+            "Role of the Security Officer, ethics, professional conduct & de-escalation",
+            "Illinois Criminal Code & Arrest Powers (720 ILCS 5/7-1 vs. 5/7-3)",
+            "Force Continuum, use of non-deadly force, liability & citizen's arrest laws",
+            "Report writing, incident documentation, evidence preservation & patrol procedures",
+            "Emergency response, fire safety, terrorism awareness & active threat protocols"
+        ],
+        prerequisites: [
+            "Must be at least 18 years of age",
+            "Eligible to obtain an Illinois PERC Card (IDFPR)",
+            "No disqualifying felony convictions",
+            "Internet-connected device (Smartphone, Tablet, or Computer)"
+        ],
+        cancellation: "Instant digital access upon registration. Self-paced completion anytime 24/7."
+    },
     "armed-28": {
         title: "28 HR ARMED SECURITY COURSE",
         category: "IDFPR Security Officer Credential (Tan Card)",
@@ -194,9 +218,15 @@ function openCourseModal(courseId) {
         <p class="modal-body-p" style="font-size:0.85rem; color:#94a3b8;">${course.cancellation}</p>
 
         <div class="modal-actions-footer">
+            ${courseId === 'unarmed-20' ? `
+            <a href="./course/index.html" class="btn-card-online btn-large btn-full" style="text-align:center;">
+                <i class="fas fa-play"></i> Launch 20-Hour Online Course ($80)
+            </a>
+            ` : `
             <a href="tel:7738732591" class="btn-tactical-primary btn-large btn-full">
                 <i class="fas fa-phone-alt"></i> Call (773) 873-2591 to Book
             </a>
+            `}
             <button onclick="closeCourseModal()" class="btn-tactical-outline btn-large">
                 Close
             </button>
