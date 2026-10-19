@@ -49,6 +49,13 @@ class SecurityCourseApp {
         this.mfaCode = null;
         this.pendingAuthName = '';
         this.pendingAuthEmail = '';
+
+        // EmailJS Configuration for Real MFA Emails
+        this.emailJsConfig = {
+            serviceId: localStorage.getItem('platforms_emailjs_service_id') || '',
+            templateId: localStorage.getItem('platforms_emailjs_template_id') || '',
+            publicKey: localStorage.getItem('platforms_emailjs_public_key') || ''
+        };
         
         // Progression state per lesson: { [lessonId]: { study: bool, scenario: bool, quiz: bool } }
         this.moduleSections = {};
@@ -76,6 +83,7 @@ class SecurityCourseApp {
 
     init() {
         this.restoreState();
+        this.fetchEmailJsConfig();
         this.initVoices();
         this.bindEvents();
         this.bindCertFormEvents();
@@ -422,16 +430,108 @@ class SecurityCourseApp {
         this.mfaCode = generatedCode;
         if (bannerVal) bannerVal.textContent = generatedCode;
 
-        // Dispatch to backend API
+        // Dispatch to backend API if server is online
         try {
             const res = await this.apiCall('/api/auth/send-mfa', 'POST', { name: this.pendingAuthName, email: this.pendingAuthEmail });
             if (res && res.code) {
                 this.mfaCode = String(res.code);
                 if (bannerVal) bannerVal.textContent = this.mfaCode;
             }
-        } catch (err) {
-            console.log("Using client-assisted MFA verification:", err);
+        } catch (err) {}
+
+        // Send real verification email to student inbox via EmailJS
+        await this.sendMfaEmail(this.pendingAuthEmail, this.pendingAuthName, this.mfaCode);
+    }
+
+    async sendMfaEmail(email, name, code) {
+        const statusEl = document.getElementById('mfa-email-dispatch-status');
+        const codeBanner = document.getElementById('mfa-code-banner');
+        const bannerVal = document.getElementById('mfa-code-display-value');
+        if (bannerVal) bannerVal.textContent = code;
+
+        const serviceId = this.emailJsConfig.serviceId || localStorage.getItem('platforms_emailjs_service_id');
+        const templateId = this.emailJsConfig.templateId || localStorage.getItem('platforms_emailjs_template_id');
+        const publicKey = this.emailJsConfig.publicKey || localStorage.getItem('platforms_emailjs_public_key');
+
+        if (!publicKey || !serviceId || !templateId) {
+            if (statusEl) {
+                statusEl.innerHTML = `<i class="fas fa-info-circle" style="color:#38bdf8;"></i> <strong>Test Mode Active:</strong> Email service credentials are not yet configured. Use your instant 6-digit access code below:`;
+            }
+            if (codeBanner) codeBanner.style.display = 'flex';
+            return false;
         }
+
+        if (statusEl) {
+            statusEl.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--brand-green-bright);"></i> Dispatching 6-digit verification email to <strong>${email}</strong>...`;
+        }
+
+        try {
+            const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    service_id: serviceId,
+                    template_id: templateId,
+                    user_id: publicKey,
+                    template_params: {
+                        to_name: name || 'Trainee Officer',
+                        to_email: email,
+                        passcode: code,
+                        course_name: '20-Hour Online Unarmed Security Course',
+                        academy_name: 'Platforms Training Academy',
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }
+                })
+            });
+
+            if (response.ok) {
+                if (statusEl) {
+                    statusEl.innerHTML = `<i class="fas fa-check-circle" style="color:#4ade80;"></i> <strong>Verification email sent!</strong> Please check your inbox at <strong>${email}</strong> (check Spam/Junk folder if not seen within 1 minute).`;
+                }
+                if (codeBanner) codeBanner.style.display = 'none';
+                return true;
+            } else {
+                const errText = await response.text();
+                console.warn('EmailJS delivery response:', errText);
+                if (statusEl) {
+                    statusEl.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#fbbf24;"></i> Email dispatch encountered an issue. Use your instant 6-digit access code below:`;
+                }
+                if (codeBanner) codeBanner.style.display = 'flex';
+                return false;
+            }
+        } catch (err) {
+            console.warn('EmailJS network exception:', err);
+            if (statusEl) {
+                statusEl.innerHTML = `<i class="fas fa-info-circle" style="color:#38bdf8;"></i> Use your instant 6-digit verification code below:`;
+            }
+            if (codeBanner) codeBanner.style.display = 'flex';
+            return false;
+        }
+    }
+
+    async fetchEmailJsConfig() {
+        try {
+            const res = await this.apiCall('/api/auth/emailjs-config', 'GET');
+            if (res && res.success && res.public_key) {
+                this.emailJsConfig.serviceId = res.service_id || this.emailJsConfig.serviceId;
+                this.emailJsConfig.templateId = res.template_id || this.emailJsConfig.templateId;
+                this.emailJsConfig.publicKey = res.public_key || this.emailJsConfig.publicKey;
+                localStorage.setItem('platforms_emailjs_service_id', this.emailJsConfig.serviceId);
+                localStorage.setItem('platforms_emailjs_template_id', this.emailJsConfig.templateId);
+                localStorage.setItem('platforms_emailjs_public_key', this.emailJsConfig.publicKey);
+            }
+        } catch (e) {}
+    }
+
+    configureEmailJS(serviceId, templateId, publicKey) {
+        this.emailJsConfig.serviceId = serviceId;
+        this.emailJsConfig.templateId = templateId;
+        this.emailJsConfig.publicKey = publicKey;
+        localStorage.setItem('platforms_emailjs_service_id', serviceId);
+        localStorage.setItem('platforms_emailjs_template_id', templateId);
+        localStorage.setItem('platforms_emailjs_public_key', publicKey);
+        this.apiCall('/api/auth/emailjs-config', 'POST', { service_id: serviceId, template_id: templateId, public_key: publicKey });
+        alert("EmailJS configuration saved successfully!");
     }
 
     autoFillMfaCode() {
@@ -530,9 +630,10 @@ class SecurityCourseApp {
                 this.mfaCode = String(res.code);
                 if (bannerVal) bannerVal.textContent = this.mfaCode;
             }
-        } catch (err) {
-            console.log("Resent client MFA code:", err);
-        }
+        } catch (err) {}
+
+        // Send real email via EmailJS
+        await this.sendMfaEmail(email, name, this.mfaCode);
 
         const codeInput = document.getElementById('mfa-code-input');
         if (codeInput) {
