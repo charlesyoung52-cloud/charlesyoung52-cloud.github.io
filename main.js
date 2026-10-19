@@ -11,8 +11,8 @@ const COURSE_DATABASE = {
         price: "$80.00",
         duration: "Self-Paced (20 Hours Online)",
         location: "100% Online LMS Portal (Phone, Tablet, or PC)",
-        rangeNote: "No range session required. Study all 10 modules, interactive scenarios, and practice quizzes 100% online.",
-        description: "Official IDFPR-approved 20-hour curriculum required for all unarmed security officers in Illinois to obtain a Permanent Employee Registration Card (PERC). Complete your training 100% online at your own pace 24/7, pass the practice exam, and immediately download your official certificate of completion.",
+        rangeNote: "No range session required. Study all 10 modules, interactive scenarios, and practice quizzes 100% online. You will receive your certificate immediately upon completion with no waiting period.",
+        description: "Official IDFPR-approved 20-hour curriculum required for all unarmed security officers in Illinois to obtain a Permanent Employee Registration Card (PERC). Complete your training 100% online at your own pace 24/7, pass the practice exam, and receive your official certificate immediately upon completion — there is absolutely no wait time.",
         curriculum: [
             "Illinois Private Detective, Private Alarm, Private Security Act of 2004 (225 ILCS 447)",
             "Role of the Security Officer, ethics, professional conduct & de-escalation",
@@ -27,7 +27,7 @@ const COURSE_DATABASE = {
             "No disqualifying felony convictions",
             "Internet-connected device (Smartphone, Tablet, or Computer)"
         ],
-        cancellation: "Instant digital access upon registration. Self-paced completion anytime 24/7."
+        cancellation: "Instant digital access upon registration. Self-paced completion anytime 24/7 with immediate certificate issuance upon completion (no wait)."
     },
     "armed-28": {
         title: "28 HR ARMED SECURITY COURSE",
