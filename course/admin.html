@@ -1111,6 +1111,7 @@
                             <div>${s.email || 'N/A'}</div>
                             <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
                                 <small style="color:var(--text-sub);">${s.agency || 'Platforms Student'}</small>
+                                ${s.has_password ? '<span class="badge" style="background:rgba(56,189,248,0.15); color:#7dd3fc; border:1px solid rgba(56,189,248,0.4); font-size:0.68rem; padding:1px 5px;"><i class="fas fa-key"></i> Password</span>' : ''}
                                 ${s.mfa_verified ? '<span class="badge" style="background:rgba(16,185,129,0.15); color:#86efac; border:1px solid rgba(16,185,129,0.4); font-size:0.68rem; padding:1px 5px;"><i class="fas fa-shield-alt"></i> MFA</span>' : '<span class="badge" style="background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.4); font-size:0.68rem; padding:1px 5px;">MFA Pending</span>'}
                             </div>
                         </td>
