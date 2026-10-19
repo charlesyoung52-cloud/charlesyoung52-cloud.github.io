@@ -21,10 +21,18 @@ class SecurityCourseApp {
         // Admin Evaluation Mode ("God Mode") - Charles Young / Instructor Access
         this.isAdminMode = localStorage.getItem('platforms_admin_mode') === 'true';
 
+        // Temporary Paywall Bypass Flag
+        // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
+        this.temporaryPaywallDisabled = true;
+
         // Payment & Permanent Certificate Sealing
         this.isPaid = localStorage.getItem('platforms_is_paid') === 'true';
         this.isCertLocked = localStorage.getItem('platforms_cert_locked') === 'true';
         this.issuedCertId = localStorage.getItem('platforms_cert_id') || null;
+
+        // Exam attempt tracking
+        this.examAttempts = parseInt(localStorage.getItem('platforms_exam_attempts') || '0', 10);
+        this.examHistory = [];
 
         // Unified Natural Voice Audio Narrator
         this.isNarrating = false;
@@ -32,7 +40,7 @@ class SecurityCourseApp {
         this.selectedVoice = null;
         this.availableVoices = [];
 
-        this.studentEmail = localStorage.getItem('platforms_student_email') || 'student@platformstraining.com';
+        this.studentEmail = localStorage.getItem('platforms_student_email') || '';
         this.studentAgency = localStorage.getItem('platforms_student_agency') || 'Platforms Security Services';
         this.lastSavedTimestamp = localStorage.getItem('platforms_last_saved') || null;
         this.currentNarratingLessonId = null;
@@ -42,20 +50,20 @@ class SecurityCourseApp {
         this.colAnswers = {}; // { [lessonId]: { [qIdx]: bool } }
         this.scenarioSelections = {}; // { [lessonId]: optionIndex }
 
-        // Trainee certificate form data
+        // Trainee certificate form data (clean defaults requiring valid student sign-in)
         this.studentCertData = {
-            name: 'DOE, JOHN A.',
-            address: '1234 S. Michigan Ave, Apt 4B',
-            city: 'Chicago',
-            state: 'IL',
-            zip: '60616',
-            dob: '05/14/1995',
-            ssn: 'XXX-XX-1234',
-            weight: '185 lbs',
-            height: "5' 11\"",
-            hair: 'Black',
-            eyes: 'Brown',
-            signature: 'John A. Doe'
+            name: localStorage.getItem('platforms_student_name') || '',
+            address: localStorage.getItem('platforms_student_address') || '',
+            city: localStorage.getItem('platforms_student_city') || 'Chicago',
+            state: localStorage.getItem('platforms_student_state') || 'IL',
+            zip: localStorage.getItem('platforms_student_zip') || '',
+            dob: localStorage.getItem('platforms_student_dob') || '',
+            ssn: localStorage.getItem('platforms_student_ssn') || '',
+            weight: localStorage.getItem('platforms_student_weight') || '',
+            height: localStorage.getItem('platforms_student_height') || '',
+            hair: localStorage.getItem('platforms_student_hair') || '',
+            eyes: localStorage.getItem('platforms_student_eyes') || '',
+            signature: localStorage.getItem('platforms_student_signature') || ''
         };
 
         this.init();
@@ -166,9 +174,22 @@ class SecurityCourseApp {
             isAdminMode: this.isAdminMode,
             isPaid: this.isPaid,
             isCertLocked: this.isCertLocked,
-            issuedCertId: this.issuedCertId
+            issuedCertId: this.issuedCertId,
+            examAttempts: this.examAttempts,
+            examHistory: this.examHistory,
+            temporaryPaywallDisabled: this.temporaryPaywallDisabled
         };
         localStorage.setItem('platforms_unarmed_course_state_v3', JSON.stringify(state));
+        if (this.studentCertData && this.studentCertData.name) {
+            localStorage.setItem('platforms_student_name', this.studentCertData.name);
+        }
+        if (this.studentEmail) {
+            localStorage.setItem('platforms_student_email', this.studentEmail);
+        }
+        if (this.examAttempts) {
+            localStorage.setItem('platforms_exam_attempts', String(this.examAttempts));
+        }
+        this.syncToLocalRegistry();
     }
 
     restoreState() {
@@ -190,6 +211,9 @@ class SecurityCourseApp {
                 this.colAnswers = state.colAnswers || {};
                 this.scenarioSelections = state.scenarioSelections || {};
                 if (state.studentCertData) {
+                    if (state.studentCertData.name === 'DOE, JOHN A.') {
+                        state.studentCertData.name = '';
+                    }
                     this.studentCertData = { ...this.studentCertData, ...state.studentCertData };
                 }
                 this.studentEmail = state.studentEmail || this.studentEmail;
@@ -199,9 +223,62 @@ class SecurityCourseApp {
                 this.isPaid = state.isPaid !== undefined ? state.isPaid : (localStorage.getItem('platforms_is_paid') === 'true');
                 this.isCertLocked = state.isCertLocked !== undefined ? state.isCertLocked : (localStorage.getItem('platforms_cert_locked') === 'true');
                 this.issuedCertId = state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
+                this.examAttempts = state.examAttempts || parseInt(localStorage.getItem('platforms_exam_attempts') || '0', 10);
+                this.examHistory = state.examHistory || [];
             } catch (e) {
                 console.error("Error restoring course state:", e);
             }
+        }
+    }
+
+    syncToLocalRegistry() {
+        try {
+            let registry = [];
+            const saved = localStorage.getItem('platforms_student_registry');
+            if (saved) {
+                try { registry = JSON.parse(saved); } catch (e) { registry = []; }
+            }
+            const studentId = this.studentEmail || this.studentCertData.name;
+            if (!studentId || studentId === 'student@platformstraining.com' || studentId === 'DOE, JOHN A.') return;
+
+            const completedCount = this.getCompletedLessonsCount();
+            const nowStr = this.getFormattedTodayDate() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const existingIdx = registry.findIndex(s => s.id === studentId || s.email === this.studentEmail);
+            const studentRecord = {
+                id: studentId,
+                name: this.studentCertData.name || 'Student Officer',
+                email: this.studentEmail,
+                agency: this.studentAgency,
+                is_paid: this.temporaryPaywallDisabled ? true : this.isPaid,
+                completed_modules: completedCount,
+                total_modules: 10,
+                exam_attempts: this.examAttempts || (this.examCompleted ? 1 : 0),
+                best_score: this.examPercentage || null,
+                latest_score: this.examPercentage || null,
+                latest_passed: this.examPassed || false,
+                has_passed: this.examPassed || false,
+                cert_id: this.issuedCertId || null,
+                created_at: (existingIdx >= 0 && registry[existingIdx].created_at) || nowStr,
+                last_active: nowStr,
+                attempts: this.examHistory && this.examHistory.length > 0 ? this.examHistory : (this.examCompleted ? [{
+                    attempt_number: 1,
+                    score: `${this.examScore}/50`,
+                    percentage: this.examPercentage,
+                    passed: this.examPassed,
+                    date: nowStr
+                }] : [])
+            };
+
+            if (existingIdx >= 0) {
+                registry[existingIdx] = { ...registry[existingIdx], ...studentRecord };
+            } else {
+                registry.push(studentRecord);
+            }
+
+            localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
+        } catch (err) {
+            console.warn("Local student registry sync warning:", err);
         }
     }
 
@@ -268,42 +345,92 @@ class SecurityCourseApp {
 
     isAuthenticated() {
         if (this.isAdminMode) return true;
-        const loggedIn = localStorage.getItem('platforms_officer_logged_in');
-        if (loggedIn === 'true') return true;
-        if (this.studentCertData && this.studentCertData.name && this.studentCertData.name.trim().length > 0 && this.studentCertData.name !== 'Student Officer') {
-            return true;
-        }
-        return false;
+        const loggedIn = localStorage.getItem('platforms_officer_logged_in') === 'true';
+        const name = (this.studentCertData && this.studentCertData.name) ? this.studentCertData.name.trim().toUpperCase() : '';
+        const hasValidName = name.length > 0 && name !== 'STUDENT OFFICER' && name !== 'DOE, JOHN A.';
+        const hasValidEmail = !!(this.studentEmail && this.studentEmail.trim().length > 0 && this.studentEmail.includes('@'));
+        return loggedIn && hasValidName && hasValidEmail;
     }
 
-    officerSignIn() {
+    async officerSignIn() {
         const nameInput = document.getElementById('auth-gate-name-input');
         const emailInput = document.getElementById('auth-gate-email-input');
         const rawName = (nameInput && nameInput.value.trim()) || '';
-        const rawEmail = (emailInput && emailInput.value.trim()) || '';
+        const rawEmail = (emailInput && emailInput.value.trim().toLowerCase()) || '';
 
         if (!rawName) {
-            alert('Please enter your full student officer name for official certification.');
+            alert('Please enter your full legal student officer name for official certification.');
             if (nameInput) nameInput.focus();
             return;
         }
 
+        if (!rawEmail || !rawEmail.includes('@')) {
+            alert('Please enter a valid email address to save and resume your course progress across devices.');
+            if (emailInput) emailInput.focus();
+            return;
+        }
+
         this.studentCertData.name = rawName.toUpperCase();
-        this.studentEmail = rawEmail || 'student@platformstraining.com';
+        if (!this.studentCertData.signature) {
+            this.studentCertData.signature = rawName;
+        }
+        this.studentEmail = rawEmail;
         localStorage.setItem('platforms_officer_logged_in', 'true');
+        localStorage.setItem('platforms_student_name', this.studentCertData.name);
         localStorage.setItem('platforms_student_email', this.studentEmail);
+        localStorage.setItem('platforms_student_signature', this.studentCertData.signature);
+
+        // Fetch cross-device progress and exam attempts from academy backend
+        try {
+            const loginRes = await this.apiCall('/api/students/login', 'POST', {
+                name: this.studentCertData.name,
+                email: this.studentEmail,
+                student_id: this.studentEmail,
+                agency: this.studentAgency
+            });
+
+            if (loginRes && loginRes.success) {
+                if (loginRes.progress && Object.keys(loginRes.progress).length > 0) {
+                    this.moduleSections = { ...this.moduleSections, ...loginRes.progress };
+                }
+                if (loginRes.attempts && loginRes.attempts.length > 0) {
+                    this.examAttempts = loginRes.attempts.length;
+                    this.examHistory = loginRes.attempts;
+                }
+                if (loginRes.latest_exam) {
+                    this.examCompleted = true;
+                    this.examScore = loginRes.latest_exam.score;
+                    this.examPercentage = loginRes.latest_exam.percentage;
+                    this.examPassed = Boolean(loginRes.latest_exam.passed);
+                }
+                if (loginRes.student && loginRes.student.cert_id) {
+                    this.isCertLocked = true;
+                    this.issuedCertId = loginRes.student.cert_id;
+                    localStorage.setItem('platforms_cert_locked', 'true');
+                    localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                }
+            }
+        } catch (err) {
+            console.warn("Backend login sync warning:", err);
+        }
+
         this.saveState();
+        this.syncToLocalRegistry();
         this.updateHeaderProfileDisplay();
+        this.renderLessonsSidebar();
+        this.renderOverviewGrid();
+        this.updateGlobalProgress();
 
         if (!this.isAuthorized()) {
             this.showView('payment-gate');
         } else {
             this.showView('overview');
+            this.manualSaveProgress(`Welcome, ${this.studentCertData.name}! Trainee session authenticated.`);
         }
     }
 
     officerSignOut() {
-        if (confirm('Switch student officer account? Your current progress will remain saved.')) {
+        if (confirm('Switch student officer account? Your current progress will remain saved on this device and on the academy server.')) {
             localStorage.removeItem('platforms_officer_logged_in');
             this.closeLoginModal();
             this.updateHeaderProfileDisplay();
@@ -313,6 +440,10 @@ class SecurityCourseApp {
 
     isAuthorized() {
         if (this.isAdminMode) return true;
+        // Temporary paywall bypass: authenticated students immediately gain full access
+        if (this.temporaryPaywallDisabled) {
+            return this.isAuthenticated();
+        }
         return this.isAuthenticated() && this.isPaid;
     }
 
@@ -1362,12 +1493,24 @@ class SecurityCourseApp {
             }
         });
 
+        this.examAttempts = (this.examAttempts || 0) + 1;
         this.examCompleted = true;
         this.examScore = correctCount;
         this.examPercentage = Math.round((correctCount / EXAM_QUESTIONS.length) * 100);
         this.examPassed = this.examPercentage >= COURSE_META.passingScore;
 
+        const attemptRecord = {
+            attempt_number: this.examAttempts,
+            score: `${this.examScore}/${EXAM_QUESTIONS.length}`,
+            percentage: this.examPercentage,
+            passed: this.examPassed,
+            date: this.getFormattedTodayDate() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        if (!this.examHistory) this.examHistory = [];
+        this.examHistory.push(attemptRecord);
+
         this.saveState();
+        this.syncToLocalRegistry();
 
         // Asynchronously sync results with backend
         this.apiCall('/api/exam/submit', 'POST', {
@@ -1377,6 +1520,7 @@ class SecurityCourseApp {
             percentage: this.examPercentage,
             passed: this.examPassed,
             time_taken_seconds: this.timerSeconds,
+            attempt_number: this.examAttempts,
             answers: this.userAnswers
         });
 
@@ -1398,15 +1542,17 @@ class SecurityCourseApp {
         const mainActionBtn = document.getElementById('btn-results-main-action');
 
         scoreNum.textContent = `${this.examScore} / ${EXAM_QUESTIONS.length}`;
-        scorePct.textContent = `${this.examPercentage}% Score`;
+        scorePct.textContent = `${this.examPercentage}% Score (Attempt #${this.examAttempts || 1})`;
 
         if (this.examPassed) {
             badge.className = 'score-badge passed';
             title.textContent = "CONGRATULATIONS — YOU PASSED!";
             title.style.color = "var(--brand-green-bright)";
-            subtitle.textContent = `You achieved ${this.examPercentage}%, exceeding the State of Illinois passing standard of 75% (${COURSE_META.passingCorrect} correct out of 50). In compliance with IDFPR 225 ILCS 447, complete certification payment and state trainee verification below to issue your permanent training certificate.`;
+            subtitle.textContent = `You achieved ${this.examPercentage}%, exceeding the State of Illinois passing standard of 75% (${COURSE_META.passingCorrect} correct out of 50). In compliance with IDFPR 225 ILCS 447, complete state trainee verification below to issue your permanent training certificate.`;
 
-            if (!this.isPaid) {
+            const paymentSatisfied = this.temporaryPaywallDisabled || this.isPaid;
+
+            if (!paymentSatisfied) {
                 // Payment Gate visible; Certificate form locked
                 if (payGate) payGate.style.display = 'block';
                 if (certForm) certForm.style.display = 'none';
@@ -1417,12 +1563,12 @@ class SecurityCourseApp {
                     };
                 }
             } else {
-                // Payment Completed: Certificate unlocked
+                // Paywall bypassed or paid: Certificate form unlocked
                 if (payGate) payGate.style.display = 'none';
                 if (certForm) certForm.style.display = 'block';
 
                 if (this.isCertLocked) {
-                    // Certificate permanently downloaded and deleted from session for security
+                    // Certificate permanently downloaded and sealed
                     if (sealedBanner) {
                         sealedBanner.style.display = 'flex';
                         const idTag = document.getElementById('sealed-cert-id-tag');
@@ -1452,12 +1598,20 @@ class SecurityCourseApp {
                         preWarn.className = 'cert-security-warning-callout urgent';
                         preWarn.innerHTML = `
                             <div class="cert-security-warning-icon">
-                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-exclamation-triangle" style="color:#fbbf24; font-size:2rem;"></i>
                             </div>
                             <div class="cert-security-warning-text">
-                                <strong><i class="fas fa-exclamation-circle"></i> CERTIFICATE DOWNLOADED &amp; PURGED FROM SESSION FOR SECURITY</strong>
-                                <p>Your official certificate has been generated and downloaded. <strong>In accordance with security protocols, the active certificate has now been deleted from this session.</strong></p>
-                                <p style="margin-top:6px; color:#fca5a5; font-weight:600;"><i class="fas fa-check-circle"></i> Please ensure you have verified the PDF file is in your Downloads folder before closing or leaving this page. Re-downloading and duplicate generation are disabled.</p>
+                                <strong style="color:#fbbf24; font-size:1.05rem; display:block; margin-bottom:6px;">
+                                    <i class="fas fa-certificate"></i> CERTIFICATE DOWNLOADED &amp; SEALED — SINGLE ISSUANCE NOTICE
+                                </strong>
+                                <p style="color:#ffffff; font-size:0.95rem; line-height:1.6; margin-bottom:10px;">
+                                    <strong>REMINDER: This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.</strong>
+                                </p>
+                                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:12px 14px; color:#cbd5e1; font-size:0.88rem; line-height:1.6;">
+                                    <strong style="color:#fbbf24; display:block; margin-bottom:6px;"><i class="fas fa-clipboard-check"></i> MANDATORY NEXT STEPS FOR ALL CANDIDATES:</strong>
+                                    <p style="margin-bottom:6px;"><i class="fas fa-cloud-arrow-up" style="color:var(--brand-green-bright);"></i> <strong>1. Save in Multiple Locations:</strong> Please ensure you have safely stored this PDF across multiple secure locations (computer, phone, cloud storage, and email backup).</p>
+                                    <p><i class="fas fa-print" style="color:var(--brand-green-bright);"></i> <strong>2. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to submit for your Illinois PERC license application to the IDFPR.</p>
+                                </div>
                             </div>
                         `;
                     }
@@ -1466,7 +1620,7 @@ class SecurityCourseApp {
                         inp.disabled = true;
                     });
                 } else {
-                    // Unsealed: Student can still fill/verify before generating
+                    // Unsealed: Student can fill/verify before generating
                     if (sealedBanner) sealedBanner.style.display = 'none';
                     if (mainActionBtn) {
                         mainActionBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)`;
@@ -1485,15 +1639,23 @@ class SecurityCourseApp {
                     }
                     const preWarn = document.getElementById('cert-pre-download-warning');
                     if (preWarn) {
-                        preWarn.className = 'cert-security-warning-callout';
+                        preWarn.className = 'cert-security-warning-callout urgent';
                         preWarn.innerHTML = `
                             <div class="cert-security-warning-icon">
-                                <i class="fas fa-shield-alt"></i>
+                                <i class="fas fa-exclamation-triangle" style="color:#fbbf24; font-size:2rem;"></i>
                             </div>
                             <div class="cert-security-warning-text">
-                                <strong><i class="fas fa-exclamation-triangle"></i> CRITICAL SECURITY NOTICE — IMMEDIATE ACTION REQUIRED:</strong>
-                                <p>Once you click <strong>"Download Official State Certificate (PDF)"</strong>, your certificate will be generated and then <strong>permanently deleted from this active session for security and privacy protection</strong>.</p>
-                                <p style="margin-top: 6px; font-weight: 600; color: #fbbf24;"><i class="fas fa-arrow-circle-right"></i> Please ensure that you have your certificate completely downloaded and saved to your device before leaving or closing this page. You will NOT be able to access, recreate, or re-download the certificate after leaving.</p>
+                                <strong style="color:#fbbf24; font-size:1.05rem; display:block; margin-bottom:6px;">
+                                    <i class="fas fa-certificate"></i> CRITICAL NOTICE — SINGLE OFFICIAL COPY (NO DUPLICATES ISSUED)
+                                </strong>
+                                <p style="color:#ffffff; font-size:0.95rem; line-height:1.6; margin-bottom:10px;">
+                                    <strong>This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.</strong>
+                                </p>
+                                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:12px 14px; color:#cbd5e1; font-size:0.88rem; line-height:1.6;">
+                                    <strong style="color:#fbbf24; display:block; margin-bottom:6px;"><i class="fas fa-clipboard-check"></i> MANDATORY NEXT STEPS FOR ALL CANDIDATES:</strong>
+                                    <p style="margin-bottom:6px;"><i class="fas fa-cloud-arrow-up" style="color:var(--brand-green-bright);"></i> <strong>1. Save in Multiple Locations:</strong> Save this PDF file immediately across multiple secure locations (such as your computer, smartphone, cloud storage like Google Drive or iCloud, and email a copy to yourself).</p>
+                                    <p><i class="fas fa-print" style="color:var(--brand-green-bright);"></i> <strong>2. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to bring for your Illinois PERC card application to the IDFPR.</p>
+                                </div>
                             </div>
                         `;
                     }
@@ -1619,18 +1781,18 @@ class SecurityCourseApp {
             if (prv) prv.textContent = val;
         };
 
-        setVal('cert-input-name', 'prev-cert-name', 'name', 'DOE, JOHN A.');
-        setVal('cert-input-address', 'prev-cert-address', 'address', '1234 S. Michigan Ave, Apt 4B');
+        setVal('cert-input-name', 'prev-cert-name', 'name', '');
+        setVal('cert-input-address', 'prev-cert-address', 'address', '');
         setVal('cert-input-city', 'prev-cert-city', 'city', 'Chicago');
         setVal('cert-input-state', 'prev-cert-state', 'state', 'IL');
-        setVal('cert-input-zip', 'prev-cert-zip', 'zip', '60616');
-        setVal('cert-input-dob', 'prev-cert-dob', 'dob', '05/14/1995');
-        setVal('cert-input-ssn', 'prev-cert-ssn', 'ssn', 'XXX-XX-1234');
-        setVal('cert-input-weight', 'prev-cert-weight', 'weight', '185 lbs');
-        setVal('cert-input-height', 'prev-cert-height', 'height', "5' 11\"");
-        setVal('cert-input-hair', 'prev-cert-hair', 'hair', 'Black');
-        setVal('cert-input-eyes', 'prev-cert-eyes', 'eyes', 'Brown');
-        setVal('cert-input-signature', 'prev-cert-sig', 'signature', 'John A. Doe');
+        setVal('cert-input-zip', 'prev-cert-zip', 'zip', '');
+        setVal('cert-input-dob', 'prev-cert-dob', 'dob', '');
+        setVal('cert-input-ssn', 'prev-cert-ssn', 'ssn', '');
+        setVal('cert-input-weight', 'prev-cert-weight', 'weight', '');
+        setVal('cert-input-height', 'prev-cert-height', 'height', '');
+        setVal('cert-input-hair', 'prev-cert-hair', 'hair', '');
+        setVal('cert-input-eyes', 'prev-cert-eyes', 'eyes', '');
+        setVal('cert-input-signature', 'prev-cert-sig', 'signature', '');
     }
 
     async downloadOfficialPdfCertificate() {
@@ -1641,10 +1803,11 @@ class SecurityCourseApp {
 
         // Mandatory Pre-Download Security Warning Confirmation
         const userConfirmed = confirm(
-            "⚠️ CRITICAL SECURITY WARNING:\n\n" +
-            "Once you download your certificate, it will be permanently deleted from this system for security.\n\n" +
-            "Please ensure that you have the certificate completely downloaded and saved on your device before leaving this page, as you will not be able to recreate or re-download it.\n\n" +
-            "Click OK to proceed with downloading your certificate now."
+            "⚠️ CRITICAL CERTIFICATE NOTICE:\n\n" +
+            "1. This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.\n\n" +
+            "2. We strongly recommend that you save this certificate PDF in MULTIPLE LOCATIONS (e.g. your computer, smartphone, cloud storage, and email backup).\n\n" +
+            "3. In addition, please PRINT A PHYSICAL HARD COPY immediately for your permanent records and state PERC license application.\n\n" +
+            "Click OK to download your official certificate now."
         );
         if (!userConfirmed) {
             return;
@@ -1673,7 +1836,7 @@ class SecurityCourseApp {
             const timesItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
 
             // Extract values
-            const name = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || 'DOE, JOHN A.').toUpperCase();
+            const name = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').toUpperCase();
             const address = document.getElementById('cert-input-address')?.value || this.studentCertData.address || '';
             const city = document.getElementById('cert-input-city')?.value || this.studentCertData.city || 'Chicago';
             const state = (document.getElementById('cert-input-state')?.value || this.studentCertData.state || 'IL').toUpperCase();
@@ -1758,9 +1921,11 @@ class SecurityCourseApp {
                 // Post-download immediate security alert
                 setTimeout(() => {
                     alert(
-                        "✅ CERTIFICATE DOWNLOAD INITIATED!\n\n" +
-                        "Your official Illinois 20-Hour Unarmed Security Certificate PDF is downloading now.\n\n" +
-                        "CRITICAL SECURITY NOTICE: For your security, this certificate record has now been permanently deleted from this active session. Please ensure you have the PDF file safely saved to your device before leaving or closing this page!"
+                        "✅ CERTIFICATE DOWNLOAD COMPLETE!\n\n" +
+                        "Your official Illinois 20-Hour Unarmed Security Training Certificate (Form IL486-0486) has been generated and downloaded.\n\n" +
+                        "⚠️ CRITICAL REMINDER:\n" +
+                        "This is the ONLY copy of your certificate that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.\n\n" +
+                        "Please verify the PDF in your Downloads folder right now, save the certificate in MULTIPLE LOCATIONS (computer, smartphone, cloud drive, email), and PRINT A PHYSICAL HARD COPY immediately."
                     );
                 }, 350);
             }
@@ -1771,7 +1936,7 @@ class SecurityCourseApp {
     }
 
     handleResultsCertificateAction() {
-        if (!this.isPaid) {
+        if (!this.temporaryPaywallDisabled && !this.isPaid) {
             const payGate = document.getElementById('results-payment-gate');
             if (payGate) {
                 payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2064,15 +2229,50 @@ class SecurityCourseApp {
             siteHeaderEl.classList.remove('header-hidden');
         }
 
-
         // Window beforeunload security warning for certificate holders
         window.addEventListener('beforeunload', (e) => {
-            if (this.examPassed && this.isPaid && !this.isCertLocked) {
+            if (this.examPassed && (this.temporaryPaywallDisabled || this.isPaid) && !this.isCertLocked) {
                 e.preventDefault();
                 e.returnValue = "WARNING: You have unlocked your official certificate, but have not yet downloaded it. Once downloaded, it will be deleted for security. Please ensure you download your certificate before leaving!";
                 return e.returnValue;
             }
         });
+
+        // Hidden Instructor Admin Portal Access (Kept completely invisible from public students)
+        // 1. Keyboard Shortcut: Ctrl+Shift+A or Cmd+Shift+A
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+                e.preventDefault();
+                this.openAdminLoginModal();
+            }
+        });
+
+        // 2. URL Hash: #admin or #instructor
+        if (window.location.hash === '#admin' || window.location.hash === '#instructor') {
+            setTimeout(() => this.openAdminLoginModal(), 400);
+        }
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash === '#admin' || window.location.hash === '#instructor') {
+                this.openAdminLoginModal();
+            }
+        });
+
+        // 3. Triple-click on brand logo in header
+        const brandHeader = document.querySelector('.brand-wrapper') || document.querySelector('.header-brand');
+        if (brandHeader) {
+            let logoClicks = 0;
+            let logoTimer = null;
+            brandHeader.addEventListener('click', () => {
+                logoClicks++;
+                clearTimeout(logoTimer);
+                if (logoClicks >= 3) {
+                    logoClicks = 0;
+                    this.openAdminLoginModal();
+                } else {
+                    logoTimer = setTimeout(() => { logoClicks = 0; }, 600);
+                }
+            });
+        }
     }
 
 
@@ -2113,7 +2313,7 @@ class SecurityCourseApp {
                 headerAccountInd.style.color = 'var(--brand-green-bright)';
                 headerAccountInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
             }
-            if (headerAccountText) headerAccountText.textContent = this.isAdminMode ? 'Instructor' : 'Enrolled';
+            if (headerAccountText) headerAccountText.textContent = this.isAdminMode ? 'Instructor' : 'Active Trainee';
         }
 
         const officerNameEl = document.getElementById('payment-gate-officer-name');
@@ -2534,25 +2734,43 @@ class SecurityCourseApp {
         }
 
         if (tbody) {
-            if (studentsData && studentsData.students && studentsData.students.length > 0) {
-                tbody.innerHTML = studentsData.students.map(s => `
-                    <tr>
-                        <td><strong>${s.name}</strong></td>
-                        <td>${s.email || 'N/A'}<br><small style="color:var(--text-muted);">${s.agency || 'N/A'}</small></td>
-                        <td>${s.completed_modules} / 10</td>
-                        <td>${s.best_score ? s.best_score + '%' : 'Not taken'}</td>
-                        <td>${s.is_paid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $80</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
-                        <td>${s.cert_id ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${s.cert_id}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>
-                    </tr>
-                `).join('');
+            let roster = (studentsData && studentsData.students && studentsData.students.length > 0) 
+                ? studentsData.students 
+                : [];
+
+            if (roster.length === 0) {
+                try {
+                    const localReg = localStorage.getItem('platforms_student_registry');
+                    if (localReg) roster = JSON.parse(localReg);
+                } catch (e) {}
+            }
+
+            if (roster.length > 0) {
+                tbody.innerHTML = roster.map(s => {
+                    const attemptsCount = s.exam_attempts || (s.attempts ? s.attempts.length : (s.has_passed ? 1 : 0));
+                    const best = s.best_score !== null && s.best_score !== undefined ? `${s.best_score}%` : 'Not taken';
+                    const isCert = s.cert_id ? `<span style="color:var(--warning); font-weight:700;"><i class="fas fa-lock"></i> ${s.cert_id}</span>` : '<span style="color:var(--text-muted);">Not issued</span>';
+                    const passStatus = s.has_passed ? '<span style="color:var(--brand-green-bright); font-weight:600;"><i class="fas fa-check-circle"></i> Passed</span>' : (attemptsCount > 0 ? '<span style="color:#ef4444;"><i class="fas fa-times-circle"></i> Retake Needed</span>' : '<span style="color:var(--text-muted);">Pending</span>');
+
+                    return `
+                        <tr>
+                            <td><strong>${s.name}</strong></td>
+                            <td>${s.email || 'N/A'}<br><small style="color:var(--text-muted);">${s.agency || 'N/A'}</small></td>
+                            <td>${s.completed_modules} / 10</td>
+                            <td><strong>${attemptsCount}</strong> attempt${attemptsCount === 1 ? '' : 's'}<br><small>${passStatus}</small></td>
+                            <td>${best}</td>
+                            <td>${isCert}</td>
+                        </tr>
+                    `;
+                }).join('');
             } else {
                 tbody.innerHTML = `
                     <tr>
-                        <td><strong>${this.studentCertData.name || 'Marcus Washington'}</strong></td>
-                        <td>${this.studentEmail}<br><small style="color:var(--text-muted);">${this.studentAgency}</small></td>
+                        <td><strong>${this.studentCertData.name || 'Candidate Officer'}</strong></td>
+                        <td>${this.studentEmail || 'N/A'}<br><small style="color:var(--text-muted);">${this.studentAgency}</small></td>
                         <td>${this.getCompletedLessonsCount()} / 10</td>
+                        <td>${this.examAttempts || (this.examCompleted ? 1 : 0)} attempts</td>
                         <td>${this.examCompleted ? this.examPercentage + '%' : 'In Progress'}</td>
-                        <td>${this.isPaid ? '<span style="color:var(--brand-green-bright);"><i class="fas fa-check"></i> Paid $80</span>' : '<span style="color:var(--text-muted);">Unpaid</span>'}</td>
                         <td>${this.isCertLocked ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${this.issuedCertId || 'PTA-IL-SEALED'}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>
                     </tr>
                 `;

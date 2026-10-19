@@ -144,8 +144,6 @@
 
                     <div class="auth-gate-secondary-links">
                         <span>Return to Main Website: <a href="../index.html">Platforms Home</a></span>
-                        <span>&bull;</span>
-                        <span>Instructor Access: <a href="javascript:void(0)" onclick="app.openAdminLoginModal()">Enter Instructor PIN</a></span>
                     </div>
                 </div>
             </div>
@@ -601,8 +599,8 @@
                             <p>
                                 In compliance with Illinois Department of Financial and Professional Regulation (IDFPR) standards under 225 ILCS 447, your official basic training certificate (<strong id="sealed-cert-id-tag">PTA-IL-CERT</strong>) has been generated and downloaded.
                             </p>
-                            <p style="margin-top:6px; color:#f59e0b; font-weight:600;">
-                                <i class="fas fa-exclamation-triangle"></i> SECURITY PROTOCOL ACTIVE: For your personal security and privacy, this certificate has now been permanently deleted from the active session. Please ensure your PDF file is safely saved on your computer or mobile device before leaving this page. Re-downloading and duplicate generation are disabled.
+                            <p style="margin-top:6px; color:#fbbf24; font-weight:600;">
+                                <i class="fas fa-exclamation-triangle"></i> CRITICAL REMINDER: This is the ONLY copy of your certificate that will be issued. Duplicates will NOT be issued under any circumstances. Ensure you have saved this PDF file across multiple secure locations (computer, phone, cloud storage, and email) and printed a physical hard copy for your permanent records and state PERC application.
                             </p>
                         </div>
                     </div>
@@ -620,12 +618,12 @@
                     <div class="cert-form-grid">
                         <div class="cert-form-group" style="grid-column: span 12;">
                             <label for="cert-input-name">Full Legal Name (LAST, FIRST, MIDDLE INITIAL):</label>
-                            <input type="text" id="cert-input-name" class="cert-form-input" placeholder="e.g. DOE, JOHN A." value="DOE, JOHN A.">
+                            <input type="text" id="cert-input-name" class="cert-form-input" placeholder="e.g. DOE, JOHN A." value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 6;">
                             <label for="cert-input-address">Home Street Address:</label>
-                            <input type="text" id="cert-input-address" class="cert-form-input" placeholder="e.g. 1234 S. Michigan Ave, Apt 4B" value="1234 S. Michigan Ave, Apt 4B">
+                            <input type="text" id="cert-input-address" class="cert-form-input" placeholder="e.g. 1234 S. Michigan Ave, Apt 4B" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 3;">
@@ -640,47 +638,47 @@
 
                         <div class="cert-form-group" style="grid-column: span 2;">
                             <label for="cert-input-zip">ZIP Code:</label>
-                            <input type="text" id="cert-input-zip" class="cert-form-input" placeholder="e.g. 60616" value="60616" maxlength="10">
+                            <input type="text" id="cert-input-zip" class="cert-form-input" placeholder="e.g. 60616" value="" maxlength="10">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 3;">
                             <label for="cert-input-dob">Date of Birth (MM/DD/YYYY):</label>
-                            <input type="text" id="cert-input-dob" class="cert-form-input" placeholder="MM/DD/YYYY" value="05/14/1995">
+                            <input type="text" id="cert-input-dob" class="cert-form-input" placeholder="MM/DD/YYYY" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 3;">
                             <label for="cert-input-ssn">Social Security Number:</label>
-                            <input type="text" id="cert-input-ssn" class="cert-form-input" placeholder="XXX-XX-XXXX" value="XXX-XX-1234">
+                            <input type="text" id="cert-input-ssn" class="cert-form-input" placeholder="XXX-XX-XXXX" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 1;">
                             <label for="cert-input-weight">Weight:</label>
-                            <input type="text" id="cert-input-weight" class="cert-form-input" placeholder="185 lbs" value="185 lbs">
+                            <input type="text" id="cert-input-weight" class="cert-form-input" placeholder="e.g. 185 lbs" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 1;">
                             <label for="cert-input-height">Height:</label>
-                            <input type="text" id="cert-input-height" class="cert-form-input" placeholder="5' 11&quot;" value="5' 11&quot;">
+                            <input type="text" id="cert-input-height" class="cert-form-input" placeholder="e.g. 5' 11&quot;" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 2;">
                             <label for="cert-input-hair">Hair Color:</label>
-                            <input type="text" id="cert-input-hair" class="cert-form-input" placeholder="Black" value="Black">
+                            <input type="text" id="cert-input-hair" class="cert-form-input" placeholder="e.g. Black" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 2;">
                             <label for="cert-input-eyes">Eye Color:</label>
-                            <input type="text" id="cert-input-eyes" class="cert-form-input" placeholder="Brown" value="Brown">
+                            <input type="text" id="cert-input-eyes" class="cert-form-input" placeholder="e.g. Brown" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 8;">
                             <label for="cert-input-signature">Trainee Electronic Signature (Type Full Legal Name):</label>
-                            <input type="text" id="cert-input-signature" class="cert-form-input" style="font-family:'Times New Roman', Georgia, serif; font-style:italic; font-size:1.1rem;" placeholder="John A. Doe" value="John A. Doe">
+                            <input type="text" id="cert-input-signature" class="cert-form-input" style="font-family:'Times New Roman', Georgia, serif; font-style:italic; font-size:1.1rem;" placeholder="Your Full Legal Name" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 4;">
                             <label for="cert-input-trainee-date">Trainee Signature Date:</label>
-                            <input type="text" id="cert-input-trainee-date" class="cert-form-input" readonly value="10/04/2026">
+                            <input type="text" id="cert-input-trainee-date" class="cert-form-input" readonly value="">
                         </div>
                     </div>
 
@@ -700,18 +698,22 @@
                     </div>
 
                     <!-- Security Alert Callout & Action Controls -->
-                    <div class="cert-security-warning-callout" id="cert-pre-download-warning">
+                    <div class="cert-security-warning-callout urgent" id="cert-pre-download-warning" style="border-left: 4px solid var(--warning); background: rgba(245, 158, 11, 0.12); padding: 18px 20px; border-radius: 8px;">
                         <div class="cert-security-warning-icon">
-                            <i class="fas fa-shield-alt"></i>
+                            <i class="fas fa-exclamation-triangle" style="color: #fbbf24; font-size: 2rem;"></i>
                         </div>
                         <div class="cert-security-warning-text">
-                            <strong><i class="fas fa-exclamation-triangle"></i> CRITICAL SECURITY NOTICE — IMMEDIATE ACTION REQUIRED:</strong>
-                            <p>
-                                Once you click <strong>"Download Official State Certificate (PDF)"</strong>, your certificate will be generated and then <strong>permanently deleted from this active session for security and privacy protection</strong>.
+                            <strong style="color: #fbbf24; font-size: 1.05rem; display: block; margin-bottom: 6px;">
+                                <i class="fas fa-certificate"></i> CRITICAL NOTICE — SINGLE OFFICIAL COPY (NO DUPLICATES ISSUED)
+                            </strong>
+                            <p style="color: #ffffff; font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px;">
+                                <strong>This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.</strong>
                             </p>
-                            <p style="margin-top: 6px; font-weight: 600; color: #fbbf24;">
-                                <i class="fas fa-arrow-circle-right"></i> Please ensure that you have your certificate completely downloaded and saved to your device before leaving or closing this page. You will NOT be able to access, recreate, or re-download the certificate after leaving.
-                            </p>
+                            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 12px 14px; color: #cbd5e1; font-size: 0.88rem; line-height: 1.6;">
+                                <strong style="color: #fbbf24; display: block; margin-bottom: 6px;"><i class="fas fa-clipboard-check"></i> MANDATORY NEXT STEPS FOR ALL CANDIDATES:</strong>
+                                <p style="margin-bottom: 6px;"><i class="fas fa-cloud-arrow-up" style="color: var(--brand-green-bright);"></i> <strong>1. Save in Multiple Locations:</strong> Save this PDF file immediately across multiple secure locations (such as your computer, smartphone, cloud storage like Google Drive or iCloud, and email a copy to yourself).</p>
+                                <p><i class="fas fa-print" style="color: var(--brand-green-bright);"></i> <strong>2. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to bring for your Illinois PERC card application to the IDFPR.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -755,13 +757,13 @@
                             <tr>
                                 <td class="il-grid-cell" colspan="6">
                                     <span class="il-cell-label">NAME (LAST, FIRST, MIDDLE INITIAL)</span>
-                                    <div class="il-cell-value" id="prev-cert-name">DOE, JOHN A.</div>
+                                    <div class="il-cell-value" id="prev-cert-name"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="il-grid-cell" colspan="3" style="width:50%;">
                                     <span class="il-cell-label">HOME STREET ADDRESS</span>
-                                    <div class="il-cell-value" id="prev-cert-address">1234 S. Michigan Ave, Apt 4B</div>
+                                    <div class="il-cell-value" id="prev-cert-address"></div>
                                 </td>
                                 <td class="il-grid-cell" style="width:20%;">
                                     <span class="il-cell-label">CITY</span>
@@ -773,33 +775,33 @@
                                 </td>
                                 <td class="il-grid-cell" style="width:20%;">
                                     <span class="il-cell-label">ZIP CODE</span>
-                                    <div class="il-cell-value" id="prev-cert-zip">60616</div>
+                                    <div class="il-cell-value" id="prev-cert-zip"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="il-grid-cell" style="width:20%;">
                                     <span class="il-cell-label">DATE OF BIRTH</span>
-                                    <div class="il-cell-value" id="prev-cert-dob">05/14/1995</div>
+                                    <div class="il-cell-value" id="prev-cert-dob"></div>
                                 </td>
                                 <td class="il-grid-cell" colspan="2" style="width:30%;">
                                     <span class="il-cell-label">SOCIAL SECURITY NUMBER</span>
-                                    <div class="il-cell-value" id="prev-cert-ssn">XXX-XX-1234</div>
+                                    <div class="il-cell-value" id="prev-cert-ssn"></div>
                                 </td>
                                 <td class="il-grid-cell" style="width:14%;">
                                     <span class="il-cell-label">WEIGHT</span>
-                                    <div class="il-cell-value" id="prev-cert-weight">185 lbs</div>
+                                    <div class="il-cell-value" id="prev-cert-weight"></div>
                                 </td>
                                 <td class="il-grid-cell" style="width:12%;">
                                     <span class="il-cell-label">HEIGHT</span>
-                                    <div class="il-cell-value" id="prev-cert-height">5' 11"</div>
+                                    <div class="il-cell-value" id="prev-cert-height"></div>
                                 </td>
                                 <td class="il-grid-cell" style="width:12%;">
                                     <span class="il-cell-label">HAIR COLOR</span>
-                                    <div class="il-cell-value" id="prev-cert-hair">Black</div>
+                                    <div class="il-cell-value" id="prev-cert-hair"></div>
                                 </td>
                                 <td class="il-grid-cell" style="width:12%;">
                                     <span class="il-cell-label">EYE COLOR</span>
-                                    <div class="il-cell-value" id="prev-cert-eyes">Brown</div>
+                                    <div class="il-cell-value" id="prev-cert-eyes"></div>
                                 </td>
                             </tr>
                         </table>
@@ -811,11 +813,11 @@
                         <div class="il-sig-row">
                             <div class="il-sig-field">
                                 <span>Signature of Trainee:</span>
-                                <span class="il-sig-underline" id="prev-cert-sig" style="min-width:280px;">John A. Doe</span>
+                                <span class="il-sig-underline" id="prev-cert-sig" style="min-width:280px;"></span>
                             </div>
                             <div class="il-sig-field">
                                 <span>Date:</span>
-                                <span class="il-sig-underline" id="prev-cert-date" style="min-width:140px;">10/04/2026</span>
+                                <span class="il-sig-underline" id="prev-cert-date" style="min-width:140px;"></span>
                             </div>
                         </div>
 
@@ -1185,6 +1187,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px 0; flex-wrap:wrap; gap:10px;">
                 <h4 style="color:var(--text-white); font-size:1rem; margin:0;"><i class="fas fa-users"></i> Registered Students &amp; Certification Status</h4>
                 <div style="display:flex; gap:10px;">
+                    <a href="admin.html" target="_blank" class="btn-primary" style="font-size:0.8rem; padding:6px 12px; text-decoration:none;"><i class="fas fa-external-link-alt"></i> Full Standalone Portal</a>
                     <button class="btn-secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="app.refreshAdminMetrics()"><i class="fas fa-sync"></i> Refresh Data</button>
                     <button class="btn-secondary" style="font-size:0.8rem; padding:6px 12px; color:var(--brand-green-bright); border-color:var(--brand-green);" onclick="app.closeAdminDashboard(); app.showView('exam');"><i class="fas fa-file-alt"></i> Evaluate Exam</button>
                 </div>
@@ -1197,8 +1200,8 @@
                             <th>Student Name</th>
                             <th>Email / Agency</th>
                             <th>Modules Done</th>
-                            <th>Best Exam</th>
-                            <th>Payment ($80)</th>
+                            <th>Exam Attempts</th>
+                            <th>Best Score</th>
                             <th>Certificate</th>
                         </tr>
                     </thead>
@@ -1237,7 +1240,6 @@
             </div>
             <div class="footer-copy">
                 &copy; 2026 Platforms Training Academy. All rights reserved. &bull; <a href="../index.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-home"></i> Home</a> &bull; <a href="../courses.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-list-check"></i> Course Catalog</a>
-                &bull; <a href="javascript:void(0)" onclick="app.openAdminLoginModal()" style="color:var(--text-muted); text-decoration:none;" title="Instructor Course Evaluation & Analytics"><i class="fas fa-key"></i> Instructor Evaluation</a>
             </div>
         </div>
     </footer>

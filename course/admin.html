@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Admin Dashboard | Platforms Training Academy</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0b0d;
+            --bg-surface: #12151b;
+            --bg-card: #181c24;
+            --border: #262c3a;
+            --border-highlight: #3b4559;
+            --green: #80a315;
+            --green-bright: #9edb1a;
+            --green-glow: rgba(128, 163, 21, 0.25);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-sub: #64748b;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #38bdf8;
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Tactical Header */
+        .admin-header {
+            background: linear-gradient(180deg, #161a22 0%, var(--bg-dark) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-brand img {
+            height: 38px;
+            width: auto;
+        }
+        .brand-title {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+        .brand-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-action {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: var(--radius);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-action:hover {
+            border-color: var(--green);
+            color: var(--green-bright);
+            background: #1c222c;
+        }
+        .btn-primary {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--green-bright);
+            color: #000;
+        }
+
+        /* Container */
+        .admin-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px 24px 60px 24px;
+        }
+
+        /* Metrics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-card:hover {
+            border-color: var(--border-highlight);
+            transform: translateY(-2px);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--green);
+            opacity: 0.8;
+        }
+        .stat-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .stat-val {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        .stat-desc {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        /* Control Bar */
+        .controls-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 14px;
+            min-width: 320px;
+            flex: 1;
+            max-width: 480px;
+        }
+        .search-box i {
+            color: var(--text-sub);
+            margin-right: 10px;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.88rem;
+            width: 100%;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            color: #fff;
+            border-color: var(--border-highlight);
+        }
+        .filter-btn.active {
+            background: rgba(128, 163, 21, 0.15);
+            border-color: var(--green);
+            color: var(--green-bright);
+        }
+
+        /* Table */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+        thead {
+            background: #101318;
+            border-bottom: 2px solid var(--border);
+        }
+        th {
+            padding: 14px 16px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Table Badges & Elements */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .badge-success { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-info { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-cert { background: rgba(128, 163, 21, 0.2); color: var(--green-bright); border: 1px solid rgba(128, 163, 21, 0.4); font-family: 'Chakra Petch', sans-serif; font-size: 0.78rem; }
+
+        .progress-bar-wrapper {
+            width: 110px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--green-bright);
+            border-radius: 3px;
+        }
+
+        /* PIN Login Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(5, 7, 10, 0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-highlight);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 420px;
+            padding: 32px 28px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .pin-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.4rem;
+            letter-spacing: 6px;
+            text-align: center;
+            background: #0d1015;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: #fff;
+            margin: 20px 0 12px 0;
+            font-family: inherit;
+        }
+        .pin-input:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 12px var(--green-glow);
+        }
+
+        /* Attempts History Drawer Modal */
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+        }
+        .drawer-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-highlight);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            padding: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header { flex-direction: column; gap: 14px; align-items: flex-start; }
+            .search-box { min-width: 100%; max-width: 100%; }
+            .header-actions { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PIN Authentication Overlay -->
+    <div id="pin-modal" class="modal-overlay" style="display: flex;">
+        <div class="modal-box">
+            <div style="font-size: 2.4rem; color: var(--green); margin-bottom: 12px;">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <h2 style="font-family:'Chakra Petch',sans-serif; font-size: 1.4rem; margin-bottom: 6px;">INSTRUCTOR ACCESS</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">Enter Lead Instructor PIN to view student records, test scores &amp; attempts.</p>
+            
+            <input type="password" id="pin-input" class="pin-input" placeholder="••••••••" maxlength="15" autofocus>
+            <div id="pin-error" style="color: var(--danger); font-size: 0.8rem; margin-bottom: 12px; display: none;">
+                <i class="fas fa-circle-exclamation"></i> Invalid Admin PIN. Please try again.
+            </div>
+
+            <button class="btn-action btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="verifyPin()">
+                <i class="fas fa-unlock"></i> Authenticate &amp; Unlock Dashboard
+            </button>
+            <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-sub);">
+                Platforms Training Academy &bull; Chicago, IL
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Dashboard -->
+    <div id="dashboard-content" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-brand">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy">
+                <div>
+                    <div class="brand-title">INSTRUCTOR ROSTER &amp; EXAM ANALYTICS</div>
+                    <div class="brand-sub"><i class="fas fa-user-shield text-green"></i> Lead Instructor: Charles Young &bull; Chicago, IL &bull; 225 ILCS 447</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh</button>
+                <button class="btn-action btn-primary" onclick="exportCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+                <a href="index.html" class="btn-action"><i class="fas fa-arrow-left"></i> Course View</a>
+                <button class="btn-action" style="color:#f87171;" onclick="lockDashboard()"><i class="fas fa-lock"></i> Lock</button>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="admin-container">
+            
+            <!-- Statistics Strip -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-users"></i> Total Students</div>
+                    <div class="stat-val" id="stat-total-students">0</div>
+                    <div class="stat-desc">Registered candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-graduation-cap"></i> Modules Mastered</div>
+                    <div class="stat-val" id="stat-completed-modules">0</div>
+                    <div class="stat-desc">Completed 10/10 modules</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-file-signature"></i> Total Exam Attempts</div>
+                    <div class="stat-val" id="stat-total-exams">0</div>
+                    <div class="stat-desc">Across all candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-bullseye"></i> Exam Pass Rate</div>
+                    <div class="stat-val" id="stat-pass-rate">0%</div>
+                    <div class="stat-desc">75%+ passing benchmark</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-award"></i> Certificates Sealed</div>
+                    <div class="stat-val" id="stat-certs-issued">0</div>
+                    <div class="stat-desc">Official IL486-0486 issued</div>
+                </div>
+            </div>
+
+            <!-- Controls: Search & Filter Tabs -->
+            <div class="controls-card">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search by name, email, agency, or certificate ID..." oninput="filterStudents()">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All (<span id="count-all">0</span>)</button>
+                    <button class="filter-btn" data-filter="in_progress" onclick="setFilter('in_progress')">In Progress (<span id="count-progress">0</span>)</button>
+                    <button class="filter-btn" data-filter="passed" onclick="setFilter('passed')">Passed Exam (<span id="count-passed">0</span>)</button>
+                    <button class="filter-btn" data-filter="retake" onclick="setFilter('retake')">Needs Retake (<span id="count-retake">0</span>)</button>
+                    <button class="filter-btn" data-filter="certified" onclick="setFilter('certified')">Certified (<span id="count-certified">0</span>)</button>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Officer</th>
+                                <th>Email / Agency</th>
+                                <th>Module Progress</th>
+                                <th>Exam Attempts</th>
+                                <th>Latest Score</th>
+                                <th>Best Score</th>
+                                <th>Certificate Status</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 8px; display:block;"></i>
+                                    Loading student roster and examination records...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Attempts History Drawer / Modal -->
+    <div id="attempts-modal" class="drawer-overlay" onclick="if(event.target===this) closeAttemptsModal()">
+        <div class="drawer-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 style="font-family:'Chakra Petch',sans-serif; font-size:1.15rem; color:#fff;" id="attempts-modal-title">
+                    <i class="fas fa-history text-green"></i> Examination Attempts History
+                </h3>
+                <button onclick="closeAttemptsModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="attempts-modal-body">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PIN = "7738732591";
+        let allStudents = [];
+        let currentFilter = 'all';
+
+        // Check authentication on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedToken = sessionStorage.getItem('pta_admin_auth');
+            if (savedToken === 'authorized') {
+                showDashboard();
+            } else {
+                document.getElementById('pin-input').focus();
+            }
+
+            document.getElementById('pin-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') verifyPin();
+            });
+        });
+
+        function verifyPin() {
+            const inp = document.getElementById('pin-input');
+            const err = document.getElementById('pin-error');
+            const val = (inp.value || '').trim();
+
+            if (val === ADMIN_PIN) {
+                sessionStorage.setItem('pta_admin_auth', 'authorized');
+                err.style.display = 'none';
+                showDashboard();
+            } else {
+                err.style.display = 'block';
+                inp.value = '';
+                inp.focus();
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('pin-modal').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+            fetchData();
+        }
+
+        function lockDashboard() {
+            sessionStorage.removeItem('pta_admin_auth');
+            document.getElementById('dashboard-content').style.display = 'none';
+            document.getElementById('pin-modal').style.display = 'flex';
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-input').focus();
+        }
+
+        async function fetchData() {
+            try {
+                // 1. Fetch metrics
+                const metricsRes = await fetch('/api/metrics');
+                if (metricsRes.ok) {
+                    const m = await metricsRes.json();
+                    document.getElementById('stat-total-students').textContent = m.total_students || 0;
+                    document.getElementById('stat-completed-modules').textContent = (m.modules_stats && m.modules_stats['Lesson 10']) || 0;
+                    document.getElementById('stat-total-exams').textContent = m.total_exams || 0;
+                    document.getElementById('stat-pass-rate').textContent = (m.pass_rate || 0) + '%';
+                    document.getElementById('stat-certs-issued').textContent = m.certs_issued || 0;
+                }
+
+                // 2. Fetch students list
+                const studentsRes = await fetch('/api/students');
+                if (studentsRes.ok) {
+                    const data = await studentsRes.json();
+                    allStudents = data.students || [];
+                } else {
+                    // Fallback to local storage registry if server offline
+                    allStudents = loadLocalStudentsRegistry();
+                }
+            } catch (err) {
+                console.warn('Backend fetch failed, checking local registry:', err);
+                allStudents = loadLocalStudentsRegistry();
+            }
+
+            updateFilterCounts();
+            renderTable();
+        }
+
+        function loadLocalStudentsRegistry() {
+            try {
+                const reg = localStorage.getItem('platforms_student_registry');
+                if (reg) return JSON.parse(reg);
+            } catch (e) {}
+
+            // Minimal demo record from current active session if any
+            const state = localStorage.getItem('platforms_unarmed_course_state_v3');
+            if (state) {
+                const parsed = JSON.parse(state);
+                const cert = parsed.studentCertData || {};
+                return [{
+                    id: parsed.studentEmail || 'active_student',
+                    name: cert.name || 'Trainee Officer',
+                    email: parsed.studentEmail || 'trainee@example.com',
+                    agency: parsed.studentAgency || 'Platforms Training Academy',
+                    completed_modules: Object.values(parsed.moduleSections || {}).filter(m => m.study && m.scenario && m.quiz).length,
+                    total_modules: 10,
+                    exam_attempts: parsed.examAttempts || (parsed.examCompleted ? 1 : 0),
+                    best_score: parsed.examPercentage || null,
+                    latest_score: parsed.examPercentage || null,
+                    latest_passed: parsed.examPassed || false,
+                    has_passed: parsed.examPassed || false,
+                    cert_id: parsed.issuedCertId || null,
+                    created_at: parsed.lastSavedTimestamp || 'Recent',
+                    last_active: parsed.lastSavedTimestamp || 'Recent',
+                    attempts: parsed.examCompleted ? [{
+                        attempt_number: 1,
+                        score: `${parsed.examScore}/50`,
+                        percentage: parsed.examPercentage,
+                        passed: parsed.examPassed,
+                        date: parsed.lastSavedTimestamp || 'Recent'
+                    }] : []
+                }];
+            }
+            return [];
+        }
+
+        function updateFilterCounts() {
+            document.getElementById('count-all').textContent = allStudents.length;
+            document.getElementById('count-progress').textContent = allStudents.filter(s => s.completed_modules > 0 && s.completed_modules < 10).length;
+            document.getElementById('count-passed').textContent = allStudents.filter(s => s.has_passed).length;
+            document.getElementById('count-retake').textContent = allStudents.filter(s => s.exam_attempts > 0 && !s.has_passed).length;
+            document.getElementById('count-certified').textContent = allStudents.filter(s => s.cert_id).length;
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderTable();
+        }
+
+        function filterStudents() {
+            renderTable();
+        }
+
+        function renderTable() {
+            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            const tbody = document.getElementById('students-table-body');
+
+            let filtered = allStudents.filter(s => {
+                // Filter tabs
+                if (currentFilter === 'in_progress' && (s.completed_modules === 0 || s.completed_modules >= 10)) return false;
+                if (currentFilter === 'passed' && !s.has_passed) return false;
+                if (currentFilter === 'retake' && (s.exam_attempts === 0 || s.has_passed)) return false;
+                if (currentFilter === 'certified' && !s.cert_id) return false;
+
+                // Search query
+                if (query) {
+                    const match = (s.name && s.name.toLowerCase().includes(query)) ||
+                                  (s.email && s.email.toLowerCase().includes(query)) ||
+                                  (s.agency && s.agency.toLowerCase().includes(query)) ||
+                                  (s.cert_id && s.cert_id.toLowerCase().includes(query));
+                    if (!match) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:36px; color:var(--text-muted);">
+                            <i class="fas fa-user-slash" style="font-size:1.8rem; margin-bottom:8px; display:block; opacity:0.4;"></i>
+                            No students match the selected filter or search criteria.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, idx) => {
+                const modulesDone = s.completed_modules || 0;
+                const pctModules = Math.round((modulesDone / 10) * 100);
+                const attemptsCount = s.exam_attempts || 0;
+                
+                // Score badges
+                let latestScoreBadge = `<span style="color:var(--text-sub);">No Attempt</span>`;
+                if (s.latest_score !== null && s.latest_score !== undefined) {
+                    if (s.latest_passed) {
+                        latestScoreBadge = `<span class="badge badge-success"><i class="fas fa-check"></i> ${s.latest_score}% Passed</span>`;
+                    } else {
+                        latestScoreBadge = `<span class="badge badge-danger"><i class="fas fa-times"></i> ${s.latest_score}% Failed</span>`;
+                    }
+                }
+
+                let bestScoreBadge = `<span style="color:var(--text-sub);">&mdash;</span>`;
+                if (s.best_score !== null && s.best_score !== undefined) {
+                    bestScoreBadge = `<strong style="color:${s.best_score >= 75 ? 'var(--green-bright)' : '#f87171'};">${s.best_score}%</strong>`;
+                }
+
+                // Cert Badge
+                let certBadge = `<span style="color:var(--text-sub);">Pending</span>`;
+                if (s.cert_id) {
+                    certBadge = `<span class="badge badge-cert" title="Issued ${s.cert_issued_at || ''}"><i class="fas fa-lock"></i> ${s.cert_id}</span>`;
+                }
+
+                // Attempts pill
+                let attemptsPill = `<span class="badge badge-info">${attemptsCount} ${attemptsCount === 1 ? 'Attempt' : 'Attempts'}</span>`;
+                if (attemptsCount === 0) {
+                    attemptsPill = `<span style="color:var(--text-sub);">0</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td>
+                            <strong style="color:#fff; font-size:0.92rem;">${s.name}</strong>
+                            <div style="font-size:0.72rem; color:var(--text-sub);">Enrolled: ${s.created_at || 'N/A'}</div>
+                        </td>
+                        <td>
+                            <div>${s.email || 'N/A'}</div>
+                            <small style="color:var(--text-sub);">${s.agency || 'Platforms Student'}</small>
+                        </td>
+                        <td>
+                            <div style="font-weight:600; color:#fff;">${modulesDone} / 10</div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-bar-fill" style="width: ${pctModules}%;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            ${attemptsPill}
+                        </td>
+                        <td>
+                            ${latestScoreBadge}
+                        </td>
+                        <td>
+                            ${bestScoreBadge}
+                        </td>
+                        <td>
+                            ${certBadge}
+                        </td>
+                        <td style="color:var(--text-muted); font-size:0.78rem;">
+                            ${s.last_active || 'Recent'}
+                        </td>
+                        <td>
+                            ${attemptsCount > 0 ? `
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="viewAttempts(${idx})">
+                                    <i class="fas fa-list-check"></i> History
+                                </button>
+                            ` : `
+                                <span style="font-size:0.75rem; color:var(--text-sub);">In Study</span>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewAttempts(studentIndex) {
+            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            let filtered = allStudents.filter(s => {
+                if (currentFilter === 'in_progress' && (s.completed_modules === 0 || s.completed_modules >= 10)) return false;
+                if (currentFilter === 'passed' && !s.has_passed) return false;
+                if (currentFilter === 'retake' && (s.exam_attempts === 0 || s.has_passed)) return false;
+                if (currentFilter === 'certified' && !s.cert_id) return false;
+                if (query) {
+                    const match = (s.name && s.name.toLowerCase().includes(query)) ||
+                                  (s.email && s.email.toLowerCase().includes(query));
+                    if (!match) return false;
+                }
+                return true;
+            });
+
+            const student = filtered[studentIndex];
+            if (!student) return;
+
+            document.getElementById('attempts-modal-title').innerHTML = `
+                <i class="fas fa-history text-green"></i> Exam History: ${student.name}
+            `;
+
+            const attempts = student.attempts || [];
+            const container = document.getElementById('attempts-modal-body');
+
+            if (attempts.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); padding:20px 0;">No recorded attempts yet for this student.</p>`;
+            } else {
+                container.innerHTML = `
+                    <div style="margin-bottom:14px; font-size:0.82rem; color:var(--text-muted);">
+                        Total Recorded Attempts: <strong>${attempts.length}</strong> &bull; Best Score: <strong style="color:var(--green-bright);">${student.best_score || 0}%</strong>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <th style="padding:8px;">Attempt #</th>
+                                <th style="padding:8px;">Date / Time</th>
+                                <th style="padding:8px;">Score</th>
+                                <th style="padding:8px;">Percentage</th>
+                                <th style="padding:8px;">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${attempts.map(a => `
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding:10px 8px;"><strong>Attempt ${a.attempt_number}</strong></td>
+                                    <td style="padding:10px 8px; color:var(--text-muted); font-size:0.78rem;">${a.date || a.completed_at || 'N/A'}</td>
+                                    <td style="padding:10px 8px;">${a.score}</td>
+                                    <td style="padding:10px 8px; font-weight:700;">${a.percentage}%</td>
+                                    <td style="padding:10px 8px;">
+                                        ${a.passed ? '<span class="badge badge-success">PASSED</span>' : '<span class="badge badge-danger">FAILED</span>'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            document.getElementById('attempts-modal').style.display = 'flex';
+        }
+
+        function closeAttemptsModal() {
+            document.getElementById('attempts-modal').style.display = 'none';
+        }
+
+        function exportCSV() {
+            if (!allStudents || allStudents.length === 0) {
+                alert("No student records available to export.");
+                return;
+            }
+
+            const headers = ["Student Name", "Email", "Agency", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
+            const rows = allStudents.map(s => [
+                `"${(s.name || '').replace(/"/g, '""')}"`,
+                `"${(s.email || '').replace(/"/g, '""')}"`,
+                `"${(s.agency || '').replace(/"/g, '""')}"`,
+                `${s.completed_modules || 0}/10`,
+                s.exam_attempts || 0,
+                s.latest_score !== null ? `${s.latest_score}%` : 'N/A',
+                s.best_score !== null ? `${s.best_score}%` : 'N/A',
+                s.has_passed ? "YES" : "NO",
+                `"${(s.cert_id || 'None').replace(/"/g, '""')}"`,
+                `"${s.created_at || ''}"`,
+                `"${s.last_active || ''}"`
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Platforms_Training_Academy_Roster_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
