@@ -598,6 +598,7 @@
                     name: cert.name || 'Trainee Officer',
                     email: parsed.studentEmail || 'trainee@example.com',
                     agency: parsed.studentAgency || 'Platforms Training Academy',
+                    mfa_verified: localStorage.getItem('platforms_mfa_verified_' + (parsed.studentEmail || '')) === 'true',
                     completed_modules: Object.values(parsed.moduleSections || {}).filter(m => m.study && m.scenario && m.quiz).length,
                     total_modules: 10,
                     exam_attempts: parsed.examAttempts || (parsed.examCompleted ? 1 : 0),
@@ -714,7 +715,10 @@
                         </td>
                         <td>
                             <div>${s.email || 'N/A'}</div>
-                            <small style="color:var(--text-sub);">${s.agency || 'Platforms Student'}</small>
+                            <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                                <small style="color:var(--text-sub);">${s.agency || 'Platforms Student'}</small>
+                                ${s.mfa_verified ? '<span class="badge" style="background:rgba(16,185,129,0.15); color:#86efac; border:1px solid rgba(16,185,129,0.4); font-size:0.68rem; padding:1px 5px;"><i class="fas fa-shield-alt"></i> MFA</span>' : '<span class="badge" style="background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.4); font-size:0.68rem; padding:1px 5px;">MFA Pending</span>'}
+                            </div>
                         </td>
                         <td>
                             <div style="font-weight:600; color:#fff;">${modulesDone} / 10</div>
@@ -823,11 +827,12 @@
                 return;
             }
 
-            const headers = ["Student Name", "Email", "Agency", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
+            const headers = ["Student Name", "Email", "Agency", "MFA Verified", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
             const rows = allStudents.map(s => [
                 `"${(s.name || '').replace(/"/g, '""')}"`,
                 `"${(s.email || '').replace(/"/g, '""')}"`,
                 `"${(s.agency || '').replace(/"/g, '""')}"`,
+                s.mfa_verified ? "YES" : "NO",
                 `${s.completed_modules || 0}/10`,
                 s.exam_attempts || 0,
                 s.latest_score !== null ? `${s.latest_score}%` : 'N/A',
