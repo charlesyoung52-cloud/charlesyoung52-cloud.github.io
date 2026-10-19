@@ -499,7 +499,12 @@ class SecurityCourseApp {
                     template_params: {
                         to_name: name || 'Trainee Officer',
                         to_email: email,
+                        user_email: email,
+                        email: email,
                         passcode: code,
+                        code: code,
+                        otp: code,
+                        verification_code: code,
                         course_name: '20-Hour Online Unarmed Security Course',
                         academy_name: 'Platforms Training Academy',
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
