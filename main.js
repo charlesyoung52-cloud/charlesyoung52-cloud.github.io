@@ -159,7 +159,7 @@ const COURSE_DATABASE = {
         duration: "3 Hours (Classroom & Range)",
         location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
-        description: "Required state refresher course every 5 years for Illinois Concealed Carry License holders to renew their permit with the Illinois State Police.",
+        description: "Required state refresher course every 5 years for Illinois Concealed Carry License holders to renew their CCL with the Illinois State Police.",
         curriculum: [
             "Review of Illinois Concealed Carry Act changes and recent case law updates",
             "Mental conditioning, situational awareness, and defensive decision-making",
