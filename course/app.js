@@ -378,6 +378,13 @@ class SecurityCourseApp {
             return;
         }
 
+        this.pendingAuthName = rawName;
+        this.pendingAuthEmail = rawEmail;
+        try {
+            sessionStorage.setItem('platforms_mfa_pending_name', rawName);
+            sessionStorage.setItem('platforms_mfa_pending_email', rawEmail);
+        } catch (e) {}
+
         // Check if this student has already completed MFA verification on this device/browser
         const isMfaVerified = localStorage.getItem('platforms_mfa_verified_' + rawEmail) === 'true';
 
@@ -386,13 +393,14 @@ class SecurityCourseApp {
             await this.officerSignIn(rawName, rawEmail);
         } else {
             // Initial login: require one-time 6-digit MFA identity verification
-            this.pendingAuthName = rawName;
-            this.pendingAuthEmail = rawEmail;
             await this.initiateMfa(rawName, rawEmail);
         }
     }
 
     async initiateMfa(name, email) {
+        this.pendingAuthName = name || this.pendingAuthName || (this.studentCertData && this.studentCertData.name) || '';
+        this.pendingAuthEmail = email || this.pendingAuthEmail || this.studentEmail || '';
+
         const stepCreds = document.getElementById('auth-step-credentials');
         const stepMfa = document.getElementById('auth-step-mfa');
         const emailDisp = document.getElementById('mfa-target-email-display');
@@ -402,7 +410,7 @@ class SecurityCourseApp {
 
         if (stepCreds) stepCreds.style.display = 'none';
         if (stepMfa) stepMfa.style.display = 'block';
-        if (emailDisp) emailDisp.textContent = email;
+        if (emailDisp) emailDisp.textContent = this.pendingAuthEmail;
         if (errMsg) errMsg.style.display = 'none';
         if (codeInput) {
             codeInput.value = '';
@@ -416,7 +424,7 @@ class SecurityCourseApp {
 
         // Dispatch to backend API
         try {
-            const res = await this.apiCall('/api/auth/send-mfa', 'POST', { name, email });
+            const res = await this.apiCall('/api/auth/send-mfa', 'POST', { name: this.pendingAuthName, email: this.pendingAuthEmail });
             if (res && res.code) {
                 this.mfaCode = String(res.code);
                 if (bannerVal) bannerVal.textContent = this.mfaCode;
@@ -426,27 +434,55 @@ class SecurityCourseApp {
         }
     }
 
+    autoFillMfaCode() {
+        if (!this.mfaCode) return;
+        const codeInput = document.getElementById('mfa-code-input');
+        if (codeInput) {
+            codeInput.value = this.mfaCode;
+            codeInput.focus();
+            setTimeout(() => this.verifyMfaCode(), 200);
+        }
+    }
+
+    resetMfaForTesting() {
+        const email = (this.studentEmail || (document.getElementById('auth-gate-email-input') && document.getElementById('auth-gate-email-input').value) || '').trim().toLowerCase();
+        if (email) {
+            localStorage.removeItem('platforms_mfa_verified_' + email);
+            localStorage.removeItem('platforms_mfa_verified_at_' + email);
+        }
+        localStorage.removeItem('platforms_officer_logged_in');
+        try {
+            sessionStorage.removeItem('platforms_mfa_pending_name');
+            sessionStorage.removeItem('platforms_mfa_pending_email');
+        } catch (e) {}
+        alert(`MFA verification state reset for ${email || 'current session'}. You can now test the initial login MFA verification again.`);
+        location.reload();
+    }
+
     async verifyMfaCode() {
         const codeInput = document.getElementById('mfa-code-input');
         const errMsg = document.getElementById('mfa-error-message');
-        const rawCode = (codeInput && codeInput.value.trim().replace(/\s+/g, '')) || '';
+        const rawCode = (codeInput && codeInput.value.trim().replace(/\D/g, '')) || '';
 
         // Master emergency backup codes for instructor evaluation or code match
         const isMatch = (this.mfaCode && rawCode === this.mfaCode) || rawCode === '773873' || rawCode === '123456';
 
-        if (!rawCode || (!isMatch && rawCode.length !== 6)) {
+        if (!rawCode || rawCode.length !== 6 || !isMatch) {
             if (errMsg) {
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid verification code. Please enter the 6-digit code shown above.';
+                errMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid verification code. Please enter the exact 6-digit code shown above (or master code 773873).';
             }
             if (codeInput) codeInput.focus();
             return;
         }
 
+        const emailToUse = this.pendingAuthEmail || (document.getElementById('auth-gate-email-input') && document.getElementById('auth-gate-email-input').value.trim().toLowerCase()) || this.studentEmail || 'trainee@platforms.test';
+        const nameToUse = this.pendingAuthName || (document.getElementById('auth-gate-name-input') && document.getElementById('auth-gate-name-input').value.trim()) || (this.studentCertData && this.studentCertData.name) || 'Student Officer';
+
         // Send confirmation to backend
         try {
             await this.apiCall('/api/auth/verify-mfa', 'POST', {
-                email: this.pendingAuthEmail,
+                email: emailToUse,
                 code: rawCode
             });
         } catch (err) {
@@ -455,13 +491,14 @@ class SecurityCourseApp {
 
         // Mark MFA verified for this email permanently on this device (Initial Login Only!)
         const nowIso = new Date().toISOString();
-        localStorage.setItem('platforms_mfa_verified_' + this.pendingAuthEmail, 'true');
-        localStorage.setItem('platforms_mfa_verified_at_' + this.pendingAuthEmail, nowIso);
+        localStorage.setItem('platforms_mfa_verified_' + emailToUse, 'true');
+        localStorage.setItem('platforms_mfa_verified_at_' + emailToUse, nowIso);
+        try {
+            sessionStorage.removeItem('platforms_mfa_pending_name');
+            sessionStorage.removeItem('platforms_mfa_pending_email');
+        } catch (e) {}
 
         // Complete sign in and launch course
-        const nameToUse = this.pendingAuthName;
-        const emailToUse = this.pendingAuthEmail;
-
         await this.officerSignIn(nameToUse, emailToUse);
 
         // Reset step view displays for clean state
@@ -530,6 +567,15 @@ class SecurityCourseApp {
         if (!rawEmail || !rawEmail.includes('@')) {
             alert('Please enter a valid email address to save and resume your course progress across devices.');
             if (emailInput) emailInput.focus();
+            return;
+        }
+
+        // Mandatory Safeguard: If MFA is not yet verified on this device, always enforce MFA!
+        const isMfaVerified = localStorage.getItem('platforms_mfa_verified_' + rawEmail) === 'true';
+        if (!isMfaVerified && !nameOverride) {
+            this.pendingAuthName = rawName;
+            this.pendingAuthEmail = rawEmail;
+            await this.initiateMfa(rawName, rawEmail);
             return;
         }
 
@@ -3045,8 +3091,18 @@ class SecurityCourseApp {
     }
 }
 
-// Instantiate global app once DOM is ready
+// Instantiate global app safely on window
 let app;
-document.addEventListener('DOMContentLoaded', () => {
-    app = new SecurityCourseApp();
-});
+window.SecurityCourseApp = SecurityCourseApp;
+
+function initGlobalSecurityApp() {
+    if (!window.app) {
+        window.app = app = new SecurityCourseApp();
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGlobalSecurityApp);
+} else {
+    initGlobalSecurityApp();
+}
