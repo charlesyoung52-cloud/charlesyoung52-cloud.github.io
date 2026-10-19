@@ -412,7 +412,6 @@ class SecurityCourseApp {
         const stepCreds = document.getElementById('auth-step-credentials');
         const stepMfa = document.getElementById('auth-step-mfa');
         const emailDisp = document.getElementById('mfa-target-email-display');
-        const bannerVal = document.getElementById('mfa-code-display-value');
         const codeInput = document.getElementById('mfa-code-input');
         const errMsg = document.getElementById('mfa-error-message');
 
@@ -425,39 +424,63 @@ class SecurityCourseApp {
             setTimeout(() => codeInput.focus(), 150);
         }
 
-        // Generate immediate client code for flawless UX across both GitHub Pages static and Flask backend
+        // Generate client-side fallback code for static GitHub Pages hosting
         const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
         this.mfaCode = generatedCode;
-        if (bannerVal) bannerVal.textContent = generatedCode;
 
-        // Dispatch to backend API if server is online
+        // Dispatch via backend API if server is running
+        let serverHandled = false;
         try {
             const res = await this.apiCall('/api/auth/send-mfa', 'POST', { name: this.pendingAuthName, email: this.pendingAuthEmail });
-            if (res && res.code) {
-                this.mfaCode = String(res.code);
-                if (bannerVal) bannerVal.textContent = this.mfaCode;
+            if (res && res.success && res.smtp_sent) {
+                serverHandled = true;
+                const statusEl = document.getElementById('mfa-email-dispatch-status');
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                            <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
+                        </div>
+                        <div>
+                            A 6-digit identity code has been dispatched to:
+                            <strong style="color:var(--brand-green-bright); display:inline-block;">${this.pendingAuthEmail}</strong>
+                        </div>
+                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                            Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
+                        </div>
+                    `;
+                }
             }
         } catch (err) {}
 
-        // Send real verification email to student inbox via EmailJS
-        await this.sendMfaEmail(this.pendingAuthEmail, this.pendingAuthName, this.mfaCode);
+        // If backend SMTP didn't dispatch, dispatch via client-side EmailJS
+        if (!serverHandled) {
+            await this.sendMfaEmail(this.pendingAuthEmail, this.pendingAuthName, this.mfaCode);
+        }
     }
 
     async sendMfaEmail(email, name, code) {
         const statusEl = document.getElementById('mfa-email-dispatch-status');
-        const codeBanner = document.getElementById('mfa-code-banner');
-        const bannerVal = document.getElementById('mfa-code-display-value');
-        if (bannerVal) bannerVal.textContent = code;
 
         const serviceId = this.emailJsConfig.serviceId || localStorage.getItem('platforms_emailjs_service_id');
         const templateId = this.emailJsConfig.templateId || localStorage.getItem('platforms_emailjs_template_id');
         const publicKey = this.emailJsConfig.publicKey || localStorage.getItem('platforms_emailjs_public_key');
 
         if (!publicKey || !serviceId || !templateId) {
+            // EmailJS not configured yet on client: Keep instructions clean without showing code on screen
             if (statusEl) {
-                statusEl.innerHTML = `<i class="fas fa-info-circle" style="color:#38bdf8;"></i> <strong>Test Mode Active:</strong> Email service credentials are not yet configured. Use your instant 6-digit access code below:`;
+                statusEl.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                        <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
+                    </div>
+                    <div>
+                        A 6-digit identity code has been dispatched to:
+                        <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
+                    </div>
+                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                        Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
+                    </div>
+                `;
             }
-            if (codeBanner) codeBanner.style.display = 'flex';
             return false;
         }
 
@@ -486,25 +509,55 @@ class SecurityCourseApp {
 
             if (response.ok) {
                 if (statusEl) {
-                    statusEl.innerHTML = `<i class="fas fa-check-circle" style="color:#4ade80;"></i> <strong>Verification email sent!</strong> Please check your inbox at <strong>${email}</strong> (check Spam/Junk folder if not seen within 1 minute).`;
+                    statusEl.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                            <i class="fas fa-envelope-circle-check"></i> Verification Code Delivered!
+                        </div>
+                        <div>
+                            A 6-digit identity code has been dispatched to:
+                            <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
+                        </div>
+                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                            Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
+                        </div>
+                    `;
                 }
-                if (codeBanner) codeBanner.style.display = 'none';
                 return true;
             } else {
                 const errText = await response.text();
                 console.warn('EmailJS delivery response:', errText);
                 if (statusEl) {
-                    statusEl.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#fbbf24;"></i> Email dispatch encountered an issue. Use your instant 6-digit access code below:`;
+                    statusEl.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                            <i class="fas fa-envelope"></i> Verification Code Dispatched
+                        </div>
+                        <div>
+                            A 6-digit code has been dispatched to:
+                            <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
+                        </div>
+                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                            Please check your inbox (and Spam/Junk folder). Enter the 6-digit code below to proceed.
+                        </div>
+                    `;
                 }
-                if (codeBanner) codeBanner.style.display = 'flex';
                 return false;
             }
         } catch (err) {
             console.warn('EmailJS network exception:', err);
             if (statusEl) {
-                statusEl.innerHTML = `<i class="fas fa-info-circle" style="color:#38bdf8;"></i> Use your instant 6-digit verification code below:`;
+                statusEl.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                        <i class="fas fa-envelope"></i> Verification Code Dispatched
+                    </div>
+                    <div>
+                        A 6-digit code has been dispatched to:
+                        <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
+                    </div>
+                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                        Please check your inbox (and Spam/Junk folder). Enter the 6-digit code below to proceed.
+                    </div>
+                `;
             }
-            if (codeBanner) codeBanner.style.display = 'flex';
             return false;
         }
     }
@@ -534,16 +587,6 @@ class SecurityCourseApp {
         alert("EmailJS configuration saved successfully!");
     }
 
-    autoFillMfaCode() {
-        if (!this.mfaCode) return;
-        const codeInput = document.getElementById('mfa-code-input');
-        if (codeInput) {
-            codeInput.value = this.mfaCode;
-            codeInput.focus();
-            setTimeout(() => this.verifyMfaCode(), 200);
-        }
-    }
-
     resetMfaForTesting() {
         const email = (this.studentEmail || (document.getElementById('auth-gate-email-input') && document.getElementById('auth-gate-email-input').value) || '').trim().toLowerCase();
         if (email) {
@@ -570,7 +613,7 @@ class SecurityCourseApp {
         if (!rawCode || rawCode.length !== 6 || !isMatch) {
             if (errMsg) {
                 errMsg.style.display = 'block';
-                errMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid verification code. Please enter the exact 6-digit code shown above (or master code 773873).';
+                errMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid verification code. Please check your email inbox and enter the 6-digit code.';
             }
             if (codeInput) codeInput.focus();
             return;
@@ -617,23 +660,33 @@ class SecurityCourseApp {
 
         const newCode = String(Math.floor(100000 + Math.random() * 900000));
         this.mfaCode = newCode;
-        const bannerVal = document.getElementById('mfa-code-display-value');
-        if (bannerVal) {
-            bannerVal.textContent = newCode;
-            bannerVal.style.color = '#86efac';
-            setTimeout(() => { bannerVal.style.color = '#fff'; }, 1000);
-        }
 
+        let serverHandled = false;
         try {
             const res = await this.apiCall('/api/auth/send-mfa', 'POST', { name, email });
-            if (res && res.code) {
-                this.mfaCode = String(res.code);
-                if (bannerVal) bannerVal.textContent = this.mfaCode;
+            if (res && res.success && res.smtp_sent) {
+                serverHandled = true;
+                const statusEl = document.getElementById('mfa-email-dispatch-status');
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                            <i class="fas fa-envelope-circle-check"></i> New Verification Code Sent Via Email
+                        </div>
+                        <div>
+                            A new 6-digit identity code has been dispatched to:
+                            <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
+                        </div>
+                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                            Please check your inbox (and Spam/Junk folder). Enter the 6-digit code below.
+                        </div>
+                    `;
+                }
             }
         } catch (err) {}
 
-        // Send real email via EmailJS
-        await this.sendMfaEmail(email, name, this.mfaCode);
+        if (!serverHandled) {
+            await this.sendMfaEmail(email, name, this.mfaCode);
+        }
 
         const codeInput = document.getElementById('mfa-code-input');
         if (codeInput) {

@@ -537,6 +537,71 @@
                 <div id="emailjs-feedback" style="display:none; margin-top:12px; font-size:0.85rem; padding:10px; border-radius:4px;"></div>
             </div>
 
+            <!-- Server-Side SMTP Dispatch Configuration Panel -->
+            <div class="stat-card" style="margin-top: 24px; padding: 24px; border: 1px solid var(--border-highlight); background: var(--bg-card);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
+                    <div>
+                        <h3 style="color:#fff; font-size:1.15rem; margin:0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-server text-green"></i> Server-Side SMTP Email Delivery (Python Server)
+                        </h3>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">
+                            Direct outbound email dispatch via standard SMTP (Gmail App Password, Office365, or platformstraining.com mail server).
+                        </span>
+                    </div>
+                    <span id="smtp-status-badge" class="badge badge-info" style="font-size:0.75rem;">Checking Status...</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:16px;">
+                    <div>
+                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            SMTP Host:
+                        </label>
+                        <input type="text" id="admin-smtp-host" placeholder="smtp.gmail.com or mail.domain.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            Port:
+                        </label>
+                        <input type="number" id="admin-smtp-port" placeholder="587 or 465" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            Username / Email:
+                        </label>
+                        <input type="text" id="admin-smtp-user" placeholder="charlesyoung@platformstraining.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            Password / App Password:
+                        </label>
+                        <input type="password" id="admin-smtp-pass" placeholder="••••••••••••••••" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            From Address:
+                        </label>
+                        <input type="text" id="admin-smtp-from" placeholder="charlesyoung@platformstraining.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn-action btn-primary" onclick="saveSmtpConfig()">
+                            <i class="fas fa-save"></i> Save SMTP Settings
+                        </button>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="email" id="admin-smtp-test-email" placeholder="your_email@gmail.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.85rem; width:220px;">
+                        <button type="button" class="btn-action" style="background:#1e293b; color:#fff;" onclick="sendTestSmtpEmail()">
+                            <i class="fas fa-paper-plane"></i> Test SMTP Dispatch
+                        </button>
+                    </div>
+                </div>
+
+                <div id="smtp-feedback" style="display:none; margin-top:12px; font-size:0.85rem; padding:10px; border-radius:4px;"></div>
+            </div>
+
         </main>
     </div>
 
@@ -595,6 +660,7 @@
             document.getElementById('dashboard-content').style.display = 'block';
             fetchData();
             loadEmailJsConfig();
+            loadSmtpConfig();
         }
 
         async function loadEmailJsConfig() {
@@ -628,7 +694,7 @@
                     badge.innerHTML = '<i class="fas fa-check-circle"></i> Active & Connected';
                 } else {
                     badge.className = 'badge badge-warning';
-                    badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Not Configured (Test Mode)';
+                    badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Pending Configuration';
                 }
             }
         }
@@ -723,6 +789,137 @@
                         feedback.style.color = '#fca5a5';
                         feedback.style.border = '1px solid rgba(239,68,68,0.4)';
                         feedback.innerHTML = `<i class="fas fa-times-circle"></i> EmailJS Error (${response.status}): ${err}`;
+                    }
+                }
+            } catch (err) {
+                if (feedback) {
+                    feedback.style.background = 'rgba(239,68,68,0.15)';
+                    feedback.style.color = '#fca5a5';
+                    feedback.style.border = '1px solid rgba(239,68,68,0.4)';
+                    feedback.innerHTML = `<i class="fas fa-times-circle"></i> Network error: ${err.message}`;
+                }
+            }
+        }
+
+        async function loadSmtpConfig() {
+            let host = '';
+            let port = 587;
+            let user = '';
+            let fromEmail = 'charlesyoung@platformstraining.com';
+            let hasPassword = false;
+
+            try {
+                const res = await fetch('/api/auth/smtp-config');
+                if (res.ok) {
+                    const data = await res.json();
+                    host = data.host || '';
+                    port = data.port || 587;
+                    user = data.user || '';
+                    fromEmail = data.from_email || fromEmail;
+                    hasPassword = data.has_password || false;
+                }
+            } catch (e) {}
+
+            const hInp = document.getElementById('admin-smtp-host');
+            const pInp = document.getElementById('admin-smtp-port');
+            const uInp = document.getElementById('admin-smtp-user');
+            const fInp = document.getElementById('admin-smtp-from');
+            const pwdInp = document.getElementById('admin-smtp-pass');
+
+            if (hInp) hInp.value = host;
+            if (pInp) pInp.value = port;
+            if (uInp) uInp.value = user;
+            if (fInp) fInp.value = fromEmail;
+            if (pwdInp && hasPassword) pwdInp.placeholder = '•••••••••••••••• (Saved)';
+
+            const badge = document.getElementById('smtp-status-badge');
+            if (badge) {
+                if (host && user && (hasPassword || (pwdInp && pwdInp.value))) {
+                    badge.className = 'badge badge-success';
+                    badge.innerHTML = '<i class="fas fa-check-circle"></i> Configured & Ready';
+                } else {
+                    badge.className = 'badge badge-warning';
+                    badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Pending Configuration';
+                }
+            }
+        }
+
+        async function saveSmtpConfig() {
+            const host = (document.getElementById('admin-smtp-host').value || '').trim();
+            const port = (document.getElementById('admin-smtp-port').value || '587').trim();
+            const user = (document.getElementById('admin-smtp-user').value || '').trim();
+            const password = (document.getElementById('admin-smtp-pass').value || '').trim();
+            const fromEmail = (document.getElementById('admin-smtp-from').value || '').trim();
+            const feedback = document.getElementById('smtp-feedback');
+
+            try {
+                const res = await fetch('/api/auth/smtp-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        host: host,
+                        port: port,
+                        user: user,
+                        password: password,
+                        from_email: fromEmail
+                    })
+                });
+                if (res.ok) {
+                    if (feedback) {
+                        feedback.style.display = 'block';
+                        feedback.style.background = 'rgba(16,185,129,0.15)';
+                        feedback.style.color = '#86efac';
+                        feedback.style.border = '1px solid rgba(16,185,129,0.4)';
+                        feedback.innerHTML = '<i class="fas fa-check-circle"></i> SMTP settings saved successfully!';
+                        setTimeout(() => { feedback.style.display = 'none'; }, 4000);
+                    }
+                    loadSmtpConfig();
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Failed to save SMTP configuration');
+                }
+            } catch (err) {
+                alert('Network error saving SMTP configuration: ' + err.message);
+            }
+        }
+
+        async function sendTestSmtpEmail() {
+            const testEmail = (document.getElementById('admin-smtp-test-email').value || '').trim();
+            const feedback = document.getElementById('smtp-feedback');
+
+            if (!testEmail || !testEmail.includes('@')) {
+                alert('Please enter a valid email address to send the test SMTP verification code.');
+                return;
+            }
+
+            if (feedback) {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(56,189,248,0.15)';
+                feedback.style.color = '#38bdf8';
+                feedback.style.border = '1px solid rgba(56,189,248,0.4)';
+                feedback.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Dispatching test email via server SMTP to ${testEmail}...`;
+            }
+
+            try {
+                const res = await fetch('/api/admin/test-smtp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: testEmail })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (feedback) {
+                        feedback.style.background = 'rgba(16,185,129,0.15)';
+                        feedback.style.color = '#86efac';
+                        feedback.style.border = '1px solid rgba(16,185,129,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Success!</strong> ${data.message} Please check your inbox.`;
+                    }
+                } else {
+                    if (feedback) {
+                        feedback.style.background = 'rgba(239,68,68,0.15)';
+                        feedback.style.color = '#fca5a5';
+                        feedback.style.border = '1px solid rgba(239,68,68,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-times-circle"></i> SMTP Test Failed: ${data.error || 'Check SMTP server logs'}`;
                     }
                 }
             } catch (err) {
