@@ -691,17 +691,17 @@ h1, h2, h3, h4, h5, h6 {
     transform: translate(-50%, -50%);
     object-fit: cover;
     z-index: 1;
-    opacity: 0.35;
-    filter: brightness(0.65) contrast(1.15);
+    opacity: 0.50;
+    filter: brightness(0.75) contrast(1.15);
     pointer-events: none;
 }
 
 .hero-bg-overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.72) 0%, rgba(10, 11, 13, 0.94) 85%);
+    background: radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.58) 0%, rgba(10, 11, 13, 0.85) 85%);
     background-image: 
-        radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.6) 0%, rgba(10, 11, 13, 0.94) 85%),
+        radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.48) 0%, rgba(10, 11, 13, 0.85) 85%),
         linear-gradient(rgba(128, 163, 21, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(128, 163, 21, 0.04) 1px, transparent 1px);
     background-size: auto, 40px 40px, 40px 40px;
