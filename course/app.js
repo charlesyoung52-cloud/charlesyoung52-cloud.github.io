@@ -2312,10 +2312,14 @@ class SecurityCourseApp {
         const sealedBanner = document.getElementById('cert-sealed-banner');
         const mainActionBtn = document.getElementById('btn-results-main-action');
 
-        scoreNum.textContent = `${this.examScore} / ${EXAM_QUESTIONS.length}`;
-        scorePct.textContent = `${this.examPercentage}% Score (Attempt #${this.examAttempts || 1})`;
+        const effectiveScore = (this.isAdminMode && !this.examPassed) ? EXAM_QUESTIONS.length : this.examScore;
+        const effectivePct = (this.isAdminMode && !this.examPassed) ? 100 : this.examPercentage;
+        scoreNum.textContent = `${effectiveScore} / ${EXAM_QUESTIONS.length}`;
+        scorePct.textContent = (this.isAdminMode && !this.examPassed)
+            ? `100% Score (Instructor Admin Certificate Preview)`
+            : `${effectivePct}% Score (Attempt #${this.examAttempts || 1})`;
 
-        if (this.examPassed) {
+        if (this.examPassed || this.isAdminMode) {
             badge.className = 'score-badge passed';
             title.textContent = "CONGRATULATIONS — YOU PASSED!";
             title.style.color = "var(--brand-green-bright)";
@@ -3535,6 +3539,13 @@ class SecurityCourseApp {
         if (banner) {
             banner.style.display = this.isAdminMode ? 'flex' : 'none';
         }
+    }
+
+    openAdminCertificateView() {
+        this.isCertLocked = false;
+        localStorage.removeItem('platforms_cert_locked');
+        document.querySelectorAll('.cert-form-input').forEach(inp => { inp.disabled = false; });
+        this.showView('results');
     }
 
     openAdminDashboard() {

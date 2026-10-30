@@ -32,6 +32,7 @@
     <!-- Admin Evaluation Mode Banner (Unlocked via Charles Young Admin PIN) -->
     <div class="admin-mode-banner" id="admin-mode-banner" style="display:none;">
         <span><i class="fas fa-user-shield"></i> <strong>ADMIN EVALUATION MODE ACTIVE</strong> &bull; All module and exam locks bypassed for Instructor Charles Young</span>
+        <button onclick="app.openAdminCertificateView()"><i class="fas fa-certificate"></i> View Certificate Page</button>
         <button onclick="app.openAdminDashboard()"><i class="fas fa-chart-line"></i> Analytics Dashboard</button>
         <button onclick="app.exitAdminMode()"><i class="fas fa-sign-out-alt"></i> Exit Admin Mode</button>
     </div>
@@ -70,6 +71,9 @@
                 </button>
                 <button class="nav-btn" data-view="exam" id="nav-btn-exam">
                     <i class="fas fa-file-alt"></i> Official Exam (50 Qs)
+                </button>
+                <button class="nav-btn" data-view="results" id="nav-btn-cert">
+                    <i class="fas fa-certificate"></i> Certificate
                 </button>
             </nav>
 
