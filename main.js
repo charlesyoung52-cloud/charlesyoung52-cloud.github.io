@@ -187,7 +187,7 @@ function openCourseModal(courseId) {
         </div>
 
         ${course.rangeNote ? `
-        <div class="modal-range-included-box" style="background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:6px; padding:12px 14px; margin-bottom:16px; font-size:0.88rem; color:#e2e8f0; display:flex; gap:10px; align-items:flex-start;">
+        <div class="modal-range-included-box" style="background:rgba(14,165,233,0.12); border:1px solid rgba(14,165,233,0.35); border-radius:6px; padding:12px 14px; margin-bottom:16px; font-size:0.88rem; color:#e2e8f0; display:flex; gap:10px; align-items:flex-start;">
             <i class="fas fa-bullseye text-green" style="font-size:1.1rem; margin-top:2px; color:var(--brand-green-bright);"></i>
             <div>
                 <strong style="color:#fff;">Range Equipment &amp; Fees Included:</strong><br>

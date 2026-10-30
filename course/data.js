@@ -674,7 +674,7 @@ const LESSONS_DATA = [
                 <!-- Level 2 -->
                 <div class="continuum-tier-card" style="border-left-color: #0284c7; background: rgba(2, 132, 199, 0.08);">
                     <div class="tier-header-row">
-                        <span class="tier-title" style="color: #38bdf8;"><i class="fas fa-comments"></i> LEVEL 2 — VERBAL DIRECTION &amp; COMMUNICATION</span>
+                        <span class="tier-title" style="color: #0ea5e9;"><i class="fas fa-comments"></i> LEVEL 2 — VERBAL DIRECTION &amp; COMMUNICATION</span>
                         <span class="tier-statute-badge" style="background: rgba(2,132,199,0.25); color: #7dd3fc; border: 1px solid #0284c7;">Tactical Dialogue</span>
                     </div>
                     <div class="tier-details-grid">
