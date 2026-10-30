@@ -2539,6 +2539,16 @@ class SecurityCourseApp {
                             val = digits;
                         }
                         e.target.value = val;
+                    } else if (item.key === 'height') {
+                        const digits = val.replace(/\D/g, '').slice(0, 3);
+                        if (digits.length >= 2) {
+                            val = `${digits[0]}'${digits.slice(1, 3)}`;
+                        } else if (digits.length === 1) {
+                            val = isDeleting ? digits : `${digits}'`;
+                        } else {
+                            val = '';
+                        }
+                        e.target.value = val;
                     } else if (item.upper) {
                         val = val.toUpperCase();
                         e.target.value = val;
