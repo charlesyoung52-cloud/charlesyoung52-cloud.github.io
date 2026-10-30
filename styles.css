@@ -992,6 +992,39 @@ h1, h2, h3, h4, h5, h6 {
 /* ==========================================================================
    SECTION 3: COURSES & BOOKING
    ========================================================================== */
+/* ==========================================================================
+   COURSES PAGE HERO BANNER
+   ========================================================================== */
+.courses-hero-banner {
+    padding-top: 36px !important;
+    padding-bottom: 24px !important;
+    background: radial-gradient(circle at 50% 25%, rgba(14, 165, 233, 0.12) 0%, rgba(10, 11, 13, 0.98) 75%);
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: center;
+}
+
+.courses-hero-banner .hero-main-title {
+    font-size: 2.8rem;
+    margin: 12px 0 10px 0;
+}
+
+.courses-hero-banner .section-desc {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.12rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.courses-hero-banner .section-title-line {
+    margin: 18px auto 0 auto;
+}
+
+.courses-section {
+    padding-top: 36px;
+    padding-bottom: 80px;
+}
+
 .courses-section {
     background-color: var(--bg-primary);
 }
@@ -2348,6 +2381,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 768px) {
+    .courses-hero-banner {
+        padding-top: 20px !important;
+        padding-bottom: 16px !important;
+    }
+    .courses-hero-banner .hero-main-title {
+        font-size: 2.1rem !important;
+        margin: 8px 0 !important;
+    }
+    .courses-hero-banner .section-desc {
+        font-size: 0.96rem !important;
+        line-height: 1.5 !important;
+    }
+    .courses-hero-banner .section-title-line {
+        margin: 12px auto 0 auto !important;
+    }
+    .courses-section {
+        padding-top: 22px !important;
+        padding-bottom: 50px !important;
+    }
+
     .top-link-email,
     .top-sep-email {
         display: none !important;
@@ -2419,6 +2472,32 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 640px) {
+    .courses-hero-banner {
+        padding-top: 16px !important;
+        padding-bottom: 12px !important;
+    }
+    .courses-hero-banner .section-tag-badge {
+        font-size: 0.70rem !important;
+        padding: 3px 10px !important;
+        margin-bottom: 4px !important;
+    }
+    .courses-hero-banner .hero-main-title {
+        font-size: 1.8rem !important;
+        line-height: 1.18 !important;
+        margin: 6px 0 !important;
+    }
+    .courses-hero-banner .section-desc {
+        font-size: 0.90rem !important;
+        line-height: 1.45 !important;
+    }
+    .courses-hero-banner .section-title-line {
+        margin: 10px auto 0 auto !important;
+    }
+    .courses-section {
+        padding-top: 16px !important;
+        padding-bottom: 40px !important;
+    }
+
     .site-container {
         padding: 0 16px;
     }
