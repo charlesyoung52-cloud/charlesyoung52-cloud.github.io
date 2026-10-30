@@ -68,7 +68,7 @@
     --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.25);
 
     --site-max-width: 1360px;
-    --header-height: 68px;
+    --header-height: 76px;
 }
 
 /* Global Reset */
@@ -298,9 +298,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .brand-logo-img {
-    height: 48px;
+    height: 58px;
     width: auto;
-    max-width: 220px;
+    max-width: 255px;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
@@ -2326,8 +2326,8 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 0.85rem;
     }
     .brand-logo-img {
-        height: 42px;
-        max-width: 190px;
+        height: 50px;
+        max-width: 220px;
     }
 }
 
@@ -2639,5 +2639,130 @@ h1, h2, h3, h4, h5, h6 {
     }
     .online-lms-banner {
         padding: 24px 16px;
+    }
+}
+
+
+/* ==========================================================================
+   MOBILE HEADER CENTERED LOGO & TIDY MOBILE CARDS FIT
+   ========================================================================== */
+.contact-highlight-link,
+.portal-url {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+@media (max-width: 768px) {
+    .main-header {
+        height: 68px !important;
+    }
+    .main-header .header-inner {
+        position: relative !important;
+        justify-content: center !important;
+        padding: 0 48px !important;
+    }
+    .main-header .brand-link {
+        margin: 0 auto !important;
+        justify-content: center !important;
+    }
+    .main-header .brand-logo-img {
+        height: 48px !important;
+        max-width: 215px !important;
+    }
+    .main-header .header-book-btn {
+        display: none !important;
+    }
+    .main-header .header-cta-block {
+        position: absolute !important;
+        right: 14px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+
+    /* Ensure all section containers and grids fit 100% of mobile screen without horizontal overflow */
+    .site-container {
+        padding: 0 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .site-section {
+        padding: 52px 0 !important;
+    }
+    .about-grid,
+    .online-lms-grid,
+    .info-split-grid,
+    .jobs-grid,
+    .reviews-grid,
+    .contact-grid,
+    .contact-split-grid,
+    .courses-cards-grid,
+    .instructor-badges-grid,
+    .hero-stats-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 16px !important;
+        width: 100% !important;
+    }
+
+    /* Tidy card padding and sizing on mobile */
+    .course-card,
+    .job-partner-card,
+    .review-card,
+    .reciprocity-card,
+    .state-portal-card,
+    .info-contact-card,
+    .form-container-box,
+    .online-lms-banner,
+    .ins-badge-item,
+    .image-sub-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 20px 18px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .info-contact-card,
+    .state-portal-card {
+        gap: 14px !important;
+        align-items: flex-start !important;
+    }
+    .info-contact-card > div,
+    .state-portal-card .portal-info {
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+    .contact-highlight-link {
+        font-size: 0.95rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .mockup-body {
+        padding: 14px !important;
+    }
+    .mockup-screen-card {
+        padding: 16px !important;
+    }
+    .lms-title {
+        font-size: 1.55rem !important;
+    }
+    .lms-desc {
+        font-size: 0.95rem !important;
+    }
+    .lms-cta-row .btn-large {
+        width: 100% !important;
+        padding: 12px 16px !important;
+        font-size: 0.9rem !important;
+        text-align: center !important;
+    }
+    .instructor-photo {
+        height: 300px !important;
+    }
+    .job-notice-strip {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 16px 18px !important;
+        gap: 10px !important;
     }
 }

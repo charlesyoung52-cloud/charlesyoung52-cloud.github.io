@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Tactical Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=2.2">
+    <link rel="stylesheet" href="styles.css?v=2.3">
 
     <style>
         /* Clean, Minimal Calendar Styles */
@@ -500,8 +500,27 @@
         }
 
         @media (max-width: 900px) {
+            .cal-page-wrap {
+                padding: 22px 0 44px;
+            }
             .cal-layout {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 20px;
+            }
+            .course-summary-bar,
+            .mini-cal-card,
+            .session-row {
+                padding: 16px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .summary-title,
+            .summary-price {
+                font-size: 1.35rem;
+            }
+            .cal-course-tab {
+                padding: 7px 11px;
+                font-size: 0.78rem;
             }
             .summary-more-body {
                 grid-template-columns: 1fr;
