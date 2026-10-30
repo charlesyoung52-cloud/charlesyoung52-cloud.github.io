@@ -718,12 +718,20 @@
         let allStudents = [];
         let currentFilter = 'all';
 
-        // Check authentication on startup
+        let isInternalAdminNav = false;
+
+        // Check authentication on startup (only allow active handoff from God Mode; require fresh login on new page/session)
         document.addEventListener('DOMContentLoaded', () => {
-            const savedToken = sessionStorage.getItem('pta_admin_auth');
-            if (savedToken === 'authorized') {
+            localStorage.removeItem('platforms_admin_mode');
+            const handoffTs = parseInt(sessionStorage.getItem('pta_admin_handoff') || '0', 10);
+            const isRecentHandoff = (Date.now() - handoffTs) < 15000;
+            sessionStorage.removeItem('pta_admin_handoff');
+
+            if (isRecentHandoff && sessionStorage.getItem('pta_admin_auth') === 'authorized') {
                 showDashboard();
             } else {
+                sessionStorage.removeItem('pta_admin_auth');
+                sessionStorage.removeItem('platforms_admin_mode');
                 document.getElementById('pin-input').focus();
             }
 
@@ -732,6 +740,18 @@
             });
         });
 
+        // Automatically log out of Admin Dashboard when closing page/tab/browser
+        const clearAdminSessionOnExit = () => {
+            if (!isInternalAdminNav) {
+                sessionStorage.removeItem('pta_admin_auth');
+                sessionStorage.removeItem('platforms_admin_mode');
+                sessionStorage.removeItem('pta_admin_handoff');
+                localStorage.removeItem('platforms_admin_mode');
+            }
+        };
+        window.addEventListener('pagehide', clearAdminSessionOnExit);
+        window.addEventListener('beforeunload', clearAdminSessionOnExit);
+
         function verifyPin() {
             const inp = document.getElementById('pin-input');
             const err = document.getElementById('pin-error');
@@ -739,7 +759,8 @@
 
             if (val === ADMIN_PIN) {
                 sessionStorage.setItem('pta_admin_auth', 'authorized');
-                localStorage.setItem('platforms_admin_mode', 'true');
+                sessionStorage.setItem('platforms_admin_mode', 'true');
+                localStorage.removeItem('platforms_admin_mode');
                 err.style.display = 'none';
                 showDashboard();
             } else {
@@ -1041,21 +1062,18 @@
         }
 
         function launchCourseGodMode() {
+            isInternalAdminNav = true;
             sessionStorage.setItem('pta_admin_auth', 'authorized');
-            localStorage.setItem('platforms_admin_mode', 'true');
-            try {
-                const rawState = localStorage.getItem('platforms_unarmed_course_state_v3');
-                if (rawState) {
-                    const parsed = JSON.parse(rawState);
-                    parsed.isAdminMode = true;
-                    localStorage.setItem('platforms_unarmed_course_state_v3', JSON.stringify(parsed));
-                }
-            } catch (e) {}
+            sessionStorage.setItem('platforms_admin_mode', 'true');
+            sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
+            localStorage.removeItem('platforms_admin_mode');
             window.location.href = 'index.html?godmode=1';
         }
 
         function lockDashboard() {
             sessionStorage.removeItem('pta_admin_auth');
+            sessionStorage.removeItem('platforms_admin_mode');
+            sessionStorage.removeItem('pta_admin_handoff');
             localStorage.removeItem('platforms_admin_mode');
             document.getElementById('dashboard-content').style.display = 'none';
             document.getElementById('pin-modal').style.display = 'flex';

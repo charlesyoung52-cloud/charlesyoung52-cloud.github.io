@@ -18,8 +18,20 @@ class SecurityCourseApp {
         this.timerSeconds = 0;
         this.timerInterval = null;
 
-        // Admin Evaluation Mode ("God Mode") - Charles Young / Instructor Access
-        this.isAdminMode = (localStorage.getItem('platforms_admin_mode') === 'true') || (sessionStorage.getItem('pta_admin_auth') === 'authorized') || window.location.search.includes('godmode=1');
+        // Admin Evaluation Mode ("God Mode") - Strictly session-scoped; auto-logs out on page/browser close
+        localStorage.removeItem('platforms_admin_mode');
+        this.isInternalAdminNav = false;
+        const handoffTs = parseInt(sessionStorage.getItem('pta_admin_handoff') || '0', 10);
+        const hasValidHandoff = (Date.now() - handoffTs) < 15000;
+        if (hasValidHandoff && (window.location.search.includes('godmode=1') || sessionStorage.getItem('pta_admin_auth') === 'authorized')) {
+            this.isAdminMode = true;
+            sessionStorage.removeItem('pta_admin_handoff');
+        } else {
+            this.isAdminMode = false;
+            sessionStorage.removeItem('pta_admin_auth');
+            sessionStorage.removeItem('platforms_admin_mode');
+            sessionStorage.removeItem('pta_admin_handoff');
+        }
 
         // Temporary Paywall Bypass Flag
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
@@ -102,20 +114,18 @@ class SecurityCourseApp {
         this.enforcePermanentMute();
 
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('godmode') === '1' || window.location.hash === '#godmode' || sessionStorage.getItem('pta_admin_auth') === 'authorized') {
-            this.isAdminMode = true;
-            localStorage.setItem('platforms_admin_mode', 'true');
+        if (this.isAdminMode) {
             sessionStorage.setItem('pta_admin_auth', 'authorized');
-            this.saveState();
+            sessionStorage.setItem('platforms_admin_mode', 'true');
             this.updateAdminModeUI();
             this.renderLessonsSidebar();
             this.renderOverviewGrid();
             this.updateHeaderProfileDisplay();
-            if (urlParams.get('godmode') === '1') {
-                urlParams.delete('godmode');
-                const cleanQ = urlParams.toString() ? '?' + urlParams.toString() : '';
-                window.history.replaceState({}, document.title, window.location.pathname + cleanQ + window.location.hash);
-            }
+        }
+        if (urlParams.get('godmode') === '1') {
+            urlParams.delete('godmode');
+            const cleanQ = urlParams.toString() ? '?' + urlParams.toString() : '';
+            window.history.replaceState({}, document.title, window.location.pathname + cleanQ + window.location.hash);
         }
         if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId')) {
             this.isPaid = true;
@@ -202,7 +212,7 @@ class SecurityCourseApp {
             studentEmail: this.studentEmail,
             studentAgency: this.studentAgency,
             lastSavedTimestamp: this.lastSavedTimestamp,
-            isAdminMode: this.isAdminMode,
+            isAdminMode: false,
             isPaid: this.isPaid,
             isCertLocked: this.isCertLocked,
             issuedCertId: this.issuedCertId,
@@ -258,7 +268,7 @@ class SecurityCourseApp {
                 this.studentEmail = state.studentEmail || this.studentEmail;
                 this.studentAgency = state.studentAgency || this.studentAgency;
                 this.lastSavedTimestamp = state.lastSavedTimestamp || this.lastSavedTimestamp;
-                this.isAdminMode = (localStorage.getItem('platforms_admin_mode') === 'true') || (sessionStorage.getItem('pta_admin_auth') === 'authorized') || !!state.isAdminMode;
+                // Never restore isAdminMode from localStorage so closing the page/browser always logs out of God Mode
                 this.isPaid = state.isPaid !== undefined ? state.isPaid : (localStorage.getItem('platforms_is_paid') === 'true');
                 this.isCertLocked = state.isCertLocked !== undefined ? state.isCertLocked : (localStorage.getItem('platforms_cert_locked') === 'true');
                 this.issuedCertId = state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
@@ -3022,6 +3032,13 @@ class SecurityCourseApp {
 
         // Auto-save user progress before closing webpage or browser
         const autoSaveProgressOnExit = () => {
+            if (!this.isInternalAdminNav) {
+                this.isAdminMode = false;
+                sessionStorage.removeItem('pta_admin_auth');
+                sessionStorage.removeItem('platforms_admin_mode');
+                sessionStorage.removeItem('pta_admin_handoff');
+                localStorage.removeItem('platforms_admin_mode');
+            }
             try {
                 this.saveState();
                 const studentId = this.studentEmail || (this.studentCertData && this.studentCertData.name);
@@ -3482,15 +3499,7 @@ class SecurityCourseApp {
     // Admin Evaluation Mode ("God Mode") & Academy Analytics
     // =========================================================================
     openAdminLoginModal() {
-        if (this.isAdminMode || sessionStorage.getItem('pta_admin_auth') === 'authorized') {
-            this.isAdminMode = true;
-            localStorage.setItem('platforms_admin_mode', 'true');
-            sessionStorage.setItem('pta_admin_auth', 'authorized');
-            this.saveState();
-            this.updateAdminModeUI();
-            this.renderLessonsSidebar();
-            this.renderOverviewGrid();
-            this.updateHeaderProfileDisplay();
+        if (this.isAdminMode) {
             this.showView('overview');
             return;
         }
@@ -3525,20 +3534,15 @@ class SecurityCourseApp {
 
         if (verified) {
             this.isAdminMode = true;
-            localStorage.setItem('platforms_admin_mode', 'true');
+            sessionStorage.setItem('pta_admin_auth', 'authorized');
+            sessionStorage.setItem('platforms_admin_mode', 'true');
+            localStorage.removeItem('platforms_admin_mode');
             this.saveState();
             this.updateAdminModeUI();
             this.closeAdminLoginModal();
             this.renderLessonsSidebar();
             this.renderOverviewGrid();
             this.updateHeaderProfileDisplay();
-            if (this.currentView === 'auth-gate' || this.currentView === 'payment-gate') {
-                this.showView('overview');
-            } else if (this.currentView === 'exam') {
-                this.handleExamView();
-            }
-
-            sessionStorage.setItem('pta_admin_auth', 'authorized');
             this.showView('overview');
             this.manualSaveProgress("God Mode Activated: All module and exam locks bypassed for Instructor Charles Young!");
         } else {
@@ -3546,10 +3550,20 @@ class SecurityCourseApp {
         }
     }
 
+    returnToAdminDashboard() {
+        this.isInternalAdminNav = true;
+        sessionStorage.setItem('pta_admin_auth', 'authorized');
+        sessionStorage.setItem('platforms_admin_mode', 'true');
+        sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
+        window.location.href = 'admin.html';
+    }
+
     exitAdminMode() {
         this.isAdminMode = false;
         localStorage.removeItem('platforms_admin_mode');
         sessionStorage.removeItem('pta_admin_auth');
+        sessionStorage.removeItem('platforms_admin_mode');
+        sessionStorage.removeItem('pta_admin_handoff');
         this.saveState();
         this.updateAdminModeUI();
         this.renderLessonsSidebar();
