@@ -2330,9 +2330,9 @@ class SecurityCourseApp {
         const effectiveScore = (this.isAdminMode && !this.examPassed) ? EXAM_QUESTIONS.length : this.examScore;
         const effectivePct = (this.isAdminMode && !this.examPassed) ? 100 : this.examPercentage;
         scoreNum.textContent = `${effectiveScore} / ${EXAM_QUESTIONS.length}`;
-        scorePct.textContent = (this.isAdminMode && !this.examPassed)
-            ? `100% Score (Instructor Admin Certificate Preview)`
-            : `${effectivePct}% Score (Attempt #${this.examAttempts || 1})`;
+        scorePct.innerHTML = (this.isAdminMode && !this.examPassed)
+            ? `<strong>100% Score</strong><br><span style="font-size:0.76rem;">Admin Preview</span>`
+            : `<strong>${effectivePct}% Score</strong><br><span style="font-size:0.78rem;">Attempt #${this.examAttempts || 1}</span>`;
 
         if (this.examPassed || this.isAdminMode) {
             badge.className = 'score-badge passed';
