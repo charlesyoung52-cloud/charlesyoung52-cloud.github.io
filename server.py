@@ -1106,6 +1106,73 @@ def get_cert_status(student_id):
         'certificate': dict(cert) if cert else None
     })
 
+# 10. Course Calendar & Schedule Management (Admin & Public)
+CALENDAR_JSON_PATH = os.path.join(DATA_DIR, 'calendar.json')
+
+def load_calendar_data():
+    db = get_db()
+    row = db.execute("SELECT value FROM settings WHERE key = 'calendar_data'").fetchone()
+    if row and row['value']:
+        try:
+            return json.loads(row['value'])
+        except Exception:
+            pass
+    if os.path.exists(CALENDAR_JSON_PATH):
+        try:
+            with open(CALENDAR_JSON_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {'courses': {}, 'sessions': [], 'reservations': []}
+
+def save_calendar_data(cal_data):
+    cal_data['last_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    db = get_db()
+    db.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('calendar_data', ?)",
+        (json.dumps(cal_data),)
+    )
+    db.commit()
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        with open(CALENDAR_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(cal_data, f, indent=2)
+    except Exception as e:
+        print(f"[CALENDAR SAVE NOTE] {e}")
+
+@app.route('/api/calendar', methods=['GET', 'POST'])
+def api_calendar():
+    if request.method == 'GET':
+        return jsonify(load_calendar_data())
+    data = request.get_json() or {}
+    if 'courses' in data and 'sessions' in data:
+        save_calendar_data(data)
+        return jsonify({'success': True, 'message': 'Calendar schedule updated in cloud.'})
+    return jsonify({'error': 'Invalid calendar payload'}), 400
+
+@app.route('/api/calendar/book', methods=['POST'])
+def api_calendar_book():
+    data = request.get_json() or {}
+    cal = load_calendar_data()
+    reservation = data.get('reservation')
+    if reservation:
+        if 'reservations' not in cal or not isinstance(cal['reservations'], list):
+            cal['reservations'] = []
+        cal['reservations'].insert(0, reservation)
+        sid = reservation.get('sessionId')
+        for s in cal.get('sessions', []):
+            if s.get('id') == sid:
+                avail = int(s.get('seatsAvailable', 10))
+                if avail > 0:
+                    s['seatsAvailable'] = avail - 1
+                    if s['seatsAvailable'] == 0:
+                        s['status'] = 'Sold Out'
+                    elif s['seatsAvailable'] <= 5:
+                        s['status'] = 'Filling Fast'
+                break
+        save_calendar_data(cal)
+    return jsonify({'success': True, 'calendar': cal})
+
 # Fallback static files router (placed after all API endpoints)
 @app.route('/<path:filename>')
 def serve_static(filename):

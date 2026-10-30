@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Schedule &amp; Class Calendar | Platforms Training Academy Chicago</title>
+    
+    <!-- Meta & SEO Tags -->
+    <meta name="description" content="View upcoming class dates and schedule your seat for 28-Hour Armed Security, 16-Hour & 8-Hour Illinois Concealed Carry (CCL), Firearm Requalification, and 20-Hour Unarmed Security at Platforms Training Academy in Chicago.">
+    <meta name="author" content="Platforms Training Academy - Charles Young">
+    <meta name="theme-color" content="#0a0b0d">
+
+    <!-- Favicon & Touch Icons -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rajdhani:wght@600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tactical Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        /* Calendar Subpage Dedicated Styles */
+        .calendar-hero-banner {
+            padding: 36px 0 20px !important;
+            text-align: center;
+        }
+        .calendar-breadcrumb {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+        .calendar-breadcrumb a {
+            color: var(--brand-green-bright);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .calendar-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Course Filter Pills */
+        .cal-course-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+        .cal-filter-pill {
+            background: #11151c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .cal-filter-pill:hover {
+            border-color: var(--brand-green);
+            color: #fff;
+            background: #161d26;
+        }
+        .cal-filter-pill.active {
+            background: rgba(56, 189, 248, 0.16);
+            border-color: var(--brand-green-bright);
+            color: var(--brand-green-bright);
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Selected Course Spotlight Detail Card */
+        .selected-course-spotlight {
+            background: linear-gradient(135deg, rgba(17, 23, 34, 0.96) 0%, rgba(11, 14, 20, 0.98) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-left: 5px solid var(--brand-green-bright);
+            border-radius: 10px;
+            padding: 26px 28px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+        }
+        .spotlight-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .spotlight-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 6px 0 4px 0;
+            letter-spacing: 0.5px;
+        }
+        .spotlight-price-box {
+            text-align: right;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+        .spotlight-price-val {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--brand-green-bright);
+            line-height: 1;
+        }
+        .spotlight-price-lbl {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .spotlight-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        .spotlight-meta-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+            padding: 12px 14px;
+        }
+        .spotlight-meta-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--brand-green-bright);
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .spotlight-meta-val {
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }
+        .spotlight-details-cols {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .spotlight-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0 0;
+        }
+        .spotlight-list li {
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.45;
+        }
+        .spotlight-list li i {
+            color: var(--brand-green-bright);
+            margin-top: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Calendar Dual Layout */
+        .calendar-workspace-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 28px;
+            align-items: start;
+        }
+        @media (max-width: 1024px) {
+            .calendar-workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Interactive Monthly Calendar Card */
+        .monthly-cal-card {
+            background: #11151c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 22px;
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+        }
+        .cal-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .cal-month-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.6px;
+            margin: 0;
+        }
+        .cal-nav-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .cal-nav-btn {
+            background: #1a202c;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+            padding: 7px 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .cal-nav-btn:hover {
+            border-color: var(--brand-green-bright);
+            color: var(--brand-green-bright);
+        }
+        .cal-weekdays-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--brand-green-bright);
+            text-transform: uppercase;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 8px;
+        }
+        .cal-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .cal-day-cell {
+            min-height: 92px;
+            background: #0c0f14;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.18s ease;
+        }
+        .cal-day-cell.has-events {
+            cursor: pointer;
+            border-color: rgba(56, 189, 248, 0.25);
+            background: rgba(14, 22, 34, 0.9);
+        }
+        .cal-day-cell.has-events:hover {
+            border-color: var(--brand-green-bright);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+        }
+        .cal-day-cell.selected-day {
+            border: 2px solid var(--brand-green-bright);
+            background: rgba(56, 189, 248, 0.12);
+        }
+        .cal-day-cell.other-month {
+            opacity: 0.3;
+            background: transparent;
+        }
+        .cal-day-num {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cal-day-cell.today .cal-day-num span {
+            background: var(--brand-green-bright);
+            color: #090d14;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+        .cal-event-chip {
+            font-size: 0.67rem;
+            font-weight: 700;
+            padding: 3px 5px;
+            border-radius: 4px;
+            background: rgba(56, 189, 248, 0.16);
+            border-left: 3px solid var(--brand-green-bright);
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+            cursor: pointer;
+        }
+        .cal-event-chip:hover {
+            background: rgba(56, 189, 248, 0.3);
+            color: #fff;
+        }
+
+        /* Upcoming Sessions List Column */
+        .sessions-list-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .session-schedule-card {
+            background: #11151c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .session-schedule-card:hover {
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+        .session-card-top {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .session-date-badge {
+            min-width: 74px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 8px;
+            padding: 10px 8px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .session-date-month {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--brand-green-bright);
+            letter-spacing: 0.8px;
+        }
+        .session-date-day {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.05;
+        }
+        .session-date-dow {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .session-main-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .session-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .session-course-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .session-price-tag {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--brand-green-bright);
+            white-space: nowrap;
+        }
+        .session-meta-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            margin: 8px 0 10px 0;
+        }
+        .session-meta-list span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .session-meta-list i {
+            color: var(--brand-green-bright);
+        }
+        .session-notes-text {
+            font-size: 0.84rem;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .session-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .seat-status-pill {
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .seat-open {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .seat-fast {
+            background: rgba(245, 158, 11, 0.16);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+        .seat-soldout {
+            background: rgba(239, 68, 68, 0.16);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        /* Booking Modal */
+        .booking-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .booking-modal-backdrop.open {
+            display: flex;
+        }
+        .booking-modal-box {
+            background: #11151c;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+        .booking-summary-banner {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+        }
+        .booking-form-group {
+            margin-bottom: 14px;
+        }
+        .booking-form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+        .booking-form-input {
+            width: 100%;
+            padding: 11px 14px;
+            background: #090c10;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+        .booking-form-input:focus {
+            outline: none;
+            border-color: var(--brand-green-bright);
+        }
+
+        @media (max-width: 640px) {
+            .cal-day-cell {
+                min-height: 68px;
+                padding: 4px;
+            }
+            .cal-event-chip {
+                font-size: 0.6rem;
+                padding: 2px 3px;
+            }
+            .session-card-top {
+                flex-direction: column;
+            }
+            .session-date-badge {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                justify-content: center;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body id="top">
+
+    <!-- Top Credential & Hotline Bar -->
+    <div class="top-credential-bar">
+        <div class="site-container top-credential-inner">
+            <div class="credential-tags">
+                <span class="cred-badge"><i class="fas fa-certificate"></i> IDFPR Approved &bull; 225 ILCS 447</span>
+                <span class="cred-badge badge-military"><i class="fas fa-medal"></i> 18-Year Combat Veteran Owned</span>
+                <span class="cred-badge badge-nra"><i class="fas fa-crosshairs"></i> NRA Certified Law Enforcement Instructor</span>
+            </div>
+            <div class="top-contact-links">
+                <a href="tel:7738732591" class="top-link"><i class="fas fa-phone-alt"></i> (773) 873-2591</a>
+                <span class="top-sep top-sep-email">|</span>
+                <a href="mailto:charlesyoung@platformstraining.com" class="top-link top-link-email"><i class="fas fa-envelope"></i> charlesyoung@platformstraining.com</a>
+                <span class="top-sep">|</span>
+                <span class="top-loc"><i class="fas fa-map-marker-alt"></i> 200 E 75th St, Chicago, IL</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="main-header" id="main-header">
+        <div class="site-container header-inner">
+            <a href="index.html" class="brand-link" title="Platforms Training Academy - Home" aria-label="Platforms Training Academy Home">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="brand-logo-img">
+            </a>
+
+            <nav class="desktop-nav" aria-label="Main Navigation">
+                <a href="./course/index.html" class="nav-item nav-item-online" title="Online 20HR Unarmed Course">
+                    <i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course <span class="nav-online-pulse"></span>
+                </a>
+                <a href="courses.html" class="nav-item"><i class="fas fa-list-check"></i> Courses</a>
+                <a href="calendar.html" class="nav-item active"><i class="fas fa-calendar-days"></i> Class Calendar</a>
+                <a href="index.html#helpful-info" class="nav-item"><i class="fas fa-circle-info"></i> Helpful Info</a>
+                <a href="index.html#jobs" class="nav-item"><i class="fas fa-briefcase"></i> Jobs</a>
+                <a href="index.html#reviews" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+                <a href="index.html#contact" class="nav-item"><i class="fas fa-paper-plane"></i> Contact</a>
+            </nav>
+
+            <div class="header-cta-block">
+                <a href="courses.html" class="btn-tactical-primary header-book-btn">
+                    <i class="fas fa-book-open"></i> All Courses
+                </a>
+                <button class="mobile-toggle-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="mobile-drawer-header">
+            <div class="drawer-brand">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="drawer-logo">
+            </div>
+            <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close Menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="./course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course</a>
+            <a href="courses.html" class="mobile-nav-link"><i class="fas fa-list-check"></i> Courses</a>
+            <a href="calendar.html" class="mobile-nav-link active"><i class="fas fa-calendar-days"></i> Class Calendar</a>
+            <a href="index.html#helpful-info" class="mobile-nav-link"><i class="fas fa-circle-info"></i> Helpful Info &amp; Reciprocity</a>
+            <a href="index.html#jobs" class="mobile-nav-link"><i class="fas fa-briefcase"></i> Job Placement</a>
+            <a href="index.html#reviews" class="mobile-nav-link"><i class="fas fa-star"></i> Reviews &amp; Instructor</a>
+            <a href="index.html#contact" class="mobile-nav-link"><i class="fas fa-paper-plane"></i> Contact &amp; Locations</a>
+        </nav>
+    </div>
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <section class="site-section calendar-hero-banner">
+            <div class="site-container">
+                <div class="calendar-breadcrumb">
+                    <a href="courses.html"><i class="fas fa-arrow-left"></i> Back to Courses Catalog</a>
+                    <span>/</span>
+                    <span>Official Class Schedule &amp; Registration Calendar</span>
+                </div>
+                <h1 class="hero-main-title" style="font-size: clamp(2rem, 4.2vw, 3.1rem); margin-bottom: 10px;">
+                    COURSE SCHEDULE &amp; <span class="text-gradient-green">CLASS CALENDAR</span>
+                </h1>
+                <p class="section-desc" style="max-width: 760px; margin: 0 auto 14px auto;">
+                    Select your course below to review full class details, prerequisites, included range equipment, and upcoming training dates in Chicago. Click any scheduled class to reserve your seat.
+                </p>
+                <div class="section-title-line"></div>
+            </div>
+        </section>
+
+        <section class="site-section" style="padding-top: 10px;">
+            <div class="site-container">
+
+                <!-- Course Filter Bar -->
+                <div class="cal-course-filter-bar" id="cal-course-filter-bar">
+                    <button class="cal-filter-pill active" data-course="all" onclick="selectCourseFilter('all')">
+                        <i class="fas fa-layer-group"></i> All Courses
+                    </button>
+                    <button class="cal-filter-pill" data-course="armed-28" onclick="selectCourseFilter('armed-28')">
+                        <i class="fas fa-crosshairs"></i> 28-HR Armed Security ($200)
+                    </button>
+                    <button class="cal-filter-pill" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">
+                        <i class="fas fa-certificate"></i> Firearm Requal ($125)
+                    </button>
+                    <button class="cal-filter-pill" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">
+                        <i class="fas fa-plus-circle"></i> Firearm Upgrade ($125)
+                    </button>
+                    <button class="cal-filter-pill" data-course="ccl-16" onclick="selectCourseFilter('ccl-16')">
+                        <i class="fas fa-shield-halved"></i> 16-HR IL CCL ($200)
+                    </button>
+                    <button class="cal-filter-pill" data-course="ccl-8" onclick="selectCourseFilter('ccl-8')">
+                        <i class="fas fa-shield"></i> 8-HR IL CCL ($150)
+                    </button>
+                    <button class="cal-filter-pill" data-course="ccl-military" onclick="selectCourseFilter('ccl-military')">
+                        <i class="fas fa-medal"></i> 8-HR Military/LEO CCL ($125)
+                    </button>
+                    <button class="cal-filter-pill" data-course="ccl-refresher" onclick="selectCourseFilter('ccl-refresher')">
+                        <i class="fas fa-redo"></i> 3-HR CCL Refresher ($125)
+                    </button>
+                    <button class="cal-filter-pill" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">
+                        <i class="fas fa-laptop-code"></i> 20-HR Unarmed Online ($80)
+                    </button>
+                </div>
+
+                <!-- Dynamic Selected Course Details Spotlight -->
+                <div id="selected-course-spotlight-slot"></div>
+
+                <!-- Dual View: Monthly Calendar + Upcoming Sessions List -->
+                <div class="calendar-workspace-grid">
+
+                    <!-- Left: Interactive Monthly Calendar Grid -->
+                    <div class="monthly-cal-card">
+                        <div class="cal-header-bar">
+                            <div>
+                                <h2 class="cal-month-title" id="cal-month-label">NOVEMBER 2026</h2>
+                                <span style="font-size:0.78rem; color:#94a3b8;">Click any highlighted date or class badge to view details &amp; book</span>
+                            </div>
+                            <div class="cal-nav-btns">
+                                <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i> Prev</button>
+                                <button class="cal-nav-btn" onclick="resetToActiveMonth()">Current</button>
+                                <button class="cal-nav-btn" onclick="changeMonth(1)">Next <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="cal-weekdays-row">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+
+                        <div class="cal-days-grid" id="cal-days-grid">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.78rem; color:#94a3b8;">
+                            <span><i class="fas fa-laptop-code" style="color:var(--brand-green-bright);"></i> <strong>20-HR Unarmed Security ($80):</strong> Available Online 24/7 (<a href="./course/index.html" style="color:var(--brand-green-bright);">Start Anytime &rarr;</a>)</span>
+                            <button class="cal-nav-btn" id="clear-date-filter-btn" style="display:none; padding:4px 10px; font-size:0.75rem;" onclick="clearDayFilter()">
+                                <i class="fas fa-times"></i> Show All Dates
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Upcoming Scheduled Classes & Details -->
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.5rem; font-weight:800; color:#fff; margin:0;">
+                                <i class="fas fa-calendar-check" style="color:var(--brand-green-bright);"></i>
+                                <span id="sessions-list-heading">UPCOMING SCHEDULED CLASSES</span>
+                            </h3>
+                            <span id="sessions-count-badge" style="font-size:0.8rem; color:var(--brand-green-bright); font-weight:700; background:rgba(56,189,248,0.12); padding:4px 10px; border-radius:20px; border:1px solid rgba(56,189,248,0.3);">0 Classes</span>
+                        </div>
+
+                        <div class="sessions-list-wrapper" id="sessions-list-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- CLASS RESERVATION / BOOKING MODAL -->
+    <div class="booking-modal-backdrop" id="booking-modal" onclick="if(event.target===this) closeBookingModal()">
+        <div class="booking-modal-box">
+            <button class="modal-close-btn" onclick="closeBookingModal()" aria-label="Close">&times;</button>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.65rem; font-weight:800; color:#fff; margin:0 0 6px 0;">
+                <i class="fas fa-calendar-check" style="color:var(--brand-green-bright);"></i> SCHEDULE &amp; RESERVE YOUR SEAT
+            </h3>
+            <p style="font-size:0.86rem; color:#94a3b8; margin:0 0 16px 0;">
+                Complete your student reservation details below to lock in your seat for this class session.
+            </p>
+
+            <div class="booking-summary-banner" id="booking-modal-summary">
+                <!-- Populated dynamically -->
+            </div>
+
+            <form id="booking-reservation-form" onsubmit="submitClassBooking(event)">
+                <input type="hidden" id="book-session-id">
+                <div class="booking-form-group">
+                    <label for="book-student-name">Full Legal Name *</label>
+                    <input type="text" id="book-student-name" class="booking-form-input" placeholder="e.g. Marcus Washington" required>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div class="booking-form-group">
+                        <label for="book-student-phone">Phone Number *</label>
+                        <input type="tel" id="book-student-phone" class="booking-form-input" placeholder="(773) 555-0199" required>
+                    </div>
+                    <div class="booking-form-group">
+                        <label for="book-student-email">Email Address *</label>
+                        <input type="email" id="book-student-email" class="booking-form-input" placeholder="officer@example.com" required>
+                    </div>
+                </div>
+                <div class="booking-form-group">
+                    <label for="book-student-notes">FOID / PERC Status or Questions (Optional)</label>
+                    <input type="text" id="book-student-notes" class="booking-form-input" placeholder="e.g. Have valid FOID & PERC card / Need range eye & ear protection">
+                </div>
+
+                <div id="booking-confirm-feedback" style="display:none; padding:14px; border-radius:8px; margin-bottom:14px; font-size:0.9rem;"></div>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:18px;">
+                    <button type="button" class="btn-tactical-outline" onclick="closeBookingModal()">Cancel</button>
+                    <button type="submit" class="btn-tactical-primary" id="book-submit-btn">
+                        <i class="fas fa-check-circle"></i> Confirm Class Reservation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="site-container footer-container-wide">
+            <div class="footer-grid">
+                <div class="footer-brand-col">
+                    <div class="footer-brand">
+                        <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="footer-logo">
+                    </div>
+                    <p class="footer-tagline">
+                        Chicago's trusted provider of professional security officer licensing, tactical defense, and Illinois concealed carry training.
+                    </p>
+                </div>
+                <div class="footer-links-col">
+                    <h4>Training Programs</h4>
+                    <ul>
+                        <li><a href="./course/index.html">Online 20HR Unarmed Course ($80)</a></li>
+                        <li><a href="calendar.html?course=armed-28">28-Hour Armed Security ($200)</a></li>
+                        <li><a href="calendar.html?course=firearm-requal">Security Firearm Requalification ($125)</a></li>
+                        <li><a href="calendar.html?course=ccl-16">16-Hour Concealed Carry ($200)</a></li>
+                        <li><a href="calendar.html?course=ccl-military">8-Hour Military &amp; LEO CCL ($125)</a></li>
+                        <li><a href="calendar.html?course=ccl-refresher">3-Hour CCL Refresher ($125)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact-col">
+                    <h4>Academy Contact</h4>
+                    <p><i class="fas fa-phone-alt text-green"></i> (773) 873-2591</p>
+                    <p><i class="fas fa-envelope text-green"></i> charlesyoung@platformstraining.com</p>
+                    <p><i class="fas fa-building text-green"></i> 200 E 75th St, Chicago, IL 60619</p>
+                    <p><i class="fas fa-bullseye text-green"></i> Range: Eagle Sports Range</p>
+                </div>
+            </div>
+            <div class="footer-bottom-row">
+                <p>&copy; 2013&ndash;2026 PLATFORMS TRAINING ACADEMY. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="course/config.js?v=2.0"></script>
+    <script>
+        let calendarData = { courses: {}, sessions: [] };
+        let activeCourseFilter = 'all';
+        let activeDayFilter = null; // YYYY-MM-DD
+        let currentCalYear = 2026;
+        let currentCalMonth = 10; // 0-indexed: 10 = November
+
+        const MONTH_NAMES = [
+            "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+            "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+        ];
+        const SHORT_MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        function getApiBaseUrl() {
+            return (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
+                ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
+                : 'https://charlesyoung52-cloud-github-io.onrender.com';
+        }
+
+        async function loadCalendarSchedule() {
+            let loaded = null;
+
+            // 1. Check static/CDN data/calendar.json first for immediate render
+            try {
+                const res = await fetch('data/calendar.json?t=' + Date.now());
+                if (res.ok) {
+                    loaded = await res.json();
+                }
+            } catch (e) {}
+
+            // 2. Check localStorage override if Admin recently edited on this device
+            try {
+                const localRaw = localStorage.getItem('platforms_calendar_data');
+                if (localRaw) {
+                    const parsed = JSON.parse(localRaw);
+                    if (parsed && parsed.courses && Array.isArray(parsed.sessions)) {
+                        loaded = parsed;
+                    }
+                }
+            } catch (e) {}
+
+            // 3. Check live Cloud API for latest admin-saved schedule
+            try {
+                const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
+                if (apiRes.ok) {
+                    const apiData = await apiRes.json();
+                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && apiData.sessions.length > 0) {
+                        loaded = apiData;
+                        localStorage.setItem('platforms_calendar_data', JSON.stringify(loaded));
+                    }
+                }
+            } catch (e) {}
+
+            if (loaded) {
+                calendarData = loaded;
+            }
+
+            // Determine initial course filter from URL ?course=...
+            const params = new URLSearchParams(window.location.search);
+            const requestedCourse = params.get('course');
+            if (requestedCourse && (requestedCourse === 'all' || (calendarData.courses && calendarData.courses[requestedCourse]))) {
+                activeCourseFilter = requestedCourse;
+            }
+
+            // Set initial calendar month to the earliest upcoming session for this filter
+            jumpToEarliestSessionMonth();
+            updateFilterPillsUI();
+            renderCourseSpotlight();
+            renderMonthlyCalendar();
+            renderSessionsList();
+        }
+
+        function jumpToEarliestSessionMonth() {
+            const sessions = getFilteredSessions(false);
+            if (sessions.length > 0) {
+                const firstDate = sessions[0].date;
+                const parts = firstDate.split('-');
+                if (parts.length === 3) {
+                    currentCalYear = parseInt(parts[0], 10);
+                    currentCalMonth = parseInt(parts[1], 10) - 1;
+                }
+            }
+        }
+
+        function selectCourseFilter(courseId) {
+            activeCourseFilter = courseId;
+            activeDayFilter = null;
+            const clearBtn = document.getElementById('clear-date-filter-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+
+            // Update URL query cleanly without reload
+            const url = new URL(window.location.href);
+            if (courseId === 'all') {
+                url.searchParams.delete('course');
+            } else {
+                url.searchParams.set('course', courseId);
+            }
+            window.history.replaceState({}, '', url.toString());
+
+            jumpToEarliestSessionMonth();
+            updateFilterPillsUI();
+            renderCourseSpotlight();
+            renderMonthlyCalendar();
+            renderSessionsList();
+        }
+
+        function updateFilterPillsUI() {
+            document.querySelectorAll('.cal-filter-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-course') === activeCourseFilter);
+            });
+        }
+
+        function renderCourseSpotlight() {
+            const slot = document.getElementById('selected-course-spotlight-slot');
+            if (!slot) return;
+
+            if (activeCourseFilter === 'all' || !calendarData.courses || !calendarData.courses[activeCourseFilter]) {
+                slot.innerHTML = '';
+                return;
+            }
+
+            const c = calendarData.courses[activeCourseFilter];
+            const prereqs = (c.prerequisites || []).map(item => `<li><i class="fas fa-check-circle"></i> <span>${item}</span></li>`).join('');
+            const topics = (c.curriculum || []).map(item => `<li><i class="fas fa-shield-halved"></i> <span>${item}</span></li>`).join('');
+
+            slot.innerHTML = `
+                <div class="selected-course-spotlight">
+                    <div class="spotlight-top-row">
+                        <div>
+                            <span class="course-badge badge-perc" style="display:inline-block; margin-bottom:4px;">
+                                <i class="fas fa-certificate"></i> ${c.badge || 'OFFICIAL STATE COURSE'}
+                            </span>
+                            <h2 class="spotlight-title">${c.title}</h2>
+                            <p style="color:#cbd5e1; font-size:0.95rem; max-width:780px; margin:4px 0 0 0; line-height:1.55;">
+                                ${c.description || ''}
+                            </p>
+                        </div>
+                        <div class="spotlight-price-box">
+                            <div class="spotlight-price-val">${c.price}</div>
+                            <div class="spotlight-price-lbl">Course Tuition</div>
+                        </div>
+                    </div>
+
+                    <div class="spotlight-meta-grid">
+                        <div class="spotlight-meta-item">
+                            <div class="spotlight-meta-label"><i class="fas fa-clock"></i> Class Duration &amp; Hours</div>
+                            <div class="spotlight-meta-val">${c.duration || 'Scheduled Session'}</div>
+                        </div>
+                        <div class="spotlight-meta-item">
+                            <div class="spotlight-meta-label"><i class="fas fa-location-dot"></i> Training &amp; Range Location</div>
+                            <div class="spotlight-meta-val">${c.location || '200 E 75th St, Chicago, IL'}</div>
+                        </div>
+                        <div class="spotlight-meta-item">
+                            <div class="spotlight-meta-label"><i class="fas fa-user-shield"></i> Lead Instructor</div>
+                            <div class="spotlight-meta-val">${c.instructor || 'Charles Young'} (NRA &amp; IDFPR Certified)</div>
+                        </div>
+                        <div class="spotlight-meta-item">
+                            <div class="spotlight-meta-label"><i class="fas fa-bullseye"></i> Range &amp; Equipment Included</div>
+                            <div class="spotlight-meta-val">${c.rangeNote || 'All classroom materials included.'}</div>
+                        </div>
+                    </div>
+
+                    <div class="spotlight-details-cols">
+                        <div>
+                            <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:0.95rem; margin:0; text-transform:uppercase;">
+                                <i class="fas fa-list-check" style="color:var(--brand-green-bright);"></i> Curriculum &amp; Qualification Standards
+                            </h4>
+                            <ul class="spotlight-list">${topics}</ul>
+                        </div>
+                        <div>
+                            <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:0.95rem; margin:0; text-transform:uppercase;">
+                                <i class="fas fa-clipboard-check" style="color:var(--brand-green-bright);"></i> Prerequisites &amp; What to Bring
+                            </h4>
+                            <ul class="spotlight-list">${prereqs}</ul>
+                            ${c.cancellation ? `<div style="margin-top:12px; padding:10px 12px; background:rgba(255,255,255,0.03); border-radius:6px; font-size:0.8rem; color:#94a3b8;"><strong style="color:#cbd5e1;">Scheduling Policy:</strong> ${c.cancellation}</div>` : ''}
+                            ${c.id === 'unarmed-20' ? `
+                                <div style="margin-top:14px;">
+                                    <a href="./course/index.html" class="btn-tactical-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+                                        <i class="fas fa-play"></i> Launch 20-Hour Online Course Immediately ($80)
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getFilteredSessions(applyDayFilter = true) {
+            const list = (calendarData.sessions || []).slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+            return list.filter(s => {
+                if (s.status === 'Cancelled') return false;
+                if (activeCourseFilter !== 'all' && s.courseId !== activeCourseFilter) return false;
+                if (applyDayFilter && activeDayFilter) {
+                    const start = s.date;
+                    const end = s.endDate || s.date;
+                    if (activeDayFilter < start || activeDayFilter > end) return false;
+                }
+                return true;
+            });
+        }
+
+        function doesSessionOccurOnDate(session, dateStr) {
+            const start = session.date;
+            const end = session.endDate || session.date;
+            return dateStr >= start && dateStr <= end;
+        }
+
+        function changeMonth(delta) {
+            currentCalMonth += delta;
+            if (currentCalMonth > 11) {
+                currentCalMonth = 0;
+                currentCalYear++;
+            } else if (currentCalMonth < 0) {
+                currentCalMonth = 11;
+                currentCalYear--;
+            }
+            renderMonthlyCalendar();
+        }
+
+        function resetToActiveMonth() {
+            activeDayFilter = null;
+            const clearBtn = document.getElementById('clear-date-filter-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            jumpToEarliestSessionMonth();
+            renderMonthlyCalendar();
+            renderSessionsList();
+        }
+
+        function selectCalendarDay(dateStr) {
+            if (activeDayFilter === dateStr) {
+                clearDayFilter();
+                return;
+            }
+            activeDayFilter = dateStr;
+            const clearBtn = document.getElementById('clear-date-filter-btn');
+            if (clearBtn) clearBtn.style.display = 'inline-block';
+            renderMonthlyCalendar();
+            renderSessionsList();
+        }
+
+        function clearDayFilter() {
+            activeDayFilter = null;
+            const clearBtn = document.getElementById('clear-date-filter-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            renderMonthlyCalendar();
+            renderSessionsList();
+        }
+
+        function renderMonthlyCalendar() {
+            const label = document.getElementById('cal-month-label');
+            const grid = document.getElementById('cal-days-grid');
+            if (!label || !grid) return;
+
+            label.textContent = `${MONTH_NAMES[currentCalMonth]} ${currentCalYear}`;
+
+            const firstDayOfMonth = new Date(currentCalYear, currentCalMonth, 1).getDay();
+            const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+            const prevMonthDays = new Date(currentCalYear, currentCalMonth, 0).getDate();
+
+            const visibleSessions = getFilteredSessions(false);
+            let cellsHtml = '';
+
+            // Leading days from previous month
+            for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+                const d = prevMonthDays - i;
+                cellsHtml += `<div class="cal-day-cell other-month"><div class="cal-day-num"><span>${d}</span></div></div>`;
+            }
+
+            // Days of current month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const mm = String(currentCalMonth + 1).padStart(2, '0');
+                const dd = String(day).padStart(2, '0');
+                const dateStr = `${currentCalYear}-${mm}-${dd}`;
+
+                const daySessions = visibleSessions.filter(s => doesSessionOccurOnDate(s, dateStr));
+                const hasEvents = daySessions.length > 0;
+                const isSelected = activeDayFilter === dateStr;
+
+                const chipsHtml = daySessions.map(s => {
+                    const courseObj = (calendarData.courses && calendarData.courses[s.courseId]) || {};
+                    const shortLabel = courseObj.shortTitle || s.title;
+                    return `<div class="cal-event-chip" title="${s.title} (${s.time}) - Click to schedule" onclick="event.stopPropagation(); openBookingModal('${s.id}')">${shortLabel}</div>`;
+                }).join('');
+
+                cellsHtml += `
+                    <div class="cal-day-cell ${hasEvents ? 'has-events' : ''} ${isSelected ? 'selected-day' : ''}"
+                         onclick="${hasEvents ? `selectCalendarDay('${dateStr}')` : ''}">
+                        <div class="cal-day-num">
+                            <span>${day}</span>
+                            ${hasEvents ? `<small style="font-size:0.65rem; color:var(--brand-green-bright);">${daySessions.length} ${daySessions.length === 1 ? 'Class' : 'Classes'}</small>` : ''}
+                        </div>
+                        ${chipsHtml}
+                    </div>
+                `;
+            }
+
+            // Trailing days
+            const totalCellsSoFar = firstDayOfMonth + daysInMonth;
+            const trailing = (7 - (totalCellsSoFar % 7)) % 7;
+            for (let i = 1; i <= trailing; i++) {
+                cellsHtml += `<div class="cal-day-cell other-month"><div class="cal-day-num"><span>${i}</span></div></div>`;
+            }
+
+            grid.innerHTML = cellsHtml;
+        }
+
+        function formatDateSpan(startStr, endStr) {
+            if (!startStr) return '';
+            const [y1, m1, d1] = startStr.split('-').map(Number);
+            const dt1 = new Date(y1, m1 - 1, d1);
+            const mon1 = SHORT_MONTHS[m1 - 1];
+            const dow1 = DOW_NAMES[dt1.getDay()];
+
+            if (!endStr || endStr === startStr) {
+                return `${dow1}, ${mon1} ${d1}, ${y1}`;
+            }
+            const [y2, m2, d2] = endStr.split('-').map(Number);
+            const dt2 = new Date(y2, m2 - 1, d2);
+            const mon2 = SHORT_MONTHS[m2 - 1];
+            const dow2 = DOW_NAMES[dt2.getDay()];
+            if (m1 === m2) {
+                return `${dow1}–${dow2}, ${mon1} ${d1}–${d2}, ${y1}`;
+            }
+            return `${dow1}, ${mon1} ${d1} – ${dow2}, ${mon2} ${d2}, ${y2}`;
+        }
+
+        function renderSessionsList() {
+            const container = document.getElementById('sessions-list-container');
+            const countBadge = document.getElementById('sessions-count-badge');
+            const heading = document.getElementById('sessions-list-heading');
+            if (!container) return;
+
+            if (activeDayFilter) {
+                heading.textContent = `CLASSES ON ${formatDateSpan(activeDayFilter, activeDayFilter).toUpperCase()}`;
+            } else if (activeCourseFilter !== 'all' && calendarData.courses && calendarData.courses[activeCourseFilter]) {
+                heading.textContent = `UPCOMING DATES: ${calendarData.courses[activeCourseFilter].shortTitle.toUpperCase()}`;
+            } else {
+                heading.textContent = `ALL UPCOMING SCHEDULED CLASSES`;
+            }
+
+            // Special card if 20-HR Online Unarmed is selected
+            if (activeCourseFilter === 'unarmed-20') {
+                if (countBadge) countBadge.textContent = 'Available 24/7 Online';
+                container.innerHTML = `
+                    <div class="session-schedule-card" style="border-color:var(--brand-green-bright);">
+                        <div class="session-card-top">
+                            <div class="session-date-badge">
+                                <div class="session-date-month">ONLINE</div>
+                                <div class="session-date-day">24/7</div>
+                                <div class="session-date-dow">Instant Start</div>
+                            </div>
+                            <div class="session-main-info">
+                                <div class="session-title-row">
+                                    <h4 class="session-course-title">20 HR UNARMED SECURITY COURSE (PERC CARD)</h4>
+                                    <span class="session-price-tag">$80</span>
+                                </div>
+                                <div class="session-meta-list">
+                                    <span><i class="fas fa-laptop-code"></i> 100% Online Self-Paced (20 Hours)</span>
+                                    <span><i class="fas fa-bolt"></i> Certificate Issued Immediately Upon Completion</span>
+                                </div>
+                                <p class="session-notes-text">
+                                    No classroom wait required! Begin all 10 interactive modules and your official exam right now from any computer, tablet, or smartphone.
+                                </p>
+                                <div class="session-card-footer">
+                                    <span class="seat-status-pill seat-open"><i class="fas fa-check-circle"></i> Open Enrollment 24/7</span>
+                                    <a href="./course/index.html" class="btn-tactical-primary" style="padding:9px 18px; font-size:0.86rem; text-decoration:none;">
+                                        Start Course Online Now &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const sessions = getFilteredSessions(true);
+            if (countBadge) {
+                countBadge.textContent = `${sessions.length} ${sessions.length === 1 ? 'Scheduled Class' : 'Scheduled Classes'}`;
+            }
+
+            if (sessions.length === 0) {
+                container.innerHTML = `
+                    <div class="session-schedule-card" style="text-align:center; padding:36px 20px;">
+                        <i class="fas fa-calendar-xmark" style="font-size:2.2rem; color:#64748b; margin-bottom:10px; display:block;"></i>
+                        <h4 style="color:#fff; margin:0 0 6px 0; font-family:'Rajdhani',sans-serif; font-size:1.3rem;">No Classes Match Your Current Filter</h4>
+                        <p style="color:#94a3b8; font-size:0.88rem; margin:0 0 14px 0;">Try clearing the date filter or viewing all upcoming courses.</p>
+                        <button class="btn-tactical-primary" onclick="selectCourseFilter('all')">Show All Upcoming Classes</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = sessions.map(s => {
+                const [y, m, d] = (s.date || '2026-11-01').split('-').map(Number);
+                const dt = new Date(y, m - 1, d);
+                const monStr = SHORT_MONTHS[m - 1] || 'NOV';
+                const dowStr = DOW_NAMES[dt.getDay()] || '';
+                const endDay = (s.endDate && s.endDate !== s.date) ? ('–' + Number(s.endDate.split('-')[2])) : '';
+
+                const courseObj = (calendarData.courses && calendarData.courses[s.courseId]) || {};
+                const seatsAvail = s.seatsAvailable !== undefined ? s.seatsAvailable : 10;
+                const isSoldOut = s.status === 'Sold Out' || seatsAvail <= 0;
+                const isFast = !isSoldOut && (s.status === 'Filling Fast' || seatsAvail <= 6);
+
+                let statusBadge = `<span class="seat-status-pill seat-open"><i class="fas fa-users"></i> ${seatsAvail} Seats Available</span>`;
+                if (isSoldOut) {
+                    statusBadge = `<span class="seat-status-pill seat-soldout"><i class="fas fa-ban"></i> Sold Out</span>`;
+                } else if (isFast) {
+                    statusBadge = `<span class="seat-status-pill seat-fast"><i class="fas fa-fire"></i> Filling Fast (${seatsAvail} Seats Left)</span>`;
+                }
+
+                return `
+                    <div class="session-schedule-card">
+                        <div class="session-card-top">
+                            <div class="session-date-badge">
+                                <div class="session-date-month">${monStr}</div>
+                                <div class="session-date-day">${d}${endDay}</div>
+                                <div class="session-date-dow">${dowStr}</div>
+                            </div>
+                            <div class="session-main-info">
+                                <div class="session-title-row">
+                                    <div>
+                                        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--brand-green-bright); letter-spacing:0.6px;">
+                                            ${courseObj.badge || 'IN-PERSON TRAINING'} &bull; ${formatDateSpan(s.date, s.endDate)}
+                                        </span>
+                                        <h4 class="session-course-title">${s.title}</h4>
+                                    </div>
+                                    <span class="session-price-tag">${s.price || courseObj.price || '$200'}</span>
+                                </div>
+
+                                <div class="session-meta-list">
+                                    <span><i class="fas fa-clock"></i> ${s.time}</span>
+                                    <span><i class="fas fa-location-dot"></i> ${s.location}</span>
+                                    <span><i class="fas fa-user-shield"></i> Instructor: ${s.instructor || 'Charles Young'}</span>
+                                </div>
+
+                                <p class="session-notes-text">${s.notes || courseObj.description || ''}</p>
+
+                                <details style="margin-bottom:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:6px; padding:8px 12px;">
+                                    <summary style="cursor:pointer; font-size:0.8rem; font-weight:700; color:var(--brand-green-bright); outline:none;">
+                                        <i class="fas fa-circle-info"></i> View Full Class Details, Prerequisites &amp; What to Bring
+                                    </summary>
+                                    <div style="margin-top:10px; font-size:0.82rem; color:#cbd5e1; line-height:1.5;">
+                                        <p style="margin:0 0 6px 0;"><strong>Range &amp; Equipment:</strong> ${courseObj.rangeNote || 'Ammo, targets, and range fees included.'}</p>
+                                        <p style="margin:0 0 4px 0;"><strong>Prerequisites:</strong> ${(courseObj.prerequisites || []).join(' • ')}</p>
+                                        <p style="margin:0;"><strong>Policy:</strong> ${courseObj.cancellation || 'Classes may be rescheduled within 3 months.'}</p>
+                                    </div>
+                                </details>
+
+                                <div class="session-card-footer">
+                                    ${statusBadge}
+                                    ${isSoldOut ? `
+                                        <button class="btn-tactical-outline" disabled style="opacity:0.5; cursor:not-allowed; padding:8px 16px; font-size:0.84rem;">Class Full</button>
+                                    ` : `
+                                        <button class="btn-tactical-primary" style="padding:9px 20px; font-size:0.85rem;" onclick="openBookingModal('${s.id}')">
+                                            Schedule This Class
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openBookingModal(sessionId) {
+            const session = (calendarData.sessions || []).find(s => s.id === sessionId);
+            if (!session) return;
+            const courseObj = (calendarData.courses && calendarData.courses[session.courseId]) || {};
+
+            document.getElementById('book-session-id').value = session.id;
+            const summary = document.getElementById('booking-modal-summary');
+            summary.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:0.74rem; font-weight:700; color:var(--brand-green-bright); text-transform:uppercase;">${courseObj.badge || 'OFFICIAL CLASS SESSION'}</div>
+                        <div style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:800; color:#fff;">${session.title}</div>
+                    </div>
+                    <div style="font-family:'Rajdhani',sans-serif; font-size:1.45rem; font-weight:800; color:var(--brand-green-bright);">${session.price || courseObj.price || '$200'}</div>
+                </div>
+                <div style="margin-top:8px; font-size:0.83rem; color:#cbd5e1; display:grid; gap:4px;">
+                    <div><i class="fas fa-calendar-day" style="color:var(--brand-green-bright); width:18px;"></i> <strong>Date:</strong> ${formatDateSpan(session.date, session.endDate)}</div>
+                    <div><i class="fas fa-clock" style="color:var(--brand-green-bright); width:18px;"></i> <strong>Hours:</strong> ${session.time}</div>
+                    <div><i class="fas fa-location-dot" style="color:var(--brand-green-bright); width:18px;"></i> <strong>Location:</strong> ${session.location}</div>
+                    <div><i class="fas fa-bullseye" style="color:var(--brand-green-bright); width:18px;"></i> <strong>Included:</strong> ${courseObj.rangeNote || 'Ammo, targets & range fees included.'}</div>
+                </div>
+            `;
+
+            const fb = document.getElementById('booking-confirm-feedback');
+            if (fb) fb.style.display = 'none';
+            const submitBtn = document.getElementById('book-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Class Reservation';
+            }
+
+            document.getElementById('booking-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function submitClassBooking(e) {
+            e.preventDefault();
+            const sessionId = document.getElementById('book-session-id').value;
+            const name = document.getElementById('book-student-name').value.trim();
+            const phone = document.getElementById('book-student-phone').value.trim();
+            const email = document.getElementById('book-student-email').value.trim();
+            const notes = document.getElementById('book-student-notes').value.trim();
+            const fb = document.getElementById('booking-confirm-feedback');
+            const submitBtn = document.getElementById('book-submit-btn');
+
+            const session = (calendarData.sessions || []).find(s => s.id === sessionId);
+            if (!session) return;
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Reservation...';
+            }
+
+            // Decrement available seat locally & in cloud
+            if (session.seatsAvailable > 0) {
+                session.seatsAvailable -= 1;
+                if (session.seatsAvailable === 0) session.status = 'Sold Out';
+                else if (session.seatsAvailable <= 5) session.status = 'Filling Fast';
+            }
+
+            const reservation = {
+                id: 'RES-' + Date.now(),
+                sessionId: session.id,
+                courseId: session.courseId,
+                courseTitle: session.title,
+                date: session.date,
+                endDate: session.endDate,
+                time: session.time,
+                price: session.price,
+                studentName: name,
+                studentPhone: phone,
+                studentEmail: email,
+                notes: notes,
+                createdAt: new Date().toLocaleString()
+            };
+
+            if (!Array.isArray(calendarData.reservations)) {
+                calendarData.reservations = [];
+            }
+            calendarData.reservations.unshift(reservation);
+            localStorage.setItem('platforms_calendar_data', JSON.stringify(calendarData));
+
+            try {
+                await fetch(getApiBaseUrl() + '/api/calendar/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reservation, calendarData })
+                });
+            } catch (err) {}
+
+            renderMonthlyCalendar();
+            renderSessionsList();
+
+            if (fb) {
+                fb.style.display = 'block';
+                fb.style.background = 'rgba(16, 185, 129, 0.15)';
+                fb.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                fb.style.color = '#86efac';
+                fb.innerHTML = `
+                    <strong><i class="fas fa-check-circle"></i> Seat Reserved Successfully!</strong><br>
+                    <strong>${name}</strong> is scheduled for <strong>${session.title}</strong> (${formatDateSpan(session.date, session.endDate)} &bull; ${session.time}).<br>
+                    <span style="font-size:0.82rem; color:#cbd5e1;">Confirmation ID: <code>${reservation.id}</code> &bull; Location: ${session.location}</span>
+                `;
+            }
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Reservation Confirmed';
+            }
+            document.getElementById('booking-reservation-form').reset();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCalendarSchedule();
+
+            // Mobile Drawer
+            const mobileToggleBtn = document.getElementById("mobile-toggle-btn");
+            const drawerCloseBtn = document.getElementById("drawer-close-btn");
+            const mobileDrawer = document.getElementById("mobile-drawer");
+            const drawerBackdrop = document.getElementById("drawer-backdrop");
+            if (mobileToggleBtn) mobileToggleBtn.addEventListener("click", () => {
+                mobileDrawer.classList.add("open");
+                drawerBackdrop.classList.add("active");
+            });
+            if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", () => {
+                mobileDrawer.classList.remove("open");
+                drawerBackdrop.classList.remove("active");
+            });
+            if (drawerBackdrop) drawerBackdrop.addEventListener("click", () => {
+                mobileDrawer.classList.remove("open");
+                drawerBackdrop.classList.remove("active");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -489,13 +489,16 @@
                 </div>
             </div>
 
-            <!-- Dashboard Navigation: Roster vs Cloud MFA -->
+            <!-- Dashboard Navigation: Roster vs Cloud MFA vs Course Calendar -->
             <div class="dashboard-nav-bar">
                 <button class="dash-nav-tab active" id="tab-btn-roster" onclick="switchDashboardTab('roster')">
                     <i class="fas fa-users-gear"></i> Student Roster &amp; Exam Analytics
                 </button>
                 <button class="dash-nav-tab" id="tab-btn-mfa" onclick="switchDashboardTab('mfa')">
                     <i class="fas fa-shield-halved text-blue"></i> Cloud MFA &amp; Email Delivery
+                </button>
+                <button class="dash-nav-tab" id="tab-btn-calendar" onclick="switchDashboardTab('calendar')">
+                    <i class="fas fa-calendar-days text-blue"></i> Course Calendar &amp; Class Schedule
                 </button>
             </div>
 
@@ -693,6 +696,273 @@
             </div>
             <!-- END TAB 2 -->
 
+            <!-- TAB 3: COURSE CALENDAR & CLASS SCHEDULE MANAGER -->
+            <div id="view-calendar" style="display: none;">
+
+                <!-- Top Header Banner for Calendar Manager -->
+                <div class="stat-card" style="margin-bottom: 20px; padding: 20px 24px; border: 1px solid var(--border-highlight); background: var(--bg-card);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+                        <div>
+                            <h3 style="color:#fff; font-size:1.2rem; margin:0 0 4px 0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-calendar-days text-blue"></i> Course Calendar &amp; Class Schedule Manager
+                            </h3>
+                            <p style="font-size:0.84rem; color:var(--text-muted); margin:0;">
+                                Add, edit, duplicate, or remove scheduled training dates and customize course details, pricing, hours, locations, and seat availability for the public Class Calendar.
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button type="button" class="btn-action" onclick="resetAddSessionForm()">
+                                <i class="fas fa-plus-circle text-blue"></i> New Class Date
+                            </button>
+                            <button type="button" class="btn-action btn-primary" onclick="saveCalendarToCloud()">
+                                <i class="fas fa-cloud-arrow-up"></i> Save &amp; Publish Calendar Changes
+                            </button>
+                            <a href="../calendar.html" target="_blank" class="btn-action" style="text-decoration:none;">
+                                <i class="fas fa-up-right-from-square"></i> View Live Calendar Page
+                            </a>
+                        </div>
+                    </div>
+                    <div id="admin-cal-save-feedback" style="display:none; margin-top:12px; padding:10px 14px; border-radius:6px; font-size:0.85rem;"></div>
+                </div>
+
+                <!-- Add / Edit Scheduled Class Session Card -->
+                <div class="stat-card" id="admin-session-editor-card" style="margin-bottom: 24px; padding: 22px; border: 1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                        <h4 id="session-editor-heading" style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.05rem; margin:0;">
+                            <i class="fas fa-calendar-plus text-blue"></i> Add / Edit Scheduled Class Date
+                        </h4>
+                        <span style="font-size:0.78rem; color:var(--text-muted);">Selecting a course auto-fills standard price, hours &amp; location</span>
+                    </div>
+
+                    <input type="hidden" id="edit-session-id" value="">
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Type *</label>
+                            <select id="edit-session-course" onchange="onAdminCourseTypeChange()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                                <option value="armed-28">28 HR Armed Security Course ($200)</option>
+                                <option value="firearm-requal">Security Firearm Requalification ($125)</option>
+                                <option value="firearm-upgrade">Security Firearm Upgrade Qual ($125)</option>
+                                <option value="ccl-16">16 HR IL Concealed Carry Course ($200)</option>
+                                <option value="ccl-8">8 HR IL Concealed Carry Course ($150)</option>
+                                <option value="ccl-military">8 HR IL CCL – Military &amp; LEO ($125)</option>
+                                <option value="ccl-refresher">3 HR IL CCL Refresher Course ($125)</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Class Display Title *</label>
+                            <input type="text" id="edit-session-title" placeholder="e.g. 28 HR ARMED SECURITY COURSE (TAN CARD)" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Start Date *</label>
+                            <input type="date" id="edit-session-date" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">End Date (Multi-Day or Same)</label>
+                            <input type="date" id="edit-session-enddate" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Tuition Price *</label>
+                            <input type="text" id="edit-session-price" placeholder="$200" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
+                        <div style="grid-column: span 2;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Class Time / Schedule Breakdown *</label>
+                            <input type="text" id="edit-session-time" placeholder="e.g. Wed 1:00 PM–5:00 PM | Thu & Fri 9:00 AM–5:00 PM" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Classroom &amp; Range Location *</label>
+                            <input type="text" id="edit-session-location" placeholder="200 E 75th St, Chicago, IL & Eagle Sports Range" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:14px;">
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Lead Instructor</label>
+                            <input type="text" id="edit-session-instructor" value="Charles Young" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Total Seats</label>
+                            <input type="number" id="edit-session-seats-total" value="15" min="1" max="100" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Available Seats</label>
+                            <input type="number" id="edit-session-seats-avail" value="12" min="0" max="100" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Enrollment Status</label>
+                            <select id="edit-session-status" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                                <option value="Open">Open</option>
+                                <option value="Filling Fast">Filling Fast</option>
+                                <option value="Sold Out">Sold Out</option>
+                                <option value="Cancelled">Cancelled (Hidden)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:14px;">
+                        <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Session Details &amp; Student Notes</label>
+                        <textarea id="edit-session-notes" rows="2" placeholder="Describe class details, range qualification schedule, and what students should bring..." style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.86rem;"></textarea>
+                    </div>
+
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button type="button" class="btn-action" onclick="resetAddSessionForm()">Clear / Reset Form</button>
+                        <button type="button" class="btn-action btn-primary" onclick="saveSessionFromForm()">
+                            <i class="fas fa-check"></i> <span id="save-session-btn-label">Add Class Date to Schedule</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scheduled Class Dates Table -->
+                <div class="table-card" style="margin-bottom: 24px;">
+                    <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1rem; margin:0;">
+                            <i class="fas fa-list-check text-blue"></i> All Scheduled Calendar Dates (<span id="admin-cal-count">0</span>)
+                        </h4>
+                        <select id="admin-cal-filter" onchange="renderAdminCalendarTable()" style="padding:7px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                            <option value="all">Filter: All Courses</option>
+                            <option value="armed-28">28 HR Armed Security</option>
+                            <option value="firearm-requal">Firearm Requalification</option>
+                            <option value="firearm-upgrade">Firearm Upgrade Qual</option>
+                            <option value="ccl-16">16 HR Concealed Carry</option>
+                            <option value="ccl-8">8 HR Concealed Carry</option>
+                            <option value="ccl-military">8 HR Military &amp; LEO CCL</option>
+                            <option value="ccl-refresher">3 HR CCL Refresher</option>
+                        </select>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date(s)</th>
+                                    <th>Course &amp; Session Title</th>
+                                    <th>Time / Hours</th>
+                                    <th>Price</th>
+                                    <th>Location</th>
+                                    <th>Seats</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-calendar-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Master Course Details Editor (Edit Course Descriptions, Prerequisites, Curriculum, Prices) -->
+                <div class="stat-card" style="margin-bottom: 24px; padding: 22px; border: 1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.05rem; margin:0;">
+                                <i class="fas fa-sliders text-blue"></i> Edit Course Master Details (Descriptions, Tuition, Hours &amp; Requirements)
+                            </h4>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Customize the course overview, curriculum bullets, prerequisites, and policies shown on the public calendar page.</span>
+                        </div>
+                        <select id="master-course-select" onchange="loadMasterCourseIntoEditor()" style="padding:9px 14px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-weight:700; font-size:0.88rem;">
+                            <option value="armed-28">28 HR Armed Security Course</option>
+                            <option value="firearm-requal">Security Firearm Requalification</option>
+                            <option value="firearm-upgrade">Security Firearm Upgrade Qual</option>
+                            <option value="ccl-16">16 HR IL Concealed Carry Course</option>
+                            <option value="ccl-8">8 HR IL Concealed Carry Course</option>
+                            <option value="ccl-military">8 HR IL CCL – Military &amp; LEO</option>
+                            <option value="ccl-refresher">3 HR IL CCL Refresher Course</option>
+                            <option value="unarmed-20">20 HR Unarmed Security Course (Online)</option>
+                        </select>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
+                        <div style="grid-column: span 2;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Official Course Title</label>
+                            <input type="text" id="mc-title" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Default Tuition Price</label>
+                            <input type="text" id="mc-price" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Badge Tag</label>
+                            <input type="text" id="mc-badge" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:14px;">
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Standard Duration &amp; Hours</label>
+                            <input type="text" id="mc-duration" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Default Location</label>
+                            <input type="text" id="mc-location" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Range &amp; Equipment Included Note</label>
+                            <input type="text" id="mc-rangenote" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:14px;">
+                        <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Overview Description</label>
+                        <textarea id="mc-description" rows="2" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.86rem;"></textarea>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-bottom:14px;">
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Curriculum / Key Topics (One per line)</label>
+                            <textarea id="mc-curriculum" rows="4" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.84rem;"></textarea>
+                        </div>
+                        <div>
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Prerequisites &amp; Requirements (One per line)</label>
+                            <textarea id="mc-prerequisites" rows="4" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.84rem;"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div style="flex:1; min-width:240px;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Cancellation / Rescheduling Policy</label>
+                            <input type="text" id="mc-cancellation" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        </div>
+                        <button type="button" class="btn-action btn-primary" style="margin-top:18px;" onclick="saveMasterCourseDetails()">
+                            <i class="fas fa-save"></i> Update Course Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Seat Reservations Table -->
+                <div class="table-card">
+                    <div style="padding:16px 20px; border-bottom:1px solid var(--border);">
+                        <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1rem; margin:0;">
+                            <i class="fas fa-user-check text-blue"></i> Student Class Reservations (<span id="admin-reservations-count">0</span>)
+                        </h4>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Confirmation ID</th>
+                                    <th>Student Name</th>
+                                    <th>Phone &amp; Email</th>
+                                    <th>Scheduled Class</th>
+                                    <th>Class Date &amp; Time</th>
+                                    <th>Student Notes</th>
+                                    <th>Reserved At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-reservations-table-body">
+                                <tr>
+                                    <td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <!-- END TAB 3 -->
+
         </main>
     </div>
 
@@ -755,6 +1025,7 @@
             fetchData();
             loadEmailJsConfig();
             loadSmtpConfig();
+            loadAdminCalendarData();
         }
 
         function getApiBaseUrl() {
@@ -1157,13 +1428,309 @@
             return [];
         }
 
+        let adminCalendarData = { courses: {}, sessions: [], reservations: [] };
+
         function switchDashboardTab(tab) {
-            const isRoster = tab === 'roster';
-            document.getElementById('tab-btn-roster').classList.toggle('active', isRoster);
-            document.getElementById('tab-btn-mfa').classList.toggle('active', !isRoster);
+            document.getElementById('tab-btn-roster').classList.toggle('active', tab === 'roster');
+            document.getElementById('tab-btn-mfa').classList.toggle('active', tab === 'mfa');
+            const calBtn = document.getElementById('tab-btn-calendar');
+            if (calBtn) calBtn.classList.toggle('active', tab === 'calendar');
             
-            document.getElementById('view-roster').style.display = isRoster ? 'block' : 'none';
-            document.getElementById('view-mfa').style.display = isRoster ? 'none' : 'block';
+            document.getElementById('view-roster').style.display = (tab === 'roster') ? 'block' : 'none';
+            document.getElementById('view-mfa').style.display = (tab === 'mfa') ? 'block' : 'none';
+            const calView = document.getElementById('view-calendar');
+            if (calView) calView.style.display = (tab === 'calendar') ? 'block' : 'none';
+        }
+
+        async function loadAdminCalendarData() {
+            let loaded = null;
+            try {
+                const res = await fetch('../data/calendar.json?t=' + Date.now());
+                if (res.ok) loaded = await res.json();
+            } catch (e) {}
+
+            try {
+                const localRaw = localStorage.getItem('platforms_calendar_data');
+                if (localRaw) {
+                    const parsed = JSON.parse(localRaw);
+                    if (parsed && parsed.courses && Array.isArray(parsed.sessions)) {
+                        loaded = parsed;
+                    }
+                }
+            } catch (e) {}
+
+            try {
+                const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
+                if (apiRes.ok) {
+                    const apiData = await apiRes.json();
+                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && apiData.sessions.length > 0) {
+                        loaded = apiData;
+                    }
+                }
+            } catch (e) {}
+
+            if (loaded) {
+                adminCalendarData = loaded;
+            }
+            onAdminCourseTypeChange();
+            loadMasterCourseIntoEditor();
+            renderAdminCalendarTable();
+            renderAdminReservationsTable();
+        }
+
+        function onAdminCourseTypeChange() {
+            const editId = document.getElementById('edit-session-id').value;
+            if (editId) return; // Don't overwrite when editing an existing session
+            const courseId = document.getElementById('edit-session-course').value;
+            const c = (adminCalendarData.courses && adminCalendarData.courses[courseId]) || {};
+            document.getElementById('edit-session-title').value = c.title || '';
+            document.getElementById('edit-session-price').value = c.price || '$200';
+            document.getElementById('edit-session-time').value = c.duration || '9:00 AM – 5:00 PM';
+            document.getElementById('edit-session-location').value = c.location || '200 E 75th St, Chicago, IL & Eagle Sports Range';
+            document.getElementById('edit-session-instructor').value = c.instructor || 'Charles Young';
+            document.getElementById('edit-session-notes').value = c.description || '';
+        }
+
+        function resetAddSessionForm() {
+            document.getElementById('edit-session-id').value = '';
+            document.getElementById('session-editor-heading').innerHTML = '<i class="fas fa-calendar-plus text-blue"></i> Add New Scheduled Class Date';
+            document.getElementById('save-session-btn-label').textContent = 'Add Class Date to Schedule';
+            document.getElementById('edit-session-date').value = '';
+            document.getElementById('edit-session-enddate').value = '';
+            document.getElementById('edit-session-seats-total').value = 15;
+            document.getElementById('edit-session-seats-avail').value = 12;
+            document.getElementById('edit-session-status').value = 'Open';
+            onAdminCourseTypeChange();
+        }
+
+        function saveSessionFromForm() {
+            const editId = document.getElementById('edit-session-id').value;
+            const courseId = document.getElementById('edit-session-course').value;
+            const title = document.getElementById('edit-session-title').value.trim();
+            const date = document.getElementById('edit-session-date').value;
+            const endDate = document.getElementById('edit-session-enddate').value || date;
+            const price = document.getElementById('edit-session-price').value.trim();
+            const time = document.getElementById('edit-session-time').value.trim();
+            const location = document.getElementById('edit-session-location').value.trim();
+            const instructor = document.getElementById('edit-session-instructor').value.trim() || 'Charles Young';
+            const seatsTotal = parseInt(document.getElementById('edit-session-seats-total').value || '15', 10);
+            const seatsAvailable = parseInt(document.getElementById('edit-session-seats-avail').value || '12', 10);
+            const status = document.getElementById('edit-session-status').value;
+            const notes = document.getElementById('edit-session-notes').value.trim();
+
+            if (!title || !date) {
+                alert('Please enter at least a Class Title and Start Date.');
+                return;
+            }
+
+            if (!Array.isArray(adminCalendarData.sessions)) {
+                adminCalendarData.sessions = [];
+            }
+
+            const sessionObj = {
+                id: editId || ('sess-' + Date.now()),
+                courseId,
+                title,
+                date,
+                endDate,
+                time,
+                price,
+                location,
+                instructor,
+                seatsTotal,
+                seatsAvailable,
+                status,
+                notes
+            };
+
+            if (editId) {
+                const idx = adminCalendarData.sessions.findIndex(s => s.id === editId);
+                if (idx !== -1) adminCalendarData.sessions[idx] = sessionObj;
+                else adminCalendarData.sessions.push(sessionObj);
+            } else {
+                adminCalendarData.sessions.push(sessionObj);
+            }
+
+            adminCalendarData.sessions.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+            resetAddSessionForm();
+            renderAdminCalendarTable();
+            saveCalendarToCloud();
+        }
+
+        function editAdminSession(sessionId) {
+            const s = (adminCalendarData.sessions || []).find(item => item.id === sessionId);
+            if (!s) return;
+            document.getElementById('edit-session-id').value = s.id;
+            document.getElementById('edit-session-course').value = s.courseId || 'armed-28';
+            document.getElementById('edit-session-title').value = s.title || '';
+            document.getElementById('edit-session-date').value = s.date || '';
+            document.getElementById('edit-session-enddate').value = s.endDate || s.date || '';
+            document.getElementById('edit-session-price').value = s.price || '$200';
+            document.getElementById('edit-session-time').value = s.time || '';
+            document.getElementById('edit-session-location').value = s.location || '';
+            document.getElementById('edit-session-instructor').value = s.instructor || 'Charles Young';
+            document.getElementById('edit-session-seats-total').value = s.seatsTotal !== undefined ? s.seatsTotal : 15;
+            document.getElementById('edit-session-seats-avail').value = s.seatsAvailable !== undefined ? s.seatsAvailable : 10;
+            document.getElementById('edit-session-status').value = s.status || 'Open';
+            document.getElementById('edit-session-notes').value = s.notes || '';
+
+            document.getElementById('session-editor-heading').innerHTML = `<i class="fas fa-pen-to-square text-blue"></i> Editing Session: ${s.title} (${s.date})`;
+            document.getElementById('save-session-btn-label').textContent = 'Update Scheduled Class';
+            document.getElementById('admin-session-editor-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function duplicateAdminSessionPlus7Days(sessionId) {
+            const s = (adminCalendarData.sessions || []).find(item => item.id === sessionId);
+            if (!s) return;
+            const addDays = (dateStr, days) => {
+                const [y, m, d] = dateStr.split('-').map(Number);
+                const dt = new Date(y, m - 1, d + days);
+                return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+            };
+            const copy = {
+                ...s,
+                id: 'sess-' + Date.now(),
+                date: addDays(s.date, 7),
+                endDate: addDays(s.endDate || s.date, 7),
+                seatsAvailable: s.seatsTotal || 15,
+                status: 'Open'
+            };
+            adminCalendarData.sessions.push(copy);
+            adminCalendarData.sessions.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+            renderAdminCalendarTable();
+            saveCalendarToCloud();
+        }
+
+        function deleteAdminSession(sessionId) {
+            if (!confirm('Remove this scheduled class date from the calendar?')) return;
+            adminCalendarData.sessions = (adminCalendarData.sessions || []).filter(s => s.id !== sessionId);
+            renderAdminCalendarTable();
+            saveCalendarToCloud();
+        }
+
+        function renderAdminCalendarTable() {
+            const tbody = document.getElementById('admin-calendar-table-body');
+            const filterVal = (document.getElementById('admin-cal-filter') && document.getElementById('admin-cal-filter').value) || 'all';
+            const countEl = document.getElementById('admin-cal-count');
+            if (!tbody) return;
+
+            const list = (adminCalendarData.sessions || []).filter(s => filterVal === 'all' || s.courseId === filterVal);
+            if (countEl) countEl.textContent = list.length;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:28px; color:var(--text-muted);">No scheduled classes match the selected filter.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(s => {
+                const dateLabel = (s.endDate && s.endDate !== s.date) ? `${s.date} &rarr; ${s.endDate}` : s.date;
+                let badgeClass = 'badge-success';
+                if (s.status === 'Filling Fast') badgeClass = 'badge-warning';
+                else if (s.status === 'Sold Out' || s.status === 'Cancelled') badgeClass = 'badge-danger';
+
+                return `
+                    <tr>
+                        <td style="white-space:nowrap; font-weight:700; color:#fff;">${dateLabel}</td>
+                        <td>
+                            <strong style="color:#fff; display:block;">${s.title}</strong>
+                            <span style="font-size:0.74rem; color:var(--text-sub);">${s.notes ? s.notes.slice(0, 75) + (s.notes.length > 75 ? '...' : '') : ''}</span>
+                        </td>
+                        <td style="font-size:0.8rem; color:#cbd5e1;">${s.time}</td>
+                        <td><strong style="color:var(--green-bright);">${s.price}</strong></td>
+                        <td style="font-size:0.78rem; color:var(--text-muted);">${s.location}</td>
+                        <td style="font-size:0.82rem; color:#fff;">${s.seatsAvailable} / ${s.seatsTotal || 15}</td>
+                        <td><span class="badge ${badgeClass}">${s.status || 'Open'}</span></td>
+                        <td>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="editAdminSession('${s.id}')" title="Edit Class"><i class="fas fa-pen"></i> Edit</button>
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="duplicateAdminSessionPlus7Days('${s.id}')" title="Duplicate +1 Week"><i class="fas fa-copy"></i> +1 Wk</button>
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem; color:#f87171;" onclick="deleteAdminSession('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadMasterCourseIntoEditor() {
+            const cid = document.getElementById('master-course-select').value;
+            const c = (adminCalendarData.courses && adminCalendarData.courses[cid]) || {};
+            document.getElementById('mc-title').value = c.title || '';
+            document.getElementById('mc-price').value = c.price || '';
+            document.getElementById('mc-badge').value = c.badge || '';
+            document.getElementById('mc-duration').value = c.duration || '';
+            document.getElementById('mc-location').value = c.location || '';
+            document.getElementById('mc-rangenote').value = c.rangeNote || '';
+            document.getElementById('mc-description').value = c.description || '';
+            document.getElementById('mc-curriculum').value = (c.curriculum || []).join('\n');
+            document.getElementById('mc-prerequisites').value = (c.prerequisites || []).join('\n');
+            document.getElementById('mc-cancellation').value = c.cancellation || '';
+        }
+
+        function saveMasterCourseDetails() {
+            const cid = document.getElementById('master-course-select').value;
+            if (!adminCalendarData.courses) adminCalendarData.courses = {};
+            const existing = adminCalendarData.courses[cid] || { id: cid };
+
+            existing.title = document.getElementById('mc-title').value.trim();
+            existing.price = document.getElementById('mc-price').value.trim();
+            existing.badge = document.getElementById('mc-badge').value.trim();
+            existing.duration = document.getElementById('mc-duration').value.trim();
+            existing.location = document.getElementById('mc-location').value.trim();
+            existing.rangeNote = document.getElementById('mc-rangenote').value.trim();
+            existing.description = document.getElementById('mc-description').value.trim();
+            existing.curriculum = document.getElementById('mc-curriculum').value.split('\n').map(s => s.trim()).filter(Boolean);
+            existing.prerequisites = document.getElementById('mc-prerequisites').value.split('\n').map(s => s.trim()).filter(Boolean);
+            existing.cancellation = document.getElementById('mc-cancellation').value.trim();
+
+            adminCalendarData.courses[cid] = existing;
+            saveCalendarToCloud();
+        }
+
+        function renderAdminReservationsTable() {
+            const tbody = document.getElementById('admin-reservations-table-body');
+            const countEl = document.getElementById('admin-reservations-count');
+            if (!tbody) return;
+            const list = adminCalendarData.reservations || [];
+            if (countEl) countEl.textContent = list.length;
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(r => `
+                <tr>
+                    <td><code style="color:var(--green-bright);">${r.id}</code></td>
+                    <td><strong style="color:#fff;">${r.studentName}</strong></td>
+                    <td>
+                        <div style="color:#e2e8f0; font-size:0.84rem;">${r.studentPhone}</div>
+                        <div style="color:var(--text-sub); font-size:0.76rem;">${r.studentEmail}</div>
+                    </td>
+                    <td><strong style="color:#fff;">${r.courseTitle}</strong></td>
+                    <td style="font-size:0.82rem; color:#cbd5e1;">${r.date} &bull; ${r.time}</td>
+                    <td style="font-size:0.8rem; color:var(--text-muted);">${r.notes || '—'}</td>
+                    <td style="font-size:0.78rem; color:var(--text-sub);">${r.createdAt || ''}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveCalendarToCloud() {
+            localStorage.setItem('platforms_calendar_data', JSON.stringify(adminCalendarData));
+            const fb = document.getElementById('admin-cal-save-feedback');
+            if (fb) {
+                fb.style.display = 'block';
+                fb.style.background = 'rgba(16, 185, 129, 0.15)';
+                fb.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                fb.style.color = '#86efac';
+                fb.innerHTML = '<i class="fas fa-check-circle"></i> Calendar schedule & course details saved! Live calendar updated.';
+                setTimeout(() => { fb.style.display = 'none'; }, 4000);
+            }
+            try {
+                await fetch(getApiBaseUrl() + '/api/calendar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(adminCalendarData)
+                });
+            } catch (e) {}
         }
 
         function updateFilterCounts() {

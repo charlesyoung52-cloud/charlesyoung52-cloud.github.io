@@ -223,8 +223,8 @@ function openCourseModal(courseId) {
                 <i class="fas fa-play"></i> Launch 20-Hour Online Course ($80)
             </a>
             ` : `
-            <a href="tel:7738732591" class="btn-tactical-primary btn-large btn-full">
-                <i class="fas fa-phone-alt"></i> Call (773) 873-2591 to Book
+            <a href="calendar.html?course=${courseId}" class="btn-tactical-primary btn-large btn-full" style="text-align:center;">
+                Book Now
             </a>
             `}
             <button onclick="closeCourseModal()" class="btn-tactical-outline btn-large">
