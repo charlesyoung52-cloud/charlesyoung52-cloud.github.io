@@ -56,12 +56,18 @@
         .cal-back-link:hover {
             color: #fff;
         }
-        /* Clean Course Tabs Bar */
+        /* Clean Course Tabs Bar (2 Rows: Security on Top, CCL Below) */
         .cal-course-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .cal-tabs-row {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 24px;
+            align-items: center;
         }
         .cal-course-tab {
             background: #11141a;
@@ -602,17 +608,21 @@
                 </div>
             </div>
 
-            <!-- Course Filter Tabs -->
+            <!-- Course Filter Tabs: Row 1 Security Courses, Row 2 CCL Courses -->
             <div class="cal-course-tabs" id="cal-course-tabs">
-                <button class="cal-course-tab active" data-course="all" onclick="selectCourseFilter('all')">All Courses</button>
-                <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Armed Security ($200)</button>
-                <button class="cal-course-tab" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">Firearm Requal ($125)</button>
-                <button class="cal-course-tab" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">Firearm Upgrade ($125)</button>
-                <button class="cal-course-tab" data-course="ccl-16" onclick="selectCourseFilter('ccl-16')">16-HR IL CCL ($200)</button>
-                <button class="cal-course-tab" data-course="ccl-8" onclick="selectCourseFilter('ccl-8')">8-HR IL CCL ($150)</button>
-                <button class="cal-course-tab" data-course="ccl-military" onclick="selectCourseFilter('ccl-military')">8-HR Military/LEO CCL ($125)</button>
-                <button class="cal-course-tab" data-course="ccl-refresher" onclick="selectCourseFilter('ccl-refresher')">3-HR CCL Refresher ($125)</button>
-                <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($80)</button>
+                <div class="cal-tabs-row">
+                    <button class="cal-course-tab active" data-course="all" onclick="selectCourseFilter('all')">All Courses</button>
+                    <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($80)</button>
+                    <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Armed Security ($200)</button>
+                    <button class="cal-course-tab" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">Firearm Requal ($125)</button>
+                    <button class="cal-course-tab" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">Firearm Upgrade ($125)</button>
+                </div>
+                <div class="cal-tabs-row">
+                    <button class="cal-course-tab" data-course="ccl-16" onclick="selectCourseFilter('ccl-16')">16-HR IL CCL ($200)</button>
+                    <button class="cal-course-tab" data-course="ccl-8" onclick="selectCourseFilter('ccl-8')">8-HR IL CCL ($150)</button>
+                    <button class="cal-course-tab" data-course="ccl-military" onclick="selectCourseFilter('ccl-military')">8-HR Military/LEO CCL ($125)</button>
+                    <button class="cal-course-tab" data-course="ccl-refresher" onclick="selectCourseFilter('ccl-refresher')">3-HR CCL Refresher ($125)</button>
+                </div>
             </div>
 
             <!-- Selected Course Summary Bar -->
