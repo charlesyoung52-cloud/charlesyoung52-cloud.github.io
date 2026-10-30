@@ -2509,7 +2509,41 @@ class SecurityCourseApp {
                 }
                 input.addEventListener('input', (e) => {
                     let val = e.target.value;
-                    if (item.upper) val = val.toUpperCase();
+                    const isDeleting = e.inputType && (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward');
+
+                    if (item.key === 'dob') {
+                        const digits = val.replace(/\D/g, '').slice(0, 8);
+                        if (digits.length > 4) {
+                            val = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+                        } else if (digits.length === 4) {
+                            val = isDeleting ? `${digits.slice(0, 2)}/${digits.slice(2, 4)}` : `${digits.slice(0, 2)}/${digits.slice(2, 4)}/`;
+                        } else if (digits.length > 2) {
+                            val = `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
+                        } else if (digits.length === 2) {
+                            val = isDeleting ? digits : `${digits}/`;
+                        } else {
+                            val = digits;
+                        }
+                        e.target.value = val;
+                    } else if (item.key === 'ssn') {
+                        const digits = val.replace(/\D/g, '').slice(0, 9);
+                        if (digits.length > 5) {
+                            val = `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5, 9)}`;
+                        } else if (digits.length === 5) {
+                            val = isDeleting ? `${digits.slice(0, 3)}-${digits.slice(3, 5)}` : `${digits.slice(0, 3)}-${digits.slice(3, 5)}-`;
+                        } else if (digits.length > 3) {
+                            val = `${digits.slice(0, 3)}-${digits.slice(3, 5)}`;
+                        } else if (digits.length === 3) {
+                            val = isDeleting ? digits : `${digits}-`;
+                        } else {
+                            val = digits;
+                        }
+                        e.target.value = val;
+                    } else if (item.upper) {
+                        val = val.toUpperCase();
+                        e.target.value = val;
+                    }
+
                     this.studentCertData[item.key] = val;
                     const prevEl = document.getElementById(item.prevId);
                     if (prevEl) prevEl.textContent = val || ' ';
