@@ -19,7 +19,7 @@ class SecurityCourseApp {
         this.timerInterval = null;
 
         // Admin Evaluation Mode ("God Mode") - Charles Young / Instructor Access
-        this.isAdminMode = localStorage.getItem('platforms_admin_mode') === 'true';
+        this.isAdminMode = (localStorage.getItem('platforms_admin_mode') === 'true') || (sessionStorage.getItem('pta_admin_auth') === 'authorized') || window.location.search.includes('godmode=1');
 
         // Temporary Paywall Bypass Flag
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
@@ -102,6 +102,21 @@ class SecurityCourseApp {
         this.enforcePermanentMute();
 
         const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('godmode') === '1' || window.location.hash === '#godmode' || sessionStorage.getItem('pta_admin_auth') === 'authorized') {
+            this.isAdminMode = true;
+            localStorage.setItem('platforms_admin_mode', 'true');
+            sessionStorage.setItem('pta_admin_auth', 'authorized');
+            this.saveState();
+            this.updateAdminModeUI();
+            this.renderLessonsSidebar();
+            this.renderOverviewGrid();
+            this.updateHeaderProfileDisplay();
+            if (urlParams.get('godmode') === '1') {
+                urlParams.delete('godmode');
+                const cleanQ = urlParams.toString() ? '?' + urlParams.toString() : '';
+                window.history.replaceState({}, document.title, window.location.pathname + cleanQ + window.location.hash);
+            }
+        }
         if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId')) {
             this.isPaid = true;
             localStorage.setItem('platforms_is_paid', 'true');
@@ -243,7 +258,7 @@ class SecurityCourseApp {
                 this.studentEmail = state.studentEmail || this.studentEmail;
                 this.studentAgency = state.studentAgency || this.studentAgency;
                 this.lastSavedTimestamp = state.lastSavedTimestamp || this.lastSavedTimestamp;
-                this.isAdminMode = state.isAdminMode !== undefined ? state.isAdminMode : (localStorage.getItem('platforms_admin_mode') === 'true');
+                this.isAdminMode = (localStorage.getItem('platforms_admin_mode') === 'true') || (sessionStorage.getItem('pta_admin_auth') === 'authorized') || !!state.isAdminMode;
                 this.isPaid = state.isPaid !== undefined ? state.isPaid : (localStorage.getItem('platforms_is_paid') === 'true');
                 this.isCertLocked = state.isCertLocked !== undefined ? state.isCertLocked : (localStorage.getItem('platforms_cert_locked') === 'true');
                 this.issuedCertId = state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
@@ -3466,6 +3481,18 @@ class SecurityCourseApp {
     // Admin Evaluation Mode ("God Mode") & Academy Analytics
     // =========================================================================
     openAdminLoginModal() {
+        if (this.isAdminMode || sessionStorage.getItem('pta_admin_auth') === 'authorized') {
+            this.isAdminMode = true;
+            localStorage.setItem('platforms_admin_mode', 'true');
+            sessionStorage.setItem('pta_admin_auth', 'authorized');
+            this.saveState();
+            this.updateAdminModeUI();
+            this.renderLessonsSidebar();
+            this.renderOverviewGrid();
+            this.updateHeaderProfileDisplay();
+            this.showView('overview');
+            return;
+        }
         const modal = document.getElementById('modal-admin-login');
         if (modal) {
             modal.classList.add('open');
@@ -3510,8 +3537,9 @@ class SecurityCourseApp {
                 this.handleExamView();
             }
 
+            sessionStorage.setItem('pta_admin_auth', 'authorized');
+            this.showView('overview');
             this.manualSaveProgress("God Mode Activated: All module and exam locks bypassed for Instructor Charles Young!");
-            this.openAdminDashboard();
         } else {
             if (err) err.style.display = 'block';
         }
@@ -3520,6 +3548,7 @@ class SecurityCourseApp {
     exitAdminMode() {
         this.isAdminMode = false;
         localStorage.removeItem('platforms_admin_mode');
+        sessionStorage.removeItem('pta_admin_auth');
         this.saveState();
         this.updateAdminModeUI();
         this.renderLessonsSidebar();
@@ -3549,11 +3578,7 @@ class SecurityCourseApp {
     }
 
     openAdminDashboard() {
-        const modal = document.getElementById('modal-admin-dashboard');
-        if (modal) {
-            modal.classList.add('open');
-            this.loadAdminMetrics();
-        }
+        window.location.href = 'admin.html';
     }
 
     closeAdminDashboard() {

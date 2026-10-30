@@ -31,10 +31,10 @@
 
     <!-- Admin Evaluation Mode Banner (Unlocked via Charles Young Admin PIN) -->
     <div class="admin-mode-banner" id="admin-mode-banner" style="display:none;">
-        <span><i class="fas fa-user-shield"></i> <strong>ADMIN EVALUATION MODE ACTIVE</strong> &bull; All module and exam locks bypassed for Instructor Charles Young</span>
+        <span><i class="fas fa-user-shield"></i> <strong>ADMIN GOD MODE ACTIVE</strong> &bull; All 10 modules, 50-Q exam &amp; certificate unlocked for Instructor Charles Young</span>
         <button onclick="app.openAdminCertificateView()"><i class="fas fa-certificate"></i> View Certificate Page</button>
-        <button onclick="app.openAdminDashboard()"><i class="fas fa-chart-line"></i> Analytics Dashboard</button>
-        <button onclick="app.exitAdminMode()"><i class="fas fa-sign-out-alt"></i> Exit Admin Mode</button>
+        <button onclick="window.location.href='admin.html'"><i class="fas fa-arrow-left"></i> Back to Admin Dashboard</button>
+        <button onclick="app.exitAdminMode()"><i class="fas fa-sign-out-alt"></i> Exit God Mode</button>
     </div>
 
     <!-- Top Credential & Hotline Bar (Matching Main Site) -->
@@ -390,10 +390,7 @@
                         <button class="btn-payment-sub-link" onclick="app.promptVoucherCode()">
                             <i class="fas fa-ticket-alt"></i> Agency Voucher Code
                         </button>
-                        <span>&bull;</span>
-                        <button class="btn-payment-sub-link" onclick="app.openAdminLoginModal()">
-                            <i class="fas fa-key"></i> Instructor Evaluation PIN
-                        </button>
+
                     </div>
                 </div>
             </div>
@@ -1326,60 +1323,7 @@
         </div>
     </div>
 
-    <!-- ===============================================================
-         MODAL 4: Instructor Analytics & Course Metrics Dashboard
-         =============================================================== -->
-    <div class="lms-modal-backdrop" id="modal-admin-dashboard" onclick="if(event.target===this) app.closeAdminDashboard()">
-        <div class="lms-modal-window" style="max-width:960px;">
-            <button class="lms-modal-close-btn" onclick="app.closeAdminDashboard()" title="Close Dashboard">&times;</button>
-            <h3 class="modal-header-title">
-                <i class="fas fa-chart-line" style="color:var(--brand-green);"></i> Platforms Training Academy &bull; Course Metrics &amp; Analytics
-            </h3>
-            <p class="modal-header-sub">
-                Real-time instructor dashboard monitoring students, exam performance, certifications, and revenue (Charles Young | Chicago, IL).
-            </p>
-            
-            <div class="admin-dashboard-stats-grid" id="admin-stats-grid">
-                <!-- Dynamically populated via app.loadAdminMetrics() -->
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px 0; flex-wrap:wrap; gap:10px;">
-                <h4 style="color:var(--text-white); font-size:1rem; margin:0;"><i class="fas fa-users"></i> Registered Students &amp; Certification Status</h4>
-                <div style="display:flex; gap:10px;">
-                    <a href="admin.html" target="_blank" class="btn-primary" style="font-size:0.8rem; padding:6px 12px; text-decoration:none;"><i class="fas fa-external-link-alt"></i> Full Standalone Portal</a>
-                    <button class="btn-secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="app.refreshAdminMetrics()"><i class="fas fa-sync"></i> Refresh Data</button>
-                    <button class="btn-secondary" style="font-size:0.8rem; padding:6px 12px; color:var(--brand-green-bright); border-color:var(--brand-green);" onclick="app.closeAdminDashboard(); app.showView('exam');"><i class="fas fa-file-alt"></i> Evaluate Exam</button>
-                </div>
-            </div>
-
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Email / Agency</th>
-                            <th>Modules Done</th>
-                            <th>Exam Attempts</th>
-                            <th>Best Score</th>
-                            <th>Certificate</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-students-table-body">
-                        <!-- Populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
-                <div style="font-size:0.8rem; color:var(--text-muted);">
-                    <i class="fas fa-info-circle"></i> Authorized Access: Charles Young &bull; Chicago, IL &bull; platformstraining.com
-                </div>
-                <button class="btn-primary" onclick="app.closeAdminDashboard()">
-                    <i class="fas fa-times"></i> Close Dashboard
-                </button>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Global Toast Notification -->
     <div id="lms-toast" class="lms-toast" style="display:none;">
