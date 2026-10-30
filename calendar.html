@@ -56,38 +56,41 @@
         .cal-back-link:hover {
             color: #fff;
         }
-        .cal-course-picker {
+        /* Clean Course Tabs Bar */
+        .cal-course-tabs {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
         }
-        .cal-course-picker label {
-            font-size: 0.82rem;
+        .cal-course-tab {
+            background: #11141a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        .cal-course-select {
-            background: #12151b;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            color: #f1f5f9;
-            padding: 9px 14px;
+            padding: 8px 14px;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.83rem;
+            font-weight: 500;
             font-family: inherit;
-            min-width: 260px;
             cursor: pointer;
+            transition: all 0.15s ease;
         }
-        .cal-course-select:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.35);
+        .cal-course-tab:hover {
+            color: #e2e8f0;
+            border-color: rgba(56, 189, 248, 0.28);
+        }
+        .cal-course-tab.active {
+            background: rgba(14, 165, 233, 0.08);
+            border-color: rgba(56, 189, 248, 0.45);
+            color: #38bdf8;
+            font-weight: 600;
         }
 
         /* Minimal Course Summary Box */
         .course-summary-bar {
             background: #11141a;
             border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 3px solid rgba(56, 189, 248, 0.55);
             border-radius: 8px;
             padding: 22px 24px;
             margin-bottom: 28px;
@@ -134,7 +137,7 @@
             gap: 7px;
         }
         .summary-specs i {
-            color: #64748b;
+            color: rgba(56, 189, 248, 0.7);
         }
         .summary-more-details {
             margin-top: 12px;
@@ -256,20 +259,20 @@
             border-color: rgba(255, 255, 255, 0.14);
         }
         .mini-day.has-class:hover {
-            border-color: #94a3b8;
+            border-color: rgba(56, 189, 248, 0.45);
         }
         .mini-day.has-class::after {
             content: '';
             width: 4px;
             height: 4px;
             border-radius: 50%;
-            background: #cbd5e1;
+            background: #38bdf8;
             margin-top: 3px;
         }
         .mini-day.selected-day {
-            background: #f8fafc;
-            color: #0a0b0d;
-            border-color: #f8fafc;
+            background: rgba(14, 165, 233, 0.14);
+            color: #fff;
+            border-color: #38bdf8;
             font-weight: 700;
         }
         .mini-day.selected-day::after {
@@ -332,7 +335,7 @@
             transition: border-color 0.15s ease;
         }
         .session-row:hover {
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(56, 189, 248, 0.32);
         }
         .session-row-left {
             display: flex;
@@ -348,7 +351,7 @@
         .session-date-mon {
             font-size: 0.72rem;
             font-weight: 700;
-            color: #94a3b8;
+            color: #38bdf8;
             text-transform: uppercase;
             letter-spacing: 0.8px;
         }
@@ -587,7 +590,7 @@
     <main class="cal-page-wrap">
         <div class="site-container">
 
-            <!-- Top Bar: Back to Courses + Page Title + Clean Course Dropdown -->
+            <!-- Top Bar: Back to Courses + Page Title -->
             <div class="cal-topbar">
                 <div>
                     <a href="courses.html" class="cal-back-link" style="margin-bottom:6px;">
@@ -597,20 +600,19 @@
                         COURSE SCHEDULE
                     </h1>
                 </div>
-                <div class="cal-course-picker">
-                    <label for="course-filter-select">Course:</label>
-                    <select id="course-filter-select" class="cal-course-select" onchange="selectCourseFilter(this.value)">
-                        <option value="all">All Courses</option>
-                        <option value="armed-28">28-HR Armed Security Course ($200)</option>
-                        <option value="firearm-requal">Security Firearm Requalification ($125)</option>
-                        <option value="firearm-upgrade">Security Firearm Upgrade Qual ($125)</option>
-                        <option value="ccl-16">16-HR Illinois Concealed Carry ($200)</option>
-                        <option value="ccl-8">8-HR Illinois Concealed Carry ($150)</option>
-                        <option value="ccl-military">8-HR Military &amp; LEO CCL ($125)</option>
-                        <option value="ccl-refresher">3-HR IL CCL Refresher ($125)</option>
-                        <option value="unarmed-20">20-HR Unarmed Security Online ($80)</option>
-                    </select>
-                </div>
+            </div>
+
+            <!-- Course Filter Tabs -->
+            <div class="cal-course-tabs" id="cal-course-tabs">
+                <button class="cal-course-tab active" data-course="all" onclick="selectCourseFilter('all')">All Courses</button>
+                <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Armed Security ($200)</button>
+                <button class="cal-course-tab" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">Firearm Requal ($125)</button>
+                <button class="cal-course-tab" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">Firearm Upgrade ($125)</button>
+                <button class="cal-course-tab" data-course="ccl-16" onclick="selectCourseFilter('ccl-16')">16-HR IL CCL ($200)</button>
+                <button class="cal-course-tab" data-course="ccl-8" onclick="selectCourseFilter('ccl-8')">8-HR IL CCL ($150)</button>
+                <button class="cal-course-tab" data-course="ccl-military" onclick="selectCourseFilter('ccl-military')">8-HR Military/LEO CCL ($125)</button>
+                <button class="cal-course-tab" data-course="ccl-refresher" onclick="selectCourseFilter('ccl-refresher')">3-HR CCL Refresher ($125)</button>
+                <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($80)</button>
             </div>
 
             <!-- Selected Course Summary Bar -->
@@ -794,8 +796,7 @@
                 activeCourseFilter = requestedCourse;
             }
 
-            const selectEl = document.getElementById('course-filter-select');
-            if (selectEl) selectEl.value = activeCourseFilter;
+            updateCourseTabsUI();
 
             jumpToEarliestSessionMonth();
             renderCourseSpotlight();
@@ -814,14 +815,19 @@
             }
         }
 
+        function updateCourseTabsUI() {
+            document.querySelectorAll('.cal-course-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-course') === activeCourseFilter);
+            });
+        }
+
         function selectCourseFilter(courseId) {
             activeCourseFilter = courseId;
             activeDayFilter = null;
             const clearBtn = document.getElementById('clear-date-filter-btn');
             if (clearBtn) clearBtn.style.display = 'none';
 
-            const selectEl = document.getElementById('course-filter-select');
-            if (selectEl) selectEl.value = courseId;
+            updateCourseTabsUI();
 
             const url = new URL(window.location.href);
             if (courseId === 'all') {
