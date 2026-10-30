@@ -438,7 +438,9 @@
         <!-- Header -->
         <header class="admin-header">
             <div class="header-brand">
-                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy">
+                <a href="../index.html" title="Platforms Training Academy - Home" style="display:inline-flex; align-items:center; text-decoration:none;">
+                    <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy">
+                </a>
                 <div>
                     <div class="brand-title" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                         <span>INSTRUCTOR ROSTER &amp; EXAM ANALYTICS</span>
@@ -487,16 +489,13 @@
                 </div>
             </div>
 
-            <!-- Dashboard Navigation: Roster vs Cloud MFA vs Course God Mode -->
+            <!-- Dashboard Navigation: Roster vs Cloud MFA -->
             <div class="dashboard-nav-bar">
                 <button class="dash-nav-tab active" id="tab-btn-roster" onclick="switchDashboardTab('roster')">
                     <i class="fas fa-users-gear"></i> Student Roster &amp; Exam Analytics
                 </button>
                 <button class="dash-nav-tab" id="tab-btn-mfa" onclick="switchDashboardTab('mfa')">
                     <i class="fas fa-shield-halved text-blue"></i> Cloud MFA &amp; Email Delivery
-                </button>
-                <button class="dash-nav-tab" id="tab-btn-godmode" onclick="launchCourseGodMode()">
-                    <i class="fas fa-bolt text-blue"></i> Course God Mode (All Modules Unlocked)
                 </button>
             </div>
 
