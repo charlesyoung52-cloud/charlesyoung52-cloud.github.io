@@ -404,8 +404,11 @@
             <div class="header-brand">
                 <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy">
                 <div>
-                    <div class="brand-title">INSTRUCTOR ROSTER &amp; EXAM ANALYTICS</div>
-                    <div class="brand-sub"><i class="fas fa-user-shield text-green"></i> Lead Instructor: Charles Young &bull; Chicago, IL &bull; 225 ILCS 447</div>
+                    <div class="brand-title" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <span>INSTRUCTOR ROSTER &amp; EXAM ANALYTICS</span>
+                        <span class="badge badge-info" id="cloud-status-badge" style="font-size:0.75rem;"><i class="fas fa-cloud-arrow-down"></i> Connecting to Cloud Server...</span>
+                    </div>
+                    <div class="brand-sub"><i class="fas fa-user-shield text-blue"></i> Lead Instructor: Charles Young &bull; Chicago, IL &bull; 225 ILCS 447 &bull; Cloud Backend (Render + GitHub CDN)</div>
                 </div>
             </div>
             <div class="header-actions">
@@ -460,6 +463,7 @@
                     <button class="filter-btn" data-filter="passed" onclick="setFilter('passed')">Passed Exam (<span id="count-passed">0</span>)</button>
                     <button class="filter-btn" data-filter="retake" onclick="setFilter('retake')">Needs Retake (<span id="count-retake">0</span>)</button>
                     <button class="filter-btn" data-filter="certified" onclick="setFilter('certified')">Certified (<span id="count-certified">0</span>)</button>
+                    <button class="filter-btn" data-filter="paid" onclick="setFilter('paid')">Tuition Paid (<span id="count-paid">0</span>)</button>
                 </div>
             </div>
 
@@ -469,15 +473,16 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Student Officer</th>
-                                <th>Email / Agency</th>
-                                <th>Module Progress</th>
-                                <th>Exam Attempts</th>
-                                <th>Latest Score</th>
-                                <th>Best Score</th>
-                                <th>Certificate Status</th>
-                                <th>Last Active</th>
-                                <th>Actions</th>
+                                <th style="min-width:180px;">Student Officer</th>
+                                <th style="min-width:200px;">Email &amp; Security</th>
+                                <th style="min-width:130px;">Tuition / Payment</th>
+                                <th style="min-width:140px;">20-HR Modules</th>
+                                <th style="min-width:110px;">Exam Attempts</th>
+                                <th style="min-width:130px;">Latest Score</th>
+                                <th style="min-width:90px;">Best Score</th>
+                                <th style="min-width:160px;">State Certificate</th>
+                                <th style="min-width:130px;">Last Active</th>
+                                <th style="min-width:110px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="students-table-body">
@@ -963,32 +968,85 @@
             document.getElementById('pin-input').focus();
         }
 
+        function applyMetrics(m) {
+            if (!m) return;
+            document.getElementById('stat-total-students').textContent = m.total_students || 0;
+            document.getElementById('stat-completed-modules').textContent = (m.modules_stats && m.modules_stats['Lesson 10']) || m.completed_modules || 0;
+            document.getElementById('stat-total-exams').textContent = m.total_exams || 0;
+            document.getElementById('stat-pass-rate').textContent = (m.pass_rate || 0) + '%';
+            document.getElementById('stat-certs-issued').textContent = m.certs_issued || 0;
+        }
+
         async function fetchData() {
             const baseUrl = getApiBaseUrl();
+            const cloudBadge = document.getElementById('cloud-status-badge');
+            let cloudServerOnline = false;
+
+            // Step 1: Immediately fetch static cloud roster fallback so the dashboard NEVER shows empty
             try {
-                // 1. Fetch metrics
-                const metricsRes = await fetch(baseUrl + '/api/metrics');
-                if (metricsRes.ok) {
-                    const m = await metricsRes.json();
-                    document.getElementById('stat-total-students').textContent = m.total_students || 0;
-                    document.getElementById('stat-completed-modules').textContent = (m.modules_stats && m.modules_stats['Lesson 10']) || 0;
-                    document.getElementById('stat-total-exams').textContent = m.total_exams || 0;
-                    document.getElementById('stat-pass-rate').textContent = (m.pass_rate || 0) + '%';
-                    document.getElementById('stat-certs-issued').textContent = m.certs_issued || 0;
+                const mirrorRes = await fetch('../data/students.json');
+                if (mirrorRes.ok) {
+                    const mirrorData = await mirrorRes.json();
+                    if (mirrorData.students && mirrorData.students.length > 0) {
+                        allStudents = mirrorData.students;
+                        if (mirrorData.metrics) {
+                            applyMetrics(mirrorData.metrics);
+                        }
+                        updateFilterCounts();
+                        renderTable();
+                    }
+                }
+            } catch (e) {
+                console.log("Static cloud mirror notice:", e);
+            }
+
+            // Step 2: Fetch live data from Render cloud server
+            try {
+                if (cloudBadge) {
+                    cloudBadge.className = 'badge badge-info';
+                    cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing with Cloud Server...';
                 }
 
-                // 2. Fetch students list
+                // 15s timeout for Render wake-up
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                const metricsRes = await fetch(baseUrl + '/api/metrics', { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (metricsRes.ok) {
+                    const m = await metricsRes.json();
+                    applyMetrics(m);
+                    cloudServerOnline = true;
+                }
+
                 const studentsRes = await fetch(baseUrl + '/api/students');
                 if (studentsRes.ok) {
                     const data = await studentsRes.json();
-                    allStudents = data.students || [];
-                } else {
-                    // Fallback to local storage registry if server offline
-                    allStudents = loadLocalStudentsRegistry();
+                    if (data.students && data.students.length > 0) {
+                        allStudents = data.students;
+                    }
+                    cloudServerOnline = true;
                 }
             } catch (err) {
-                console.warn('Backend fetch failed, checking local registry:', err);
+                console.warn('Live cloud server fetch note (using cloud mirror):', err);
+            }
+
+            // Fallback if both empty: check local storage
+            if (!allStudents || allStudents.length === 0) {
                 allStudents = loadLocalStudentsRegistry();
+            }
+
+            if (cloudServerOnline) {
+                if (cloudBadge) {
+                    cloudBadge.className = 'badge badge-success';
+                    cloudBadge.innerHTML = '<i class="fas fa-cloud-check"></i> Cloud Server: Online (Render.com)';
+                }
+            } else {
+                if (cloudBadge) {
+                    cloudBadge.className = 'badge badge-info';
+                    cloudBadge.innerHTML = '<i class="fas fa-database"></i> Cloud Mirror Active (GitHub CDN)';
+                }
             }
 
             updateFilterCounts();
@@ -1040,6 +1098,8 @@
             document.getElementById('count-passed').textContent = allStudents.filter(s => s.has_passed).length;
             document.getElementById('count-retake').textContent = allStudents.filter(s => s.exam_attempts > 0 && !s.has_passed).length;
             document.getElementById('count-certified').textContent = allStudents.filter(s => s.cert_id).length;
+            const paidEl = document.getElementById('count-paid');
+            if (paidEl) paidEl.textContent = allStudents.filter(s => s.is_paid).length;
         }
 
         function setFilter(filter) {
@@ -1064,6 +1124,7 @@
                 if (currentFilter === 'passed' && !s.has_passed) return false;
                 if (currentFilter === 'retake' && (s.exam_attempts === 0 || s.has_passed)) return false;
                 if (currentFilter === 'certified' && !s.cert_id) return false;
+                if (currentFilter === 'paid' && !s.is_paid) return false;
 
                 // Search query
                 if (query) {
@@ -1079,8 +1140,8 @@
             if (filtered.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align:center; padding:36px; color:var(--text-muted);">
-                            <i class="fas fa-user-slash" style="font-size:1.8rem; margin-bottom:8px; display:block; opacity:0.4;"></i>
+                        <td colspan="10" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <i class="fas fa-user-slash" style="font-size:2rem; margin-bottom:10px; display:block; opacity:0.4;"></i>
                             No students match the selected filter or search criteria.
                         </td>
                     </tr>
@@ -1094,51 +1155,87 @@
                 const attemptsCount = s.exam_attempts || 0;
                 
                 // Score badges
-                let latestScoreBadge = `<span style="color:var(--text-sub);">No Attempt</span>`;
+                let latestScoreBadge = `<span style="color:var(--text-sub); font-size:0.82rem;">Not Attempted</span>`;
                 if (s.latest_score !== null && s.latest_score !== undefined) {
                     if (s.latest_passed) {
-                        latestScoreBadge = `<span class="badge badge-success"><i class="fas fa-check"></i> ${s.latest_score}% Passed</span>`;
+                        latestScoreBadge = `<span class="badge badge-success"><i class="fas fa-check"></i> ${s.latest_score}% PASSED</span>`;
                     } else {
-                        latestScoreBadge = `<span class="badge badge-danger"><i class="fas fa-times"></i> ${s.latest_score}% Failed</span>`;
+                        latestScoreBadge = `<span class="badge badge-danger"><i class="fas fa-times"></i> ${s.latest_score}% RETAKE</span>`;
                     }
                 }
 
                 let bestScoreBadge = `<span style="color:var(--text-sub);">&mdash;</span>`;
                 if (s.best_score !== null && s.best_score !== undefined) {
-                    bestScoreBadge = `<strong style="color:${s.best_score >= 75 ? 'var(--green-bright)' : '#f87171'};">${s.best_score}%</strong>`;
+                    bestScoreBadge = `<strong style="color:${s.best_score >= 75 ? 'var(--green-bright)' : '#f87171'}; font-size:0.92rem;">${s.best_score}%</strong>`;
                 }
 
                 // Cert Badge
-                let certBadge = `<span style="color:var(--text-sub);">Pending</span>`;
+                let certBadge = `<span style="color:var(--text-sub); font-size:0.8rem;"><i class="fas fa-hourglass-half"></i> In Progress</span>`;
                 if (s.cert_id) {
-                    certBadge = `<span class="badge badge-cert" title="Issued ${s.cert_issued_at || ''}"><i class="fas fa-lock"></i> ${s.cert_id}</span>`;
+                    certBadge = `
+                        <span class="badge badge-cert" title="Issued ${s.cert_issued_at || ''}" style="display:inline-flex; align-items:center; gap:4px;">
+                            <i class="fas fa-award"></i> ${s.cert_id}
+                        </span>
+                        <div style="font-size:0.68rem; color:var(--green-bright); margin-top:2px;">
+                            Sealed: ${s.cert_issued_at || s.latest_exam_date || 'Recent'}
+                        </div>
+                    `;
                 }
 
                 // Attempts pill
                 let attemptsPill = `<span class="badge badge-info">${attemptsCount} ${attemptsCount === 1 ? 'Attempt' : 'Attempts'}</span>`;
                 if (attemptsCount === 0) {
-                    attemptsPill = `<span style="color:var(--text-sub);">0</span>`;
+                    attemptsPill = `<span style="color:var(--text-sub); font-size:0.82rem;">0 Attempts</span>`;
+                }
+
+                // Payment pill
+                let paymentPill = `
+                    <span class="badge badge-success" style="font-size:0.75rem; padding:3px 8px;">
+                        <i class="fas fa-check-circle"></i> $80 PAID
+                    </span>
+                    <div style="font-size:0.68rem; color:#86efac; margin-top:2px;">IDFPR Approved</div>
+                `;
+                if (!s.is_paid) {
+                    paymentPill = `
+                        <span class="badge badge-warning" style="font-size:0.75rem; padding:3px 8px;">
+                            <i class="fas fa-clock"></i> Pending
+                        </span>
+                    `;
                 }
 
                 return `
                     <tr>
                         <td>
-                            <strong style="color:#fff; font-size:0.92rem;">${s.name}</strong>
-                            <div style="font-size:0.72rem; color:var(--text-sub);">Enrolled: ${s.created_at || 'N/A'}</div>
-                        </td>
-                        <td>
-                            <div>${s.email || 'N/A'}</div>
-                            <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
-                                <small style="color:var(--text-sub);">${s.agency || 'Platforms Student'}</small>
-                                ${s.has_password ? '<span class="badge" style="background:rgba(14,165,233,0.15); color:#7dd3fc; border:1px solid rgba(14,165,233,0.4); font-size:0.68rem; padding:1px 5px;"><i class="fas fa-key"></i> Password</span>' : ''}
-                                ${s.mfa_verified ? '<span class="badge" style="background:rgba(16,185,129,0.15); color:#86efac; border:1px solid rgba(16,185,129,0.4); font-size:0.68rem; padding:1px 5px;"><i class="fas fa-shield-alt"></i> MFA</span>' : '<span class="badge" style="background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.4); font-size:0.68rem; padding:1px 5px;">MFA Pending</span>'}
+                            <strong style="color:#fff; font-size:0.94rem; display:block;">${s.name}</strong>
+                            <div style="font-size:0.72rem; color:var(--text-sub); margin-top:2px;">
+                                <i class="fas fa-calendar-alt"></i> Enrolled: ${s.created_at || 'Recent'}
                             </div>
                         </td>
                         <td>
-                            <div style="font-weight:600; color:#fff;">${modulesDone} / 10</div>
-                            <div class="progress-bar-wrapper">
+                            <div style="color:#e2e8f0; font-size:0.85rem;"><i class="fas fa-envelope" style="color:var(--text-sub); margin-right:4px;"></i>${s.email || 'N/A'}</div>
+                            <div style="font-size:0.74rem; color:var(--text-sub); margin-top:2px;">${s.agency || 'Platforms Student'}</div>
+                            <div style="display:flex; align-items:center; gap:5px; margin-top:4px; flex-wrap:wrap;">
+                                ${s.mfa_verified ? `
+                                    <span class="badge badge-success" style="font-size:0.68rem; padding:1px 6px;" title="MFA Verified: ${s.mfa_verified_at || ''}">
+                                        <i class="fas fa-shield-alt"></i> MFA Verified
+                                    </span>
+                                ` : `
+                                    <span class="badge badge-warning" style="font-size:0.68rem; padding:1px 6px;">
+                                        <i class="fas fa-lock"></i> MFA Pending
+                                    </span>
+                                `}
+                                ${s.has_password ? '<span class="badge badge-info" style="font-size:0.68rem; padding:1px 6px;"><i class="fas fa-key"></i> Password</span>' : ''}
+                            </div>
+                        </td>
+                        <td>
+                            ${paymentPill}
+                        </td>
+                        <td>
+                            <div style="font-weight:700; color:#fff; font-size:0.86rem;">${modulesDone} / 10 Modules</div>
+                            <div class="progress-bar-wrapper" style="margin-top:4px;">
                                 <div class="progress-bar-fill" style="width: ${pctModules}%;"></div>
                             </div>
+                            <div style="font-size:0.70rem; color:var(--text-sub); margin-top:2px;">${pctModules}% Completed</div>
                         </td>
                         <td>
                             ${attemptsPill}
@@ -1152,17 +1249,19 @@
                         <td>
                             ${certBadge}
                         </td>
-                        <td style="color:var(--text-muted); font-size:0.78rem;">
+                        <td style="color:var(--text-muted); font-size:0.78rem; white-space:nowrap;">
                             ${s.last_active || 'Recent'}
                         </td>
                         <td>
-                            ${attemptsCount > 0 ? `
-                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="viewAttempts(${idx})">
-                                    <i class="fas fa-list-check"></i> History
-                                </button>
-                            ` : `
-                                <span style="font-size:0.75rem; color:var(--text-sub);">In Study</span>
-                            `}
+                            <div style="display:flex; gap:4px; flex-direction:column;">
+                                ${attemptsCount > 0 ? `
+                                    <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
+                                        <i class="fas fa-history"></i> History (${attemptsCount})
+                                    </button>
+                                ` : `
+                                    <span style="font-size:0.75rem; color:var(--text-sub);">In Study</span>
+                                `}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1241,12 +1340,15 @@
                 return;
             }
 
-            const headers = ["Student Name", "Email", "Agency", "MFA Verified", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
+            const headers = ["Student Name", "Email", "Agency", "Tuition Payment", "Payment Date", "MFA Verified", "MFA Verified Date", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
             const rows = allStudents.map(s => [
                 `"${(s.name || '').replace(/"/g, '""')}"`,
                 `"${(s.email || '').replace(/"/g, '""')}"`,
                 `"${(s.agency || '').replace(/"/g, '""')}"`,
+                s.is_paid ? "PAID $80" : "UNPAID",
+                `"${s.payment_date || s.created_at || ''}"`,
                 s.mfa_verified ? "YES" : "NO",
+                `"${s.mfa_verified_at || ''}"`,
                 `${s.completed_modules || 0}/10`,
                 s.exam_attempts || 0,
                 s.latest_score !== null ? `${s.latest_score}%` : 'N/A',

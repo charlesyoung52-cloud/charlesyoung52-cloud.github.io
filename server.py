@@ -15,6 +15,142 @@ from flask import Flask, request, jsonify, send_from_directory, g
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'lms_data.db')
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+STUDENTS_JSON_PATH = os.path.join(DATA_DIR, 'students.json')
+
+def seed_from_cloud_json():
+    try:
+        if not os.path.exists(STUDENTS_JSON_PATH):
+            return
+        with open(STUDENTS_JSON_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        students = data.get('students', [])
+        if not students:
+            return
+        
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        for s in students:
+            sid = s.get('id') or s.get('email')
+            cur.execute('SELECT id FROM students WHERE id = ?', (sid,))
+            if not cur.fetchone():
+                cur.execute('''
+                    INSERT INTO students (id, name, email, student_id, agency, is_paid, mfa_verified, mfa_verified_at, created_at, last_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    sid,
+                    s.get('name', 'Trainee Officer'),
+                    s.get('email', sid),
+                    sid,
+                    s.get('agency', 'Platforms Security Services'),
+                    1 if s.get('is_paid') else 0,
+                    1 if s.get('mfa_verified') else 0,
+                    s.get('mfa_verified_at'),
+                    s.get('created_at'),
+                    s.get('last_active')
+                ))
+            # Restore exam attempts
+            for a in s.get('attempts', []):
+                cur.execute('SELECT id FROM exam_results WHERE student_id = ? AND attempt_number = ?', (sid, a.get('attempt_number', 1)))
+                if not cur.fetchone():
+                    score_num = int(str(a.get('score', '0')).split('/')[0]) if '/' in str(a.get('score', '')) else int(a.get('score', 0))
+                    cur.execute('''
+                        INSERT INTO exam_results (student_id, attempt_number, score, total_questions, percentage, passed, time_taken_seconds, completed_at)
+                        VALUES (?, ?, ?, 50, ?, ?, ?, ?)
+                    ''', (
+                        sid,
+                        a.get('attempt_number', 1),
+                        score_num,
+                        a.get('percentage', 0),
+                        1 if a.get('passed') else 0,
+                        a.get('time_taken_seconds', 0),
+                        a.get('date')
+                    ))
+            # Restore certificates
+            if s.get('cert_id'):
+                cur.execute('SELECT id FROM certificates WHERE id = ?', (s['cert_id'],))
+                if not cur.fetchone():
+                    cur.execute('''
+                        INSERT INTO certificates (id, student_id, trainee_name, date_completed, issued_at)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (
+                        s['cert_id'],
+                        sid,
+                        s.get('name', 'Trainee Officer'),
+                        s.get('cert_issued_at'),
+                        s.get('cert_issued_at')
+                    ))
+        conn.commit()
+        conn.close()
+        print(f"[CLOUD SYNC] Seeded {len(students)} students from cloud data mirror.")
+    except Exception as e:
+        print(f"[CLOUD SYNC ERROR] Could not seed from students.json: {e}")
+
+def sync_to_cloud_json():
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        rows = cur.execute('SELECT * FROM students WHERE is_admin = 0 ORDER BY last_active DESC').fetchall()
+        students_list = []
+        for r in rows:
+            sid = r['id']
+            exams = cur.execute('SELECT * FROM exam_results WHERE student_id = ? ORDER BY id ASC', (sid,)).fetchall()
+            attempts = []
+            for ex in exams:
+                attempts.append({
+                    'attempt_number': ex['attempt_number'],
+                    'score': f"{ex['score']}/{ex['total_questions']}",
+                    'percentage': ex['percentage'],
+                    'passed': bool(ex['passed']),
+                    'date': ex['completed_at'],
+                    'time_taken_seconds': ex['time_taken_seconds']
+                })
+            best_score = max([e['percentage'] for e in exams]) if exams else None
+            latest_exam = dict(exams[-1]) if exams else None
+            cert = cur.execute('SELECT * FROM certificates WHERE student_id = ?', (sid,)).fetchone()
+            
+            # Count modules
+            mod_count = cur.execute('SELECT COUNT(*) as cnt FROM progress WHERE student_id = ? AND study_done = 1 AND scenario_done = 1 AND quiz_done = 1', (sid,)).fetchone()
+            completed_modules = mod_count['cnt'] if mod_count else (10 if cert else 0)
+
+            students_list.append({
+                'id': r['id'],
+                'name': r['name'],
+                'email': r['email'],
+                'agency': r['agency'],
+                'is_paid': bool(r['is_paid']),
+                'payment_status': 'Paid $80 - Full Tuition (IDFPR State Mandate)' if r['is_paid'] else 'Pending Payment',
+                'payment_date': r['created_at'],
+                'completed_modules': completed_modules,
+                'total_modules': 10,
+                'exam_attempts': len(exams),
+                'best_score': best_score,
+                'latest_score': latest_exam['percentage'] if latest_exam else None,
+                'latest_passed': bool(latest_exam['passed']) if latest_exam else False,
+                'latest_exam_date': latest_exam['completed_at'] if latest_exam else None,
+                'has_passed': any(bool(e['passed']) for e in exams),
+                'mfa_verified': bool(r['mfa_verified']),
+                'mfa_verified_at': r['mfa_verified_at'],
+                'has_password': bool(r['password_hash']) if 'password_hash' in r.keys() else False,
+                'cert_id': cert['id'] if cert else None,
+                'cert_issued_at': cert['issued_at'] if cert else None,
+                'created_at': r['created_at'],
+                'last_active': r['last_active'],
+                'attempts': attempts
+            })
+        conn.close()
+
+        payload = {
+            'last_synced': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'source': 'Platforms Cloud Roster Engine (Render + GitHub CDN)',
+            'students': students_list
+        }
+        with open(STUDENTS_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(payload, f, indent=2)
+    except Exception as e:
+        print(f"[CLOUD SYNC ERROR] Could not sync to students.json: {e}")
 
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path='')
 
@@ -229,6 +365,7 @@ def init_db():
     conn.close()
 
 init_db()
+seed_from_cloud_json()
 
 # =========================================================================
 # Static File Routes
@@ -246,6 +383,10 @@ def course_index():
 @app.route('/admin/')
 def admin_dashboard_portal():
     return send_from_directory(os.path.join(BASE_DIR, 'course'), 'admin.html')
+
+@app.route('/data/<path:filename>')
+def serve_cloud_data(filename):
+    return send_from_directory(DATA_DIR, filename)
 
 
 # =========================================================================
@@ -714,6 +855,9 @@ def list_students():
             'last_active': r['last_active'],
             'attempts': attempts
         })
+    try:
+        sync_to_cloud_json()
+    except Exception: pass
     return jsonify({'students': students})
 
 # 4. Student Register / Login (Cross-Device Sync)

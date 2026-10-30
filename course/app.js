@@ -87,6 +87,8 @@ class SecurityCourseApp {
         this.fetchEmailJsConfig();
         this.initVoices();
         this.bindEvents();
+        // Clean up any persistent login flag to enforce session-only auth & MFA on each browser visit
+        localStorage.removeItem('platforms_officer_logged_in');
         this.bindCertFormEvents();
         this.renderLessonsSidebar();
         this.renderOverviewGrid();
@@ -369,7 +371,7 @@ class SecurityCourseApp {
 
     isAuthenticated() {
         if (this.isAdminMode) return true;
-        const loggedIn = localStorage.getItem('platforms_officer_logged_in') === 'true';
+        const loggedIn = sessionStorage.getItem('platforms_officer_logged_in') === 'true';
         const name = (this.studentCertData && this.studentCertData.name) ? this.studentCertData.name.trim().toUpperCase() : '';
         const hasValidName = name.length > 0 && name !== 'STUDENT OFFICER' && name !== 'DOE, JOHN A.';
         const hasValidEmail = !!(this.studentEmail && this.studentEmail.trim().length > 0 && this.studentEmail.includes('@'));
@@ -925,7 +927,8 @@ class SecurityCourseApp {
             localStorage.removeItem('platforms_mfa_verified_' + email);
             localStorage.removeItem('platforms_mfa_verified_at_' + email);
         }
-        localStorage.removeItem('platforms_officer_logged_in');
+        sessionStorage.removeItem('platforms_officer_logged_in');
+            localStorage.removeItem('platforms_officer_logged_in');
         try {
             sessionStorage.removeItem('platforms_mfa_pending_name');
             sessionStorage.removeItem('platforms_mfa_pending_email');
@@ -1111,7 +1114,9 @@ class SecurityCourseApp {
             this.studentCertData.signature = rawName;
         }
         this.studentEmail = rawEmail;
-        localStorage.setItem('platforms_officer_logged_in', 'true');
+        sessionStorage.setItem('platforms_officer_logged_in', 'true');
+        sessionStorage.removeItem('platforms_officer_logged_in');
+            localStorage.removeItem('platforms_officer_logged_in');
         localStorage.setItem('platforms_student_name', this.studentCertData.name);
         localStorage.setItem('platforms_student_email', this.studentEmail);
         localStorage.setItem('platforms_student_signature', this.studentCertData.signature);
@@ -1167,6 +1172,7 @@ class SecurityCourseApp {
 
     officerSignOut() {
         if (confirm('Sign out of your student officer account? Your current progress is saved, and you will be required to authenticate with password and email verification (MFA) upon signing back in.')) {
+            sessionStorage.removeItem('platforms_officer_logged_in');
             localStorage.removeItem('platforms_officer_logged_in');
             this.closeLoginModal();
             this.updateHeaderProfileDisplay();
