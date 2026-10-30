@@ -413,7 +413,10 @@
     <!-- PIN Authentication Overlay -->
     <div id="pin-modal" class="modal-overlay" style="display: flex;">
         <div class="modal-box">
-            <div style="font-size: 2.4rem; color: var(--green); margin-bottom: 12px;">
+            <a href="../index.html" title="Return to Homepage" style="display:inline-block; margin-bottom: 10px; text-decoration:none;">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" style="height: 44px; width: auto; object-fit: contain;">
+            </a>
+            <div style="font-size: 2.0rem; color: var(--green); margin-bottom: 8px;">
                 <i class="fas fa-shield-halved"></i>
             </div>
             <h2 style="font-family:'Chakra Petch',sans-serif; font-size: 1.4rem; margin-bottom: 6px;">INSTRUCTOR ACCESS</h2>
@@ -427,8 +430,11 @@
             <button class="btn-action btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="verifyPin()">
                 <i class="fas fa-unlock"></i> Authenticate &amp; Unlock Dashboard
             </button>
+            <a href="../index.html" class="btn-action" style="width: 100%; justify-content: center; padding: 10px; margin-top: 10px; text-decoration: none;">
+                <i class="fas fa-house text-blue"></i> Return to Homepage
+            </a>
             <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-sub);">
-                Platforms Training Academy &bull; Chicago, IL
+                <a href="../index.html" style="color: var(--text-sub); text-decoration: none;">Platforms Training Academy &bull; Chicago, IL</a>
             </div>
         </div>
     </div>
@@ -450,6 +456,7 @@
                 </div>
             </div>
             <div class="header-actions">
+                <a href="../index.html" class="btn-action" style="text-decoration:none;"><i class="fas fa-house text-blue"></i> Homepage</a>
                 <button class="btn-action" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh</button>
                 <button class="btn-action btn-primary" onclick="exportCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
                 <button class="btn-action" onclick="launchCourseGodMode()"><i class="fas fa-bolt text-blue"></i> Course God Mode</button>

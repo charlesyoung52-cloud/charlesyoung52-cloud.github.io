@@ -1324,9 +1324,12 @@
                 <input type="password" id="admin-pin-input" class="cert-form-input" style="width:100%; font-size:1.2rem; letter-spacing:3px; text-align:center;" placeholder="••••••••••" maxlength="15" onkeydown="if(event.key==='Enter') app.submitAdminLogin()">
                 <div id="admin-pin-error" style="color:var(--danger); font-size:0.85rem; margin-top:8px; display:none;">Invalid PIN. Please try again.</div>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button class="btn-secondary" onclick="app.closeAdminLoginModal()">Cancel</button>
-                <button class="btn-primary" onclick="app.submitAdminLogin()"><i class="fas fa-unlock"></i> Unlock God Mode</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                <a href="../index.html" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;"><i class="fas fa-home"></i> Homepage</a>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" onclick="app.closeAdminLoginModal()">Cancel</button>
+                    <button class="btn-primary" onclick="app.submitAdminLogin()"><i class="fas fa-unlock"></i> Unlock God Mode</button>
+                </div>
             </div>
         </div>
     </div>
