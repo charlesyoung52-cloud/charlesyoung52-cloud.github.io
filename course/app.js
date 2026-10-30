@@ -18,20 +18,9 @@ class SecurityCourseApp {
         this.timerSeconds = 0;
         this.timerInterval = null;
 
-        // Admin Evaluation Mode ("God Mode") - Strictly session-scoped; auto-logs out on page/browser close
+        // Admin Evaluation Mode ("God Mode") - Persists across page changes in sessionStorage; clears when browser closes
         localStorage.removeItem('platforms_admin_mode');
-        this.isInternalAdminNav = false;
-        const handoffTs = parseInt(sessionStorage.getItem('pta_admin_handoff') || '0', 10);
-        const hasValidHandoff = (Date.now() - handoffTs) < 15000;
-        if (hasValidHandoff && (window.location.search.includes('godmode=1') || sessionStorage.getItem('pta_admin_auth') === 'authorized')) {
-            this.isAdminMode = true;
-            sessionStorage.removeItem('pta_admin_handoff');
-        } else {
-            this.isAdminMode = false;
-            sessionStorage.removeItem('pta_admin_auth');
-            sessionStorage.removeItem('platforms_admin_mode');
-            sessionStorage.removeItem('pta_admin_handoff');
-        }
+        this.isAdminMode = (sessionStorage.getItem('pta_admin_auth') === 'authorized') || (sessionStorage.getItem('platforms_admin_mode') === 'true') || window.location.search.includes('godmode=1');
 
         // Temporary Paywall Bypass Flag
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
@@ -3032,13 +3021,6 @@ class SecurityCourseApp {
 
         // Auto-save user progress before closing webpage or browser
         const autoSaveProgressOnExit = () => {
-            if (!this.isInternalAdminNav) {
-                this.isAdminMode = false;
-                sessionStorage.removeItem('pta_admin_auth');
-                sessionStorage.removeItem('platforms_admin_mode');
-                sessionStorage.removeItem('pta_admin_handoff');
-                localStorage.removeItem('platforms_admin_mode');
-            }
             try {
                 this.saveState();
                 const studentId = this.studentEmail || (this.studentCertData && this.studentCertData.name);
