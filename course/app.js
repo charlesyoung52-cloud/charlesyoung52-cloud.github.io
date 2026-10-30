@@ -2657,8 +2657,38 @@ class SecurityCourseApp {
             page.drawText(hair, { x: 392, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
             page.drawText(eyes, { x: 490, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
 
-            // Trainee Signature & Date (Cursive Times Roman Italic)
-            page.drawText(traineeSig, { x: 140, y: height - 273, size: 14, font: timesItalic, color: PDFLib.rgb(0.05, 0.08, 0.15) });
+            // Trainee Signature & Date (Realistic Thin Handwritten Signature via Canvas -> PNG or Fallback)
+            let sigDrawn = false;
+            try {
+                if (document.fonts && document.fonts.load) {
+                    await document.fonts.load("400 48px 'Sacramento'");
+                }
+                const sigCanvas = document.createElement('canvas');
+                sigCanvas.width = 900;
+                sigCanvas.height = 160;
+                const ctx = sigCanvas.getContext('2d');
+                if (ctx) {
+                    ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+                    ctx.font = "400 68px 'Sacramento', 'Alex Brush', cursive";
+                    ctx.fillStyle = '#0b1938';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(traineeSig, 12, 85);
+                    const sigDataUrl = sigCanvas.toDataURL('image/png');
+                    const sigImage = await pdfDoc.embedPng(sigDataUrl);
+                    page.drawImage(sigImage, {
+                        x: 136,
+                        y: height - 290,
+                        width: 225,
+                        height: 40
+                    });
+                    sigDrawn = true;
+                }
+            } catch (sigErr) {
+                console.warn('Signature canvas fallback:', sigErr);
+            }
+            if (!sigDrawn) {
+                page.drawText(traineeSig, { x: 140, y: height - 273, size: 13, font: timesItalic, color: PDFLib.rgb(0.05, 0.08, 0.15) });
+            }
             page.drawText(compDate, { x: 432, y: height - 273, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
 
             // Bottom Instructor Section (Platforms Training Academy & Charles Young)

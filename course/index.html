@@ -14,11 +14,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 
-    <!-- Font Awesome Icons -->
+    <!-- Font Awesome Icons & Realistic Signature Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Sacramento&display=swap" rel="stylesheet">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=3.1">
+    <link rel="stylesheet" href="styles.css?v=3.2">
 
 
 
@@ -850,7 +853,7 @@
 
                         <div class="cert-form-group" style="grid-column: span 8;">
                             <label for="cert-input-signature">Trainee Electronic Signature (Type Full Legal Name):</label>
-                            <input type="text" id="cert-input-signature" class="cert-form-input" style="font-family:'Times New Roman', Georgia, serif; font-style:italic; font-size:1.1rem;" placeholder="Your Full Legal Name" value="">
+                            <input type="text" id="cert-input-signature" class="cert-form-input" style="font-family:'Sacramento', 'Alex Brush', cursive; font-style:normal; font-weight:400; font-size:1.65rem; line-height:1.1; padding:6px 14px;" placeholder="Your Full Legal Name" value="">
                         </div>
 
                         <div class="cert-form-group" style="grid-column: span 4;">
@@ -909,38 +912,42 @@
                             TRAINEE: This is your permanent record of training--a duplicate will not be issued.
                         </div>
 
-                        <!-- Trainee Table Grid -->
-                        <table class="il-grid-table">
+                        <!-- Trainee Table Grid (Independent fixed-layout rows so Hair Color & Eye Color are identical size) -->
+                        <table class="il-grid-table" style="table-layout:fixed; width:100%; border-bottom:none;">
                             <tr>
-                                <td class="il-grid-cell" colspan="6">
+                                <td class="il-grid-cell" style="width:100%; border-bottom:none;">
                                     <span class="il-cell-label">NAME (LAST, FIRST, MIDDLE INITIAL)</span>
                                     <div class="il-cell-value" id="prev-cert-name"></div>
                                 </td>
                             </tr>
+                        </table>
+                        <table class="il-grid-table" style="table-layout:fixed; width:100%; border-bottom:none;">
                             <tr>
-                                <td class="il-grid-cell" colspan="3" style="width:50%;">
+                                <td class="il-grid-cell" style="width:50%; border-bottom:none;">
                                     <span class="il-cell-label">HOME STREET ADDRESS</span>
                                     <div class="il-cell-value" id="prev-cert-address"></div>
                                 </td>
-                                <td class="il-grid-cell" style="width:20%;">
+                                <td class="il-grid-cell" style="width:22%; border-bottom:none;">
                                     <span class="il-cell-label">CITY</span>
                                     <div class="il-cell-value" id="prev-cert-city">Chicago</div>
                                 </td>
-                                <td class="il-grid-cell" style="width:10%;">
+                                <td class="il-grid-cell" style="width:10%; border-bottom:none;">
                                     <span class="il-cell-label">STATE</span>
                                     <div class="il-cell-value" id="prev-cert-state">IL</div>
                                 </td>
-                                <td class="il-grid-cell" style="width:20%;">
+                                <td class="il-grid-cell" style="width:18%; border-bottom:none;">
                                     <span class="il-cell-label">ZIP CODE</span>
                                     <div class="il-cell-value" id="prev-cert-zip"></div>
                                 </td>
                             </tr>
+                        </table>
+                        <table class="il-grid-table" style="table-layout:fixed; width:100%;">
                             <tr>
-                                <td class="il-grid-cell" style="width:20%;">
+                                <td class="il-grid-cell" style="width:18%;">
                                     <span class="il-cell-label">DATE OF BIRTH</span>
                                     <div class="il-cell-value" id="prev-cert-dob"></div>
                                 </td>
-                                <td class="il-grid-cell" colspan="2" style="width:30%;">
+                                <td class="il-grid-cell" style="width:26%;">
                                     <span class="il-cell-label">SOCIAL SECURITY NUMBER</span>
                                     <div class="il-cell-value" id="prev-cert-ssn"></div>
                                 </td>
@@ -948,15 +955,15 @@
                                     <span class="il-cell-label">WEIGHT</span>
                                     <div class="il-cell-value" id="prev-cert-weight"></div>
                                 </td>
-                                <td class="il-grid-cell" style="width:12%;">
+                                <td class="il-grid-cell" style="width:14%;">
                                     <span class="il-cell-label">HEIGHT</span>
                                     <div class="il-cell-value" id="prev-cert-height"></div>
                                 </td>
-                                <td class="il-grid-cell" style="width:12%;">
+                                <td class="il-grid-cell" style="width:14%;">
                                     <span class="il-cell-label">HAIR COLOR</span>
                                     <div class="il-cell-value" id="prev-cert-hair"></div>
                                 </td>
-                                <td class="il-grid-cell" style="width:12%;">
+                                <td class="il-grid-cell" style="width:14%;">
                                     <span class="il-cell-label">EYE COLOR</span>
                                     <div class="il-cell-value" id="prev-cert-eyes"></div>
                                 </td>
@@ -1069,7 +1076,7 @@
                         <div class="il-sig-row" style="margin-bottom:28px;">
                             <div class="il-sig-field">
                                 <span>Signature of Instructor:</span>
-                                <span class="il-sig-underline" style="min-width:280px;">Charles Young</span>
+                                <span class="il-sig-underline il-hand-signature" style="min-width:280px;">Charles Young</span>
                             </div>
                             <div class="il-sig-field">
                                 <span>Date:</span>

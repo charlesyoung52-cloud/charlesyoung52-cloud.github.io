@@ -2484,6 +2484,7 @@ video::-webkit-media-controls-panel {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .cert-form-group label {
@@ -2492,9 +2493,16 @@ video::-webkit-media-controls-panel {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--brand-green-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cert-form-input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 44px;
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
     color: #fff;
@@ -3430,13 +3438,16 @@ video::-webkit-media-controls-panel {
     cursor: not-allowed !important;
 }
 
-/* Trainee signature cursive styling in preview and input */
-#prev-cert-sig {
-    font-family: 'Brush Script MT', 'Dancing Script', 'Times New Roman', cursive, serif !important;
-    font-style: italic !important;
-    font-size: 1.35rem !important;
-    color: #0f172a !important;
-    font-weight: 600 !important;
+/* Trainee & Instructor realistic thin handwritten signature styling */
+#prev-cert-sig,
+.il-hand-signature {
+    font-family: 'Sacramento', 'Alex Brush', 'Segoe Script', cursive !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    font-size: 1.85rem !important;
+    line-height: 1 !important;
+    color: #0b1938 !important;
+    letter-spacing: 0.4px;
 }
 
 #cert-input-signature {
