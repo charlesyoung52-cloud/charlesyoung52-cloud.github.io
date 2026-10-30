@@ -2658,12 +2658,12 @@ h1, h2, h3, h4, h5, h6 {
     }
     .main-header .header-inner {
         position: relative !important;
-        justify-content: center !important;
-        padding: 0 48px !important;
+        justify-content: space-between !important;
+        padding: 0 22px 0 30px !important;
     }
     .main-header .brand-link {
-        margin: 0 auto !important;
-        justify-content: center !important;
+        margin: 0 !important;
+        justify-content: flex-start !important;
     }
     .main-header .brand-logo-img {
         height: 48px !important;
@@ -2673,10 +2673,8 @@ h1, h2, h3, h4, h5, h6 {
         display: none !important;
     }
     .main-header .header-cta-block {
-        position: absolute !important;
-        right: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
+        position: static !important;
+        transform: none !important;
     }
 
     /* Ensure all section containers and grids fit 100% of mobile screen without horizontal overflow */
