@@ -1911,15 +1911,15 @@ h1, h2, h3, h4, h5, h6 {
 .contact-split-grid {
     display: grid;
     grid-template-columns: 1fr 1.2fr;
-    gap: 24px;
-    align-items: stretch;
+    gap: 20px;
+    align-items: start;
 }
 
 .contact-info-col {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     gap: 20px;
+    margin: 0;
 }
 
 .info-contact-card {
