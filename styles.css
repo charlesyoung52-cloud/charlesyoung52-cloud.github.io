@@ -1907,16 +1907,19 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--bg-primary);
 }
 
+.contact-grid,
 .contact-split-grid {
     display: grid;
     grid-template-columns: 1fr 1.2fr;
-    gap: 40px;
+    gap: 24px;
+    align-items: stretch;
 }
 
 .contact-info-col {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    justify-content: space-between;
+    gap: 20px;
 }
 
 .info-contact-card {
@@ -1927,6 +1930,8 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    flex: 1;
+    margin: 0;
 }
 
 .contact-card-icon {
@@ -1968,12 +1973,21 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-muted);
 }
 
+.contact-form-col {
+    display: flex;
+    flex-direction: column;
+}
+
 .form-container-box {
     background-color: var(--bg-card);
     border: 1px solid var(--border-card);
     border-radius: var(--radius-lg);
     padding: 36px;
     box-shadow: var(--shadow-card);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .form-title {
@@ -2371,8 +2385,10 @@ h1, h2, h3, h4, h5, h6 {
     .info-split-grid {
         grid-template-columns: 1fr;
     }
+    .contact-grid,
     .contact-split-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
     .footer-top-row,
     .footer-grid {
