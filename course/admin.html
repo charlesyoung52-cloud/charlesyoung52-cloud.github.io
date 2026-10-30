@@ -233,6 +233,42 @@
             color: var(--green-bright);
         }
 
+        /* Top-Level Dashboard Tabs */
+        .dashboard-nav-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .dash-nav-tab {
+            background: #111419;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            padding: 9px 18px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .dash-nav-tab:hover {
+            color: #fff;
+            border-color: var(--border-highlight);
+            background: #161b22;
+        }
+        .dash-nav-tab.active {
+            background: rgba(14, 165, 233, 0.18);
+            border-color: var(--green);
+            color: var(--green-bright);
+            box-shadow: 0 0 14px var(--green-glow);
+        }
+
         /* Table */
         .table-card {
             background: var(--bg-card);
@@ -451,6 +487,19 @@
                 </div>
             </div>
 
+            <!-- Dashboard Navigation: Roster vs Cloud MFA -->
+            <div class="dashboard-nav-bar">
+                <button class="dash-nav-tab active" id="tab-btn-roster" onclick="switchDashboardTab('roster')">
+                    <i class="fas fa-users-gear"></i> Student Roster &amp; Exam Analytics
+                </button>
+                <button class="dash-nav-tab" id="tab-btn-mfa" onclick="switchDashboardTab('mfa')">
+                    <i class="fas fa-shield-halved text-blue"></i> Cloud MFA &amp; Email Delivery
+                </button>
+            </div>
+
+            <!-- TAB 1: STUDENT ROSTER & EXAM ANALYTICS -->
+            <div id="view-roster">
+
             <!-- Controls: Search & Filter Tabs -->
             <div class="controls-card">
                 <div class="search-box">
@@ -494,6 +543,30 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            </div>
+            <!-- END TAB 1 -->
+
+            <!-- TAB 2: CLOUD MFA & EMAIL DELIVERY (DEDICATED TAB) -->
+            <div id="view-mfa" style="display: none;">
+
+            <!-- MFA Policy & Security Architecture Banner -->
+            <div class="stat-card" style="margin-bottom: 24px; padding: 22px; border: 1px solid var(--border-highlight); background: var(--bg-card);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h3 style="color:#fff; font-size:1.15rem; margin:0 0 6px 0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-shield-check text-blue"></i> Mandatory Multi-Factor Authentication (MFA) Policy
+                        </h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.6; max-width:780px; margin:0;">
+                            Multi-Factor Authentication is enforced on <strong>every student login</strong> via 6-digit one-time passcodes sent to candidate email inboxes. To comply with security standards, student sessions are strictly scoped to the active browser tab/window &mdash; students are <strong>automatically logged off</strong> when closing the browser, requiring password and MFA verification upon return.
+                        </p>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <span class="badge badge-success" style="font-size:0.78rem; padding:4px 10px;"><i class="fas fa-lock"></i> MFA Enforced Every Login</span>
+                        <span class="badge badge-info" style="font-size:0.78rem; padding:4px 10px;"><i class="fas fa-arrow-right-from-bracket"></i> Auto-Logout on Close</span>
+                    </div>
                 </div>
             </div>
 
@@ -614,6 +687,9 @@
 
                 <div id="smtp-feedback" style="display:none; margin-top:12px; font-size:0.85rem; padding:10px; border-radius:4px;"></div>
             </div>
+
+            </div>
+            <!-- END TAB 2 -->
 
         </main>
     </div>
@@ -1056,40 +1132,22 @@
         function loadLocalStudentsRegistry() {
             try {
                 const reg = localStorage.getItem('platforms_student_registry');
-                if (reg) return JSON.parse(reg);
+                if (reg) {
+                    const parsed = JSON.parse(reg);
+                    // Only return valid registered students with real emails
+                    return (parsed || []).filter(s => s.email && s.email.includes('@') && !s.email.includes('example.com') && s.name !== 'STUDENT OFFICER' && s.name !== 'DOE, JOHN A.');
+                }
             } catch (e) {}
-
-            // Minimal demo record from current active session if any
-            const state = localStorage.getItem('platforms_unarmed_course_state_v3');
-            if (state) {
-                const parsed = JSON.parse(state);
-                const cert = parsed.studentCertData || {};
-                return [{
-                    id: parsed.studentEmail || 'active_student',
-                    name: cert.name || 'Trainee Officer',
-                    email: parsed.studentEmail || 'trainee@example.com',
-                    agency: parsed.studentAgency || 'Platforms Training Academy',
-                    mfa_verified: localStorage.getItem('platforms_mfa_verified_' + (parsed.studentEmail || '')) === 'true',
-                    completed_modules: Object.values(parsed.moduleSections || {}).filter(m => m.study && m.scenario && m.quiz).length,
-                    total_modules: 10,
-                    exam_attempts: parsed.examAttempts || (parsed.examCompleted ? 1 : 0),
-                    best_score: parsed.examPercentage || null,
-                    latest_score: parsed.examPercentage || null,
-                    latest_passed: parsed.examPassed || false,
-                    has_passed: parsed.examPassed || false,
-                    cert_id: parsed.issuedCertId || null,
-                    created_at: parsed.lastSavedTimestamp || 'Recent',
-                    last_active: parsed.lastSavedTimestamp || 'Recent',
-                    attempts: parsed.examCompleted ? [{
-                        attempt_number: 1,
-                        score: `${parsed.examScore}/50`,
-                        percentage: parsed.examPercentage,
-                        passed: parsed.examPassed,
-                        date: parsed.lastSavedTimestamp || 'Recent'
-                    }] : []
-                }];
-            }
             return [];
+        }
+
+        function switchDashboardTab(tab) {
+            const isRoster = tab === 'roster';
+            document.getElementById('tab-btn-roster').classList.toggle('active', isRoster);
+            document.getElementById('tab-btn-mfa').classList.toggle('active', !isRoster);
+            
+            document.getElementById('view-roster').style.display = isRoster ? 'block' : 'none';
+            document.getElementById('view-mfa').style.display = isRoster ? 'none' : 'block';
         }
 
         function updateFilterCounts() {
@@ -1188,12 +1246,11 @@
                     attemptsPill = `<span style="color:var(--text-sub); font-size:0.82rem;">0 Attempts</span>`;
                 }
 
-                // Payment pill
+                // Payment pill (Clean indicator without IDFPR Approved)
                 let paymentPill = `
-                    <span class="badge badge-success" style="font-size:0.75rem; padding:3px 8px;">
+                    <span class="badge badge-success" style="font-size:0.76rem; padding:3px 8px;">
                         <i class="fas fa-check-circle"></i> $80 PAID
                     </span>
-                    <div style="font-size:0.68rem; color:#86efac; margin-top:2px;">IDFPR Approved</div>
                 `;
                 if (!s.is_paid) {
                     paymentPill = `

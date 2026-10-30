@@ -1172,6 +1172,19 @@ class SecurityCourseApp {
 
     officerSignOut() {
         if (confirm('Sign out of your student officer account? Your current progress is saved, and you will be required to authenticate with password and email verification (MFA) upon signing back in.')) {
+            // Guarantee user's progress is saved to both local storage and cloud before logging out
+            try {
+                this.saveState();
+                const studentId = this.studentEmail || (this.studentCertData && this.studentCertData.name);
+                if (studentId) {
+                    this.apiCall('/api/progress/save', 'POST', {
+                        student_id: studentId,
+                        module_sections: this.moduleSections
+                    });
+                }
+            } catch (err) {
+                console.warn("Sign-out save warning:", err);
+            }
             sessionStorage.removeItem('platforms_officer_logged_in');
             localStorage.removeItem('platforms_officer_logged_in');
             this.closeLoginModal();
@@ -2987,8 +3000,35 @@ class SecurityCourseApp {
             siteHeaderEl.classList.remove('header-hidden');
         }
 
+        // Auto-save user progress before closing webpage or browser
+        const autoSaveProgressOnExit = () => {
+            try {
+                this.saveState();
+                const studentId = this.studentEmail || (this.studentCertData && this.studentCertData.name);
+                const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+                if (studentId && baseUrl && navigator.sendBeacon) {
+                    const payload = JSON.stringify({
+                        student_id: studentId,
+                        module_sections: this.moduleSections
+                    });
+                    const blob = new Blob([payload], { type: 'application/json' });
+                    navigator.sendBeacon(`${baseUrl}/api/progress/save`, blob);
+                }
+            } catch (err) {}
+        };
+
+        window.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                autoSaveProgressOnExit();
+            }
+        });
+        window.addEventListener('pagehide', () => {
+            autoSaveProgressOnExit();
+        });
+
         // Window beforeunload security warning for certificate holders
         window.addEventListener('beforeunload', (e) => {
+            autoSaveProgressOnExit();
             if (this.examPassed && (this.temporaryPaywallDisabled || this.isPaid) && !this.isCertLocked) {
                 e.preventDefault();
                 e.returnValue = "WARNING: You have unlocked your official certificate, but have not yet downloaded it. Once downloaded, it will be deleted for security. Please ensure you download your certificate before leaving!";
