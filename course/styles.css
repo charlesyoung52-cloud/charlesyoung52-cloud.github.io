@@ -3437,59 +3437,54 @@ video::-webkit-media-controls-panel {
     font-size: 1.3rem !important;
 }
 
-/* Certificate Security Alert & Single-Download Callouts */
-.cert-security-warning-callout {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(18, 20, 24, 0.95) 100%);
-    border: 2px solid #f59e0b;
+/* Certificate Security Alert & Single-Download Callouts (Yellow Box + Darker Yellow Outline & Text) */
+.cert-security-warning-callout,
+.cert-security-warning-callout.urgent {
+    background: #fef08a !important;
+    border: 2px solid #a16207 !important;
+    border-left: 6px solid #854d0e !important;
     border-radius: var(--radius-md);
     padding: 18px 22px;
-    margin: 18px 0;
+    margin: 0 0 22px 0;
     display: flex;
     align-items: flex-start;
     gap: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    color: #713f12 !important;
 }
 
-.cert-security-warning-callout.urgent {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(18, 20, 24, 0.95) 100%);
-    border-color: #ef4444;
-}
-
-.cert-security-warning-icon {
+.cert-security-warning-icon,
+.cert-security-warning-callout.urgent .cert-security-warning-icon {
     width: 46px;
     height: 46px;
     border-radius: 50%;
-    background: rgba(245, 158, 11, 0.22);
-    border: 2px solid #f59e0b;
+    background: #fde047 !important;
+    border: 2px solid #a16207 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fbbf24;
+    color: #854d0e !important;
     font-size: 1.35rem;
     flex-shrink: 0;
     margin-top: 2px;
 }
 
-.cert-security-warning-callout.urgent .cert-security-warning-icon {
-    background: rgba(239, 68, 68, 0.22);
-    border-color: #ef4444;
-    color: #f87171;
-}
-
 .cert-security-warning-text {
     flex: 1;
+    color: #713f12 !important;
 }
 
-.cert-security-warning-text strong {
-    color: #fbbf24;
+.cert-security-warning-text strong,
+.cert-security-warning-callout.urgent .cert-security-warning-text strong {
+    color: #713f12 !important;
     font-size: 1.05rem;
     display: block;
     margin-bottom: 6px;
     letter-spacing: 0.5px;
 }
 
-.cert-security-warning-callout.urgent .cert-security-warning-text strong {
-    color: #f87171;
+.cert-security-warning-text p {
+    color: #854d0e !important;
 }
 
 .cert-security-warning-text p {

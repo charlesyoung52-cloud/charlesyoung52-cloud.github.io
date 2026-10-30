@@ -2385,66 +2385,23 @@ class SecurityCourseApp {
                     }
                     const preWarn = document.getElementById('cert-pre-download-warning');
                     if (preWarn) {
-                        preWarn.className = 'cert-security-warning-callout urgent';
+                        preWarn.className = 'cert-security-warning-callout';
                         preWarn.innerHTML = `
-                            <div class="cert-security-warning-icon">
-                                <i class="fas fa-exclamation-triangle" style="color:#fbbf24; font-size:2rem;"></i>
+                            <div class="cert-security-warning-icon" style="background:#fde047; border:2px solid #a16207; color:#854d0e;">
+                                <i class="fas fa-exclamation-triangle" style="color:#854d0e; font-size:1.8rem;"></i>
                             </div>
-                            <div class="cert-security-warning-text">
-                                <strong style="color:#fbbf24; font-size:1.05rem; display:block; margin-bottom:6px;">
-                                    <i class="fas fa-certificate"></i> CERTIFICATE DOWNLOADED &amp; SEALED — SINGLE ISSUANCE NOTICE
+                            <div class="cert-security-warning-text" style="color:#713f12;">
+                                <strong style="color:#713f12; font-size:1.08rem; display:block; margin-bottom:6px; font-weight:800;">
+                                    <i class="fas fa-certificate" style="color:#854d0e;"></i> CRITICAL NOTICE — SINGLE OFFICIAL COPY (VERIFY INFO BEFORE SAVING — YOU CANNOT COME BACK!)
                                 </strong>
-                                <p style="color:#ffffff; font-size:0.95rem; line-height:1.6; margin-bottom:10px;">
-                                    <strong>REMINDER: This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.</strong>
+                                <p style="color:#854d0e; font-size:0.95rem; line-height:1.6; margin-bottom:10px; font-weight:700;">
+                                    Please ensure that all of your demographic information below is 100% accurate before saving/downloading! Once you download your certificate, this page locks permanently and you CANNOT come back. This certificate is the ONLY copy that you will receive &mdash; Platforms Training Academy does NOT issue duplicate copies under any circumstances.
                                 </p>
-                                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:12px 14px; color:#cbd5e1; font-size:0.88rem; line-height:1.6;">
-                                    <strong style="color:#fbbf24; display:block; margin-bottom:6px;"><i class="fas fa-clipboard-check"></i> MANDATORY NEXT STEPS FOR ALL CANDIDATES:</strong>
-                                    <p style="margin-bottom:6px;"><i class="fas fa-cloud-arrow-up" style="color:var(--brand-green-bright);"></i> <strong>1. Save in Multiple Locations:</strong> Please ensure you have safely stored this PDF across multiple secure locations (computer, phone, cloud storage, and email backup).</p>
-                                    <p><i class="fas fa-print" style="color:var(--brand-green-bright);"></i> <strong>2. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to submit for your Illinois PERC license application to the IDFPR.</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    // Disable all form inputs
-                    document.querySelectorAll('.cert-form-input').forEach(inp => {
-                        inp.disabled = true;
-                    });
-                } else {
-                    // Unsealed: Student can fill/verify before generating
-                    if (sealedBanner) sealedBanner.style.display = 'none';
-                    if (mainActionBtn) {
-                        mainActionBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)`;
-                        mainActionBtn.disabled = false;
-                        mainActionBtn.style.opacity = '1';
-                        mainActionBtn.style.cursor = 'pointer';
-                        mainActionBtn.onclick = () => this.downloadOfficialPdfCertificate();
-                    }
-                    const bottomDownloadBtn = document.getElementById('btn-download-cert-main');
-                    if (bottomDownloadBtn) {
-                        bottomDownloadBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official State Certificate (PDF)`;
-                        bottomDownloadBtn.disabled = false;
-                        bottomDownloadBtn.style.opacity = '1';
-                        bottomDownloadBtn.style.cursor = 'pointer';
-                        bottomDownloadBtn.onclick = () => this.downloadOfficialPdfCertificate();
-                    }
-                    const preWarn = document.getElementById('cert-pre-download-warning');
-                    if (preWarn) {
-                        preWarn.className = 'cert-security-warning-callout urgent';
-                        preWarn.innerHTML = `
-                            <div class="cert-security-warning-icon">
-                                <i class="fas fa-exclamation-triangle" style="color:#fbbf24; font-size:2rem;"></i>
-                            </div>
-                            <div class="cert-security-warning-text">
-                                <strong style="color:#fbbf24; font-size:1.05rem; display:block; margin-bottom:6px;">
-                                    <i class="fas fa-certificate"></i> CRITICAL NOTICE — SINGLE OFFICIAL COPY (NO DUPLICATES ISSUED)
-                                </strong>
-                                <p style="color:#ffffff; font-size:0.95rem; line-height:1.6; margin-bottom:10px;">
-                                    <strong>This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.</strong>
-                                </p>
-                                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:12px 14px; color:#cbd5e1; font-size:0.88rem; line-height:1.6;">
-                                    <strong style="color:#fbbf24; display:block; margin-bottom:6px;"><i class="fas fa-clipboard-check"></i> MANDATORY NEXT STEPS FOR ALL CANDIDATES:</strong>
-                                    <p style="margin-bottom:6px;"><i class="fas fa-cloud-arrow-up" style="color:var(--brand-green-bright);"></i> <strong>1. Save in Multiple Locations:</strong> Save this PDF file immediately across multiple secure locations (such as your computer, smartphone, cloud storage like Google Drive or iCloud, and email a copy to yourself).</p>
-                                    <p><i class="fas fa-print" style="color:var(--brand-green-bright);"></i> <strong>2. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to bring for your Illinois PERC card application to the IDFPR.</p>
+                                <div style="background:#fef9c3; border:1.5px solid #a16207; border-radius:6px; padding:12px 14px; color:#713f12; font-size:0.88rem; line-height:1.6;">
+                                    <strong style="color:#713f12; display:block; margin-bottom:6px; font-weight:800;"><i class="fas fa-clipboard-check" style="color:#854d0e;"></i> MANDATORY REQUIREMENTS BEFORE &amp; AFTER SAVING:</strong>
+                                    <p style="margin-bottom:6px; color:#854d0e;"><i class="fas fa-user-check" style="color:#854d0e;"></i> <strong style="display:inline; color:#713f12;">1. Double-Check Your Info Now:</strong> Verify that your legal name, street address, DOB, SSN, physical description, and signature are completely accurate before saving because <strong>you cannot come back!</strong></p>
+                                    <p style="margin-bottom:6px; color:#854d0e;"><i class="fas fa-cloud-arrow-up" style="color:#854d0e;"></i> <strong style="display:inline; color:#713f12;">2. Save in Multiple Locations:</strong> Save this PDF file immediately across multiple secure locations (computer, smartphone, cloud storage like Google Drive or iCloud, and email a copy to yourself).</p>
+                                    <p style="margin:0; color:#854d0e;"><i class="fas fa-print" style="color:#854d0e;"></i> <strong style="display:inline; color:#713f12;">3. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to bring for your Illinois PERC card application to the IDFPR.</p>
                                 </div>
                             </div>
                         `;
