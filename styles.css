@@ -2985,3 +2985,7 @@ body, p, span, li, a, label, address, small,
         width: 100% !important;
     }
 }
+
+.about-text-col .section-title-line {
+    margin: 14px 0 20px 0 !important;
+}
