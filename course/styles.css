@@ -5350,3 +5350,35 @@ button:disabled.btn-primary {
 }
 
 .narration-audio-play-btn { display: none !important; }
+
+/* Tidy small top credential bar on mobile so items are never crowded or cut off */
+@media (max-width: 768px) {
+    .top-credential-bar {
+        padding: 6px 0 !important;
+        font-size: 0.75rem !important;
+    }
+    .site-container.top-credential-inner,
+    .top-credential-inner {
+        padding: 0 22px 0 30px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        overflow: hidden !important;
+    }
+    .credential-tags,
+    .top-contact-links {
+        gap: 8px !important;
+        min-width: 0 !important;
+    }
+    .badge-military,
+    .badge-nra,
+    .cred-sub-code,
+    .top-sep,
+    .top-sep-email,
+    .top-link-email,
+    .top-loc {
+        display: none !important;
+    }
+}
