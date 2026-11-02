@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-02 17:00:00",
+  "last_updated": "2026-11-02 17:02:00",
   "courses": {
     "unarmed-20": {
       "id": "unarmed-20",
@@ -227,8 +227,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 12,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -241,8 +241,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 14,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -255,8 +255,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$150",
-      "seatsTotal": 15,
-      "seatsAvailable": 12,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -269,7 +269,7 @@
       "location": "Eagle Sports Range (Oak Forest, IL)",
       "instructor": "Charles Young",
       "price": "$125",
-      "seatsTotal": 12,
+      "seatsTotal": 10,
       "seatsAvailable": 10,
       "status": "Open"
     },
@@ -283,8 +283,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 12,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -297,8 +297,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 15,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -311,8 +311,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$125",
-      "seatsTotal": 15,
-      "seatsAvailable": 12,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -339,8 +339,8 @@
       "location": "Eagle Sports Range (Oak Forest, IL)",
       "instructor": "Charles Young",
       "price": "$125",
-      "seatsTotal": 15,
-      "seatsAvailable": 14,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -353,8 +353,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 15,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -367,8 +367,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 13,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -381,8 +381,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$150",
-      "seatsTotal": 15,
-      "seatsAvailable": 15,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -395,8 +395,8 @@
       "location": "Eagle Sports Range (Oak Forest, IL)",
       "instructor": "Charles Young",
       "price": "$125",
-      "seatsTotal": 12,
-      "seatsAvailable": 12,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -409,8 +409,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 15,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -423,8 +423,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$200",
-      "seatsTotal": 15,
-      "seatsAvailable": 15,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -437,8 +437,8 @@
       "location": "200 E 75th St, Chicago, IL & Eagle Sports Range",
       "instructor": "Charles Young",
       "price": "$125",
-      "seatsTotal": 15,
-      "seatsAvailable": 14,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     },
     {
@@ -465,8 +465,8 @@
       "location": "Eagle Sports Range (Oak Forest, IL)",
       "instructor": "Charles Young",
       "price": "$125",
-      "seatsTotal": 15,
-      "seatsAvailable": 15,
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
       "status": "Open"
     }
   ]

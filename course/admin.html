@@ -1471,7 +1471,7 @@
 
             try {
                 localStorage.removeItem('platforms_calendar_data');
-                const localRaw = localStorage.getItem('platforms_calendar_data_v2');
+                const localRaw = localStorage.getItem('platforms_calendar_data_v5');
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
                     if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
@@ -1518,8 +1518,8 @@
             document.getElementById('save-session-btn-label').textContent = 'Add Class Date to Schedule';
             document.getElementById('edit-session-date').value = '';
             document.getElementById('edit-session-enddate').value = '';
-            document.getElementById('edit-session-seats-total').value = 15;
-            document.getElementById('edit-session-seats-avail').value = 12;
+            document.getElementById('edit-session-seats-total').value = 10;
+            document.getElementById('edit-session-seats-avail').value = 10;
             document.getElementById('edit-session-status').value = 'Open';
             onAdminCourseTypeChange();
         }
@@ -1534,8 +1534,8 @@
             const time = document.getElementById('edit-session-time').value.trim();
             const location = document.getElementById('edit-session-location').value.trim();
             const instructor = document.getElementById('edit-session-instructor').value.trim() || 'Charles Young';
-            const seatsTotal = parseInt(document.getElementById('edit-session-seats-total').value || '15', 10);
-            const seatsAvailable = parseInt(document.getElementById('edit-session-seats-avail').value || '12', 10);
+            const seatsTotal = Math.min(10, parseInt(document.getElementById('edit-session-seats-total').value || '10', 10));
+            const seatsAvailable = Math.min(10, parseInt(document.getElementById('edit-session-seats-avail').value || '10', 10));
             const status = document.getElementById('edit-session-status').value;
             const notes = document.getElementById('edit-session-notes').value.trim();
 
@@ -1590,7 +1590,7 @@
             document.getElementById('edit-session-time').value = s.time || '';
             document.getElementById('edit-session-location').value = s.location || '';
             document.getElementById('edit-session-instructor').value = s.instructor || 'Charles Young';
-            document.getElementById('edit-session-seats-total').value = s.seatsTotal !== undefined ? s.seatsTotal : 15;
+            document.getElementById('edit-session-seats-total').value = Math.min(10, s.seatsTotal !== undefined ? s.seatsTotal : 10);
             document.getElementById('edit-session-seats-avail').value = s.seatsAvailable !== undefined ? s.seatsAvailable : 10;
             document.getElementById('edit-session-status').value = s.status || 'Open';
             document.getElementById('edit-session-notes').value = s.notes || '';
@@ -1613,7 +1613,7 @@
                 id: 'sess-' + Date.now(),
                 date: addDays(s.date, 7),
                 endDate: addDays(s.endDate || s.date, 7),
-                seatsAvailable: s.seatsTotal || 15,
+                seatsAvailable: Math.min(10, s.seatsTotal || 10),
                 status: 'Open'
             };
             adminCalendarData.sessions.push(copy);
@@ -1659,7 +1659,7 @@
                         <td style="font-size:0.8rem; color:#cbd5e1;">${s.time}</td>
                         <td><strong style="color:var(--green-bright);">${s.price}</strong></td>
                         <td style="font-size:0.78rem; color:var(--text-muted);">${s.location}</td>
-                        <td style="font-size:0.82rem; color:#fff;">${s.seatsAvailable} / ${s.seatsTotal || 15}</td>
+                        <td style="font-size:0.82rem; color:#fff;">${s.seatsAvailable} / ${Math.min(10, s.seatsTotal || 10)}</td>
                         <td><span class="badge ${badgeClass}">${s.status || 'Open'}</span></td>
                         <td>
                             <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -1735,7 +1735,7 @@
         }
 
         async function saveCalendarToCloud() {
-            localStorage.setItem('platforms_calendar_data_v2', JSON.stringify(adminCalendarData));
+            localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(adminCalendarData));
             const fb = document.getElementById('admin-cal-save-feedback');
             if (fb) {
                 fb.style.display = 'block';

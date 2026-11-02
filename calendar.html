@@ -872,8 +872,8 @@
             try {
                 localStorage.removeItem('platforms_calendar_data');
                 localStorage.removeItem('platforms_calendar_data_v2');
-                localStorage.removeItem('platforms_calendar_data_v4');
-                const localRaw = localStorage.getItem('platforms_calendar_data_v4');
+                localStorage.removeItem('platforms_calendar_data_v5');
+                const localRaw = localStorage.getItem('platforms_calendar_data_v5');
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
                     if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') > baseUpdated) {
@@ -888,7 +888,7 @@
                     const apiData = await apiRes.json();
                     if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
                         loaded = apiData;
-                        localStorage.setItem('platforms_calendar_data_v4', JSON.stringify(loaded));
+                        localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(loaded));
                     }
                 }
             } catch (e) {}
@@ -1250,7 +1250,7 @@
                 const endDay = (s.endDate && s.endDate !== s.date) ? ('–' + Number(s.endDate.split('-')[2])) : '';
 
                 const courseObj = (calendarData.courses && calendarData.courses[s.courseId]) || {};
-                const seatsAvail = s.seatsAvailable !== undefined ? s.seatsAvailable : 10;
+                const seatsAvail = Math.min(10, s.seatsAvailable !== undefined ? s.seatsAvailable : 10);
                 const isSoldOut = s.status === 'Sold Out' || seatsAvail <= 0;
                 const isSelected = selectedSessionId === s.id;
                 const priceDisplay = s.price || courseObj.price || '$200';
@@ -1381,7 +1381,7 @@
                 calendarData.reservations = [];
             }
             calendarData.reservations.unshift(reservation);
-            localStorage.setItem('platforms_calendar_data_v4', JSON.stringify(calendarData));
+            localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(calendarData));
 
             try {
                 await fetch(getApiBaseUrl() + '/api/calendar/book', {
