@@ -2726,10 +2726,10 @@ h1, h2, h3, h4, h5, h6 {
         gap: 14px !important;
         align-items: flex-start !important;
     }
-    .info-contact-card > div,
+    .info-contact-card > div:not(.contact-card-icon),
     .state-portal-card .portal-info {
         min-width: 0 !important;
-        flex: 1 !important;
+        flex: 1 1 auto !important;
     }
     .contact-highlight-link {
         font-size: 0.95rem !important;
@@ -2845,12 +2845,14 @@ body, p, span, li, a, label, address, small,
    ========================================================================== */
 .contact-card-icon,
 .portal-icon {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
+    flex: 0 0 46px !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
     padding: 0 !important;
-    font-size: 0.92rem !important;
-    border-radius: 6px !important;
+    font-size: 1.35rem !important;
+    border-radius: var(--radius-sm) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -2910,12 +2912,14 @@ body, p, span, li, a, label, address, small,
 
     .contact-card-icon,
     .portal-icon {
-        width: 30px !important;
-        height: 30px !important;
-        min-width: 30px !important;
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
         padding: 0 !important;
-        font-size: 0.85rem !important;
-        border-radius: 6px !important;
+        font-size: 1.3rem !important;
+        border-radius: var(--radius-sm) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
