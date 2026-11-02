@@ -2986,6 +2986,9 @@ body, p, span, li, a, label, address, small,
     }
 }
 
+.about-text-col .section-title {
+    margin-bottom: 0 !important;
+}
 .about-text-col .section-title-line {
-    margin: 14px 0 20px 0 !important;
+    margin: 18px auto 18px auto !important;
 }
