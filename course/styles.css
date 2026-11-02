@@ -5348,3 +5348,5 @@ button:disabled.btn-primary {
     border-color: #f3d06b !important;
     color: #ffffff !important;
 }
+
+.narration-audio-play-btn { display: none !important; }
