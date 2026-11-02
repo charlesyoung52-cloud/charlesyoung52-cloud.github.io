@@ -2308,8 +2308,8 @@ video::-webkit-media-controls-panel {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--brand-green-bright);
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.35);
     padding: 3px 10px;
     border-radius: 4px;
     transition: all 0.2s ease;
@@ -2318,7 +2318,7 @@ video::-webkit-media-controls-panel {
 .lesson-card:hover .start-pill {
     background: var(--brand-green-bright);
     color: #0f172a;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
 }
 
 .resume-pill {
@@ -2352,8 +2352,8 @@ video::-webkit-media-controls-panel {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--brand-green-bright);
-    background: rgba(16, 185, 129, 0.16);
-    border: 1px solid rgba(16, 185, 129, 0.45);
+    background: rgba(212, 175, 55, 0.16);
+    border: 1px solid rgba(212, 175, 55, 0.45);
     padding: 3px 10px;
     border-radius: 4px;
 }
@@ -4859,7 +4859,7 @@ button:disabled.btn-primary {
 
 .auth-gate-card {
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
-    border: 2px solid rgba(16, 185, 129, 0.4);
+    border: 2px solid rgba(212, 175, 55, 0.4);
     border-radius: var(--radius-md);
     padding: 48px 36px;
     text-align: center;
@@ -4875,14 +4875,14 @@ button:disabled.btn-primary {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #059669, #10b981, #d4af37);
+    background: linear-gradient(90deg, #231e12, #d4af37, #d4af37);
 }
 
 .auth-gate-shield-icon {
     width: 88px;
     height: 88px;
     margin: 0 auto 24px auto;
-    background: rgba(16, 185, 129, 0.15);
+    background: rgba(212, 175, 55, 0.15);
     border: 2px solid var(--brand-green-bright);
     border-radius: 50%;
     display: flex;
@@ -4890,14 +4890,14 @@ button:disabled.btn-primary {
     justify-content: center;
     font-size: 2.4rem;
     color: var(--brand-green-bright);
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
 }
 
 .auth-gate-badge {
     display: inline-block;
     padding: 5px 16px;
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.4);
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.4);
     border-radius: 9999px;
     color: var(--brand-green-bright);
     font-size: 0.8rem;
@@ -4985,7 +4985,7 @@ button:disabled.btn-primary {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    background: linear-gradient(135deg, #059669, #10b981);
+    background: linear-gradient(135deg, #231e12, #d4af37);
     color: #fff;
     border: none;
     padding: 16px 42px;
@@ -4993,7 +4993,7 @@ button:disabled.btn-primary {
     font-size: 1.15rem;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.4);
     transition: all 0.25s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -5002,7 +5002,7 @@ button:disabled.btn-primary {
 .btn-auth-gate-login:hover {
     filter: brightness(1.15);
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.6);
 }
 
 .auth-gate-secondary-links {
@@ -5097,7 +5097,7 @@ button:disabled.btn-primary {
     align-items: center;
     justify-content: center;
     padding: 32px 16px;
-    background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+    background: radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.08), transparent 70%),
                 radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.05), transparent 60%);
 }
 
@@ -5118,7 +5118,7 @@ button:disabled.btn-primary {
     width: 72px;
     height: 72px;
     margin: 0 auto 16px auto;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(16, 185, 129, 0.2));
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(212, 175, 55, 0.2));
     border: 2px solid #f59e0b;
     border-radius: 50%;
     display: flex;
@@ -5381,4 +5381,93 @@ button:disabled.btn-primary {
     .top-loc {
         display: none !important;
     }
+}
+
+/* ==========================================================================
+   GOLD & WHITE THEME FOR COURSE LOGIN, MFA, PAYMENT GATE & PROMINENT LOGOUT
+   ========================================================================== */
+.auth-gate-card,
+.payment-gate-card {
+    background: linear-gradient(135deg, #14171d 0%, #181c24 100%) !important;
+    border: 1px solid rgba(212, 175, 55, 0.42) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+}
+
+.auth-gate-card::before {
+    background: linear-gradient(90deg, #b89225, #d4af37, #f3d06b) !important;
+}
+
+.auth-gate-shield-icon,
+.payment-gate-icon {
+    background: rgba(212, 175, 55, 0.12) !important;
+    border: 2px solid #d4af37 !important;
+    color: #d4af37 !important;
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.22) !important;
+}
+
+.auth-gate-badge,
+.payment-gate-badge {
+    background: rgba(212, 175, 55, 0.12) !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    color: #ffffff !important;
+}
+
+.auth-gate-badge i,
+.payment-gate-badge i {
+    color: #d4af37 !important;
+}
+
+.btn-auth-gate-login,
+.btn-payment-gate-checkout {
+    background: linear-gradient(135deg, #231e12 0%, #16130b 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #d4af37 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+.btn-auth-gate-login i,
+.btn-payment-gate-checkout i {
+    color: #d4af37 !important;
+}
+
+.btn-auth-gate-login:hover,
+.btn-payment-gate-checkout:hover {
+    background: linear-gradient(135deg, #332b18 0%, #1f1a0f 100%) !important;
+    color: #ffffff !important;
+    border-color: #f3d06b !important;
+    box-shadow: 0 6px 22px rgba(212, 175, 55, 0.28) !important;
+    filter: none !important;
+}
+
+.profile-online-dot {
+    background-color: #d4af37 !important;
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.7) !important;
+}
+
+.btn-logout-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: linear-gradient(135deg, #231e12 0%, #16130b 100%);
+    border: 1px solid #d4af37;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-logout-header i {
+    color: #d4af37;
+}
+
+.btn-logout-header:hover {
+    background: linear-gradient(135deg, #332b18 0%, #1f1a0f 100%);
+    border-color: #f3d06b;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.25);
 }

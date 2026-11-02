@@ -774,7 +774,7 @@ class SecurityCourseApp {
         if (serverAlreadyDispatched) {
             if (statusEl) {
                 statusEl.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                         <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
                     </div>
                     <div>
@@ -799,7 +799,7 @@ class SecurityCourseApp {
                 serverHandled = true;
                 if (statusEl) {
                     statusEl.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                             <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
                         </div>
                         <div>
@@ -832,7 +832,7 @@ class SecurityCourseApp {
             // EmailJS not configured yet on client: Keep instructions clean without showing code on screen
             if (statusEl) {
                 statusEl.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                         <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
                     </div>
                     <div>
@@ -889,7 +889,7 @@ class SecurityCourseApp {
             if (response.ok) {
                 if (statusEl) {
                     statusEl.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                             <i class="fas fa-envelope-circle-check"></i> Verification Code Delivered!
                         </div>
                         <div>
@@ -907,7 +907,7 @@ class SecurityCourseApp {
                 console.warn('EmailJS delivery response:', errText);
                 if (statusEl) {
                     statusEl.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                             <i class="fas fa-envelope"></i> Verification Code Dispatched
                         </div>
                         <div>
@@ -925,7 +925,7 @@ class SecurityCourseApp {
             console.warn('EmailJS network exception:', err);
             if (statusEl) {
                 statusEl.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                         <i class="fas fa-envelope"></i> Verification Code Dispatched
                     </div>
                     <div>
@@ -1122,7 +1122,7 @@ class SecurityCourseApp {
                 const statusEl = document.getElementById('mfa-email-dispatch-status');
                 if (statusEl) {
                     statusEl.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                             <i class="fas fa-envelope-circle-check"></i> New Verification Code Sent Via Email
                         </div>
                         <div>
@@ -3090,6 +3090,10 @@ class SecurityCourseApp {
         const display = document.getElementById('header-student-name-display');
         const headerAccountInd = document.getElementById('header-account-indicator');
         const headerAccountText = document.getElementById('header-account-text');
+        const logoutBtn = document.getElementById('btn-header-logout');
+        if (logoutBtn) {
+            logoutBtn.style.display = this.isAuthenticated() ? 'inline-flex' : 'none';
+        }
 
         if (!this.isAuthenticated()) {
             if (display) display.textContent = 'Officer Sign-In';
@@ -3116,9 +3120,9 @@ class SecurityCourseApp {
                 display.textContent = name.length > 20 ? name.substring(0, 18) + '...' : name;
             }
             if (headerAccountInd) {
-                headerAccountInd.style.background = 'rgba(16, 185, 129, 0.2)';
+                headerAccountInd.style.background = 'rgba(212, 175, 55, 0.18)';
                 headerAccountInd.style.color = 'var(--brand-green-bright)';
-                headerAccountInd.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                headerAccountInd.style.border = '1px solid rgba(212, 175, 55, 0.45)';
             }
             if (headerAccountText) headerAccountText.textContent = this.isAdminMode ? 'Instructor' : 'Active Trainee';
         }

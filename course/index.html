@@ -89,7 +89,10 @@
                 </button>
                 <button class="header-profile-btn" onclick="app.openLoginModal()" title="Student Account & Profile">
                     <i class="fas fa-user-circle"></i> <span id="header-student-name-display">Student Officer</span> <span class="profile-online-dot"></span>
-                    <span id="header-account-indicator" style="font-size:0.68rem; padding:1px 6px; border-radius:4px; background:rgba(212, 175, 55,0.2); color:var(--brand-green-bright); margin-left:2px; font-weight:600;"><i class="fas fa-shield-alt"></i> <span id="header-account-text">Account</span></span>
+                    <span id="header-account-indicator" style="font-size:0.68rem; padding:1px 6px; border-radius:4px; background:rgba(212, 175, 55,0.2); color:#ffffff; border:1px solid rgba(212, 175, 55, 0.4); margin-left:2px; font-weight:600;"><i class="fas fa-shield-alt" style="color:#d4af37;"></i> <span id="header-account-text">Account</span></span>
+                </button>
+                <button class="btn-logout-header" id="btn-header-logout" onclick="app.officerSignOut()" title="Log Out of Student Account" style="display:none;">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
                 </button>
             </div>
         </div>
@@ -213,7 +216,7 @@
                                     <i class="fas fa-exclamation-circle"></i> <span id="auth-reg-error-text">Please complete all fields.</span>
                                 </div>
                                 <button type="button" class="btn-auth-gate-login" onclick="window.app ? window.app.handleRegisterSubmit() : app.handleRegisterSubmit()" style="width:100%; margin-bottom:12px;">
-                                    <i class="fas fa-user-shield"></i> Create Account &amp; Send Verification Code
+                                    <i class="fas fa-user-shield"></i> Create Account &amp; Sign In
                                 </button>
                                 <div style="text-align:center; font-size:0.8rem; color:#94a3b8;">
                                     Already have a student account? <button type="button" onclick="window.app ? window.app.setAuthTab('signin') : app.setAuthTab('signin')" style="background:none; border:none; color:var(--brand-green-bright); cursor:pointer; text-decoration:underline; font-size:0.8rem; padding:0;">Sign In here</button>
@@ -252,13 +255,13 @@
                                 </div>
                                 <div>
                                     <h4 style="color:#fff; font-size:1rem; margin:0; font-family:'Chakra Petch', sans-serif;">TWO-STEP IDENTITY VERIFICATION (MFA)</h4>
-                                    <span style="font-size:0.75rem; color:#86efac; font-weight:600;"><i class="fas fa-lock"></i> Mandated Identity Verification &bull; Enforced Every Login</span>
+                                    <span style="font-size:0.75rem; color:#ffffff; font-weight:600;"><i class="fas fa-lock"></i> Mandated Identity Verification &bull; Enforced Every Login</span>
                                 </div>
                             </div>
 
                             <!-- Real-time Email Dispatch Status (Code sent strictly to email) -->
                             <div id="mfa-email-dispatch-status" style="margin-bottom:16px; font-size:0.88rem; line-height:1.5; padding:14px; border-radius:6px; background:rgba(30,41,59,0.85); border:1px solid #334155; color:#cbd5e1;">
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#86efac; font-weight:600;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
                                     <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
                                 </div>
                                 <div>
@@ -384,7 +387,7 @@
                         </div>
                     </div>
 
-                    <!-- Secondary Options: Voucher / Verify / Instructor PIN -->
+                    <!-- Secondary Options: Voucher / Verify / Log Out -->
                     <div class="payment-gate-secondary-options">
                         <button class="btn-payment-sub-link" onclick="app.checkExistingPaymentStatus()">
                             <i class="fas fa-sync-alt"></i> I've Already Paid / Verify Order
@@ -393,7 +396,10 @@
                         <button class="btn-payment-sub-link" onclick="app.promptVoucherCode()">
                             <i class="fas fa-ticket-alt"></i> Agency Voucher Code
                         </button>
-
+                        <span>&bull;</span>
+                        <button class="btn-payment-sub-link" onclick="app.officerSignOut()">
+                            <i class="fas fa-sign-out-alt"></i> Log Out
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1219,8 +1225,8 @@
                             <div style="font-size: 0.82rem; color: #94a3b8;" id="officer-display-email">student@platformstraining.com</div>
                         </div>
                     </div>
-                    <button class="btn-secondary" onclick="app.officerSignOut()" style="font-size: 0.82rem; padding: 6px 14px; color: #f87171; border-color: rgba(239,68,68,0.3);">
-                        <i class="fas fa-sign-out-alt"></i> Switch Officer
+                    <button class="btn-secondary" onclick="app.officerSignOut()" style="font-size: 0.88rem; padding: 8px 16px; color: #ffffff; background: linear-gradient(135deg, #231e12 0%, #16130b 100%); border: 1px solid #d4af37; font-weight: 700;">
+                        <i class="fas fa-sign-out-alt" style="color: #d4af37; margin-right: 5px;"></i> Log Out
                     </button>
                 </div>
             </div>
@@ -1366,7 +1372,7 @@
     <!-- Standalone Academy Scripts -->
     <script src="config.js?v=2.0"></script>
     <script src="data.js?v=3.6"></script>
-    <script src="app.js?v=4.5"></script>
+    <script src="app.js?v=4.6"></script>
 </body>
 
 
