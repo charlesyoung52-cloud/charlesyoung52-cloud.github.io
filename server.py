@@ -1111,20 +1111,26 @@ def get_cert_status(student_id):
 CALENDAR_JSON_PATH = os.path.join(DATA_DIR, 'calendar.json')
 
 def load_calendar_data():
+    db_cal = None
+    file_cal = None
     db = get_db()
     row = db.execute("SELECT value FROM settings WHERE key = 'calendar_data'").fetchone()
     if row and row['value']:
         try:
-            return json.loads(row['value'])
+            db_cal = json.loads(row['value'])
         except Exception:
             pass
     if os.path.exists(CALENDAR_JSON_PATH):
         try:
             with open(CALENDAR_JSON_PATH, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                file_cal = json.load(f)
         except Exception:
             pass
-    return {'courses': {}, 'sessions': [], 'reservations': []}
+    if db_cal and file_cal:
+        if (file_cal.get('last_updated') or '') >= (db_cal.get('last_updated') or ''):
+            return file_cal
+        return db_cal
+    return file_cal or db_cal or {'courses': {}, 'sessions': [], 'reservations': []}
 
 def save_calendar_data(cal_data):
     cal_data['last_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

@@ -688,18 +688,21 @@
         </div>
     </main>
 
-    <!-- Booking Modal -->
+    <!-- Booking & Payment Modal (Only after choosing a calendar date) -->
     <div class="booking-modal-backdrop" id="booking-modal" onclick="if(event.target===this) closeBookingModal()">
-        <div class="booking-modal-card">
+        <div class="booking-modal-card" style="border-color: rgba(212, 175, 55, 0.45);">
             <button class="booking-modal-close" onclick="closeBookingModal()" aria-label="Close">&times;</button>
-            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.5rem; font-weight:700; color:#fff; margin:0 0 6px 0;">
-                Reserve Your Seat
+            <div style="font-size:0.75rem; font-weight:700; color:#d4af37; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">
+                <i class="fas fa-calendar-check"></i> Class Date Selected
+            </div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.55rem; font-weight:700; color:#fff; margin:0 0 6px 0;">
+                Confirm Seat &amp; Continue to Payment
             </h3>
             <p style="font-size:0.85rem; color:#ffffff; margin:0 0 16px 0;">
-                Enter your contact information below to reserve your seat in this class.
+                Enter your student information below for your selected class date, then continue to secure Stripe tuition checkout.
             </p>
 
-            <div class="booking-summary-banner" id="booking-modal-summary"></div>
+            <div class="booking-summary-banner" id="booking-modal-summary" style="border-color: rgba(212, 175, 55, 0.35);"></div>
 
             <form id="booking-reservation-form" onsubmit="submitClassBooking(event)">
                 <input type="hidden" id="book-session-id">
@@ -724,10 +727,10 @@
 
                 <div id="booking-confirm-feedback" style="display:none; padding:12px; border-radius:6px; margin-bottom:12px; font-size:0.86rem;"></div>
 
-                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
-                    <button type="button" class="btn-tactical-outline" style="padding:9px 16px; font-size:0.84rem;" onclick="closeBookingModal()">Cancel</button>
-                    <button type="submit" class="btn-book-clean" id="book-submit-btn">
-                        Confirm Reservation
+                <div style="display:flex; gap:10px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-top:18px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);">
+                    <button type="button" class="btn-tactical-outline" style="padding:9px 16px; font-size:0.84rem;" onclick="closeBookingModal()">Change Date</button>
+                    <button type="submit" class="btn-book-clean" id="book-submit-btn" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; padding:11px 22px; font-size:0.92rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-credit-card"></i> Continue to Payment
                     </button>
                 </div>
             </form>
@@ -791,6 +794,7 @@
         let calendarData = { courses: {}, sessions: [] };
         let activeCourseFilter = 'all';
         let activeDayFilter = null;
+        let selectedSessionId = null;
         let currentCalYear = 2026;
         let currentCalMonth = 10;
 
@@ -819,10 +823,11 @@
 
             try {
                 localStorage.removeItem('platforms_calendar_data');
-                const localRaw = localStorage.getItem('platforms_calendar_data_v2');
+                localStorage.removeItem('platforms_calendar_data_v2');
+                const localRaw = localStorage.getItem('platforms_calendar_data_v3');
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
-                    if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
+                    if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') > baseUpdated) {
                         loaded = parsed;
                     }
                 }
@@ -832,9 +837,9 @@
                 const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
                 if (apiRes.ok) {
                     const apiData = await apiRes.json();
-                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') >= baseUpdated) {
+                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
                         loaded = apiData;
-                        localStorage.setItem('platforms_calendar_data_v2', JSON.stringify(loaded));
+                        localStorage.setItem('platforms_calendar_data_v3', JSON.stringify(loaded));
                     }
                 }
             } catch (e) {}
@@ -898,6 +903,7 @@
         function selectCourseFilter(courseId) {
             activeCourseFilter = courseId;
             activeDayFilter = null;
+            selectedSessionId = null;
             const clearBtn = document.getElementById('clear-date-filter-btn');
             if (clearBtn) clearBtn.style.display = 'none';
 
@@ -929,6 +935,31 @@
             const c = calendarData.courses[activeCourseFilter];
             const prereqs = (c.prerequisites || []).map(item => `<li>${item}</li>`).join('');
             const topics = (c.curriculum || []).map(item => `<li>${item}</li>`).join('');
+            const selectedSession = selectedSessionId ? (calendarData.sessions || []).find(s => s.id === selectedSessionId) : null;
+
+            let actionAreaHtml = '';
+            if (activeCourseFilter === 'unarmed-20') {
+                actionAreaHtml = `
+                    <a href="./course/index.html" class="btn-book-clean" style="padding:10px 20px; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-play" style="color:#d4af37;"></i> Sign In to Start Online Course (${c.price})
+                    </a>
+                `;
+            } else if (selectedSession && selectedSession.courseId === activeCourseFilter) {
+                actionAreaHtml = `
+                    <span style="font-size:0.82rem; color:#d4af37; background:rgba(212,175,55,0.12); border:1px solid #d4af37; padding:7px 12px; border-radius:6px; font-weight:600;">
+                        <i class="fas fa-calendar-check"></i> ${formatDateSpan(selectedSession.date, selectedSession.endDate)}
+                    </span>
+                    <button type="button" onclick="openBookingModal('${selectedSession.id}')" class="btn-book-clean" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; padding:10px 20px; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-credit-card"></i> Continue to Payment (${selectedSession.price || c.price})
+                    </button>
+                `;
+            } else {
+                actionAreaHtml = `
+                    <span style="font-size:0.84rem; color:#d4af37; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.35); padding:8px 14px; border-radius:6px; display:inline-flex; align-items:center; gap:7px;">
+                        <i class="fas fa-calendar-day"></i> Choose a date on the calendar below to continue to payment
+                    </span>
+                `;
+            }
 
             slot.innerHTML = `
                 <div class="course-summary-bar">
@@ -936,14 +967,7 @@
                         <h1 class="summary-title">${c.title}</h1>
                         <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
                             <div class="summary-price">${c.price}</div>
-                            <a href="${getCourseStripeUrl(activeCourseFilter)}" class="btn-book-clean" style="padding:10px 20px; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
-                                <i class="fas fa-credit-card" style="color:#d4af37;"></i> Pay Course Tuition (${c.price})
-                            </a>
-                            ${activeCourseFilter === 'unarmed-20' ? `
-                                <a href="./course/index.html" class="btn-tactical-outline" style="padding:9px 16px; font-size:0.86rem; text-decoration:none;">
-                                    <i class="fas fa-play" style="color:#d4af37; margin-right:5px;"></i> Open Course Portal
-                                </a>
-                            ` : ''}
+                            ${actionAreaHtml}
                         </div>
                     </div>
                     <p class="summary-desc">${c.description || ''}</p>
@@ -1010,16 +1034,34 @@
             activeDayFilter = dateStr;
             const clearBtn = document.getElementById('clear-date-filter-btn');
             if (clearBtn) clearBtn.style.display = 'inline-block';
+
+            const daySessions = getFilteredSessions(true);
+            if (daySessions.length === 1) {
+                selectedSessionId = daySessions[0].id;
+            } else if (!daySessions.some(s => s.id === selectedSessionId)) {
+                selectedSessionId = null;
+            }
+
+            renderCourseSpotlight();
             renderMonthlyCalendar();
             renderSessionsList();
         }
 
         function clearDayFilter() {
             activeDayFilter = null;
+            selectedSessionId = null;
             const clearBtn = document.getElementById('clear-date-filter-btn');
             if (clearBtn) clearBtn.style.display = 'none';
+            renderCourseSpotlight();
             renderMonthlyCalendar();
             renderSessionsList();
+        }
+
+        function selectSessionDate(sessionId) {
+            selectedSessionId = sessionId;
+            renderCourseSpotlight();
+            renderSessionsList();
+            openBookingModal(sessionId);
         }
 
         function renderMonthlyCalendar() {
@@ -1096,9 +1138,9 @@
             if (activeDayFilter) {
                 heading.textContent = formatDateSpan(activeDayFilter, activeDayFilter).toUpperCase();
             } else if (activeCourseFilter !== 'all' && calendarData.courses && calendarData.courses[activeCourseFilter]) {
-                heading.textContent = 'AVAILABLE CLASS DATES';
+                heading.textContent = 'SELECT A CLASS DATE BELOW';
             } else {
-                heading.textContent = 'ALL UPCOMING CLASS DATES';
+                heading.textContent = 'UPCOMING WEEKEND CLASS DATES';
             }
 
             if (activeCourseFilter === 'unarmed-20') {
@@ -1116,7 +1158,7 @@
                                 <div class="session-submeta">
                                     <span>100% Online</span>
                                     <span>&bull;</span>
-                                    <span>Instant Certificate Upon Completion</span>
+                                    <span>Sign in to course portal to enroll &amp; complete payment</span>
                                 </div>
                             </div>
                         </div>
@@ -1125,8 +1167,7 @@
                                 <div class="session-price-val">$40</div>
                                 <div class="session-seats-val">Open Enrollment</div>
                             </div>
-                            <a href="${getCourseStripeUrl('unarmed-20')}" class="btn-book-clean"><i class="fas fa-credit-card" style="color:#d4af37; margin-right:6px;"></i> Pay Tuition ($40)</a>
-                            <a href="./course/index.html" class="btn-tactical-outline" style="padding:9px 14px; font-size:0.84rem; text-decoration:none;">Start Online</a>
+                            <a href="./course/index.html" class="btn-book-clean"><i class="fas fa-play" style="color:#d4af37; margin-right:6px;"></i> Start Online Course</a>
                         </div>
                     </div>
                 `;
@@ -1139,67 +1180,16 @@
             }
 
             if (sessions.length === 0) {
-                if (activeCourseFilter !== 'all' && calendarData.courses && calendarData.courses[activeCourseFilter]) {
-                    const selCourse = calendarData.courses[activeCourseFilter];
-                    const stripeUrl = getCourseStripeUrl(activeCourseFilter);
-                    container.innerHTML = `
-                        <div class="session-row" style="flex-direction:column; align-items:flex-start; gap:14px; padding:24px;">
-                            <div>
-                                <h4 style="font-family:'Rajdhani',sans-serif; font-size:1.25rem; color:#ffffff; margin:0 0 6px 0;">
-                                    No Course Dates Currently Available
-                                </h4>
-                                <p style="color:#ffffff; font-size:0.9rem; margin:0; line-height:1.55;">
-                                    New class dates for <strong>${selCourse.title}</strong> are being scheduled. You can pay your course tuition online below via Stripe to lock in your enrollment now, and Instructor Charles Young will coordinate your upcoming class date with you.
-                                </p>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; width:100%; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
-                                <a href="${stripeUrl}" class="btn-book-clean" style="padding:11px 22px; font-size:0.92rem; display:inline-flex; align-items:center; gap:8px;">
-                                    <i class="fas fa-credit-card" style="color:#d4af37;"></i> Pay Tuition Online (${selCourse.price})
-                                </a>
-                                <a href="tel:7738732591" class="btn-tactical-outline" style="padding:10px 16px; font-size:0.86rem; text-decoration:none;">
-                                    <i class="fas fa-phone-alt" style="color:#d4af37; margin-right:6px;"></i> Questions? (773) 873-2591
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    const courseOrder = ['unarmed-20', 'armed-28', 'firearm-requal', 'firearm-upgrade', 'ccl-16', 'ccl-8', 'ccl-military', 'ccl-refresher'];
-                    const rowsHtml = courseOrder.map(cid => {
-                        const cObj = (calendarData.courses && calendarData.courses[cid]) || {};
-                        if (!cObj.title) return '';
-                        const sUrl = getCourseStripeUrl(cid);
-                        return `
-                            <div class="session-row">
-                                <div class="session-row-left">
-                                    <div class="session-date-box">
-                                        <div class="session-date-mon">${cid === 'unarmed-20' ? 'ONLINE' : 'TUITION'}</div>
-                                        <div class="session-date-num" style="font-size:1.05rem;">${cObj.price}</div>
-                                        <div class="session-date-dow">${cid === 'unarmed-20' ? '24/7' : 'In-Person'}</div>
-                                    </div>
-                                    <div class="session-details">
-                                        <h4>${cObj.title}</h4>
-                                        <div class="session-submeta">
-                                            <span>${cObj.duration || ''}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="session-row-right">
-                                    <a href="${sUrl}" class="btn-book-clean" style="display:inline-flex; align-items:center; gap:7px;">
-                                        <i class="fas fa-credit-card" style="color:#d4af37;"></i> Pay Tuition (${cObj.price})
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                    container.innerHTML = `
-                        <div class="session-row" style="padding:16px 20px; border-left:3px solid #d4af37;">
-                            <p style="color:#ffffff; font-size:0.9rem; margin:0; line-height:1.5;">
-                                <strong>No in-person class dates are currently posted on the calendar.</strong> Select your course below to pay tuition online via Stripe, or start the 20-Hour Unarmed Security Course online 24/7.
-                            </p>
-                        </div>
-                        ${rowsHtml}
-                    `;
-                }
+                container.innerHTML = `
+                    <div class="session-row" style="flex-direction:column; align-items:flex-start; gap:10px; padding:24px;">
+                        <h4 style="font-family:'Rajdhani',sans-serif; font-size:1.25rem; color:#ffffff; margin:0;">
+                            No Class Dates Posted for This Selection
+                        </h4>
+                        <p style="color:#ffffff; font-size:0.9rem; margin:0; line-height:1.55;">
+                            Please select an available highlighted weekend date on the calendar to reserve your seat and continue to payment, or call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> for assistance.
+                        </p>
+                    </div>
+                `;
                 return;
             }
 
@@ -1213,9 +1203,11 @@
                 const courseObj = (calendarData.courses && calendarData.courses[s.courseId]) || {};
                 const seatsAvail = s.seatsAvailable !== undefined ? s.seatsAvailable : 10;
                 const isSoldOut = s.status === 'Sold Out' || seatsAvail <= 0;
+                const isSelected = selectedSessionId === s.id;
+                const priceDisplay = s.price || courseObj.price || '$200';
 
                 return `
-                    <div class="session-row">
+                    <div class="session-row" style="${isSelected ? 'border-color:#d4af37; background:rgba(212,175,55,0.08);' : ''}">
                         <div class="session-row-left">
                             <div class="session-date-box">
                                 <div class="session-date-mon">${monStr}</div>
@@ -1223,7 +1215,10 @@
                                 <div class="session-date-dow">${dowStr}</div>
                             </div>
                             <div class="session-details">
-                                <h4>${s.title}</h4>
+                                <h4>
+                                    ${s.title}
+                                    ${isSelected ? `<span style="font-size:0.72rem; color:#07090e; background:#d4af37; padding:2px 8px; border-radius:4px; margin-left:8px; vertical-align:middle; font-weight:700;">DATE SELECTED</span>` : ''}
+                                </h4>
                                 <div class="session-submeta">
                                     <span>${s.time}</span>
                                     <span>&bull;</span>
@@ -1231,15 +1226,21 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="session-row-right">
+                        <div class="session-row-right" style="flex-wrap:wrap;">
                             <div class="session-price-meta">
-                                <div class="session-price-val">${s.price || courseObj.price || '$200'}</div>
+                                <div class="session-price-val">${priceDisplay}</div>
                                 <div class="session-seats-val">${isSoldOut ? 'Full' : `${seatsAvail} seats open`}</div>
                             </div>
                             ${isSoldOut ? `
                                 <button class="btn-book-clean" disabled>Full</button>
+                            ` : isSelected ? `
+                                <button class="btn-book-clean" onclick="openBookingModal('${s.id}')" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; display:inline-flex; align-items:center; gap:7px;">
+                                    <i class="fas fa-credit-card"></i> Continue to Payment (${priceDisplay})
+                                </button>
                             ` : `
-                                <button class="btn-book-clean" onclick="openBookingModal('${s.id}')">Select Date</button>
+                                <button class="btn-book-clean" onclick="selectSessionDate('${s.id}')">
+                                    <i class="fas fa-calendar-check" style="color:#d4af37; margin-right:5px;"></i> Select Date
+                                </button>
                             `}
                         </div>
                     </div>
@@ -1250,18 +1251,20 @@
         function openBookingModal(sessionId) {
             const session = (calendarData.sessions || []).find(s => s.id === sessionId);
             if (!session) return;
+            selectedSessionId = session.id;
             const courseObj = (calendarData.courses && calendarData.courses[session.courseId]) || {};
+            const priceDisplay = session.price || courseObj.price || '$200';
 
             document.getElementById('book-session-id').value = session.id;
             const summary = document.getElementById('booking-modal-summary');
             summary.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">
                     <strong style="color:#fff; font-size:1.05rem;">${session.title}</strong>
-                    <strong style="color:#fff; font-size:1.1rem;">${session.price || courseObj.price || '$200'}</strong>
+                    <strong style="color:#d4af37; font-size:1.15rem;">${priceDisplay}</strong>
                 </div>
-                <div style="margin-top:6px; font-size:0.83rem; color:#ffffff; line-height:1.5;">
-                    <div>${formatDateSpan(session.date, session.endDate)} &bull; ${session.time}</div>
-                    <div>${session.location}</div>
+                <div style="margin-top:6px; font-size:0.84rem; color:#ffffff; line-height:1.5;">
+                    <div><i class="fas fa-calendar-day" style="color:#d4af37; margin-right:6px;"></i> <strong>${formatDateSpan(session.date, session.endDate)}</strong> &bull; ${session.time}</div>
+                    <div><i class="fas fa-location-dot" style="color:#d4af37; margin-right:6px;"></i> ${session.location}</div>
                 </div>
             `;
 
@@ -1270,8 +1273,11 @@
             const submitBtn = document.getElementById('book-submit-btn');
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Confirm Reservation';
+                submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Continue to Payment (${priceDisplay})`;
             }
+
+            renderCourseSpotlight();
+            renderSessionsList();
 
             document.getElementById('booking-modal').classList.add('open');
             document.body.style.overflow = 'hidden';
@@ -1294,10 +1300,11 @@
 
             const session = (calendarData.sessions || []).find(s => s.id === sessionId);
             if (!session) return;
+            const stripeUrl = getCourseStripeUrl(session.courseId);
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Saving...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to Stripe Payment...';
             }
 
             if (session.seatsAvailable > 0) {
@@ -1325,7 +1332,7 @@
                 calendarData.reservations = [];
             }
             calendarData.reservations.unshift(reservation);
-            localStorage.setItem('platforms_calendar_data_v2', JSON.stringify(calendarData));
+            localStorage.setItem('platforms_calendar_data_v3', JSON.stringify(calendarData));
 
             try {
                 await fetch(getApiBaseUrl() + '/api/calendar/book', {
@@ -1341,17 +1348,17 @@
             if (fb) {
                 fb.style.display = 'block';
                 fb.style.background = '#181c24';
-                fb.style.border = '1px solid rgba(255, 255, 255, 0.15)';
-                fb.style.color = '#f8fafc';
+                fb.style.border = '1px solid #d4af37';
+                fb.style.color = '#ffffff';
                 fb.innerHTML = `
-                    <strong>Reservation Confirmed (${reservation.id})</strong><br>
-                    ${name} is scheduled for ${session.title} on ${formatDateSpan(session.date, session.endDate)}.
+                    <strong><i class="fas fa-check-circle" style="color:#d4af37;"></i> Seat Reserved (${reservation.id})</strong><br>
+                    Redirecting you to Stripe Checkout to complete tuition payment for ${session.title} on ${formatDateSpan(session.date, session.endDate)}...
                 `;
             }
-            if (submitBtn) {
-                submitBtn.textContent = 'Reserved';
-            }
-            document.getElementById('booking-reservation-form').reset();
+
+            setTimeout(() => {
+                window.location.href = stripeUrl;
+            }, 400);
         }
 
         document.addEventListener('DOMContentLoaded', () => {

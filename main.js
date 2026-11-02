@@ -227,18 +227,12 @@ function openCourseModal(courseId) {
 
         <div class="modal-actions-footer" style="flex-wrap:wrap;">
             ${courseId === 'unarmed-20' ? `
-            <a href="${course.stripeUrl}" class="btn-tactical-primary btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
-                <i class="fas fa-credit-card"></i> Pay Tuition Online ($40)
-            </a>
             <a href="./course/index.html" class="btn-card-online btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
                 <i class="fas fa-play"></i> Start Online Course
             </a>
             ` : `
-            <a href="${course.stripeUrl}" class="btn-tactical-primary btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
-                <i class="fas fa-credit-card"></i> Pay Tuition (${course.price.replace('.00', '')})
-            </a>
-            <a href="calendar.html?course=${courseId}" class="btn-tactical-outline btn-large" style="flex:1; min-width:160px; text-align:center; justify-content:center;">
-                Book Now
+            <a href="calendar.html?course=${courseId}" class="btn-tactical-primary btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
+                <i class="fas fa-calendar-check"></i> Select a Date on Calendar
             </a>
             `}
             <button onclick="closeCourseModal()" class="btn-tactical-outline btn-large">
