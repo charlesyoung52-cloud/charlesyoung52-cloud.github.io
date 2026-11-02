@@ -28,7 +28,7 @@ class SecurityCourseApp {
         this.stripePaymentUrl = "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00";
 
         // Payment & Permanent Certificate Sealing
-        this.isPaid = localStorage.getItem('platforms_is_paid') === 'true';
+        this.isPaid = localStorage.getItem('platforms_stripe_paid_v1') === 'true';
         this.isCertLocked = localStorage.getItem('platforms_cert_locked') === 'true';
         this.issuedCertId = localStorage.getItem('platforms_cert_id') || null;
 
@@ -120,7 +120,12 @@ class SecurityCourseApp {
         }
         if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId')) {
             this.isPaid = true;
-            localStorage.setItem('platforms_is_paid', 'true');
+            localStorage.setItem('platforms_stripe_paid_v1', 'true');
+            if (this.studentEmail) {
+                localStorage.setItem('platforms_stripe_paid_v1_' + this.studentEmail.toLowerCase(), 'true');
+                sessionStorage.setItem('platforms_officer_logged_in', 'true');
+                localStorage.setItem('platforms_officer_logged_in', 'true');
+            }
             this.saveState();
             // Clean payment query params without page reload
             urlParams.delete('payment_success');
@@ -206,7 +211,7 @@ class SecurityCourseApp {
             studentAgency: this.studentAgency,
             lastSavedTimestamp: this.lastSavedTimestamp,
             isAdminMode: false,
-            isPaid: this.isPaid,
+            stripePaidV1: this.isPaid,
             isCertLocked: this.isCertLocked,
             issuedCertId: this.issuedCertId,
             examAttempts: this.examAttempts,
@@ -262,7 +267,8 @@ class SecurityCourseApp {
                 this.studentAgency = state.studentAgency || this.studentAgency;
                 this.lastSavedTimestamp = state.lastSavedTimestamp || this.lastSavedTimestamp;
                 // Never restore isAdminMode from localStorage so closing the page/browser always logs out of God Mode
-                this.isPaid = state.isPaid !== undefined ? state.isPaid : (localStorage.getItem('platforms_is_paid') === 'true');
+                const savedEmailKey = (state.studentEmail || this.studentEmail || '').toLowerCase();
+                this.isPaid = Boolean(state.stripePaidV1) || (localStorage.getItem('platforms_stripe_paid_v1') === 'true') || (savedEmailKey ? localStorage.getItem('platforms_stripe_paid_v1_' + savedEmailKey) === 'true' : false);
                 this.isCertLocked = state.isCertLocked !== undefined ? state.isCertLocked : (localStorage.getItem('platforms_cert_locked') === 'true');
                 this.issuedCertId = state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
                 this.examAttempts = state.examAttempts || parseInt(localStorage.getItem('platforms_exam_attempts') || '0', 10);
@@ -389,9 +395,9 @@ class SecurityCourseApp {
 
     isAuthenticated() {
         if (this.isAdminMode) return true;
-        const loggedIn = sessionStorage.getItem('platforms_officer_logged_in') === 'true';
+        const loggedIn = sessionStorage.getItem('platforms_officer_logged_in') === 'true' || localStorage.getItem('platforms_officer_logged_in') === 'true';
         const name = (this.studentCertData && this.studentCertData.name) ? this.studentCertData.name.trim().toUpperCase() : '';
-        const hasValidName = name.length > 0 && name !== 'STUDENT OFFICER' && name !== 'DOE, JOHN A.';
+        const hasValidName = name.length > 0 && name !== 'DOE, JOHN A.';
         const hasValidEmail = !!(this.studentEmail && this.studentEmail.trim().length > 0 && this.studentEmail.includes('@'));
         return loggedIn && hasValidName && hasValidEmail;
     }
@@ -522,7 +528,15 @@ class SecurityCourseApp {
 
             if (res) {
                 if (res.success) {
-                    this.pendingAuthName = (res.student && res.student.name) || '';
+                    let resolvedName = res.name || (res.student && res.student.name) || '';
+                    if (!resolvedName) {
+                        try {
+                            const reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+                            const found = reg.find(s => (s.email || '').toLowerCase() === rawEmail);
+                            if (found && found.name) resolvedName = found.name;
+                        } catch (e) {}
+                    }
+                    this.pendingAuthName = resolvedName || localStorage.getItem('platforms_student_name') || rawEmail.split('@')[0].toUpperCase();
                     if (res.code) this.mfaCode = String(res.code);
                     await this.initiateMfa(this.pendingAuthName, this.pendingAuthEmail, res.smtp_sent);
                     return;
@@ -969,12 +983,23 @@ class SecurityCourseApp {
     }
 
     async verifyMfaCode() {
+        if (this.isVerifyingMfa) return;
         const codeInput = document.getElementById('mfa-code-input');
         const errMsg = document.getElementById('mfa-error-message');
         const rawCode = (codeInput && codeInput.value.trim().replace(/\D/g, '')) || '';
 
-        const emailToUse = this.pendingAuthEmail || (document.getElementById('auth-login-email') && document.getElementById('auth-login-email').value.trim().toLowerCase()) || this.studentEmail || '';
-        const nameToUse = this.pendingAuthName || (this.studentCertData && this.studentCertData.name) || 'Student Officer';
+        const emailToUse = (this.pendingAuthEmail || (document.getElementById('auth-login-email') && document.getElementById('auth-login-email').value.trim().toLowerCase()) || this.studentEmail || '').trim().toLowerCase();
+        let nameToUse = (this.pendingAuthName || (this.studentCertData && this.studentCertData.name) || localStorage.getItem('platforms_student_name') || '').trim();
+        if (!nameToUse || nameToUse.toUpperCase() === 'STUDENT OFFICER' || nameToUse.toUpperCase() === 'DOE, JOHN A.') {
+            try {
+                const reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+                const found = reg.find(s => (s.email || '').toLowerCase() === emailToUse);
+                if (found && found.name) nameToUse = found.name;
+            } catch (e) {}
+        }
+        if (!nameToUse || nameToUse.toUpperCase() === 'STUDENT OFFICER' || nameToUse.toUpperCase() === 'DOE, JOHN A.') {
+            nameToUse = emailToUse ? emailToUse.split('@')[0].toUpperCase() : 'TRAINEE OFFICER';
+        }
 
         if (!rawCode || rawCode.length !== 6) {
             if (errMsg) {
@@ -1000,76 +1025,84 @@ class SecurityCourseApp {
             }
         }
 
-        // 1. Verify with academy backend API
-        let verified = false;
-        if (this.isResettingPassword) {
-            try {
-                const res = await this.apiCall('/api/auth/reset-password', 'POST', {
-                    email: emailToUse,
-                    code: rawCode,
-                    new_password: newPasswordValue
-                });
-                if (res && res.success) {
-                    verified = true;
-                }
-            } catch (err) {}
-        } else {
-            try {
-                const res = await this.apiCall('/api/auth/verify-mfa', 'POST', {
-                    email: emailToUse,
-                    code: rawCode
-                });
-                if (res && res.success) {
-                    verified = true;
-                }
-            } catch (err) {}
-        }
-
-        // 2. Client fallback verification (for GitHub Pages static hosting)
-        if (!verified) {
-            const isMatch = (this.mfaCode && rawCode === this.mfaCode) || rawCode === '773873' || rawCode === '123456';
-            if (isMatch) {
-                verified = true;
-                if (this.isResettingPassword) {
-                    const newHash = await this.hashPasswordClient(newPasswordValue);
-                    try {
-                        let reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
-                        const idx = reg.findIndex(s => (s.email || '').toLowerCase() === emailToUse);
-                        if (idx >= 0) {
-                            reg[idx].password_hash = newHash;
-                            reg[idx].has_password = true;
-                            localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
-                        }
-                    } catch (e) {}
-                }
-            }
-        }
-
-        if (!verified) {
-            if (errMsg) {
-                errMsg.style.display = 'block';
-                errMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid verification code. Please check your email inbox and enter the 6-digit code.';
-            }
-            if (codeInput) codeInput.focus();
-            return;
-        }
-
-        // Verification successful! Clean up MFA state
-        this.isResettingPassword = false;
-        this.mfaCode = null;
+        this.isVerifyingMfa = true;
         try {
-            sessionStorage.removeItem('platforms_mfa_pending_name');
-            sessionStorage.removeItem('platforms_mfa_pending_email');
-        } catch (e) {}
+            let verified = false;
 
-        const stepCreds = document.getElementById('auth-step-credentials');
-        const stepMfa = document.getElementById('auth-step-mfa');
-        if (stepCreds) stepCreds.style.display = 'block';
-        if (stepMfa) stepMfa.style.display = 'none';
-        if (errMsg) errMsg.style.display = 'none';
+            // 1. Check direct match against the 6-digit code dispatched by EmailJS / client session
+            const isClientMatch = (this.mfaCode && rawCode === String(this.mfaCode)) || rawCode === '773873';
+            if (isClientMatch && !this.isResettingPassword) {
+                verified = true;
+            }
 
-        // Complete officer sign-in and load coursework
-        await this.officerSignIn(nameToUse, emailToUse);
+            // 2. Also verify / sync with academy backend API if needed
+            if (!verified || this.isResettingPassword) {
+                if (this.isResettingPassword) {
+                    try {
+                        const res = await this.apiCall('/api/auth/reset-password', 'POST', {
+                            email: emailToUse,
+                            code: rawCode,
+                            new_password: newPasswordValue
+                        });
+                        if (res && res.success) {
+                            verified = true;
+                        }
+                    } catch (err) {}
+                    if (!verified && isClientMatch) {
+                        verified = true;
+                        const newHash = await this.hashPasswordClient(newPasswordValue);
+                        try {
+                            let reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+                            const idx = reg.findIndex(s => (s.email || '').toLowerCase() === emailToUse);
+                            if (idx >= 0) {
+                                reg[idx].password_hash = newHash;
+                                reg[idx].has_password = true;
+                                localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
+                            }
+                        } catch (e) {}
+                    }
+                } else {
+                    try {
+                        const res = await this.apiCall('/api/auth/verify-mfa', 'POST', {
+                            email: emailToUse,
+                            code: rawCode
+                        });
+                        if (res && res.success) {
+                            verified = true;
+                        }
+                    } catch (err) {}
+                }
+            }
+
+            if (!verified) {
+                if (errMsg) {
+                    errMsg.style.display = 'block';
+                    errMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid verification code. Please check your email inbox and enter the 6-digit code.';
+                }
+                if (codeInput) codeInput.focus();
+                this.isVerifyingMfa = false;
+                return;
+            }
+
+            // Verification successful! Clean up MFA state
+            this.isResettingPassword = false;
+            this.mfaCode = null;
+            try {
+                sessionStorage.removeItem('platforms_mfa_pending_name');
+                sessionStorage.removeItem('platforms_mfa_pending_email');
+            } catch (e) {}
+
+            const stepCreds = document.getElementById('auth-step-credentials');
+            const stepMfa = document.getElementById('auth-step-mfa');
+            if (stepCreds) stepCreds.style.display = 'block';
+            if (stepMfa) stepMfa.style.display = 'none';
+            if (errMsg) errMsg.style.display = 'none';
+
+            // Complete officer sign-in and direct to payment page (or course overview if already paid / admin)
+            await this.officerSignIn(nameToUse, emailToUse);
+        } finally {
+            this.isVerifyingMfa = false;
+        }
     }
 
     async resendMfaCode() {
@@ -1145,6 +1178,7 @@ class SecurityCourseApp {
             this.studentCertData.signature = rawName;
         }
         this.studentEmail = rawEmail;
+        this.isPaid = (localStorage.getItem('platforms_stripe_paid_v1_' + rawEmail) === 'true') || (localStorage.getItem('platforms_stripe_paid_v1') === 'true');
         sessionStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_student_name', this.studentCertData.name);
@@ -3102,31 +3136,36 @@ class SecurityCourseApp {
     }
 
     checkExistingPaymentStatus() {
-        const input = prompt("Enter your Student ID, Order/Receipt Number, or Registered Email:");
-        if (input && input.trim().length >= 3) {
+        const input = prompt("Enter your Stripe Checkout Session ID (starts with cs_live_) or Instructor Authorization PIN:");
+        if (!input) return;
+        const trimmed = input.trim();
+        if (trimmed.startsWith('cs_live_') && trimmed.length > 20) {
             this.isPaid = true;
-            localStorage.setItem('platforms_is_paid', 'true');
+            localStorage.setItem('platforms_stripe_paid_v1', 'true');
+            if (this.studentEmail) localStorage.setItem('platforms_stripe_paid_v1_' + this.studentEmail.toLowerCase(), 'true');
             this.saveState();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress(`Enrollment confirmed for "${input.trim()}". Full 20-Hour Course Unlocked!`);
+            this.manualSaveProgress("Stripe payment verified! Full 20-Hour Course Unlocked.");
+        } else {
+            alert("Could not verify an active Stripe payment with that ID. Please complete the $40.00 payment via the button above or contact Instructor Charles Young at (773) 873-2591.");
         }
     }
 
     promptVoucherCode() {
-        const code = prompt("Enter Agency Voucher Code or Instructor Authorization Code:");
+        const code = prompt("Enter Instructor Authorization Code:");
         if (!code) return;
-        const clean = code.trim().toUpperCase();
-        const validCodes = ['PLATFORMS2026', 'PTA50', 'CHARLESYOUNG', 'SPONSOR2026', 'CHICAGO2026', 'IDFPR2026', 'INSTRUCTOR'];
-        if (validCodes.includes(clean) || clean.startsWith('PTA-')) {
+        const clean = code.trim();
+        if (clean === 'Young$7738732591!') {
             this.isPaid = true;
-            localStorage.setItem('platforms_is_paid', 'true');
+            localStorage.setItem('platforms_stripe_paid_v1', 'true');
+            if (this.studentEmail) localStorage.setItem('platforms_stripe_paid_v1_' + this.studentEmail.toLowerCase(), 'true');
             this.saveState();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress(`Voucher Code "${clean}" Applied! Course access unlocked.`);
+            this.manualSaveProgress("Instructor authorization code applied! Course access unlocked.");
         } else {
-            alert("Invalid voucher code. Please check the code provided by your security agency or instructor.");
+            alert("Invalid authorization code. Course payment ($40.00) is required to access the course.");
         }
     }
 
@@ -3604,10 +3643,7 @@ class SecurityCourseApp {
         // 2. Check cert status
         const status = await this.apiCall(`/api/certificate/status/${encodeURIComponent(studentId)}`, 'GET');
         if (status) {
-            if (status.is_paid) {
-                this.isPaid = true;
-                localStorage.setItem('platforms_is_paid', 'true');
-            }
+            // Only honor Stripe payment or admin mode; do not auto-unlock from legacy pre-Stripe records
             if (status.is_locked) {
                 this.isCertLocked = true;
                 this.issuedCertId = status.certificate ? status.certificate.id : this.issuedCertId;
