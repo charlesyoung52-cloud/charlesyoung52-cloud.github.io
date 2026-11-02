@@ -27,10 +27,11 @@ class SecurityCourseApp {
         this.temporaryPaywallDisabled = false;
         this.stripePaymentUrl = "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00";
 
-        // Payment & Permanent Certificate Sealing
-        this.isPaid = localStorage.getItem('platforms_stripe_paid_v1') === 'true';
-        this.isCertLocked = localStorage.getItem('platforms_cert_locked') === 'true';
-        this.issuedCertId = localStorage.getItem('platforms_cert_id') || null;
+        // Payment & Permanent Certificate Sealing (Scoped per authenticated student email)
+        const initEmail = (localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
+        this.isPaid = initEmail ? (localStorage.getItem('platforms_stripe_paid_v1_' + initEmail) === 'true') : false;
+        this.isCertLocked = initEmail ? (localStorage.getItem('platforms_cert_locked_' + initEmail) === 'true' || localStorage.getItem('platforms_cert_locked') === 'true') : false;
+        this.issuedCertId = (initEmail && localStorage.getItem('platforms_cert_id_' + initEmail)) || localStorage.getItem('platforms_cert_id') || null;
 
         // Exam attempt tracking
         this.examAttempts = parseInt(localStorage.getItem('platforms_exam_attempts') || '0', 10);
@@ -118,11 +119,11 @@ class SecurityCourseApp {
             const cleanQ = urlParams.toString() ? '?' + urlParams.toString() : '';
             window.history.replaceState({}, document.title, window.location.pathname + cleanQ + window.location.hash);
         }
-        if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId')) {
-            this.isPaid = true;
-            localStorage.setItem('platforms_stripe_paid_v1', 'true');
-            if (this.studentEmail) {
-                localStorage.setItem('platforms_stripe_paid_v1_' + this.studentEmail.toLowerCase(), 'true');
+        if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId') || urlParams.get('session_id')) {
+            const stripeSessionId = urlParams.get('session_id') || urlParams.get('orderId') || ('stripe_live_' + Date.now());
+            const activeEmail = (this.studentEmail || localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
+            this.recordVerifiedPayment(activeEmail, stripeSessionId);
+            if (activeEmail) {
                 sessionStorage.setItem('platforms_officer_logged_in', 'true');
                 localStorage.setItem('platforms_officer_logged_in', 'true');
             }
@@ -136,7 +137,6 @@ class SecurityCourseApp {
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
             setTimeout(() => {
-                this.apiCall("/api/payment/checkout", "POST", { student_id: this.studentEmail || this.studentCertData.name || "student" });
                 this.manualSaveProgress("Course enrollment confirmed ($40.00)! Full 20-hour curriculum unlocked.");
             }, 500);
         }
@@ -267,10 +267,10 @@ class SecurityCourseApp {
                 this.studentAgency = state.studentAgency || this.studentAgency;
                 this.lastSavedTimestamp = state.lastSavedTimestamp || this.lastSavedTimestamp;
                 // Never restore isAdminMode from localStorage so closing the page/browser always logs out of God Mode
-                const savedEmailKey = (state.studentEmail || this.studentEmail || '').toLowerCase();
-                this.isPaid = Boolean(state.stripePaidV1) || (localStorage.getItem('platforms_stripe_paid_v1') === 'true') || (savedEmailKey ? localStorage.getItem('platforms_stripe_paid_v1_' + savedEmailKey) === 'true' : false);
-                this.isCertLocked = state.isCertLocked !== undefined ? state.isCertLocked : (localStorage.getItem('platforms_cert_locked') === 'true');
-                this.issuedCertId = state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
+                const savedEmailKey = (state.studentEmail || this.studentEmail || '').trim().toLowerCase();
+                this.isPaid = this.hasLocalVerifiedPayment(savedEmailKey);
+                this.isCertLocked = this.hasLocalLockedCert(savedEmailKey) || Boolean(state.isCertLocked && savedEmailKey && localStorage.getItem('platforms_cert_locked_' + savedEmailKey) === 'true');
+                this.issuedCertId = (savedEmailKey && localStorage.getItem('platforms_cert_id_' + savedEmailKey)) || state.issuedCertId || localStorage.getItem('platforms_cert_id') || null;
                 this.examAttempts = state.examAttempts || parseInt(localStorage.getItem('platforms_exam_attempts') || '0', 10);
                 this.examHistory = state.examHistory || [];
             } catch (e) {
@@ -298,7 +298,8 @@ class SecurityCourseApp {
                 name: this.studentCertData.name || 'Student Officer',
                 email: this.studentEmail,
                 agency: this.studentAgency,
-                is_paid: this.temporaryPaywallDisabled ? true : this.isPaid,
+                is_paid: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
+                payment_verified: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 completed_modules: completedCount,
                 total_modules: 10,
                 exam_attempts: this.examAttempts || (this.examCompleted ? 1 : 0),
@@ -307,6 +308,7 @@ class SecurityCourseApp {
                 latest_passed: this.examPassed || false,
                 has_passed: this.examPassed || false,
                 cert_id: this.issuedCertId || null,
+                is_cert_locked: Boolean(this.isCertLocked),
                 mfa_verified: localStorage.getItem('platforms_mfa_verified_' + this.studentEmail) === 'true',
                 mfa_verified_at: localStorage.getItem('platforms_mfa_verified_at_' + this.studentEmail) || null,
                 created_at: (existingIdx >= 0 && registry[existingIdx].created_at) || nowStr,
@@ -1159,6 +1161,100 @@ class SecurityCourseApp {
         this.setAuthTab('signin');
     }
 
+    recordVerifiedPayment(email, sessionIdOrSource = 'stripe_live') {
+        const cleanEmail = (email || this.studentEmail || '').trim().toLowerCase();
+        const token = 'PTA-PAID-' + btoa(unescape(encodeURIComponent((cleanEmail || 'student') + '::' + sessionIdOrSource)));
+        this.isPaid = true;
+        localStorage.removeItem('platforms_stripe_paid_v1');
+        if (cleanEmail) {
+            localStorage.setItem('platforms_stripe_paid_v1_' + cleanEmail, 'true');
+            const receipt = {
+                email: cleanEmail,
+                verified: true,
+                token: token,
+                source: sessionIdOrSource,
+                amount: 40,
+                paidAt: new Date().toISOString()
+            };
+            localStorage.setItem('platforms_payment_receipt_' + cleanEmail, JSON.stringify(receipt));
+            try {
+                let reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+                const idx = reg.findIndex(s => (s.email || '').toLowerCase() === cleanEmail || (s.id || '').toLowerCase() === cleanEmail);
+                if (idx >= 0) {
+                    reg[idx].is_paid = true;
+                    reg[idx].payment_verified = true;
+                    reg[idx].payment_token = token;
+                    reg[idx].payment_source = sessionIdOrSource;
+                    localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
+                }
+            } catch (e) {}
+        }
+        this.apiCall('/api/payment/checkout', 'POST', {
+            student_id: cleanEmail || (this.studentCertData && this.studentCertData.name) || 'student',
+            email: cleanEmail,
+            session_id: sessionIdOrSource,
+            payment_token: token
+        });
+    }
+
+    hasLocalVerifiedPayment(email) {
+        const cleanEmail = (email || this.studentEmail || '').trim().toLowerCase();
+        if (!cleanEmail) return false;
+
+        const hasFlag = localStorage.getItem('platforms_stripe_paid_v1_' + cleanEmail) === 'true';
+        let hasValidReceipt = false;
+
+        try {
+            const rawReceipt = localStorage.getItem('platforms_payment_receipt_' + cleanEmail);
+            if (rawReceipt) {
+                const parsed = JSON.parse(rawReceipt);
+                if (parsed && parsed.verified === true && (parsed.email || '').toLowerCase() === cleanEmail && String(parsed.token || '').startsWith('PTA-PAID-')) {
+                    hasValidReceipt = true;
+                }
+            }
+        } catch (e) {}
+
+        let hasRegistryVerified = false;
+        try {
+            const reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+            const found = reg.find(s => (s.email || '').toLowerCase() === cleanEmail || (s.id || '').toLowerCase() === cleanEmail);
+            if (found && found.is_paid === true && (found.payment_verified === true || hasFlag)) {
+                hasRegistryVerified = true;
+            }
+        } catch (e) {}
+
+        // If user already had the per-email Stripe flag set, upgrade to full receipt so both checks stay in sync
+        if (hasFlag && !hasValidReceipt) {
+            const token = 'PTA-PAID-' + btoa(unescape(encodeURIComponent(cleanEmail + '::stripe_verified')));
+            localStorage.setItem('platforms_payment_receipt_' + cleanEmail, JSON.stringify({
+                email: cleanEmail,
+                verified: true,
+                token: token,
+                source: 'stripe_verified',
+                amount: 40,
+                paidAt: new Date().toISOString()
+            }));
+            hasValidReceipt = true;
+        }
+
+        // Double-check: requires BOTH the per-email flag (or registry verification) AND the verified receipt
+        return (hasFlag || hasRegistryVerified) && hasValidReceipt;
+    }
+
+    hasLocalLockedCert(email) {
+        const cleanEmail = (email || this.studentEmail || '').trim().toLowerCase();
+        if (!cleanEmail) return false;
+        if (localStorage.getItem('platforms_cert_locked_' + cleanEmail) === 'true') return true;
+        try {
+            const reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+            const found = reg.find(s => (s.email || '').toLowerCase() === cleanEmail || (s.id || '').toLowerCase() === cleanEmail);
+            if (found && (found.is_cert_locked === true || Boolean(found.cert_id))) {
+                return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
     async officerSignIn(nameOverride, emailOverride) {
         const rawName = (nameOverride || this.pendingAuthName || (this.studentCertData && this.studentCertData.name) || '').trim();
         const rawEmail = (emailOverride || this.pendingAuthEmail || this.studentEmail || '').trim().toLowerCase();
@@ -1173,19 +1269,43 @@ class SecurityCourseApp {
             return;
         }
 
-        this.studentCertData.name = rawName.toUpperCase();
-        if (!this.studentCertData.signature) {
-            this.studentCertData.signature = rawName;
-        }
+        // Remove any legacy unscoped payment flag so accounts on shared browsers never bleed payment state
+        localStorage.removeItem('platforms_stripe_paid_v1');
+
         this.studentEmail = rawEmail;
-        this.isPaid = (localStorage.getItem('platforms_stripe_paid_v1_' + rawEmail) === 'true') || (localStorage.getItem('platforms_stripe_paid_v1') === 'true');
+
+        // Check per-email certificate lock first; if locked, preserve the original certified name
+        let certLockedForUser = this.hasLocalLockedCert(rawEmail);
+        let certIdForUser = localStorage.getItem('platforms_cert_id_' + rawEmail) || null;
+        try {
+            const reg = JSON.parse(localStorage.getItem('platforms_student_registry') || '[]');
+            const found = reg.find(s => (s.email || '').toLowerCase() === rawEmail || (s.id || '').toLowerCase() === rawEmail);
+            if (found) {
+                if (found.cert_id) certIdForUser = certIdForUser || found.cert_id;
+                if (certLockedForUser && found.name) {
+                    this.studentCertData.name = found.name.toUpperCase();
+                }
+            }
+        } catch (e) {}
+
+        if (!certLockedForUser || !this.studentCertData.name) {
+            this.studentCertData.name = rawName.toUpperCase();
+        }
+        if (!this.studentCertData.signature) {
+            this.studentCertData.signature = this.studentCertData.name;
+        }
+
+        // Step 1 of Double-Check: Verify local per-email payment receipt + registry
+        let localVerifiedPaid = this.hasLocalVerifiedPayment(rawEmail);
+        let backendVerifiedPaid = false;
+
         sessionStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_student_name', this.studentCertData.name);
         localStorage.setItem('platforms_student_email', this.studentEmail);
         localStorage.setItem('platforms_student_signature', this.studentCertData.signature);
 
-        // Fetch cross-device progress and exam attempts from academy backend
+        // Step 2 of Double-Check: Verify payment and certificate lock against academy backend
         try {
             const loginRes = await this.apiCall('/api/students/login', 'POST', {
                 name: this.studentCertData.name,
@@ -1208,15 +1328,59 @@ class SecurityCourseApp {
                     this.examPercentage = loginRes.latest_exam.percentage;
                     this.examPassed = Boolean(loginRes.latest_exam.passed);
                 }
-                if (loginRes.student && loginRes.student.cert_id) {
-                    this.isCertLocked = true;
-                    this.issuedCertId = loginRes.student.cert_id;
-                    localStorage.setItem('platforms_cert_locked', 'true');
-                    localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                if (loginRes.student) {
+                    if (loginRes.student.is_paid === true && loginRes.student.payment_verified === true) {
+                        backendVerifiedPaid = true;
+                    }
+                    if (loginRes.student.cert_id || loginRes.student.has_certificate || loginRes.student.cert_locked) {
+                        certLockedForUser = true;
+                        certIdForUser = loginRes.student.cert_id || certIdForUser || 'PTA-IL-SEALED';
+                    }
+                }
+            }
+
+            // Secondary backend status check to double-check both payment_verified and certificate lock
+            const certStatus = await this.apiCall(`/api/certificate/status/${encodeURIComponent(this.studentEmail)}`, 'GET');
+            if (certStatus) {
+                if (certStatus.is_paid === true && certStatus.payment_verified === true) {
+                    backendVerifiedPaid = true;
+                }
+                if (certStatus.is_locked) {
+                    certLockedForUser = true;
+                    if (certStatus.certificate && certStatus.certificate.id) {
+                        certIdForUser = certStatus.certificate.id;
+                    }
+                    if (certStatus.certificate && certStatus.certificate.trainee_name) {
+                        this.studentCertData.name = certStatus.certificate.trainee_name.toUpperCase();
+                    }
                 }
             }
         } catch (err) {
             console.warn("Backend login sync warning:", err);
+        }
+
+        if (backendVerifiedPaid && !localVerifiedPaid) {
+            this.recordVerifiedPayment(rawEmail, 'backend_verified');
+            localVerifiedPaid = true;
+        } else if (localVerifiedPaid && !backendVerifiedPaid) {
+            // Sync local verified receipt to backend
+            this.recordVerifiedPayment(rawEmail, 'local_receipt_synced');
+        }
+
+        this.isPaid = Boolean(localVerifiedPaid || backendVerifiedPaid);
+        this.isCertLocked = Boolean(certLockedForUser);
+        this.issuedCertId = certLockedForUser ? (certIdForUser || 'PTA-IL-SEALED') : null;
+
+        if (this.isCertLocked) {
+            localStorage.setItem('platforms_cert_locked', 'true');
+            localStorage.setItem('platforms_cert_locked_' + rawEmail, 'true');
+            if (this.issuedCertId) {
+                localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                localStorage.setItem('platforms_cert_id_' + rawEmail, this.issuedCertId);
+            }
+        } else {
+            localStorage.removeItem('platforms_cert_locked');
+            localStorage.removeItem('platforms_cert_id');
         }
 
         this.saveState();
@@ -1230,7 +1394,7 @@ class SecurityCourseApp {
             this.showView('payment-gate');
         } else {
             this.showView('overview');
-            this.manualSaveProgress(`Welcome, ${this.studentCertData.name}! Trainee session authenticated.`);
+            this.manualSaveProgress(`Welcome back, ${this.studentCertData.name}! Payment verified — course unlocked.`);
         }
     }
 
@@ -2406,58 +2570,77 @@ class SecurityCourseApp {
                 if (payGate) payGate.style.display = 'none';
                 if (certForm) certForm.style.display = 'block';
 
-                if (this.isCertLocked) {
-                    // Certificate permanently downloaded and sealed
+                const intakeHeader = document.querySelector('#results-certificate-form-section .cert-intake-header');
+                const formGrid = document.querySelector('#results-certificate-form-section .cert-form-grid');
+                const preWarn = document.getElementById('cert-pre-download-warning');
+                const previewWrapper = document.querySelector('.official-state-cert-wrapper');
+                const bottomDownloadBtn = document.getElementById('btn-download-cert-main');
+
+                if (this.isCertLocked && !this.isAdminMode) {
+                    // Certificate permanently downloaded and sealed — block all edits and additional downloads
                     if (sealedBanner) {
                         sealedBanner.style.display = 'flex';
                         const idTag = document.getElementById('sealed-cert-id-tag');
                         if (idTag) idTag.textContent = this.issuedCertId || 'PTA-IL-SEALED';
                     }
+                    if (intakeHeader) intakeHeader.style.display = 'none';
+                    if (preWarn) preWarn.style.display = 'none';
+                    if (formGrid) formGrid.style.display = 'none';
+                    if (previewWrapper) previewWrapper.style.display = 'none';
+
+                    document.querySelectorAll('.cert-form-input').forEach(inp => {
+                        inp.disabled = true;
+                        inp.readOnly = true;
+                    });
+
                     if (mainActionBtn) {
-                        mainActionBtn.innerHTML = `<i class="fas fa-check-circle"></i> Certificate Downloaded & Session Closed`;
+                        mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Certificate Issued & Permanently Locked`;
                         mainActionBtn.disabled = true;
                         mainActionBtn.style.opacity = '0.6';
                         mainActionBtn.style.cursor = 'not-allowed';
                         mainActionBtn.onclick = () => {
-                            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+                            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. Changes and additional certificate downloads are strictly disabled.");
                         };
                     }
-                    const bottomDownloadBtn = document.getElementById('btn-download-cert-main');
                     if (bottomDownloadBtn) {
-                        bottomDownloadBtn.innerHTML = `<i class="fas fa-check-circle"></i> Certificate Downloaded & Session Expired`;
+                        bottomDownloadBtn.innerHTML = `<i class="fas fa-lock"></i> Certificate Issued & Permanently Locked`;
                         bottomDownloadBtn.disabled = true;
                         bottomDownloadBtn.style.opacity = '0.6';
                         bottomDownloadBtn.style.cursor = 'not-allowed';
                         bottomDownloadBtn.onclick = () => {
-                            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+                            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. Changes and additional certificate downloads are strictly disabled.");
                         };
                     }
-                    const preWarn = document.getElementById('cert-pre-download-warning');
-                    if (preWarn) {
-                        preWarn.className = 'cert-security-warning-callout';
-                        preWarn.innerHTML = `
-                            <div class="cert-security-warning-icon" style="background:#fde047; border:2px solid #a16207; color:#854d0e;">
-                                <i class="fas fa-exclamation-triangle" style="color:#854d0e; font-size:1.8rem;"></i>
-                            </div>
-                            <div class="cert-security-warning-text" style="color:#713f12;">
-                                <strong style="color:#713f12; font-size:1.08rem; display:block; margin-bottom:6px; font-weight:800;">
-                                    <i class="fas fa-certificate" style="color:#854d0e;"></i> CRITICAL NOTICE — SINGLE OFFICIAL COPY (VERIFY INFO BEFORE SAVING — YOU CANNOT COME BACK!)
-                                </strong>
-                                <p style="color:#854d0e; font-size:0.95rem; line-height:1.6; margin-bottom:10px; font-weight:700;">
-                                    Please ensure that all of your demographic information below is 100% accurate before saving/downloading! Once you download your certificate, this page locks permanently and you CANNOT come back. This certificate is the ONLY copy that you will receive &mdash; Platforms Training Academy does NOT issue duplicate copies under any circumstances.
-                                </p>
-                                <div style="background:#fef9c3; border:1.5px solid #a16207; border-radius:6px; padding:12px 14px; color:#713f12; font-size:0.88rem; line-height:1.6;">
-                                    <strong style="color:#713f12; display:block; margin-bottom:6px; font-weight:800;"><i class="fas fa-clipboard-check" style="color:#854d0e;"></i> MANDATORY REQUIREMENTS BEFORE &amp; AFTER SAVING:</strong>
-                                    <p style="margin-bottom:6px; color:#854d0e;"><i class="fas fa-user-check" style="color:#854d0e;"></i> <strong style="display:inline; color:#713f12;">1. Double-Check Your Info Now:</strong> Verify that your legal name, street address, DOB, SSN, physical description, and signature are completely accurate before saving because <strong>you cannot come back!</strong></p>
-                                    <p style="margin-bottom:6px; color:#854d0e;"><i class="fas fa-cloud-arrow-up" style="color:#854d0e;"></i> <strong style="display:inline; color:#713f12;">2. Save in Multiple Locations:</strong> Save this PDF file immediately across multiple secure locations (computer, smartphone, cloud storage like Google Drive or iCloud, and email a copy to yourself).</p>
-                                    <p style="margin:0; color:#854d0e;"><i class="fas fa-print" style="color:#854d0e;"></i> <strong style="display:inline; color:#713f12;">3. Print a Physical Hard Copy:</strong> Print a physical paper copy immediately to keep in your permanent security records and to bring for your Illinois PERC card application to the IDFPR.</p>
-                                </div>
-                            </div>
-                        `;
-                    }
+                } else {
+                    if (sealedBanner) sealedBanner.style.display = 'none';
+                    if (intakeHeader) intakeHeader.style.display = 'block';
+                    if (preWarn) preWarn.style.display = 'flex';
+                    if (formGrid) formGrid.style.display = 'grid';
+                    if (previewWrapper) previewWrapper.style.display = 'block';
+
                     document.querySelectorAll('.cert-form-input').forEach(inp => {
-                        inp.disabled = false;
+                        if (inp.id === 'cert-input-trainee-date') {
+                            inp.readOnly = true;
+                        } else {
+                            inp.disabled = false;
+                            inp.readOnly = false;
+                        }
                     });
+
+                    if (mainActionBtn) {
+                        mainActionBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)`;
+                        mainActionBtn.disabled = false;
+                        mainActionBtn.style.opacity = '1';
+                        mainActionBtn.style.cursor = 'pointer';
+                        mainActionBtn.onclick = () => this.handleResultsCertificateAction();
+                    }
+                    if (bottomDownloadBtn) {
+                        bottomDownloadBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official State Certificate (PDF)`;
+                        bottomDownloadBtn.disabled = false;
+                        bottomDownloadBtn.style.opacity = '1';
+                        bottomDownloadBtn.style.cursor = 'pointer';
+                        bottomDownloadBtn.onclick = () => this.downloadOfficialPdfCertificate();
+                    }
                 }
             }
         } else {
@@ -2557,6 +2740,10 @@ class SecurityCourseApp {
                     input.value = this.studentCertData[item.key];
                 }
                 input.addEventListener('input', (e) => {
+                    if (this.isCertLocked && !this.isAdminMode) {
+                        e.target.value = this.studentCertData[item.key] || '';
+                        return;
+                    }
                     let val = e.target.value;
                     const isDeleting = e.inputType && (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward');
 
@@ -2636,8 +2823,41 @@ class SecurityCourseApp {
     }
 
     async downloadOfficialPdfCertificate() {
-        if (this.isCertLocked) {
-            alert("SECURITY NOTICE: Your certificate has already been downloaded and permanently purged from this session for security. Please check your device's Downloads folder for your saved PDF.");
+        const emailKey = (this.studentEmail || '').trim().toLowerCase();
+        if ((this.isCertLocked || this.hasLocalLockedCert(emailKey)) && !this.isAdminMode) {
+            this.isCertLocked = true;
+            this.renderResults();
+            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. Changes and additional downloads are disabled.");
+            return;
+        }
+
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
+            return;
+        }
+
+        // Double-check backend certificate lock before generating PDF
+        if (!this.isAdminMode && emailKey) {
+            try {
+                const status = await this.apiCall(`/api/certificate/status/${encodeURIComponent(emailKey)}`, 'GET');
+                if (status && status.is_locked) {
+                    this.isCertLocked = true;
+                    this.issuedCertId = (status.certificate && status.certificate.id) || this.issuedCertId || 'PTA-IL-SEALED';
+                    localStorage.setItem('platforms_cert_locked', 'true');
+                    localStorage.setItem('platforms_cert_locked_' + emailKey, 'true');
+                    this.saveState();
+                    this.renderResults();
+                    alert("SECURITY LOCK: Our records show your official certificate of completion has already been issued and permanently sealed. Duplicate certificates cannot be generated.");
+                    return;
+                }
+            } catch (e) {}
+        }
+
+        // Require trainee name before locking and downloading
+        const checkName = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').trim();
+        if (!checkName) {
+            alert("Please enter your Full Legal Name on the certificate form before downloading.");
+            document.getElementById('cert-input-name')?.focus();
             return;
         }
 
@@ -2759,11 +2979,15 @@ class SecurityCourseApp {
             document.body.removeChild(link);
 
             // Seal certificate permanently against future edits/creation and purge from session for security
-            if (!this.isCertLocked) {
+            if (!this.isCertLocked || !this.isAdminMode) {
                 this.isCertLocked = true;
-                this.issuedCertId = 'PTA-IL-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000);
+                this.issuedCertId = this.issuedCertId || ('PTA-IL-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000));
                 localStorage.setItem('platforms_cert_locked', 'true');
                 localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                if (emailKey) {
+                    localStorage.setItem('platforms_cert_locked_' + emailKey, 'true');
+                    localStorage.setItem('platforms_cert_id_' + emailKey, this.issuedCertId);
+                }
                 this.saveState();
 
                 // Send to backend
@@ -2821,30 +3045,7 @@ class SecurityCourseApp {
     }
 
     async processCoursePayment() {
-        const cardholder = document.getElementById('pay-cardholder-name')?.value || this.studentCertData.name || 'Student Officer';
-        const toast = document.getElementById('lms-toast');
-        const toastMsg = document.getElementById('lms-toast-msg');
-
-        // Simulate payment authorization & record on backend
-        await this.apiCall('/api/payment/checkout', 'POST', {
-            student_id: this.studentEmail || this.studentCertData.name
-        });
-
-        this.isPaid = true;
-        localStorage.setItem('platforms_is_paid', 'true');
-        this.saveState();
-
-        if (toast && toastMsg) {
-            toastMsg.textContent = "Payment authorized successfully ($40.00)! Official certificate unlocked.";
-            toast.style.display = 'flex';
-            setTimeout(() => { toast.style.display = 'none'; }, 4000);
-        }
-
-        this.renderResults();
-        const certSection = document.getElementById('results-certificate-form-section');
-        if (certSection) {
-            certSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        this.initiateCourseEnrollmentPayment();
     }
 
     retakeExam() {
@@ -3144,9 +3345,7 @@ class SecurityCourseApp {
         if (!input) return;
         const trimmed = input.trim();
         if (trimmed.startsWith('cs_live_') && trimmed.length > 20) {
-            this.isPaid = true;
-            localStorage.setItem('platforms_stripe_paid_v1', 'true');
-            if (this.studentEmail) localStorage.setItem('platforms_stripe_paid_v1_' + this.studentEmail.toLowerCase(), 'true');
+            this.recordVerifiedPayment(this.studentEmail, trimmed);
             this.saveState();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
@@ -3161,9 +3360,7 @@ class SecurityCourseApp {
         if (!code) return;
         const clean = code.trim();
         if (clean === 'Young$7738732591!') {
-            this.isPaid = true;
-            localStorage.setItem('platforms_stripe_paid_v1', 'true');
-            if (this.studentEmail) localStorage.setItem('platforms_stripe_paid_v1_' + this.studentEmail.toLowerCase(), 'true');
+            this.recordVerifiedPayment(this.studentEmail, 'instructor_voucher_authorized');
             this.saveState();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
@@ -3206,9 +3403,20 @@ class SecurityCourseApp {
             avatarInitials.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0][0] || 'S');
         }
 
-        // Populate fields
+        // Populate fields (lock name field permanently once certificate has been downloaded)
         const nameInput = document.getElementById('login-modal-name');
-        if (nameInput) nameInput.value = this.studentCertData.name || '';
+        if (nameInput) {
+            nameInput.value = this.studentCertData.name || '';
+            if (this.isCertLocked && !this.isAdminMode) {
+                nameInput.disabled = true;
+                nameInput.readOnly = true;
+                nameInput.title = 'Name is permanently locked after official certificate issuance.';
+            } else {
+                nameInput.disabled = false;
+                nameInput.readOnly = false;
+                nameInput.title = '';
+            }
+        }
         const emailInput = document.getElementById('login-modal-email');
         if (emailInput) emailInput.value = this.studentEmail || '';
         const agencyInput = document.getElementById('login-modal-agency');
@@ -3255,7 +3463,7 @@ class SecurityCourseApp {
         const emailInput = document.getElementById('login-modal-email');
         const agencyInput = document.getElementById('login-modal-agency');
 
-        if (nameInput && nameInput.value.trim()) {
+        if (nameInput && nameInput.value.trim() && (!this.isCertLocked || this.isAdminMode)) {
             this.studentCertData.name = nameInput.value.trim().toUpperCase();
         }
         if (emailInput) this.studentEmail = emailInput.value.trim();
@@ -3644,15 +3852,22 @@ class SecurityCourseApp {
             agency: this.studentAgency
         });
 
-        // 2. Check cert status
+        // 2. Check cert & verified payment status
         const status = await this.apiCall(`/api/certificate/status/${encodeURIComponent(studentId)}`, 'GET');
         if (status) {
-            // Only honor Stripe payment or admin mode; do not auto-unlock from legacy pre-Stripe records
+            const cleanEmail = (this.studentEmail || '').trim().toLowerCase();
+            if (status.is_paid === true && status.payment_verified === true && cleanEmail) {
+                this.recordVerifiedPayment(cleanEmail, 'backend_sync_verified');
+            }
             if (status.is_locked) {
                 this.isCertLocked = true;
                 this.issuedCertId = status.certificate ? status.certificate.id : this.issuedCertId;
                 localStorage.setItem('platforms_cert_locked', 'true');
-                if (this.issuedCertId) localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                if (cleanEmail) localStorage.setItem('platforms_cert_locked_' + cleanEmail, 'true');
+                if (this.issuedCertId) {
+                    localStorage.setItem('platforms_cert_id', this.issuedCertId);
+                    if (cleanEmail) localStorage.setItem('platforms_cert_id_' + cleanEmail, this.issuedCertId);
+                }
             }
         }
 

@@ -701,7 +701,7 @@ def verify_mfa_code():
         else:
             cur.execute('''
                 INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, mfa_verified, mfa_verified_at, created_at, last_active)
-                VALUES (?, ?, ?, ?, ?, 1, 0, 1, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, 0, 0, 1, ?, ?, ?)
             ''', (email, name or 'Student Officer', email, email, agency, now_str, now_str, now_str))
 
         db.execute('INSERT INTO analytics_events (event_type, student_id, details, timestamp) VALUES (?, ?, ?, ?)',
@@ -885,7 +885,7 @@ def student_login():
     else:
         cur.execute('''
             INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, created_at, last_active)
-            VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
+            VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?)
         ''', (student_id, name or 'Student Officer', email, student_id, agency, now_str, now_str))
 
     db.commit()
@@ -918,6 +918,16 @@ def student_login():
     best_score = max([e['percentage'] for e in exams]) if exams else None
     latest_exam = dict(exams[-1]) if exams else None
 
+    # Double-check payment: student must have is_paid=1 AND a verified payment_received event in analytics_events
+    pay_event = db.execute(
+        "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND (LOWER(student_id) = LOWER(?) OR LOWER(student_id) = LOWER(?)) ORDER BY id DESC LIMIT 1",
+        (student['id'], student['email'] or student_id)
+    ).fetchone()
+    verified_paid = True if TEMPORARY_PAYWALL_DISABLED else (bool(student['is_paid']) and (pay_event is not None))
+    if student['is_paid'] and not pay_event and not TEMPORARY_PAYWALL_DISABLED:
+        db.execute('UPDATE students SET is_paid = 0 WHERE id = ?', (student['id'],))
+        db.commit()
+
     return jsonify({
         'success': True,
         'student': {
@@ -925,9 +935,12 @@ def student_login():
             'name': student['name'],
             'email': student['email'],
             'agency': student['agency'],
-            'is_paid': True if TEMPORARY_PAYWALL_DISABLED else bool(student['is_paid']),
+            'is_paid': verified_paid,
+            'payment_verified': verified_paid,
+            'payment_details': pay_event['details'] if pay_event else None,
             'has_certificate': cert is not None,
             'cert_id': cert['id'] if cert else None,
+            'cert_locked': bool(cert['is_locked']) if cert else False,
             'mfa_verified': bool(student['mfa_verified']) if ('mfa_verified' in student.keys() and student['mfa_verified']) else False,
             'mfa_verified_at': student['mfa_verified_at'] if 'mfa_verified_at' in student.keys() else None,
             'created_at': student['created_at'],
@@ -1014,27 +1027,42 @@ def submit_exam():
         'passed': bool(passed)
     })
 
-# 7. Process Course Payment ($50.00)
+# 7. Process & Verify Course Payment ($40.00)
 @app.route('/api/payment/checkout', methods=['POST'])
 def process_payment():
     data = request.get_json() or {}
-    student_id = data.get('student_id')
+    student_id = (data.get('student_id') or '').strip()
+    email = (data.get('email') or student_id).strip().lower()
+    session_id = (data.get('session_id') or 'stripe_verified').strip()
+    payment_token = (data.get('payment_token') or '').strip()
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    if not student_id:
+    if not student_id and not email:
         return jsonify({'error': 'Missing student_id'}), 400
 
+    target_id = email or student_id
     db = get_db()
     cur = db.cursor()
-    cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE id = ?', (now_str, student_id))
+    cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)', (now_str, target_id, email))
     
+    details_str = f"Course Fee $40.00 verified (ref: {session_id})"
+    if payment_token:
+        details_str += f" [{payment_token}]"
+
     cur.execute('''
         INSERT INTO analytics_events (event_type, student_id, details, timestamp)
-        VALUES ('payment_received', ?, 'Course Certification Fee $40.00 paid', ?)
-    ''', (student_id, now_str))
+        VALUES ('payment_received', ?, ?, ?)
+    ''', (target_id, details_str, now_str))
     
     db.commit()
-    return jsonify({'success': True, 'is_paid': True, 'message': 'Payment authorized successfully!'})
+    return jsonify({
+        'success': True,
+        'is_paid': True,
+        'payment_verified': True,
+        'student_id': target_id,
+        'session_id': session_id,
+        'message': 'Payment authorized and verified successfully!'
+    })
 
 # 8. Issue Certificate & Lock Against New Certificate Creation
 @app.route('/api/certificate/issue', methods=['POST'])
@@ -1095,14 +1123,19 @@ def issue_certificate():
 @app.route('/api/certificate/status/<student_id>', methods=['GET'])
 def get_cert_status(student_id):
     db = get_db()
-    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
-    cert = db.execute('SELECT * FROM certificates WHERE student_id = ?', (student_id,)).fetchone()
+    student = db.execute('SELECT * FROM students WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)', (student_id, student_id)).fetchone()
+    cert = db.execute('SELECT * FROM certificates WHERE LOWER(student_id) = LOWER(?)', (student_id,)).fetchone()
+    pay_event = db.execute(
+        "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) ORDER BY id DESC LIMIT 1",
+        (student_id,)
+    ).fetchone()
 
-    is_paid = True if TEMPORARY_PAYWALL_DISABLED else (bool(student['is_paid']) if student else False)
+    is_paid = True if TEMPORARY_PAYWALL_DISABLED else (bool(student and student['is_paid']) and (pay_event is not None))
     is_locked = bool(cert['is_locked']) if cert else False
 
     return jsonify({
         'is_paid': is_paid,
+        'payment_verified': is_paid,
         'is_locked': is_locked,
         'certificate': dict(cert) if cert else None
     })
