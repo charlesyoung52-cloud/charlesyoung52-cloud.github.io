@@ -1,7 +1,7 @@
 /* ==========================================================================
    Platforms Training Academy - Official Website Stylesheet
    Tactical Dark Visual Theme matching the Online Course Academy
-   Brand Accent: #0284c7 / #0ea5e9 (Platforms Professional Royal/Cobalt Blue)
+   Brand Accent: #b89225 / #d4af37 (Platforms Professional Royal/Cobalt Blue)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -34,25 +34,25 @@
     --bg-card-hover: #22262e;
     --bg-highlight: #272c35;
 
-    --brand-blue: #0284c7;
-    --brand-blue-bright: #0ea5e9;
-    --brand-blue-glow: rgba(14, 165, 233, 0.20);
-    --brand-blue-dim: rgba(2, 132, 199, 0.12);
+    --brand-blue: #d4af37;
+    --brand-blue-bright: #e5c158;
+    --brand-blue-glow: rgba(212, 175, 55, 0.20);
+    --brand-blue-dim: rgba(212, 175, 55, 0.10);
 
-    /* Professional Light Blue Theme */
-    --brand-green: #0284c7;
-    --brand-green-bright: #0ea5e9;
-    --brand-green-glow: rgba(14, 165, 233, 0.20);
-    --brand-green-dim: rgba(2, 132, 199, 0.12);
+    /* Subtle Gold Accent Theme & White Text */
+    --brand-green: #d4af37;
+    --brand-green-bright: #e5c158;
+    --brand-green-glow: rgba(212, 175, 55, 0.20);
+    --brand-green-dim: rgba(212, 175, 55, 0.10);
 
     --text-white: #ffffff;
-    --text-light: #e4e7eb;
-    --text-muted: #9ba1ac;
-    --text-dark: #636b77;
+    --text-light: #ffffff;
+    --text-muted: #ffffff;
+    --text-dark: #ffffff;
 
     --border-color: #262a33;
     --border-card: #2c323d;
-    --border-focus: #0ea5e9;
+    --border-focus: #d4af37;
 
     --success: #22c55e;
     --success-bg: rgba(34, 197, 94, 0.15);
@@ -65,7 +65,7 @@
     --radius-xl: 16px;
     --shadow-main: 0 10px 30px rgba(0, 0, 0, 0.6);
     --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.25);
+    --shadow-glow: 0 0 20px rgba(212, 175, 55, 0.25);
 
     --site-max-width: 1360px;
     --header-height: 76px;
@@ -141,9 +141,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .text-gradient-green, .text-gradient-blue {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ffffff !important;
+    background: none !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .site-container {
@@ -191,7 +191,7 @@ h1, h2, h3, h4, h5, h6 {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #cbd5e1;
+    color: #ffffff;
     font-weight: 500;
     white-space: nowrap;
 }
@@ -205,7 +205,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-nra i {
-    color: #0ea5e9;
+    color: #d4af37;
 }
 
 .top-contact-links {
@@ -219,7 +219,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .top-link {
-    color: #cbd5e1;
+    color: #ffffff;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -272,7 +272,7 @@ h1, h2, h3, h4, h5, h6 {
 .main-header.header-scrolled {
     background-color: rgba(10, 11, 13, 0.98);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-    border-bottom-color: rgba(14, 165, 233, 0.3);
+    border-bottom-color: rgba(212, 175, 55, 0.3);
 }
 
 .header-inner {
@@ -366,8 +366,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-item-online {
-    background: rgba(14, 165, 233, 0.15);
-    border: 1px solid rgba(14, 165, 233, 0.4);
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.4);
     color: var(--text-white);
     padding: 6px 13px;
     font-weight: 600;
@@ -375,7 +375,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-item-online:hover {
-    background: rgba(14, 165, 233, 0.3);
+    background: rgba(212, 175, 55, 0.3);
     border-color: var(--brand-green-bright);
     box-shadow: 0 0 15px var(--brand-green-glow);
 }
@@ -437,7 +437,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.15);
     transition: all 0.25s ease;
 }
@@ -450,7 +450,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-tactical-neon {
-    background: linear-gradient(135deg, #0a1926 0%, #0d2438 100%);
+    background: linear-gradient(135deg, #1c180e 0%, #262011 100%);
     color: var(--brand-green-bright);
     border: 1px solid var(--brand-green-bright);
     font-family: var(--font-heading);
@@ -463,14 +463,14 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
     transition: all 0.25s ease;
 }
 
 .btn-tactical-neon:hover {
     background: var(--brand-green-bright);
     color: #000000;
-    box-shadow: 0 0 25px rgba(14, 165, 233, 0.6);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
     transform: translateY(-1px);
 }
 
@@ -586,7 +586,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mobile-online-highlight {
-    background: rgba(14, 165, 233, 0.15);
+    background: rgba(212, 175, 55, 0.15);
     color: var(--brand-green-bright);
     font-weight: 600;
     border-left-color: var(--brand-green);
@@ -661,7 +661,7 @@ h1, h2, h3, h4, h5, h6 {
     text-transform: uppercase;
     color: var(--brand-green-bright);
     background-color: var(--brand-green-dim);
-    border: 1px solid rgba(14, 165, 233, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.3);
     padding: 4px 12px;
     border-radius: 20px;
     margin-bottom: 16px;
@@ -721,8 +721,8 @@ h1, h2, h3, h4, h5, h6 {
     background: radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.35) 0%, rgba(10, 11, 13, 0.65) 85%);
     background-image: 
         radial-gradient(circle at 50% 30%, rgba(25, 32, 21, 0.28) 0%, rgba(10, 11, 13, 0.65) 85%),
-        linear-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+        linear-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
     background-size: auto, 40px 40px, 40px 40px;
     z-index: 2;
     pointer-events: none;
@@ -739,8 +739,8 @@ h1, h2, h3, h4, h5, h6 {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(14, 165, 233, 0.12);
-    border: 1px solid rgba(14, 165, 233, 0.4);
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.4);
     color: var(--brand-green-bright);
     font-size: 0.8rem;
     font-weight: 700;
@@ -748,7 +748,7 @@ h1, h2, h3, h4, h5, h6 {
     padding: 6px 18px;
     border-radius: 30px;
     margin-bottom: 24px;
-    box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
 }
 
 .hero-pulse-dot {
@@ -769,7 +769,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-subtitle {
     font-size: 1.2rem;
-    color: #cbd5e1;
+    color: #ffffff;
     max-width: 820px;
     margin: 0 auto 36px auto;
     line-height: 1.65;
@@ -804,7 +804,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stat-card:hover {
-    border-color: rgba(14, 165, 233, 0.4);
+    border-color: rgba(212, 175, 55, 0.4);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
@@ -936,7 +936,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .about-paragraph {
-    color: #cbd5e1;
+    color: #ffffff;
     font-size: 1.05rem;
     line-height: 1.7;
     margin-bottom: 18px;
@@ -998,7 +998,7 @@ h1, h2, h3, h4, h5, h6 {
 .courses-hero-banner {
     padding-top: 36px !important;
     padding-bottom: 24px !important;
-    background: radial-gradient(circle at 50% 25%, rgba(14, 165, 233, 0.12) 0%, rgba(10, 11, 13, 0.98) 75%);
+    background: radial-gradient(circle at 50% 25%, rgba(212, 175, 55, 0.12) 0%, rgba(10, 11, 13, 0.98) 75%);
     border-bottom: 1px solid var(--border-subtle);
     text-align: center;
 }
@@ -1032,11 +1032,11 @@ h1, h2, h3, h4, h5, h6 {
 .course-range-perk {
     margin: 10px 0 6px 0;
     padding: 8px 12px;
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: var(--radius-sm);
     font-size: 0.8rem;
-    color: #e2e8f0;
+    color: #ffffff;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1075,14 +1075,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .filter-tab-btn:hover {
     color: var(--text-white);
-    border-color: rgba(14, 165, 233, 0.5);
+    border-color: rgba(212, 175, 55, 0.5);
 }
 
 .filter-tab-btn.active {
     background-color: var(--brand-green);
     color: #ffffff;
     border-color: var(--brand-green-bright);
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
 }
 
 .courses-cards-grid {
@@ -1103,9 +1103,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .course-card:hover {
-    border-color: rgba(14, 165, 233, 0.6);
+    border-color: rgba(212, 175, 55, 0.6);
     transform: translateY(-4px);
-    box-shadow: var(--shadow-card), 0 0 20px rgba(14, 165, 233, 0.15);
+    box-shadow: var(--shadow-card), 0 0 20px rgba(212, 175, 55, 0.15);
 }
 
 .course-card-header {
@@ -1125,24 +1125,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-primary {
-    background: rgba(14, 165, 233, 0.18);
+    background: rgba(212, 175, 55, 0.18);
     color: var(--brand-green-bright);
-    border: 1px solid rgba(14, 165, 233, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.4);
 }
 
 .badge-perc {
-    background: rgba(14, 165, 233, 0.22);
-    color: #7dd3fc;
-    border: 1px solid rgba(14, 165, 233, 0.55);
-    box-shadow: 0 0 10px rgba(14, 165, 233, 0.25);
+    background: rgba(212, 175, 55, 0.22);
+    color: #ffffff;
+    border: 1px solid rgba(212, 175, 55, 0.55);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
 }
 
 .btn-card-online {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    background: linear-gradient(135deg, #d4af37 0%, #b89225 100%) !important;
     color: #0a0b0d !important;
     font-weight: 800 !important;
     border: none !important;
-    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35) !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.35) !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -1151,9 +1151,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-card-online:hover {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    background: linear-gradient(135deg, #d4af37 0%, #b89225 100%) !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5) !important;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5) !important;
     color: #000000 !important;
 }
 
@@ -1170,9 +1170,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-ccl {
-    background: rgba(14, 165, 233, 0.15);
-    color: #0ea5e9;
-    border: 1px solid rgba(14, 165, 233, 0.4);
+    background: rgba(212, 175, 55, 0.15);
+    color: #d4af37;
+    border: 1px solid rgba(212, 175, 55, 0.4);
 }
 
 .badge-renewal {
@@ -1225,7 +1225,7 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
     font-size: 0.82rem;
-    color: #cbd5e1;
+    color: #ffffff;
 }
 
 .course-meta-tags span {
@@ -1277,7 +1277,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
     transition: all 0.2s ease;
 }
 
@@ -1294,11 +1294,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .online-lms-banner {
-    background: radial-gradient(circle at 80% 20%, #0c2842 0%, #101318 60%);
-    border: 2px solid rgba(14, 165, 233, 0.4);
+    background: radial-gradient(circle at 80% 20%, #241e10 0%, #101318 60%);
+    border: 2px solid rgba(212, 175, 55, 0.4);
     border-radius: var(--radius-xl);
     padding: 50px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.15);
     position: relative;
     overflow: hidden;
 }
@@ -1320,8 +1320,8 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     letter-spacing: 1px;
     color: var(--brand-green-bright);
-    background: rgba(14, 165, 233, 0.12);
-    border: 1px solid rgba(14, 165, 233, 0.3);
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
     padding: 4px 12px;
     border-radius: 20px;
     margin-bottom: 16px;
@@ -1343,7 +1343,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .lms-desc {
-    color: #cbd5e1;
+    color: #ffffff;
     font-size: 1.05rem;
     line-height: 1.65;
     margin-bottom: 24px;
@@ -1361,7 +1361,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     gap: 10px;
     font-size: 0.95rem;
-    color: #e2e8f0;
+    color: #ffffff;
 }
 
 .lms-cta-row {
@@ -1373,7 +1373,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .lms-price-tag {
     font-size: 0.9rem;
-    color: #94a3b8;
+    color: #ffffff;
     font-weight: 500;
 }
 
@@ -1406,7 +1406,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .mockup-title {
     font-size: 0.75rem;
-    color: #718096;
+    color: #ffffff;
     margin-left: 8px;
     font-family: monospace;
 }
@@ -1462,7 +1462,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     justify-content: space-between;
     font-size: 0.75rem;
-    color: #a0aec0;
+    color: #ffffff;
 }
 
 /* ==========================================================================
@@ -1489,7 +1489,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .material-card:hover {
-    border-color: rgba(14, 165, 233, 0.6);
+    border-color: rgba(212, 175, 55, 0.6);
     transform: translateY(-3px);
     box-shadow: var(--shadow-card);
 }
@@ -1532,14 +1532,14 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     gap: 12px;
     font-size: 0.78rem;
-    color: #94a3b8;
+    color: #ffffff;
     margin-bottom: 16px;
     padding-top: 12px;
     border-top: 1px solid var(--border-color);
 }
 
 .btn-material-dl {
-    background: rgba(14, 165, 233, 0.12);
+    background: rgba(212, 175, 55, 0.12);
     border: 1px solid var(--brand-green);
     color: var(--brand-green-bright);
     font-family: var(--font-heading);
@@ -1557,7 +1557,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-material-dl:hover {
     background: var(--brand-green);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
 }
 
 /* ==========================================================================
@@ -1594,7 +1594,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .reciprocity-desc {
-    color: #cbd5e1;
+    color: #ffffff;
     font-size: 0.95rem;
     line-height: 1.6;
     margin-bottom: 20px;
@@ -1608,8 +1608,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .state-pill {
-    background-color: rgba(14, 165, 233, 0.15);
-    border: 1px solid rgba(14, 165, 233, 0.4);
+    background-color: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.4);
     color: #ffffff;
     font-size: 0.82rem;
     font-weight: 600;
@@ -1654,7 +1654,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .state-links-heading i {
-    color: #0ea5e9;
+    color: #d4af37;
 }
 
 .state-portal-card {
@@ -1669,14 +1669,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .state-portal-card:hover {
-    border-color: rgba(14, 165, 233, 0.5);
+    border-color: rgba(212, 175, 55, 0.5);
     transform: translateX(4px);
 }
 
 .portal-icon {
     font-size: 1.4rem;
-    color: #0ea5e9;
-    background: rgba(14, 165, 233, 0.1);
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.1);
     padding: 12px;
     border-radius: var(--radius-sm);
     flex-shrink: 0;
@@ -1732,7 +1732,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .job-partner-card:hover {
-    border-color: rgba(14, 165, 233, 0.6);
+    border-color: rgba(212, 175, 55, 0.6);
     transform: translateY(-4px);
     box-shadow: var(--shadow-card);
 }
@@ -1787,12 +1787,12 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--border-color);
     padding: 3px 8px;
     border-radius: var(--radius-sm);
-    color: #cbd5e1;
+    color: #ffffff;
 }
 
 .job-notice-strip {
-    background: linear-gradient(90deg, #0d2238 0%, #15181e 100%);
-    border: 1px solid rgba(14, 165, 233, 0.3);
+    background: linear-gradient(90deg, #211c10 0%, #15181e 100%);
+    border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: var(--radius-md);
     padding: 18px 24px;
     display: flex;
@@ -1816,7 +1816,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .notice-text span {
-    color: #cbd5e1;
+    color: #ffffff;
     font-size: 0.85rem;
 }
 
@@ -1854,7 +1854,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .review-quote {
     font-size: 0.96rem;
-    color: #e2e8f0;
+    color: #ffffff;
     line-height: 1.6;
     margin-bottom: 20px;
     font-style: italic;
@@ -1895,7 +1895,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .reviews-google-cta span {
-    color: #cbd5e1;
+    color: #ffffff;
     font-size: 0.95rem;
     font-weight: 500;
 }
@@ -1962,7 +1962,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .contact-address {
     font-style: normal;
-    color: #e2e8f0;
+    color: #ffffff;
     font-weight: 600;
     line-height: 1.4;
     margin-bottom: 4px;
@@ -2023,7 +2023,7 @@ h1, h2, h3, h4, h5, h6 {
 .form-group label {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #cbd5e1;
+    color: #ffffff;
     margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2047,7 +2047,7 @@ h1, h2, h3, h4, h5, h6 {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--brand-green-bright);
-    box-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
 .form-feedback-msg {
@@ -2131,7 +2131,7 @@ h1, h2, h3, h4, h5, h6 {
     flex-wrap: wrap;
     gap: 10px;
     font-size: 0.76rem;
-    color: #cbd5e1;
+    color: #ffffff;
 }
 
 .footer-links-col h4,
@@ -2193,7 +2193,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-legal {
-    color: #64748b;
+    color: #ffffff;
 }
 
 /* ==========================================================================
@@ -2230,7 +2230,7 @@ h1, h2, h3, h4, h5, h6 {
     overflow-y: auto;
     padding: 36px;
     position: relative;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(14, 165, 233, 0.2);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.2);
     transform: scale(0.95);
     transition: transform 0.25s ease;
 }
@@ -2287,14 +2287,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .modal-body-p {
     font-size: 0.92rem;
-    color: #cbd5e1;
+    color: #ffffff;
     line-height: 1.6;
     margin-bottom: 12px;
 }
 
 .modal-list {
     margin-left: 20px;
-    color: #e2e8f0;
+    color: #ffffff;
     font-size: 0.9rem;
     line-height: 1.7;
     margin-bottom: 16px;
@@ -2763,4 +2763,78 @@ h1, h2, h3, h4, h5, h6 {
         padding: 16px 18px !important;
         gap: 10px !important;
     }
+}
+
+
+/* ==========================================================================
+   WHITE TEXT & SUBTLE GOLD ACCENTS THEME OVERRIDES
+   ========================================================================== */
+body, p, span, li, a, label, address, small,
+.hero-subtitle, .section-desc, .about-paragraph, .lms-desc, .lms-price-tag,
+.reciprocity-desc, .portal-info p, .job-desc, .review-quote, .review-text,
+.contact-sub, .form-subtitle, .footer-tagline, .footer-links-col a,
+.footer-contact-col p, .footer-bottom-row, .footer-legal,
+.course-summary, .course-tagline, .caption-title, .stat-label,
+.sub-card-text span, .ins-badge-item span, .modal-body-p, .modal-list,
+.contact-highlight-link, .portal-url, .review-author span, .reviewer-badge,
+.section-tag-badge, .hero-badge-pill, .lms-live-indicator, .mockup-badge,
+.course-badge, .badge-primary, .badge-perc, .badge-ccl, .badge-qual,
+.badge-renewal, .badge-bundle, .badge-armed, .modal-price-number, .modal-section-h5 {
+    color: #ffffff !important;
+}
+
+/* Keep small gold accents on icons, borders, dots, and underlines */
+.cred-badge i, .top-link i, .top-loc i, .nav-item i, .nav-item-online i,
+.mobile-nav-link i, .stat-icon, .stat-icon i, .sub-card-icon, .ins-badge-item i,
+.section-tag-badge i, .course-range-perk i, .course-meta-tags i,
+.lms-feat-item i, .reciprocity-title i, .state-links-heading i, .portal-icon,
+.job-partner-icon, .job-notice-strip i, .review-stars, .review-stars i,
+.contact-card-icon, .form-title i, .text-green, .text-blue {
+    color: #d4af37 !important;
+}
+
+.section-title-line,
+.mockup-progress-fill {
+    background: linear-gradient(90deg, #b89225, #d4af37) !important;
+}
+
+.hero-pulse-dot,
+.nav-online-pulse,
+.pulse-green {
+    background-color: #d4af37 !important;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.7) !important;
+}
+
+/* Buttons: Dark surface with subtle gold border & crisp white text */
+.btn-tactical-primary,
+.btn-tactical-neon,
+.btn-card-book,
+.btn-card-online,
+.filter-tab-btn.active,
+.drawer-phone-btn,
+.btn-material-dl {
+    background: linear-gradient(135deg, #231e12 0%, #16130b 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #d4af37 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
+.btn-tactical-primary:hover,
+.btn-tactical-neon:hover,
+.btn-card-book:hover,
+.btn-card-online:hover,
+.btn-material-dl:hover {
+    background: linear-gradient(135deg, #332b18 0%, #1f1a0f 100%) !important;
+    color: #ffffff !important;
+    border-color: #f3d06b !important;
+    box-shadow: 0 4px 18px rgba(212, 175, 55, 0.25) !important;
+}
+
+.btn-tactical-primary i,
+.btn-tactical-neon i,
+.btn-card-book i,
+.btn-card-online i,
+.btn-tactical-outline i,
+.btn-card-details i {
+    color: #d4af37 !important;
 }
