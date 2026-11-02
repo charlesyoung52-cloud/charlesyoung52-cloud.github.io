@@ -2843,13 +2843,17 @@ body, p, span, li, a, label, address, small,
 /* ==========================================================================
    MOBILE CONTACT SECTION CARDS TIDY & UNIFORM ALIGNMENT
    ========================================================================== */
-.contact-card-icon {
-    width: 46px;
-    height: 46px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.contact-card-icon,
+.portal-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    font-size: 0.92rem !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .form-group,
@@ -2904,12 +2908,14 @@ body, p, span, li, a, label, address, small,
         box-sizing: border-box !important;
     }
 
-    .contact-card-icon {
-        width: 42px !important;
-        height: 42px !important;
-        min-width: 42px !important;
+    .contact-card-icon,
+    .portal-icon {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
         padding: 0 !important;
-        font-size: 1.15rem !important;
+        font-size: 0.85rem !important;
+        border-radius: 6px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
