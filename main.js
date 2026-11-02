@@ -8,7 +8,8 @@ const COURSE_DATABASE = {
     "unarmed-20": {
         title: "20 HR UNARMED SECURITY COURSE",
         category: "IDFPR State-Mandated Security Training (PERC Card)",
-        price: "$80.00",
+        price: "$40.00",
+        stripeUrl: "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00",
         duration: "Self-Paced (20 Hours Online)",
         location: "100% Online LMS Portal (Phone, Tablet, or PC)",
         rangeNote: "No range session required. Study all 10 modules, interactive scenarios, and practice quizzes 100% online. You will receive your certificate immediately upon completion with no waiting period.",
@@ -33,6 +34,7 @@ const COURSE_DATABASE = {
         title: "28 HR ARMED SECURITY COURSE",
         category: "IDFPR Security Officer Credential (Tan Card)",
         price: "$200.00",
+        stripeUrl: "https://buy.stripe.com/4gMaEXdJa9Un3Uw4249oc01",
         duration: "2.5 Days (Wednesday 1:00 PM – 5:00 PM, Thursday 9:00 AM – 5:00 PM, Friday 9:00 AM – 5:00 PM)",
         location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -57,6 +59,7 @@ const COURSE_DATABASE = {
         title: "SECURITY FIREARM REQUALIFICATION",
         category: "Armed Security Annual Recertification",
         price: "$125.00",
+        stripeUrl: "https://buy.stripe.com/9B6cN5bB28QjbmYgOQ9oc02",
         duration: "Scheduled Range Session",
         location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -76,6 +79,7 @@ const COURSE_DATABASE = {
         title: "SECURITY FIREARM UPGRADE QUALIFICATION",
         category: "Armed Security Multi-Weapon Endorsement",
         price: "$125.00",
+        stripeUrl: "https://buy.stripe.com/cNidR9gVm5E71Mo8ik9oc03",
         duration: "Concurrent Range Session",
         location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -95,6 +99,7 @@ const COURSE_DATABASE = {
         title: "16 HR IL CONCEALED CARRY COURSE",
         category: "Standard Illinois Concealed Carry License (CCL)",
         price: "$200.00",
+        stripeUrl: "https://buy.stripe.com/dRmeVdcF65E776I8ik9oc04",
         duration: "2 Full Days (16 Hours Total)",
         location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -117,6 +122,7 @@ const COURSE_DATABASE = {
         title: "8 HR IL CONCEALED CARRY COURSE",
         category: "8-Hour Prior Credit CCL (NRA Recognized)",
         price: "$150.00",
+        stripeUrl: "https://buy.stripe.com/14AbJ148A2rVaiU0PS9oc05",
         duration: "1 Full Day (8 Hours)",
         location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -137,6 +143,7 @@ const COURSE_DATABASE = {
         title: "8 HR IL CCL – MILITARY & LAW ENFORCEMENT",
         category: "Military & First Responder Special",
         price: "$125.00",
+        stripeUrl: "https://buy.stripe.com/aFa00jeNe0jN2QseGI9oc06",
         duration: "1 Full Day (8 Hours)",
         location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -156,6 +163,7 @@ const COURSE_DATABASE = {
         title: "3 HR IL CONCEALED CARRY REFRESHER COURSE",
         category: "5-Year State License Renewal",
         price: "$125.00",
+        stripeUrl: "https://buy.stripe.com/cNicN58oQd6z3Uw9mo9oc07",
         duration: "3 Hours (Classroom & Range)",
         location: "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
         rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
@@ -217,13 +225,19 @@ function openCourseModal(courseId) {
         <h5 class="modal-section-h5"><i class="fas fa-info-circle"></i> Policy</h5>
         <p class="modal-body-p" style="font-size:0.85rem; color:#94a3b8;">${course.cancellation}</p>
 
-        <div class="modal-actions-footer">
+        <div class="modal-actions-footer" style="flex-wrap:wrap;">
             ${courseId === 'unarmed-20' ? `
-            <a href="./course/index.html" class="btn-card-online btn-large btn-full" style="text-align:center;">
-                <i class="fas fa-play"></i> Launch 20-Hour Online Course ($80)
+            <a href="${course.stripeUrl}" class="btn-tactical-primary btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
+                <i class="fas fa-credit-card"></i> Pay Tuition Online ($40)
+            </a>
+            <a href="./course/index.html" class="btn-card-online btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
+                <i class="fas fa-play"></i> Start Online Course
             </a>
             ` : `
-            <a href="calendar.html?course=${courseId}" class="btn-tactical-primary btn-large btn-full" style="text-align:center;">
+            <a href="${course.stripeUrl}" class="btn-tactical-primary btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
+                <i class="fas fa-credit-card"></i> Pay Tuition (${course.price.replace('.00', '')})
+            </a>
+            <a href="calendar.html?course=${courseId}" class="btn-tactical-outline btn-large" style="flex:1; min-width:160px; text-align:center; justify-content:center;">
                 Book Now
             </a>
             `}

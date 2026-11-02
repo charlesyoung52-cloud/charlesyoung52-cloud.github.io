@@ -627,11 +627,14 @@
                 </div>
             </div>
 
+            <!-- Stripe Payment Confirmation Banner (shown when ?paid=true) -->
+            <div id="stripe-paid-banner-slot"></div>
+
             <!-- Course Filter Tabs: Row 1 Security Courses, Row 2 CCL Courses -->
             <div class="cal-course-tabs" id="cal-course-tabs">
                 <div class="cal-tabs-row">
                     <button class="cal-course-tab active" data-course="all" onclick="selectCourseFilter('all')">All Courses</button>
-                    <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($80)</button>
+                    <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($40)</button>
                     <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Armed Security ($200)</button>
                     <button class="cal-course-tab" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">Firearm Requal ($125)</button>
                     <button class="cal-course-tab" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">Firearm Upgrade ($125)</button>
@@ -746,7 +749,7 @@
                 <div class="footer-links-col">
                     <h4>Training Programs</h4>
                     <ul>
-                        <li><a href="./course/index.html">Online 20HR Unarmed Course ($80)</a></li>
+                        <li><a href="./course/index.html">Online 20HR Unarmed Course ($40)</a></li>
                         <li><a href="courses.html">28-Hour Armed Security ($200)</a></li>
                         <li><a href="courses.html">Security Firearm Requalification ($125)</a></li>
                         <li><a href="courses.html">16-Hour Concealed Carry ($200)</a></li>
@@ -769,6 +772,22 @@
     </footer>
 
     <script>
+        const STRIPE_PAYMENT_LINKS = {
+            "unarmed-20": "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00",
+            "armed-28": "https://buy.stripe.com/4gMaEXdJa9Un3Uw4249oc01",
+            "firearm-requal": "https://buy.stripe.com/9B6cN5bB28QjbmYgOQ9oc02",
+            "firearm-upgrade": "https://buy.stripe.com/cNidR9gVm5E71Mo8ik9oc03",
+            "ccl-16": "https://buy.stripe.com/dRmeVdcF65E776I8ik9oc04",
+            "ccl-8": "https://buy.stripe.com/14AbJ148A2rVaiU0PS9oc05",
+            "ccl-military": "https://buy.stripe.com/aFa00jeNe0jN2QseGI9oc06",
+            "ccl-refresher": "https://buy.stripe.com/cNicN58oQd6z3Uw9mo9oc07"
+        };
+
+        function getCourseStripeUrl(courseId) {
+            const c = (calendarData.courses && calendarData.courses[courseId]) || {};
+            return c.stripeUrl || STRIPE_PAYMENT_LINKS[courseId] || '#';
+        }
+
         let calendarData = { courses: {}, sessions: [] };
         let activeCourseFilter = 'all';
         let activeDayFilter = null;
@@ -796,11 +815,14 @@
                 if (res.ok) loaded = await res.json();
             } catch (e) {}
 
+            const baseUpdated = (loaded && loaded.last_updated) ? loaded.last_updated : '';
+
             try {
-                const localRaw = localStorage.getItem('platforms_calendar_data');
+                localStorage.removeItem('platforms_calendar_data');
+                const localRaw = localStorage.getItem('platforms_calendar_data_v2');
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
-                    if (parsed && parsed.courses && Array.isArray(parsed.sessions)) {
+                    if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
                         loaded = parsed;
                     }
                 }
@@ -810,19 +832,42 @@
                 const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
                 if (apiRes.ok) {
                     const apiData = await apiRes.json();
-                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && apiData.sessions.length > 0) {
+                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') >= baseUpdated) {
                         loaded = apiData;
-                        localStorage.setItem('platforms_calendar_data', JSON.stringify(loaded));
+                        localStorage.setItem('platforms_calendar_data_v2', JSON.stringify(loaded));
                     }
                 }
             } catch (e) {}
 
-            if (loaded) calendarData = loaded;
+            if (loaded) {
+                if (loaded.courses && loaded.courses['unarmed-20']) {
+                    loaded.courses['unarmed-20'].price = '$40';
+                }
+                calendarData = loaded;
+            }
 
             const params = new URLSearchParams(window.location.search);
             const requestedCourse = params.get('course');
             if (requestedCourse && (requestedCourse === 'all' || (calendarData.courses && calendarData.courses[requestedCourse]))) {
                 activeCourseFilter = requestedCourse;
+            }
+            if (params.get('paid') === 'true') {
+                const paidSlot = document.getElementById('stripe-paid-banner-slot');
+                const cPaid = (calendarData.courses && calendarData.courses[activeCourseFilter]) || {};
+                if (paidSlot) {
+                    paidSlot.innerHTML = `
+                        <div style="background:#181c24; border:1px solid #d4af37; border-radius:8px; padding:18px 22px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                            <div>
+                                <div style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700; color:#ffffff; margin-bottom:4px;">
+                                    <i class="fas fa-check-circle" style="color:#d4af37; margin-right:6px;"></i> TUITION PAYMENT CONFIRMED
+                                </div>
+                                <p style="margin:0; font-size:0.9rem; color:#ffffff; line-height:1.5;">
+                                    Thank you for enrolling${cPaid.title ? ' in <strong>' + cPaid.title + '</strong>' : ''}! Your Stripe payment receipt has been sent to your email. Instructor Charles Young will contact you to confirm your class date, or you may call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> anytime.
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }
             }
 
             updateCourseTabsUI();
@@ -889,7 +934,17 @@
                 <div class="course-summary-bar">
                     <div class="summary-head">
                         <h1 class="summary-title">${c.title}</h1>
-                        <div class="summary-price">${c.price}</div>
+                        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                            <div class="summary-price">${c.price}</div>
+                            <a href="${getCourseStripeUrl(activeCourseFilter)}" class="btn-book-clean" style="padding:10px 20px; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
+                                <i class="fas fa-credit-card" style="color:#d4af37;"></i> Pay Course Tuition (${c.price})
+                            </a>
+                            ${activeCourseFilter === 'unarmed-20' ? `
+                                <a href="./course/index.html" class="btn-tactical-outline" style="padding:9px 16px; font-size:0.86rem; text-decoration:none;">
+                                    <i class="fas fa-play" style="color:#d4af37; margin-right:5px;"></i> Open Course Portal
+                                </a>
+                            ` : ''}
+                        </div>
                     </div>
                     <p class="summary-desc">${c.description || ''}</p>
                     <div class="summary-specs">
@@ -1065,12 +1120,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="session-row-right">
+                        <div class="session-row-right" style="flex-wrap:wrap;">
                             <div class="session-price-meta">
-                                <div class="session-price-val">$80</div>
+                                <div class="session-price-val">$40</div>
                                 <div class="session-seats-val">Open Enrollment</div>
                             </div>
-                            <a href="./course/index.html" class="btn-book-clean">Start Online</a>
+                            <a href="${getCourseStripeUrl('unarmed-20')}" class="btn-book-clean"><i class="fas fa-credit-card" style="color:#d4af37; margin-right:6px;"></i> Pay Tuition ($40)</a>
+                            <a href="./course/index.html" class="btn-tactical-outline" style="padding:9px 14px; font-size:0.84rem; text-decoration:none;">Start Online</a>
                         </div>
                     </div>
                 `;
@@ -1079,18 +1135,71 @@
 
             const sessions = getFilteredSessions(true);
             if (countBadge) {
-                countBadge.textContent = `${sessions.length} ${sessions.length === 1 ? 'date' : 'dates'}`;
+                countBadge.textContent = sessions.length === 0 ? 'No dates posted' : `${sessions.length} ${sessions.length === 1 ? 'date' : 'dates'}`;
             }
 
             if (sessions.length === 0) {
-                container.innerHTML = `
-                    <div class="session-row" style="justify-content:center; padding:32px; text-align:center;">
-                        <div>
-                            <p style="color:#ffffff; margin:0 0 12px 0;">No classes scheduled for this filter.</p>
-                            <button class="btn-book-clean" onclick="clearDayFilter()">Show All Dates</button>
+                if (activeCourseFilter !== 'all' && calendarData.courses && calendarData.courses[activeCourseFilter]) {
+                    const selCourse = calendarData.courses[activeCourseFilter];
+                    const stripeUrl = getCourseStripeUrl(activeCourseFilter);
+                    container.innerHTML = `
+                        <div class="session-row" style="flex-direction:column; align-items:flex-start; gap:14px; padding:24px;">
+                            <div>
+                                <h4 style="font-family:'Rajdhani',sans-serif; font-size:1.25rem; color:#ffffff; margin:0 0 6px 0;">
+                                    No Course Dates Currently Available
+                                </h4>
+                                <p style="color:#ffffff; font-size:0.9rem; margin:0; line-height:1.55;">
+                                    New class dates for <strong>${selCourse.title}</strong> are being scheduled. You can pay your course tuition online below via Stripe to lock in your enrollment now, and Instructor Charles Young will coordinate your upcoming class date with you.
+                                </p>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; width:100%; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+                                <a href="${stripeUrl}" class="btn-book-clean" style="padding:11px 22px; font-size:0.92rem; display:inline-flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-credit-card" style="color:#d4af37;"></i> Pay Tuition Online (${selCourse.price})
+                                </a>
+                                <a href="tel:7738732591" class="btn-tactical-outline" style="padding:10px 16px; font-size:0.86rem; text-decoration:none;">
+                                    <i class="fas fa-phone-alt" style="color:#d4af37; margin-right:6px;"></i> Questions? (773) 873-2591
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    const courseOrder = ['unarmed-20', 'armed-28', 'firearm-requal', 'firearm-upgrade', 'ccl-16', 'ccl-8', 'ccl-military', 'ccl-refresher'];
+                    const rowsHtml = courseOrder.map(cid => {
+                        const cObj = (calendarData.courses && calendarData.courses[cid]) || {};
+                        if (!cObj.title) return '';
+                        const sUrl = getCourseStripeUrl(cid);
+                        return `
+                            <div class="session-row">
+                                <div class="session-row-left">
+                                    <div class="session-date-box">
+                                        <div class="session-date-mon">${cid === 'unarmed-20' ? 'ONLINE' : 'TUITION'}</div>
+                                        <div class="session-date-num" style="font-size:1.05rem;">${cObj.price}</div>
+                                        <div class="session-date-dow">${cid === 'unarmed-20' ? '24/7' : 'In-Person'}</div>
+                                    </div>
+                                    <div class="session-details">
+                                        <h4>${cObj.title}</h4>
+                                        <div class="session-submeta">
+                                            <span>${cObj.duration || ''}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="session-row-right">
+                                    <a href="${sUrl}" class="btn-book-clean" style="display:inline-flex; align-items:center; gap:7px;">
+                                        <i class="fas fa-credit-card" style="color:#d4af37;"></i> Pay Tuition (${cObj.price})
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    container.innerHTML = `
+                        <div class="session-row" style="padding:16px 20px; border-left:3px solid #d4af37;">
+                            <p style="color:#ffffff; font-size:0.9rem; margin:0; line-height:1.5;">
+                                <strong>No in-person class dates are currently posted on the calendar.</strong> Select your course below to pay tuition online via Stripe, or start the 20-Hour Unarmed Security Course online 24/7.
+                            </p>
+                        </div>
+                        ${rowsHtml}
+                    `;
+                }
                 return;
             }
 
@@ -1216,7 +1325,7 @@
                 calendarData.reservations = [];
             }
             calendarData.reservations.unshift(reservation);
-            localStorage.setItem('platforms_calendar_data', JSON.stringify(calendarData));
+            localStorage.setItem('platforms_calendar_data_v2', JSON.stringify(calendarData));
 
             try {
                 await fetch(getApiBaseUrl() + '/api/calendar/book', {

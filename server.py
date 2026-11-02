@@ -121,7 +121,7 @@ def sync_to_cloud_json():
                 'email': r['email'],
                 'agency': r['agency'],
                 'is_paid': bool(r['is_paid']),
-                'payment_status': 'Paid $80 - Full Tuition (IDFPR State Mandate)' if r['is_paid'] else 'Pending Payment',
+                'payment_status': 'Paid $40 - Full Tuition (IDFPR State Mandate)' if r['is_paid'] else 'Pending Payment',
                 'payment_date': r['created_at'],
                 'completed_modules': completed_modules,
                 'total_modules': 10,
@@ -171,7 +171,7 @@ def add_cors_headers(response):
     return response
 
 ADMIN_PIN = "7738732591" # Platforms Training Academy Admin Access PIN
-TEMPORARY_PAYWALL_DISABLED = True # Set to False to reinstate $80 course paywall
+TEMPORARY_PAYWALL_DISABLED = False # $40 Stripe course paywall enabled
 
 def get_smtp_config():
     config = {
@@ -1029,7 +1029,7 @@ def process_payment():
     
     cur.execute('''
         INSERT INTO analytics_events (event_type, student_id, details, timestamp)
-        VALUES ('payment_received', ?, 'Course Certification Fee $50.00 paid', ?)
+        VALUES ('payment_received', ?, 'Course Certification Fee $40.00 paid', ?)
     ''', (student_id, now_str))
     
     db.commit()

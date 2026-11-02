@@ -24,7 +24,8 @@ class SecurityCourseApp {
 
         // Temporary Paywall Bypass Flag
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
-        this.temporaryPaywallDisabled = true;
+        this.temporaryPaywallDisabled = false;
+        this.stripePaymentUrl = "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00";
 
         // Payment & Permanent Certificate Sealing
         this.isPaid = localStorage.getItem('platforms_is_paid') === 'true';
@@ -123,11 +124,13 @@ class SecurityCourseApp {
             urlParams.delete('payment_success');
             urlParams.delete('paid');
             urlParams.delete('orderId');
+            urlParams.delete('session_id');
             const cleanQuery = urlParams.toString() ? '?' + urlParams.toString() : '';
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
             setTimeout(() => {
-                this.manualSaveProgress("Course enrollment confirmed ($80.00)! Full 20-hour curriculum unlocked.");
+                this.apiCall("/api/payment/checkout", "POST", { student_id: this.studentEmail || this.studentCertData.name || "student" });
+                this.manualSaveProgress("Course enrollment confirmed ($40.00)! Full 20-hour curriculum unlocked.");
             }, 500);
         }
 
@@ -2345,7 +2348,7 @@ class SecurityCourseApp {
                 if (payGate) payGate.style.display = 'block';
                 if (certForm) certForm.style.display = 'none';
                 if (mainActionBtn) {
-                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($80.00)`;
+                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($40.00)`;
                     mainActionBtn.onclick = () => {
                         if (payGate) payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     };
@@ -2784,7 +2787,7 @@ class SecurityCourseApp {
         this.saveState();
 
         if (toast && toastMsg) {
-            toastMsg.textContent = "Payment authorized successfully ($80.00)! Official certificate unlocked.";
+            toastMsg.textContent = "Payment authorized successfully ($40.00)! Official certificate unlocked.";
             toast.style.display = 'flex';
             setTimeout(() => { toast.style.display = 'none'; }, 4000);
         }
@@ -3079,7 +3082,9 @@ class SecurityCourseApp {
     }
 
     initiateCourseEnrollmentPayment() {
-        window.location.href = '../#courses';
+        const base = this.stripePaymentUrl || 'https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00';
+        const emailParam = this.studentEmail ? ('?prefilled_email=' + encodeURIComponent(this.studentEmail)) : '';
+        window.location.href = base + emailParam;
     }
 
     checkExistingPaymentStatus() {
@@ -3485,7 +3490,7 @@ class SecurityCourseApp {
                     <div class="admin-stat-lbl">Active Candidate</div>
                 </div>
                 <div class="admin-stat-card">
-                    <div class="admin-stat-val">${this.isPaid ? '$80' : '$0'}</div>
+                    <div class="admin-stat-val">${this.isPaid ? '$40' : '$0'}</div>
                     <div class="admin-stat-lbl">Revenue Authorized</div>
                 </div>
                 <div class="admin-stat-card">

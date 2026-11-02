@@ -1456,11 +1456,14 @@
                 if (res.ok) loaded = await res.json();
             } catch (e) {}
 
+            const baseUpdated = (loaded && loaded.last_updated) ? loaded.last_updated : '';
+
             try {
-                const localRaw = localStorage.getItem('platforms_calendar_data');
+                localStorage.removeItem('platforms_calendar_data');
+                const localRaw = localStorage.getItem('platforms_calendar_data_v2');
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
-                    if (parsed && parsed.courses && Array.isArray(parsed.sessions)) {
+                    if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
                         loaded = parsed;
                     }
                 }
@@ -1470,7 +1473,7 @@
                 const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
                 if (apiRes.ok) {
                     const apiData = await apiRes.json();
-                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && apiData.sessions.length > 0) {
+                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') >= baseUpdated) {
                         loaded = apiData;
                     }
                 }
@@ -1721,7 +1724,7 @@
         }
 
         async function saveCalendarToCloud() {
-            localStorage.setItem('platforms_calendar_data', JSON.stringify(adminCalendarData));
+            localStorage.setItem('platforms_calendar_data_v2', JSON.stringify(adminCalendarData));
             const fb = document.getElementById('admin-cal-save-feedback');
             if (fb) {
                 fb.style.display = 'block';
@@ -1839,7 +1842,7 @@
                 // Payment pill (Clean indicator without IDFPR Approved)
                 let paymentPill = `
                     <span class="badge badge-success" style="font-size:0.76rem; padding:3px 8px;">
-                        <i class="fas fa-check-circle"></i> $80 PAID
+                        <i class="fas fa-check-circle"></i> $40 PAID
                     </span>
                 `;
                 if (!s.is_paid) {
@@ -1992,7 +1995,7 @@
                 `"${(s.name || '').replace(/"/g, '""')}"`,
                 `"${(s.email || '').replace(/"/g, '""')}"`,
                 `"${(s.agency || '').replace(/"/g, '""')}"`,
-                s.is_paid ? "PAID $80" : "UNPAID",
+                s.is_paid ? "PAID $40" : "UNPAID",
                 `"${s.payment_date || s.created_at || ''}"`,
                 s.mfa_verified ? "YES" : "NO",
                 `"${s.mfa_verified_at || ''}"`,
