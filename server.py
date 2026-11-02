@@ -535,6 +535,7 @@ Chicago, IL
         'success': True,
         'email': email,
         'name': name,
+        'code': code,
         'smtp_sent': sent,
         'message': f"Verification code dispatched to {email}"
     })
@@ -573,7 +574,7 @@ def register_student():
     else:
         cur.execute('''
             INSERT INTO students (id, name, email, student_id, agency, password_hash, password_salt, is_paid, is_admin, created_at, last_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 1, 0, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
         ''', (email, name, email, email, agency, pwd_hash, salt, now_str, now_str))
 
     db.commit()
