@@ -6362,10 +6362,10 @@ body.lms-gate-active .site-header .course-progress-strip {
 
 .armed-gate-dates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-    gap: 10px;
-    margin-bottom: 14px;
-    max-height: 290px;
+    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+    max-height: 250px;
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -6373,13 +6373,13 @@ body.lms-gate-active .site-header .course-progress-strip {
 .armed-range-date-card {
     background: #141821;
     border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 11px 13px;
+    border-radius: 6px;
+    padding: 8px 10px;
     cursor: pointer;
     transition: all 0.18s ease;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
     position: relative;
     text-align: left;
 }
