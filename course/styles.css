@@ -5473,17 +5473,17 @@ button:disabled.btn-primary {
 }
 
 .auth-gate-circle-logo {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 18px auto;
+    width: 132px;
+    height: 132px;
+    margin: 0 auto 20px auto;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     background: rgba(212, 175, 55, 0.1);
-    border: 2px solid #d4af37;
-    box-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
-    padding: 6px;
+    border: 2.5px solid #d4af37;
+    box-shadow: 0 0 32px rgba(212, 175, 55, 0.32);
+    padding: 4px;
     box-sizing: border-box;
 }
 .auth-gate-circle-logo img {
@@ -5491,6 +5491,12 @@ button:disabled.btn-primary {
     height: 100%;
     object-fit: contain;
     border-radius: 50%;
+}
+@media (max-width: 640px) {
+    .auth-gate-circle-logo {
+        width: 108px;
+        height: 108px;
+    }
 }
 
 
