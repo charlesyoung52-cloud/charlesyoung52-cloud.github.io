@@ -141,7 +141,17 @@ class SecurityCourseApp {
             }, 500);
         }
 
-        if (!this.isAuthenticated()) {
+        const requestedView = urlParams.get('view');
+        if (this.isAdminMode && (requestedView === 'results' || requestedView === 'exam' || requestedView === 'overview')) {
+            urlParams.delete('view');
+            const cleanViewQ = urlParams.toString() ? '?' + urlParams.toString() : '';
+            window.history.replaceState({}, document.title, window.location.pathname + cleanViewQ + window.location.hash);
+            if (requestedView === 'results') {
+                this.openAdminCertificateView();
+            } else {
+                this.showView(requestedView);
+            }
+        } else if (!this.isAuthenticated()) {
             this.showView('auth-gate');
         } else if (!this.isAuthorized()) {
             this.showView('payment-gate');
@@ -3201,12 +3211,11 @@ class SecurityCourseApp {
             }
         });
 
-        // 3. Triple-click on brand logo in header
-        const brandHeader = document.querySelector('.brand-wrapper') || document.querySelector('.header-brand');
-        if (brandHeader) {
+        // 3. Triple-click on circle emblem on Sign-In card or brand logo in header
+        document.querySelectorAll('.auth-gate-circle-logo, .brand-wrapper, .header-brand').forEach(el => {
             let logoClicks = 0;
             let logoTimer = null;
-            brandHeader.addEventListener('click', () => {
+            el.addEventListener('click', () => {
                 logoClicks++;
                 clearTimeout(logoTimer);
                 if (logoClicks >= 3) {
@@ -3216,7 +3225,7 @@ class SecurityCourseApp {
                     logoTimer = setTimeout(() => { logoClicks = 0; }, 600);
                 }
             });
-        }
+        });
 
         // Auth Gate and MFA inputs keyboard bindings
         const loginEmail = document.getElementById('auth-login-email');
@@ -3675,6 +3684,14 @@ class SecurityCourseApp {
         } else {
             if (err) err.style.display = 'block';
         }
+    }
+
+    navigateAdminPage(url) {
+        this.isInternalAdminNav = true;
+        sessionStorage.setItem('pta_admin_auth', 'authorized');
+        sessionStorage.setItem('platforms_admin_mode', 'true');
+        sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
+        window.location.href = url;
     }
 
     returnToAdminDashboard() {
