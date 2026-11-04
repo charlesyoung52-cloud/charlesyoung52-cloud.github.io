@@ -2108,10 +2108,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-logo {
-    height: 52px;
+    height: 76px;
     width: auto;
-    max-width: 220px;
+    max-width: 300px;
     object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
 
 .footer-tagline,
@@ -2311,7 +2312,20 @@ h1, h2, h3, h4, h5, h6 {
 /* ==========================================================================
    RESPONSIVE BREAKPOINTS (STATIONARY/STICKY HEADER & ZERO OVERFLOW)
     ========================================================================== */
-@media (max-width: 1260px) and (min-width: 1081px) {
+@media (max-width: 1380px) {
+    .badge-nra {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1180px) {
+    .top-sep:last-of-type,
+    .top-loc {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1340px) and (min-width: 1081px) {
     .nav-item {
         padding: 5px 8px;
         font-size: 0.8rem;

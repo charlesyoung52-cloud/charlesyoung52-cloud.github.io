@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Tactical Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=3.2">
+    <link rel="stylesheet" href="styles.css?v=4.0">
 
     <style>
         /* Clean, Minimal Calendar Styles */
@@ -667,6 +667,10 @@
             <a href="index.html#reviews" class="mobile-nav-link"><i class="fas fa-star"></i> Reviews &amp; Instructor</a>
             <a href="index.html#contact" class="mobile-nav-link"><i class="fas fa-paper-plane"></i> Contact &amp; Locations</a>
         </nav>
+        <div class="drawer-contact-footer">
+            <a href="tel:7738732591" class="drawer-phone-btn"><i class="fas fa-phone"></i> (773) 873-2591</a>
+            <p>200 E 75th St, Chicago, IL 60619 &bull; Eagle Sports Range</p>
+        </div>
     </div>
     <div class="drawer-backdrop" id="drawer-backdrop"></div>
 
@@ -803,7 +807,7 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- TACTICAL FOOTER (COMPACT & FULL-WIDTH) -->
     <footer class="site-footer">
         <div class="site-container footer-container-wide">
             <div class="footer-grid">
@@ -814,7 +818,12 @@
                     <p class="footer-tagline">
                         Chicago's trusted provider of professional security officer licensing, tactical defense, and Illinois concealed carry training.
                     </p>
+                    <div class="footer-creds">
+                        <span><i class="fas fa-shield-alt text-green"></i> IDFPR Approved</span>
+                        <span><i class="fas fa-medal text-green"></i> 18-Year Combat Veteran Owned</span>
+                    </div>
                 </div>
+
                 <div class="footer-links-col">
                     <h4>Training Programs</h4>
                     <ul>
@@ -826,6 +835,17 @@
                         <li><a href="courses.html">3-Hour CCL Refresher ($125)</a></li>
                     </ul>
                 </div>
+
+                <div class="footer-links-col">
+                    <h4>State Portals</h4>
+                    <ul>
+                        <li><a href="https://www.ispfsb.com" target="_blank" rel="noopener">Illinois State Police (ISP)</a></li>
+                        <li><a href="https://idfpr.illinois.gov" target="_blank" rel="noopener">IDFPR P.E.R.C. Portal</a></li>
+                        <li><a href="https://www.ilga.gov" target="_blank" rel="noopener">Illinois General Assembly</a></li>
+                        <li><a href="https://www.amlegal.com" target="_blank" rel="noopener">Chicago Municipal Code</a></li>
+                    </ul>
+                </div>
+
                 <div class="footer-contact-col">
                     <h4>Academy Contact</h4>
                     <p><i class="fas fa-phone-alt text-green"></i> (773) 873-2591</p>
@@ -834,8 +854,10 @@
                     <p><i class="fas fa-bullseye text-green"></i> Range: Eagle Sports Range</p>
                 </div>
             </div>
+
             <div class="footer-bottom-row">
                 <p>&copy; 2013&ndash;2026 PLATFORMS TRAINING ACADEMY. All Rights Reserved.</p>
+                <p class="footer-legal">Compliant with IDFPR Under 225 ILCS 447 &bull; Equal Opportunity Training Facility</p>
             </div>
         </div>
     </footer>
@@ -890,23 +912,11 @@
             try {
                 localStorage.removeItem('platforms_calendar_data');
                 localStorage.removeItem('platforms_calendar_data_v2');
-                localStorage.removeItem('platforms_calendar_data_v5');
                 const localRaw = localStorage.getItem('platforms_calendar_data_v5');
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
-                    if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') > baseUpdated) {
+                    if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
                         loaded = parsed;
-                    }
-                }
-            } catch (e) {}
-
-            try {
-                const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
-                if (apiRes.ok) {
-                    const apiData = await apiRes.json();
-                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
-                        loaded = apiData;
-                        localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(loaded));
                     }
                 }
             } catch (e) {}
@@ -917,6 +927,21 @@
                 }
                 calendarData = loaded;
             }
+
+            // Asynchronously sync with backend API without blocking initial calendar render
+            fetch(getApiBaseUrl() + '/api/calendar').then(async (apiRes) => {
+                if (apiRes.ok) {
+                    const apiData = await apiRes.json();
+                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
+                        if (apiData.courses['unarmed-20']) apiData.courses['unarmed-20'].price = '$50';
+                        calendarData = apiData;
+                        localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(calendarData));
+                        renderCourseSpotlight();
+                        renderMonthlyCalendar();
+                        renderSessionsList();
+                    }
+                }
+            }).catch(() => {});
 
             const params = new URLSearchParams(window.location.search);
             const requestedCourse = params.get('course');
@@ -1012,12 +1037,6 @@
                 actionAreaHtml = `
                     <a href="./course/index.html" class="btn-book-clean" style="padding:10px 20px; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
                         <i class="fas fa-play" style="color:#d4af37;"></i> Sign In to Start Online Course (${c.price})
-                    </a>
-                `;
-            } else if (activeCourseFilter === 'armed-28') {
-                actionAreaHtml = `
-                    <a href="./armed-course/index.html" class="btn-book-clean" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; padding:10px 18px; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px;">
-                        <i class="fas fa-laptop-code"></i> Start 20-Hr Online Classroom (${c.price})
                     </a>
                 `;
             } else if (selectedSession && selectedSession.courseId === activeCourseFilter) {
@@ -1480,6 +1499,28 @@
             }
             calendarData.reservations.unshift(reservation);
             localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(calendarData));
+
+            if (session.courseId === 'armed-28') {
+                const rangeRecord = {
+                    reservationId: reservation.id,
+                    sessionId: session.id,
+                    title: session.title,
+                    date: session.date,
+                    endDate: session.endDate || session.date,
+                    dateFormatted: formatDateSpan(session.date, session.endDate),
+                    time: session.time,
+                    location: session.location,
+                    studentName: name,
+                    studentPhone: phone,
+                    studentEmail: email.toLowerCase(),
+                    notes: notes,
+                    confirmedAt: new Date().toISOString()
+                };
+                if (email) {
+                    localStorage.setItem('platforms_armed_range_date_' + email.toLowerCase(), JSON.stringify(rangeRecord));
+                }
+                localStorage.setItem('platforms_armed_pending_range_session', JSON.stringify(rangeRecord));
+            }
 
             try {
                 await fetch(getApiBaseUrl() + '/api/calendar/book', {

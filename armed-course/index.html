@@ -21,12 +21,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Sacramento&display=swap" rel="stylesheet">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=6.0">
+    <link rel="stylesheet" href="styles.css?v=6.2">
 
     <!-- PDF Generation Library (Vector PDF Certificate & Paid Range Voucher) -->
     <script src="../assets/pdf-lib.min.js"></script>
 </head>
-<body>
+<body class="lms-gate-active">
 
     <!-- Admin Evaluation Mode Banner (Unlocked via Charles Young Admin PIN) -->
     <div class="admin-mode-banner" id="admin-mode-banner" style="display:none;">
@@ -45,9 +45,9 @@
                 <span class="cred-badge badge-nra"><i class="fas fa-crosshairs"></i> NRA Certified Law Enforcement Instructor</span>
             </div>
             <div class="top-contact-links">
-                <span class="top-link"><i class="fas fa-phone-alt"></i> (773) 873-2591</span>
+                <a href="tel:7738732591" class="top-link"><i class="fas fa-phone-alt"></i> (773) 873-2591</a>
                 <span class="top-sep top-sep-email">|</span>
-                <span class="top-link top-link-email"><i class="fas fa-envelope"></i> charlesyoung@platformstraining.com</span>
+                <a href="mailto:charlesyoung@platformstraining.com" class="top-link top-link-email"><i class="fas fa-envelope"></i> charlesyoung@platformstraining.com</a>
                 <span class="top-sep">|</span>
                 <span class="top-loc"><i class="fas fa-map-marker-alt"></i> 200 E 75th St, Chicago, IL</span>
             </div>
@@ -61,7 +61,26 @@
                 <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="brand-logo-img brand-logo">
             </a>
 
+            <!-- Main Website Navigation (Shown on Sign-In / Enrollment Gate) -->
+            <nav class="desktop-site-nav" aria-label="Main Navigation">
+                <a href="../course/index.html" class="nav-item nav-item-online" title="Online 20HR Unarmed Security Course ($50)">
+                    <i class="fas fa-laptop-code"></i> Online Unarmed <span class="nav-online-pulse"></span>
+                </a>
+                <a href="./index.html" class="nav-item nav-item-online active" title="Online 28HR Armed Security Course ($200)">
+                    <i class="fas fa-crosshairs"></i> Online Armed <span class="nav-online-pulse"></span>
+                </a>
+                <a href="../courses.html" class="nav-item"><i class="fas fa-list-check"></i> Courses</a>
+                <a href="../index.html#helpful-info" class="nav-item"><i class="fas fa-circle-info"></i> Helpful Info</a>
+                <a href="../index.html#jobs" class="nav-item"><i class="fas fa-briefcase"></i> Jobs</a>
+                <a href="../index.html#reviews" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+                <a href="../index.html#contact" class="nav-item"><i class="fas fa-paper-plane"></i> Contact</a>
+            </nav>
+
+            <!-- Course LMS Navigation (Shown once inside Course Modules / Exam) -->
             <nav class="main-nav">
+                <a href="../index.html" class="nav-btn" style="text-decoration:none;">
+                    <i class="fas fa-globe"></i> Main Site
+                </a>
                 <button class="nav-btn" data-view="overview">
                     <i class="fas fa-home"></i> Overview
                 </button>
@@ -75,6 +94,15 @@
                     <i class="fas fa-certificate"></i> Certificate &amp; Range
                 </button>
             </nav>
+
+            <div class="header-gate-cta">
+                <a href="../courses.html" class="header-book-btn">
+                    <i class="fas fa-calendar-check"></i> Book Course
+                </a>
+                <button class="mobile-toggle-btn" onclick="app.toggleMobileDrawer(true)" aria-label="Toggle Navigation Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
 
             <div class="header-actions">
                 <button class="btn-guide-header" onclick="app.openNavigationGuide()" title="Armed Course Navigation Guide">
@@ -98,6 +126,32 @@
             <div class="course-progress-fill" id="global-progress-fill"></div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="mobile-drawer-header">
+            <div class="drawer-brand">
+                <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="drawer-logo">
+            </div>
+            <button class="drawer-close-btn" onclick="app.toggleMobileDrawer(false)" aria-label="Close Menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="../course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course ($50)</a>
+            <a href="./index.html" class="mobile-nav-link mobile-online-highlight active"><i class="fas fa-crosshairs"></i> Online 28HR Armed Course ($200)</a>
+            <a href="../courses.html" class="mobile-nav-link"><i class="fas fa-list-check"></i> Courses</a>
+            <a href="../index.html#helpful-info" class="mobile-nav-link"><i class="fas fa-circle-info"></i> Helpful Info &amp; Reciprocity</a>
+            <a href="../index.html#jobs" class="mobile-nav-link"><i class="fas fa-briefcase"></i> Job Placement</a>
+            <a href="../index.html#reviews" class="mobile-nav-link"><i class="fas fa-star"></i> Reviews &amp; Instructor</a>
+            <a href="../index.html#contact" class="mobile-nav-link"><i class="fas fa-paper-plane"></i> Contact &amp; Locations</a>
+        </nav>
+        <div class="drawer-contact-footer">
+            <a href="tel:7738732591" class="drawer-phone-btn"><i class="fas fa-phone"></i> (773) 873-2591</a>
+            <p>200 E 75th St, Chicago, IL 60619 &bull; Eagle Sports Range</p>
+        </div>
+    </div>
+    <div class="drawer-backdrop" id="drawer-backdrop" onclick="app.toggleMobileDrawer(false)"></div>
 
     <!-- Main Container Views -->
     <main class="app-main">
@@ -301,82 +355,111 @@
                     </div>
 
                     <div class="auth-gate-secondary-links">
-                        <span>Looking for the $40 Unarmed Course? <a href="../course/index.html">Open Unarmed Portal</a> &bull; <a href="../index.html">Platforms Home</a></span>
+                        <span>Looking for the $50 Unarmed Course? <a href="../course/index.html">Open Unarmed Portal</a> &bull; <a href="../index.html">Platforms Home</a></span>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- ===============================================================
-             VIEW 0B: Mandatory Armed Course Enrollment & Payment Gate ($200.00)
+             VIEW 0B: Mandatory Armed Course Range Date Selection & Payment Gate ($200.00)
              =============================================================== -->
         <section id="view-payment-gate" class="view-section">
             <div class="payment-gate-wrapper">
-                <div class="payment-gate-card">
+                <div class="payment-gate-card" style="max-width:780px;">
                     <div class="payment-gate-icon">
-                        <i class="fas fa-credit-card"></i>
+                        <i class="fas fa-calendar-check"></i>
                     </div>
                     <span class="payment-gate-badge">
-                        <i class="fas fa-crosshairs"></i> IDFPR 68 IAC 1240.510 &bull; 28-Hour Armed Security ("Tan Card") Certification
+                        <i class="fas fa-crosshairs"></i> IDFPR 68 IAC 1240.510 &bull; 28-Hour Armed Security ("Tan Card") Enrollment
                     </span>
-                    <h2 class="payment-gate-title">Armed Course Enrollment &amp; Payment Required</h2>
+                    <h2 class="payment-gate-title">Select In-Person Qualification Date &amp; Complete Enrollment</h2>
                     <p class="payment-gate-desc">
                         Welcome, <strong id="payment-gate-officer-name">Student Officer</strong> (<span id="payment-gate-officer-email">student@platformstraining.com</span>).
-                        Your trainee account is authenticated. Complete your one-time <strong>$200.00 all-inclusive tuition</strong> below to unlock all 10 online armed security modules, the 50-question written examination, AND your included Live-Fire Range Qualification at Eagle Sports Range!
+                        Per Academy &amp; IDFPR enrollment requirements, you must first <strong>select your In-Person 8-Hour Live-Fire Qualification Date</strong> at Eagle Sports Range (<strong>Step 1</strong>) before completing your <strong>$200.00 all-inclusive tuition payment</strong> and unlocking access to the 20-Hour Online Armed Course (<strong>Step 2</strong>).
                     </p>
 
-                    <!-- Price Card Callout -->
-                    <div class="payment-gate-price-card">
-                        <div class="payment-gate-price-info">
-                            <span class="payment-gate-plan-name">Online Armed Security Course (20-Hr Online + 8-Hr Range)</span>
-                            <span class="payment-gate-plan-sub">Includes Eagle Sports Range Fee, Qualification Ammo &amp; Targets!</span>
+                    <!-- STEP 1: Mandatory In-Person Range Qualification Date Selection -->
+                    <div class="armed-gate-step-box" id="armed-gate-step1-box">
+                        <div class="armed-gate-step-header">
+                            <span class="armed-gate-step-pill" id="armed-gate-step1-pill">
+                                <i class="fas fa-calendar-day"></i> STEP 1 OF 2 &bull; REQUIRED BEFORE PAYMENT
+                            </span>
+                            <h3><i class="fas fa-bullseye" style="color:#d4af37;"></i> Select Your In-Person 8-Hour Range Qualification Date</h3>
                         </div>
-                        <div class="payment-gate-price-box">
-                            <span class="payment-gate-currency">$</span>
-                            <span class="payment-gate-amount">200</span>
-                            <span class="payment-gate-period">.00</span>
+                        <p class="armed-gate-step-desc">
+                            Choose an available weekend live-fire qualification session at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong>. Range fees, targets, and 50 rounds of qualification ammunition are 100% included in your $200 tuition (10 seats max per class):
+                        </p>
+
+                        <div id="armed-gate-range-dates-grid" class="armed-gate-dates-grid">
+                            <!-- Dynamically populated from ../data/calendar.json -->
+                        </div>
+
+                        <div class="armed-gate-contact-row">
+                            <div class="armed-gate-input-group">
+                                <label for="armed-gate-student-phone"><i class="fas fa-phone-alt" style="color:#d4af37;"></i> Mobile Phone Number (Required for Range Roster):</label>
+                                <input type="tel" id="armed-gate-student-phone" class="armed-gate-input" placeholder="(773) 555-0199" oninput="app.updatePaymentGateActionUI()">
+                            </div>
+                            <div class="armed-gate-input-group">
+                                <label for="armed-gate-student-notes"><i class="fas fa-crosshairs" style="color:#d4af37;"></i> Handgun Platform Preference (Optional):</label>
+                                <input type="text" id="armed-gate-student-notes" class="armed-gate-input" placeholder="9mm Semi-Auto / .38 Revolver / Rental" oninput="app.updatePaymentGateActionUI()">
+                            </div>
+                        </div>
+
+                        <div id="armed-gate-selected-date-banner" class="armed-gate-selected-banner">
+                            <i class="fas fa-hand-pointer" style="color:#fbbf24; font-size:1.1rem;"></i>
+                            <span><strong>No Qualification Date Selected Yet:</strong> Click an open weekend date card above to reserve your range seat and unlock Step 2 payment.</span>
                         </div>
                     </div>
 
-                    <!-- Features Grid -->
-                    <div class="payment-gate-features-grid">
-                        <div class="payment-gate-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <strong>20-Hour Online Armed Classroom (10 Modules)</strong>
-                                <span>Gun safety, revolver &amp; semi-auto mechanics, malfunctions, marksmanship &amp; 720 ILCS 5/7-1 deadly force.</span>
-                            </div>
+                    <!-- STEP 2: Tuition Payment & Course Unlock -->
+                    <div class="armed-gate-step-box" id="armed-gate-step2-box" style="margin-bottom:14px;">
+                        <div class="armed-gate-step-header">
+                            <span class="armed-gate-step-pill pill-locked" id="armed-gate-step2-pill">
+                                <i class="fas fa-lock"></i> STEP 2 OF 2 &bull; LOCKED UNTIL RANGE DATE SELECTED
+                            </span>
+                            <h3 id="armed-gate-step2-heading"><i class="fas fa-credit-card" style="color:#d4af37;"></i> Complete All-Inclusive Tuition Payment ($200.00) &amp; Unlock Course</h3>
                         </div>
-                        <div class="payment-gate-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <strong>34 Technical Diagrams &amp; Tactical Simulators</strong>
-                                <span>Official Academy firearm diagrams, Instructor Charles Young field narrations, and mastery quizzes.</span>
-                            </div>
-                        </div>
-                        <div class="payment-gate-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <strong>8-Hr Eagle Sports Range Qualification Included</strong>
-                                <span>Range fees, targets &amp; 50 rounds of qualification ammo at Eagle Sports Range are 100% included!</span>
-                            </div>
-                        </div>
-                        <div class="payment-gate-feature">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <strong>Instant Classroom Cert &amp; Paid Range Voucher</strong>
-                                <span>Download immediately upon passing the exam; present at range day for final IDFPR IL486-1138 sign-off.</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Checkout Actions -->
-                    <div class="payment-gate-actions">
-                        <button class="btn-payment-gate-checkout" onclick="app.initiateCourseEnrollmentPayment()">
-                            <i class="fas fa-lock"></i> Pay All-Inclusive Tuition &amp; Unlock Armed Course ($200.00)
-                        </button>
-                        <div class="payment-gate-guarantee">
-                            <i class="fas fa-shield-alt"></i> Secure Stripe Checkout &bull; Includes Online Course + Range Fee + Ammo + Targets
+                        <!-- Price Card Callout -->
+                        <div class="payment-gate-price-card" style="margin-top:10px;">
+                            <div class="payment-gate-price-info">
+                                <span class="payment-gate-plan-name">Online Armed Security Course (20-Hr Online + 8-Hr Range)</span>
+                                <span class="payment-gate-plan-sub">Includes Eagle Sports Range Fee, Qualification Ammo &amp; Targets!</span>
+                            </div>
+                            <div class="payment-gate-price-box">
+                                <span class="payment-gate-currency">$</span>
+                                <span class="payment-gate-amount" id="armed-gate-price-amount">200</span>
+                                <span class="payment-gate-period">.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Features Grid -->
+                        <div class="payment-gate-features-grid">
+                            <div class="payment-gate-feature">
+                                <i class="fas fa-check-circle"></i>
+                                <div>
+                                    <strong>20-Hour Online Armed Classroom (10 Modules)</strong>
+                                    <span>Gun safety, revolver &amp; semi-auto mechanics, malfunctions, marksmanship &amp; 720 ILCS 5/7-1 deadly force.</span>
+                                </div>
+                            </div>
+                            <div class="payment-gate-feature">
+                                <i class="fas fa-check-circle"></i>
+                                <div>
+                                    <strong>8-Hr Eagle Sports Range Qualification Included</strong>
+                                    <span>Range fees, targets &amp; 50 rounds of qualification ammo on your selected date are 100% included!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Actions -->
+                        <div class="payment-gate-actions" style="margin-top:14px;">
+                            <button id="btn-armed-gate-pay" class="btn-payment-gate-checkout btn-locked" disabled onclick="app.initiateCourseEnrollmentPayment()">
+                                <i class="fas fa-calendar-alt"></i> Select an In-Person Qualification Date in Step 1 to Unlock Payment ($200.00)
+                            </button>
+                            <div class="payment-gate-guarantee">
+                                <i class="fas fa-shield-alt"></i> Secure Stripe Checkout &bull; Reserves Your Selected Range Seat + Unlocks All 10 Online Modules
+                            </div>
                         </div>
                     </div>
 
@@ -453,8 +536,12 @@
                 <div class="orientation-banner-text">
                     <h3><i class="fas fa-compass" style="color:var(--brand-green);"></i> Armed Candidate Orientation: Online Classroom &rarr; Eagle Sports Range</h3>
                     <p>
-                        Master all 10 sequential armed modules (Study Material, Tactical Scenario Simulator, and Check on Learning) to unlock the <strong>1-Hour, 50-Question Written Examination (75% required, 2 attempts maximum)</strong>. Upon passing, download your official Classroom Certificate &amp; Paid Range Voucher and reserve your included live-fire qualification date at Eagle Sports Range!
+                        Master all 10 sequential armed modules (Study Material, Tactical Scenario Simulator, and Check on Learning) to unlock the <strong>1-Hour, 50-Question Written Examination (75% required, 2 attempts maximum)</strong>. Upon passing, download your official Classroom Certificate &amp; Paid Range Voucher to bring to your scheduled live-fire qualification at Eagle Sports Range!
                     </p>
+                    <div id="overview-confirmed-range-date" style="margin-top:10px; padding:8px 12px; border-radius:6px; background:rgba(16, 185, 129, 0.14); border:1px solid #10b981; color:#ffffff; font-size:0.86rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-calendar-check" style="color:#34d399;"></i>
+                        <span><strong>Confirmed In-Person Range Qualification:</strong> <span id="overview-range-date-text">Scheduled at Eagle Sports Range</span></span>
+                    </div>
                 </div>
                 <div style="display:flex; gap:12px; flex-wrap:wrap;">
                     <button class="btn-secondary" onclick="app.openNavigationGuide()">
@@ -725,6 +812,10 @@
                         Under <strong>68 Ill. Adm. Code 1240.510</strong>, completing this 20-hour online armed classroom course satisfies Phase 1 of your 28-Hour Illinois Firearm Control Card ("Tan Card") certification. Download and print your sealed certificate below—it doubles as your <strong>PAID Range Qualification Voucher</strong>—and reserve an upcoming weekend range session where Instructor Charles Young will administer your 50-round qualification and sign off your final IDFPR Firearm Training Certificate (Form IL486-1138).
                     </p>
                     <div class="range-voucher-grid">
+                        <div class="range-voucher-item">
+                            <strong>Confirmed Qualification Date</strong>
+                            <span id="voucher-confirmed-range-date" style="color:#34d399; font-weight:700;">Scheduled Range Session</span>
+                        </div>
                         <div class="range-voucher-item">
                             <strong>Range Facility</strong>
                             Eagle Sports Range &bull; 5900 W 159th St, Oak Forest, IL 60452
@@ -1308,18 +1399,57 @@
         <span id="lms-toast-msg">Progress saved successfully!</span>
     </div>
 
-    <!-- Footer -->
+    <!-- TACTICAL FOOTER (COMPACT & FULL-WIDTH) -->
     <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy Wordmark" style="height:36px; width:auto; max-width:160px; object-fit:contain;">
-                <div>
-                    <strong style="color:var(--text-white); font-size:0.86rem;">Platforms Training Academy</strong><br>
-                    <span style="font-size:0.78rem; color:var(--text-muted);">200 E 75th St, Chicago, IL 60619 &bull; (773) 873-2591 &bull; Eagle Sports Range</span>
+        <div class="site-container footer-container-wide">
+            <div class="footer-grid">
+                <div class="footer-brand-col">
+                    <div class="footer-brand">
+                        <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="footer-logo">
+                    </div>
+                    <p class="footer-tagline">
+                        Chicago's trusted provider of professional security officer licensing, tactical defense, and Illinois concealed carry training.
+                    </p>
+                    <div class="footer-creds">
+                        <span><i class="fas fa-shield-alt text-green"></i> IDFPR Approved</span>
+                        <span><i class="fas fa-medal text-green"></i> 18-Year Combat Veteran Owned</span>
+                    </div>
+                </div>
+
+                <div class="footer-links-col">
+                    <h4>Training Programs</h4>
+                    <ul>
+                        <li><a href="../course/index.html">Online 20HR Unarmed Course ($50)</a></li>
+                        <li><a href="./index.html">Online 28HR Armed Course ($200)</a></li>
+                        <li><a href="../courses.html">Security Firearm Requalification ($125)</a></li>
+                        <li><a href="../courses.html">16-Hour Concealed Carry ($200)</a></li>
+                        <li><a href="../courses.html">8-Hour Military &amp; LEO CCL ($125)</a></li>
+                        <li><a href="../courses.html">3-Hour CCL Refresher ($125)</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-col">
+                    <h4>State Portals</h4>
+                    <ul>
+                        <li><a href="https://www.ispfsb.com" target="_blank" rel="noopener">Illinois State Police (ISP)</a></li>
+                        <li><a href="https://idfpr.illinois.gov" target="_blank" rel="noopener">IDFPR P.E.R.C. Portal</a></li>
+                        <li><a href="https://www.ilga.gov" target="_blank" rel="noopener">Illinois General Assembly</a></li>
+                        <li><a href="https://www.amlegal.com" target="_blank" rel="noopener">Chicago Municipal Code</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact-col">
+                    <h4>Academy Contact</h4>
+                    <p><i class="fas fa-phone-alt text-green"></i> (773) 873-2591</p>
+                    <p><i class="fas fa-envelope text-green"></i> charlesyoung@platformstraining.com</p>
+                    <p><i class="fas fa-building text-green"></i> 200 E 75th St, Chicago, IL 60619</p>
+                    <p><i class="fas fa-bullseye text-green"></i> Range: Eagle Sports Range</p>
                 </div>
             </div>
-            <div class="footer-copy">
-                &copy; 2026 Platforms Training Academy. All rights reserved. &bull; <a href="../index.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-home"></i> Home</a> &bull; <a href="../courses.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-list-check"></i> Course Catalog</a> &bull; <a href="../calendar.html?course=armed-28&paid=true" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-calendar-alt"></i> Range Schedule</a>
+
+            <div class="footer-bottom-row">
+                <p>&copy; 2013&ndash;2026 PLATFORMS TRAINING ACADEMY. All Rights Reserved.</p>
+                <p class="footer-legal">Compliant with IDFPR Under 225 ILCS 447 &bull; Equal Opportunity Training Facility</p>
             </div>
         </div>
     </footer>
@@ -1327,6 +1457,6 @@
     <!-- Standalone Armed Academy Scripts -->
     <script src="config.js?v=2.0"></script>
     <script src="data.js?v=6.0"></script>
-    <script src="app.js?v=6.0"></script>
+    <script src="app.js?v=6.2"></script>
 </body>
 </html>

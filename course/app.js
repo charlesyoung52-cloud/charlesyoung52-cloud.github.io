@@ -1491,6 +1491,10 @@ class SecurityCourseApp {
 
         this.stopSpeech();
         this.currentView = viewName;
+        if (document.body) {
+            document.body.classList.toggle('lms-gate-active', viewName === 'auth-gate' || viewName === 'payment-gate');
+        }
+        this.toggleMobileDrawer(false);
 
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));

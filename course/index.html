@@ -21,7 +21,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Sacramento&display=swap" rel="stylesheet">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=5.0">
+    <link rel="stylesheet" href="styles.css?v=6.2">
 
 
 
@@ -30,7 +30,7 @@
     <script src="assets/pdf-lib.min.js"></script>
     <script src="assets/cert_template_base64.js"></script>
 </head>
-<body>
+<body class="lms-gate-active">
 
     <!-- Admin Evaluation Mode Banner (Unlocked via Charles Young Admin PIN) -->
     <div class="admin-mode-banner" id="admin-mode-banner" style="display:none;">
@@ -49,9 +49,9 @@
                 <span class="cred-badge badge-nra"><i class="fas fa-crosshairs"></i> NRA Certified Law Enforcement Instructor</span>
             </div>
             <div class="top-contact-links">
-                <span class="top-link"><i class="fas fa-phone-alt"></i> (773) 873-2591</span>
+                <a href="tel:7738732591" class="top-link"><i class="fas fa-phone-alt"></i> (773) 873-2591</a>
                 <span class="top-sep top-sep-email">|</span>
-                <span class="top-link top-link-email"><i class="fas fa-envelope"></i> charlesyoung@platformstraining.com</span>
+                <a href="mailto:charlesyoung@platformstraining.com" class="top-link top-link-email"><i class="fas fa-envelope"></i> charlesyoung@platformstraining.com</a>
                 <span class="top-sep">|</span>
                 <span class="top-loc"><i class="fas fa-map-marker-alt"></i> 200 E 75th St, Chicago, IL</span>
             </div>
@@ -65,7 +65,26 @@
                 <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="brand-logo-img brand-logo">
             </a>
 
+            <!-- Main Website Navigation (Shown on Sign-In / Enrollment Gate) -->
+            <nav class="desktop-site-nav" aria-label="Main Navigation">
+                <a href="./index.html" class="nav-item nav-item-online active" title="Online 20HR Unarmed Security Course ($50)">
+                    <i class="fas fa-laptop-code"></i> Online Unarmed <span class="nav-online-pulse"></span>
+                </a>
+                <a href="../armed-course/index.html" class="nav-item nav-item-online" title="Online 28HR Armed Security Course ($200)">
+                    <i class="fas fa-crosshairs"></i> Online Armed <span class="nav-online-pulse"></span>
+                </a>
+                <a href="../courses.html" class="nav-item"><i class="fas fa-list-check"></i> Courses</a>
+                <a href="../index.html#helpful-info" class="nav-item"><i class="fas fa-circle-info"></i> Helpful Info</a>
+                <a href="../index.html#jobs" class="nav-item"><i class="fas fa-briefcase"></i> Jobs</a>
+                <a href="../index.html#reviews" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+                <a href="../index.html#contact" class="nav-item"><i class="fas fa-paper-plane"></i> Contact</a>
+            </nav>
+
+            <!-- Course LMS Navigation (Shown once inside Course Modules / Exam) -->
             <nav class="main-nav">
+                <a href="../index.html" class="nav-btn" style="text-decoration:none;">
+                    <i class="fas fa-globe"></i> Main Site
+                </a>
                 <button class="nav-btn" data-view="overview">
                     <i class="fas fa-home"></i> Overview
                 </button>
@@ -79,6 +98,15 @@
                     <i class="fas fa-certificate"></i> Certificate
                 </button>
             </nav>
+
+            <div class="header-gate-cta">
+                <a href="../courses.html" class="header-book-btn">
+                    <i class="fas fa-calendar-check"></i> Book Course
+                </a>
+                <button class="mobile-toggle-btn" onclick="app.toggleMobileDrawer(true)" aria-label="Toggle Navigation Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
 
             <div class="header-actions">
                 <button class="btn-guide-header" onclick="app.openNavigationGuide()" title="Course Navigation Guide">
@@ -102,6 +130,32 @@
             <div class="course-progress-fill" id="global-progress-fill"></div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="mobile-drawer-header">
+            <div class="drawer-brand">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="drawer-logo">
+            </div>
+            <button class="drawer-close-btn" onclick="app.toggleMobileDrawer(false)" aria-label="Close Menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="./index.html" class="mobile-nav-link mobile-online-highlight active"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course ($50)</a>
+            <a href="../armed-course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-crosshairs"></i> Online 28HR Armed Course ($200)</a>
+            <a href="../courses.html" class="mobile-nav-link"><i class="fas fa-list-check"></i> Courses</a>
+            <a href="../index.html#helpful-info" class="mobile-nav-link"><i class="fas fa-circle-info"></i> Helpful Info &amp; Reciprocity</a>
+            <a href="../index.html#jobs" class="mobile-nav-link"><i class="fas fa-briefcase"></i> Job Placement</a>
+            <a href="../index.html#reviews" class="mobile-nav-link"><i class="fas fa-star"></i> Reviews &amp; Instructor</a>
+            <a href="../index.html#contact" class="mobile-nav-link"><i class="fas fa-paper-plane"></i> Contact &amp; Locations</a>
+        </nav>
+        <div class="drawer-contact-footer">
+            <a href="tel:7738732591" class="drawer-phone-btn"><i class="fas fa-phone"></i> (773) 873-2591</a>
+            <p>200 E 75th St, Chicago, IL 60619 &bull; Eagle Sports Range</p>
+        </div>
+    </div>
+    <div class="drawer-backdrop" id="drawer-backdrop" onclick="app.toggleMobileDrawer(false)"></div>
 
     <!-- Main Container Views -->
     <main class="app-main">
@@ -452,8 +506,9 @@
                             Your browser does not support HTML5 video.
                         </video>
                     </div>
-
                 </div>
+            </div>
+
             <!-- Student Orientation & Course Navigation Banner -->
             <div class="orientation-banner-card">
                 <div class="orientation-banner-text">
@@ -1353,18 +1408,57 @@
         <span id="lms-toast-msg">Progress saved successfully!</span>
     </div>
 
-    <!-- Footer (Compact & Wide Layout) -->
+    <!-- TACTICAL FOOTER (COMPACT & FULL-WIDTH) -->
     <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy Wordmark" style="height:36px; width:auto; max-width:160px; object-fit:contain;">
-                <div>
-                    <strong style="color:var(--text-white); font-size:0.86rem;">Platforms Training Academy</strong><br>
-                    <span style="font-size:0.78rem; color:var(--text-muted);">200 E 75th St, Chicago, IL 60619 &bull; (773) 873-2591 &bull; Eagle Sports Range</span>
+        <div class="site-container footer-container-wide">
+            <div class="footer-grid">
+                <div class="footer-brand-col">
+                    <div class="footer-brand">
+                        <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="footer-logo">
+                    </div>
+                    <p class="footer-tagline">
+                        Chicago's trusted provider of professional security officer licensing, tactical defense, and Illinois concealed carry training.
+                    </p>
+                    <div class="footer-creds">
+                        <span><i class="fas fa-shield-alt text-green"></i> IDFPR Approved</span>
+                        <span><i class="fas fa-medal text-green"></i> 18-Year Combat Veteran Owned</span>
+                    </div>
+                </div>
+
+                <div class="footer-links-col">
+                    <h4>Training Programs</h4>
+                    <ul>
+                        <li><a href="./index.html">Online 20HR Unarmed Course ($50)</a></li>
+                        <li><a href="../armed-course/index.html">Online 28HR Armed Course ($200)</a></li>
+                        <li><a href="../courses.html">Security Firearm Requalification ($125)</a></li>
+                        <li><a href="../courses.html">16-Hour Concealed Carry ($200)</a></li>
+                        <li><a href="../courses.html">8-Hour Military &amp; LEO CCL ($125)</a></li>
+                        <li><a href="../courses.html">3-Hour CCL Refresher ($125)</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links-col">
+                    <h4>State Portals</h4>
+                    <ul>
+                        <li><a href="https://www.ispfsb.com" target="_blank" rel="noopener">Illinois State Police (ISP)</a></li>
+                        <li><a href="https://idfpr.illinois.gov" target="_blank" rel="noopener">IDFPR P.E.R.C. Portal</a></li>
+                        <li><a href="https://www.ilga.gov" target="_blank" rel="noopener">Illinois General Assembly</a></li>
+                        <li><a href="https://www.amlegal.com" target="_blank" rel="noopener">Chicago Municipal Code</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact-col">
+                    <h4>Academy Contact</h4>
+                    <p><i class="fas fa-phone-alt text-green"></i> (773) 873-2591</p>
+                    <p><i class="fas fa-envelope text-green"></i> charlesyoung@platformstraining.com</p>
+                    <p><i class="fas fa-building text-green"></i> 200 E 75th St, Chicago, IL 60619</p>
+                    <p><i class="fas fa-bullseye text-green"></i> Range: Eagle Sports Range</p>
                 </div>
             </div>
-            <div class="footer-copy">
-                &copy; 2026 Platforms Training Academy. All rights reserved. &bull; <a href="../index.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-home"></i> Home</a> &bull; <a href="../courses.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-list-check"></i> Course Catalog</a>
+
+            <div class="footer-bottom-row">
+                <p>&copy; 2013&ndash;2026 PLATFORMS TRAINING ACADEMY. All Rights Reserved.</p>
+                <p class="footer-legal">Compliant with IDFPR Under 225 ILCS 447 &bull; Equal Opportunity Training Facility</p>
             </div>
         </div>
     </footer>
@@ -1372,7 +1466,7 @@
     <!-- Standalone Academy Scripts -->
     <script src="config.js?v=2.0"></script>
     <script src="data.js?v=3.6"></script>
-    <script src="app.js?v=5.1"></script>
+    <script src="app.js?v=6.2"></script>
 </body>
 
 
