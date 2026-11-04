@@ -332,16 +332,21 @@
         .cal-layout > * {
             min-width: 0;
         }
+        .sessions-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
         .session-row {
             background: #11141a;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 16px 20px;
+            border-radius: 6px;
+            padding: 9px 14px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 14px 18px;
+            gap: 10px 14px;
             transition: border-color 0.15s ease;
             box-sizing: border-box;
             width: 100%;
@@ -352,37 +357,39 @@
         .session-row-left {
             display: flex;
             align-items: center;
-            gap: 16px;
-            flex: 1 1 300px;
+            gap: 12px;
+            flex: 1 1 260px;
             min-width: 0;
         }
         .session-date-box {
-            min-width: 78px;
+            min-width: 64px;
             flex-shrink: 0;
             text-align: center;
-            padding-right: 16px;
+            padding-right: 12px;
             border-right: 1px solid rgba(255, 255, 255, 0.08);
         }
         .session-date-mon {
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             font-weight: 700;
             color: #d4af37;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.7px;
+            line-height: 1;
         }
         .session-date-num {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 1.35rem;
+            font-size: 1.18rem;
             font-weight: 700;
             color: #fff;
-            line-height: 1.1;
-            margin: 2px 0;
+            line-height: 1.05;
+            margin: 1px 0;
             white-space: nowrap;
         }
         .session-date-dow {
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             color: #ffffff;
             white-space: nowrap;
+            line-height: 1;
         }
         .session-details {
             min-width: 0;
@@ -390,29 +397,29 @@
         }
         .session-details h4 {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 1.15rem;
+            font-size: 1.02rem;
             font-weight: 700;
             color: #fff;
-            margin: 0 0 4px 0;
+            margin: 0 0 2px 0;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 6px 8px;
-            line-height: 1.25;
+            gap: 4px 6px;
+            line-height: 1.2;
         }
         .session-submeta {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px 12px;
-            font-size: 0.83rem;
-            color: #ffffff;
-            line-height: 1.4;
+            gap: 4px 10px;
+            font-size: 0.78rem;
+            color: #e2e8f0;
+            line-height: 1.3;
         }
         .session-row-right {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 14px;
+            gap: 10px;
             flex-wrap: wrap;
             margin-left: auto;
         }
@@ -421,24 +428,24 @@
         }
         .session-price-val {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: #fff;
             line-height: 1;
         }
         .session-seats-val {
-            font-size: 0.76rem;
+            font-size: 0.72rem;
             color: #ffffff;
-            margin-top: 3px;
+            margin-top: 2px;
             white-space: nowrap;
         }
         .btn-book-clean {
             background: #1e190f;
             color: #ffffff;
             border: 1px solid #d4af37;
-            padding: 9px 16px;
-            border-radius: 6px;
-            font-size: 0.84rem;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.78rem;
             font-weight: 600;
             cursor: pointer;
             transition: opacity 0.15s ease;
@@ -446,7 +453,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             white-space: nowrap;
             box-sizing: border-box;
         }
@@ -617,7 +624,7 @@
             </a>
 
             <nav class="desktop-nav" aria-label="Main Navigation">
-                <a href="./course/index.html" class="nav-item nav-item-online" title="Online 20HR Unarmed Security Course ($40)">
+                <a href="./course/index.html" class="nav-item nav-item-online" title="Online 20HR Unarmed Security Course ($50)">
                     <i class="fas fa-laptop-code"></i> Online Unarmed <span class="nav-online-pulse"></span>
                 </a>
                 <a href="./armed-course/index.html" class="nav-item nav-item-online" title="Online 28HR Armed Security Course ($200)">
@@ -652,7 +659,7 @@
             </button>
         </div>
         <nav class="mobile-nav-links">
-            <a href="./course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course ($40)</a>
+            <a href="./course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course ($50)</a>
             <a href="./armed-course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-crosshairs"></i> Online 28HR Armed Course ($200)</a>
             <a href="courses.html" class="mobile-nav-link"><i class="fas fa-list-check"></i> Courses</a>
             <a href="index.html#helpful-info" class="mobile-nav-link"><i class="fas fa-circle-info"></i> Helpful Info &amp; Reciprocity</a>
@@ -686,7 +693,7 @@
             <div class="cal-course-tabs" id="cal-course-tabs">
                 <div class="cal-tabs-row">
                     <button class="cal-course-tab active" data-course="all" onclick="selectCourseFilter('all')">All Courses</button>
-                    <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($40)</button>
+                    <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($50)</button>
                     <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Online Armed — Range Qual ($200)</button>
                     <button class="cal-course-tab" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">Firearm Requal ($125)</button>
                     <button class="cal-course-tab" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">Firearm Upgrade ($125)</button>
@@ -811,7 +818,7 @@
                 <div class="footer-links-col">
                     <h4>Training Programs</h4>
                     <ul>
-                        <li><a href="./course/index.html">Online 20HR Unarmed Course ($40)</a></li>
+                        <li><a href="./course/index.html">Online 20HR Unarmed Course ($50)</a></li>
                         <li><a href="./armed-course/index.html">Online 28HR Armed Course ($200)</a></li>
                         <li><a href="courses.html">Security Firearm Requalification ($125)</a></li>
                         <li><a href="courses.html">16-Hour Concealed Carry ($200)</a></li>
@@ -906,7 +913,7 @@
 
             if (loaded) {
                 if (loaded.courses && loaded.courses['unarmed-20']) {
-                    loaded.courses['unarmed-20'].price = '$40';
+                    loaded.courses['unarmed-20'].price = '$50';
                 }
                 calendarData = loaded;
             }
@@ -1233,7 +1240,7 @@
                         </div>
                         <div class="session-row-right" style="flex-wrap:wrap;">
                             <div class="session-price-meta">
-                                <div class="session-price-val">$40</div>
+                                <div class="session-price-val">$50</div>
                                 <div class="session-seats-val">Open Enrollment</div>
                             </div>
                             <a href="./course/index.html" class="btn-book-clean"><i class="fas fa-play" style="color:#d4af37; margin-right:6px;"></i> Start Online Course</a>

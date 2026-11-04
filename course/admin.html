@@ -1868,13 +1868,13 @@
                 // Payment pill (Clean indicator without IDFPR Approved)
                 let paymentPill = `
                     <span class="badge badge-success" style="font-size:0.76rem; padding:3px 8px;">
-                        <i class="fas fa-check-circle"></i> ${isArmedRow ? '$200 PAID' : '$40 PAID'}
+                        <i class="fas fa-check-circle"></i> ${isArmedRow ? '$200 PAID' : '$50 PAID'}
                     </span>
                 `;
                 if (!s.is_paid) {
                     paymentPill = `
                         <span class="badge badge-warning" style="font-size:0.75rem; padding:3px 8px;">
-                            <i class="fas fa-clock"></i> Pending (${isArmedRow ? '$200' : '$40'})
+                            <i class="fas fa-clock"></i> Pending (${isArmedRow ? '$200' : '$50'})
                         </span>
                     `;
                 }
@@ -2025,7 +2025,7 @@
                 isArmed ? '"28-HR ONLINE ARMED"' : '"20-HR ONLINE UNARMED"',
                 `"${(s.email || '').replace(/"/g, '""')}"`,
                 `"${(s.agency || '').replace(/"/g, '""')}"`,
-                s.is_paid ? (isArmed ? "PAID $200" : "PAID $40") : "UNPAID",
+                s.is_paid ? (isArmed ? "PAID $200" : "PAID $50") : "UNPAID",
                 `"${s.payment_date || s.created_at || ''}"`,
                 s.mfa_verified ? "YES" : "NO",
                 `"${s.mfa_verified_at || ''}"`,

@@ -8,7 +8,7 @@ const COURSE_DATABASE = {
     "unarmed-20": {
         title: "20 HR UNARMED SECURITY COURSE",
         category: "IDFPR State-Mandated Security Training (PERC Card)",
-        price: "$40.00",
+        price: "$50.00",
         stripeUrl: "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00",
         duration: "Self-Paced (20 Hours Online)",
         location: "100% Online LMS Portal (Phone, Tablet, or PC)",
@@ -229,7 +229,7 @@ function openCourseModal(courseId) {
         <div class="modal-actions-footer" style="flex-wrap:wrap; gap:10px;">
             ${courseId === 'unarmed-20' ? `
             <a href="./course/index.html" class="btn-card-online btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
-                <i class="fas fa-play"></i> Start Online Course ($40)
+                <i class="fas fa-play"></i> Start Online Course ($50)
             </a>
             ` : courseId === 'armed-28' ? `
             <a href="./armed-course/index.html" class="btn-card-online btn-large" style="flex:1; min-width:210px; text-align:center; justify-content:center;">

@@ -137,7 +137,7 @@ class SecurityCourseApp {
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
             setTimeout(() => {
-                this.manualSaveProgress("Course enrollment confirmed ($40.00)! Full 20-hour curriculum unlocked.");
+                this.manualSaveProgress("Course enrollment confirmed ($50.00)! Full 20-hour curriculum unlocked.");
             }, 500);
         }
 
@@ -1173,7 +1173,7 @@ class SecurityCourseApp {
                 verified: true,
                 token: token,
                 source: sessionIdOrSource,
-                amount: 40,
+                amount: 50,
                 paidAt: new Date().toISOString()
             };
             localStorage.setItem('platforms_payment_receipt_' + cleanEmail, JSON.stringify(receipt));
@@ -1231,7 +1231,7 @@ class SecurityCourseApp {
                 verified: true,
                 token: token,
                 source: 'stripe_verified',
-                amount: 40,
+                amount: 50,
                 paidAt: new Date().toISOString()
             }));
             hasValidReceipt = true;
@@ -2560,7 +2560,7 @@ class SecurityCourseApp {
                 if (payGate) payGate.style.display = 'block';
                 if (certForm) certForm.style.display = 'none';
                 if (mainActionBtn) {
-                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($40.00)`;
+                    mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Authorize Certification & Payment ($50.00)`;
                     mainActionBtn.onclick = () => {
                         if (payGate) payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     };
@@ -3351,7 +3351,7 @@ class SecurityCourseApp {
             this.showView('overview');
             this.manualSaveProgress("Stripe payment verified! Full 20-Hour Course Unlocked.");
         } else {
-            alert("Could not verify an active Stripe payment with that ID. Please complete the $40.00 payment via the button above or contact Instructor Charles Young at (773) 873-2591.");
+            alert("Could not verify an active Stripe payment with that ID. Please complete the $50.00 payment via the button above or contact Instructor Charles Young at (773) 873-2591.");
         }
     }
 
@@ -3366,7 +3366,7 @@ class SecurityCourseApp {
             this.showView('overview');
             this.manualSaveProgress("Instructor authorization code applied! Course access unlocked.");
         } else {
-            alert("Invalid authorization code. Course payment ($40.00) is required to access the course.");
+            alert("Invalid authorization code. Course payment ($50.00) is required to access the course.");
         }
     }
 
@@ -3755,7 +3755,7 @@ class SecurityCourseApp {
                     <div class="admin-stat-lbl">Active Candidate</div>
                 </div>
                 <div class="admin-stat-card">
-                    <div class="admin-stat-val">${this.isPaid ? '$40' : '$0'}</div>
+                    <div class="admin-stat-val">${this.isPaid ? '$50' : '$0'}</div>
                     <div class="admin-stat-lbl">Revenue Authorized</div>
                 </div>
                 <div class="admin-stat-card">

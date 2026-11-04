@@ -5471,3 +5471,24 @@ button:disabled.btn-primary {
     border-color: #f3d06b;
     box-shadow: 0 2px 12px rgba(212, 175, 55, 0.25);
 }
+
+.auth-gate-circle-logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 18px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
+    padding: 6px;
+    box-sizing: border-box;
+}
+.auth-gate-circle-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
