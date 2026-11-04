@@ -502,6 +502,24 @@ class SecurityCourseApp {
         const passInput = document.getElementById('auth-login-password');
         const rawEmail = (emailInput && emailInput.value.trim().toLowerCase()) || '';
         const rawPassword = (passInput && passInput.value) || '';
+        const cleanPass = rawPassword.trim();
+
+        // Direct Instructor God Mode Login from Sign-In Box
+        if (rawEmail === '7738732591' || cleanPass === '7738732591' || cleanPass === 'Young$7738732591!' || rawEmail === 'young$7738732591!') {
+            this.isAdminMode = true;
+            sessionStorage.setItem('pta_admin_auth', 'authorized');
+            sessionStorage.setItem('platforms_admin_mode', 'true');
+            localStorage.removeItem('platforms_admin_mode');
+            this.saveState();
+            this.updateAdminModeUI();
+            this.closeAdminLoginModal();
+            this.renderLessonsSidebar();
+            this.renderOverviewGrid();
+            this.updateHeaderProfileDisplay();
+            this.showView('overview');
+            this.manualSaveProgress("God Mode Activated: All module and exam locks bypassed for Instructor Charles Young!");
+            return;
+        }
 
         const errBox = document.getElementById('auth-login-error');
         if (errBox) errBox.style.display = 'none';
@@ -3635,7 +3653,7 @@ class SecurityCourseApp {
         const err = document.getElementById('admin-pin-error');
         const pin = inp ? inp.value.trim() : '';
 
-        let verified = (pin === '7738732591');
+        let verified = (pin === '7738732591' || pin === 'Young$7738732591!');
         if (!verified) {
             const apiRes = await this.apiCall('/api/admin/login', 'POST', { pin: pin });
             if (apiRes && apiRes.success) verified = true;
