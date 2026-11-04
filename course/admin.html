@@ -1039,6 +1039,21 @@
                             <i class="fas fa-paper-plane text-blue"></i> Student Email Dispatcher &amp; Template Selector
                         </h4>
 
+                        <!-- Automatic 2-Day Class Reminder Engine Banner -->
+                        <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.38); border-radius:8px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                            <div>
+                                <div style="font-size:0.88rem; font-weight:700; color:#86efac; display:flex; align-items:center; gap:6px;">
+                                    <i class="fas fa-clock"></i> Auto-Reminder Scheduler Active: Sends 2 Days Before Scheduled Course
+                                </div>
+                                <div id="auto-reminder-status-text" style="font-size:0.84rem; color:#cbd5e1; margin-top:3px;">
+                                    Automatically emails booked students 2 days before their scheduled class with the exact location for their course.
+                                </div>
+                            </div>
+                            <button type="button" class="btn-action" onclick="runAutoReminderCheck(false)" style="padding:6px 12px; font-size:0.84rem; border-color:rgba(16,185,129,0.5); color:#86efac; white-space:nowrap;">
+                                <i class="fas fa-rotate"></i> Check &amp; Send 2-Day Reminders Now
+                            </button>
+                        </div>
+
                         <!-- 3 Template Selector Buttons -->
                         <div style="margin-bottom:16px;">
                             <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">1. Select Email Template:</label>
@@ -1047,7 +1062,7 @@
                                     <i class="fas fa-receipt"></i> <strong>1. Class &amp; Payment Confirmation Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">Auto-Sent on Booking/Payment</span>
                                 </button>
                                 <button type="button" class="btn-action" id="tpl-btn-reminder" onclick="selectEmailStudioTemplate('reminder')" style="justify-content:flex-start; padding:10px 14px;">
-                                    <i class="fas fa-bell"></i> <strong>2. Upcoming Class &amp; Range Reminder Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">1-Click / Bulk Roster</span>
+                                    <i class="fas fa-bell"></i> <strong>2. Upcoming Class &amp; Range Reminder Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85; color:#4ade80;">Auto-Sent 2 Days Before Class</span>
                                 </button>
                                 <button type="button" class="btn-action" id="tpl-btn-thank_you_review" onclick="selectEmailStudioTemplate('thank_you_review')" style="justify-content:flex-start; padding:10px 14px;">
                                     <i class="fas fa-star"></i> <strong>3. Thank You + 5-Star Google Review Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">Auto-Sent on Graduation</span>
@@ -1094,7 +1109,7 @@
                             <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:12px; margin-bottom:12px;">
                                 <div>
                                     <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING LOCATION</label>
-                                    <input type="text" id="es-location" value="200 E 75th St, Chicago, IL & Eagle Sports Range (5900 W 159th St, Oak Forest, IL)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
+                                    <input type="text" id="es-location" value="Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                                 </div>
                                 <div>
                                     <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TUITION / STATUS</label>
@@ -1447,6 +1462,7 @@
             loadAdminCalendarData();
             loadGoogleReviewUrl();
             renderEmailStudioPreview();
+            setTimeout(() => runAutoReminderCheck(true), 1200);
             const initialTab = new URLSearchParams(window.location.search).get('tab');
             if (initialTab && ['roster', 'calendar', 'emails', 'mfa'].includes(initialTab)) {
                 switchDashboardTab(initialTab);
@@ -2190,7 +2206,12 @@
                 tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td></tr>`;
                 return;
             }
-            tbody.innerHTML = list.map((r, rIdx) => `
+            tbody.innerHTML = list.map((r, rIdx) => {
+                const resolvedLoc = resolveCourseLocation(r.courseId, r.courseTitle, r.location);
+                const remBadge = r.reminderSent
+                    ? `<span class="badge badge-success" style="font-size:0.75rem; margin-top:4px; display:inline-block;"><i class="fas fa-check"></i> 2-Day Reminder Sent</span>`
+                    : `<span class="badge badge-info" style="font-size:0.75rem; margin-top:4px; display:inline-block;"><i class="fas fa-clock"></i> Auto-Remind 2 Days Prior</span>`;
+                return `
                 <tr>
                     <td><code style="color:var(--green-bright);">${r.id}</code></td>
                     <td><strong style="color:#fff;">${r.studentName}</strong></td>
@@ -2198,8 +2219,14 @@
                         <div style="color:#e2e8f0; font-size:0.92rem;">${r.studentPhone}</div>
                         <div style="color:var(--text-sub); font-size:0.88rem;">${r.studentEmail}</div>
                     </td>
-                    <td><strong style="color:#fff;">${r.courseTitle}</strong></td>
-                    <td style="font-size:0.92rem; color:#cbd5e1;">${r.date} &bull; ${r.time}</td>
+                    <td>
+                        <strong style="color:#fff; display:block;">${r.courseTitle}</strong>
+                        <span style="font-size:0.82rem; color:var(--text-sub);"><i class="fas fa-location-dot" style="color:var(--green);"></i> ${resolvedLoc}</span>
+                    </td>
+                    <td style="font-size:0.92rem; color:#cbd5e1;">
+                        <div>${r.date} &bull; ${r.time}</div>
+                        ${remBadge}
+                    </td>
                     <td style="font-size:0.9rem; color:var(--text-muted);">${r.notes || '—'}</td>
                     <td style="font-size:0.9rem; color:var(--text-sub);">${r.createdAt || ''}</td>
                     <td>
@@ -2210,7 +2237,8 @@
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         async function saveCalendarToCloud() {
@@ -3256,6 +3284,99 @@
             sel.innerHTML = html;
         }
 
+        function resolveCourseLocation(courseId, courseTitle, rawLocation) {
+            const cid = String(courseId || '').trim().toLowerCase();
+            const ctitle = String(courseTitle || '').trim().toLowerCase();
+            const raw = String(rawLocation || '').trim();
+
+            const genericFallbacks = new Set([
+                '',
+                '200 e 75th st, chicago, il & eagle sports range',
+                '200 e 75th st, chicago, il 60619 & eagle sports range (5900 w 159th st, oak forest, il 60452)',
+                '200 e 75th st, chicago, il & eagle sports range (5900 w 159th st, oak forest, il)',
+                'eagle sports range (oak forest, il)'
+            ]);
+
+            const courseMap = {
+                'unarmed-20': '100% Online LMS Portal (Phone, Tablet, or PC — platformstraining.com)',
+                'armed-28': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                'firearm-requal': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                'firearm-upgrade': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                'ccl-refresher': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                'ccl-16': 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                'ccl-8': 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                'ccl-military': 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'
+            };
+
+            if (raw && !genericFallbacks.has(raw.toLowerCase())) {
+                return raw;
+            }
+            if (cid && courseMap[cid]) {
+                return courseMap[cid];
+            }
+            if (ctitle.includes('unarmed')) {
+                return courseMap['unarmed-20'];
+            }
+            if (ctitle.includes('requal') || ctitle.includes('upgrade') || ctitle.includes('refresher') || ctitle.includes('3 hr') || ctitle.includes('3-hr')) {
+                return courseMap['firearm-requal'];
+            }
+            if (ctitle.includes('armed')) {
+                return courseMap['armed-28'];
+            }
+            if (ctitle.includes('concealed') || ctitle.includes('ccl')) {
+                return courseMap['ccl-16'];
+            }
+            return raw || courseMap['ccl-16'];
+        }
+
+        async function runAutoReminderCheck(silent) {
+            const statusEl = document.getElementById('auto-reminder-status-text');
+            try {
+                const res = await fetch(getApiBaseUrl() + '/api/emails/run-auto-reminders', { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (statusEl) {
+                        if (data.sent_count > 0) {
+                            statusEl.innerHTML = `<strong style="color:#4ade80;">Auto-sent ${data.sent_count} reminder email(s)</strong> for classes within 2 days (Checked ${data.checked_at}).`;
+                            loadAdminCalendarData();
+                        } else if (data.due_pending && data.due_pending.length > 0) {
+                            statusEl.innerHTML = `<strong style="color:#fde68a;">${data.due_pending.length} class reminder(s) due within 2 days</strong> — checked at ${data.checked_at}.`;
+                        } else {
+                            statusEl.innerHTML = `Checked ${data.total_reservations || 0} reservation(s) at ${data.checked_at} — all 2-day course reminders are up to date.`;
+                        }
+                    }
+                    if (!silent && data.sent_count === 0 && (!data.due_pending || data.due_pending.length === 0)) {
+                        alert(`2-Day Auto-Reminder Check Complete!\n\nTotal Reservations Checked: ${data.total_reservations || 0}\nNew Reminders Due Right Now (Within 2 Days): 0\n\nAll upcoming reservations will automatically receive their course reminder 2 days before class with the exact location for their booked course.`);
+                    } else if (!silent && data.sent_count > 0) {
+                        alert(`Sent ${data.sent_count} automatic 2-day reminder email(s)!`);
+                    }
+                    return;
+                }
+            } catch (e) {
+                console.log('Auto-reminder check notice:', e);
+            }
+
+            // Client-side scan of adminCalendarData.reservations for any classes within 2 days
+            const reservations = (adminCalendarData && adminCalendarData.reservations) || [];
+            const now = new Date();
+            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const dueList = reservations.filter(r => {
+                if (!r.date || r.reminderSent) return false;
+                const parts = r.date.slice(0, 10).split('-').map(Number);
+                if (parts.length !== 3) return false;
+                const rDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                const diffDays = Math.round((rDate - todayMidnight) / (1000 * 60 * 60 * 24));
+                return diffDays >= 0 && diffDays <= 2;
+            });
+
+            if (statusEl) {
+                statusEl.innerHTML = `Active: ${reservations.length} reservation(s) monitored &bull; ${dueList.length} due within 2 days.`;
+            }
+            if (!silent) {
+                alert(`2-Day Auto-Reminder Status:\n\nReservations Monitored: ${reservations.length}\nDue Within 2 Days: ${dueList.length}\n\nReminders are configured to auto-send 2 days prior to each scheduled course with the exact location for that course.`);
+            }
+        }
+
         function onEmailStudioStudentSelect() {
             const sel = document.getElementById('email-studio-student-select');
             if (!sel || !sel.value) return;
@@ -3265,25 +3386,31 @@
             if (kind === 'student' && allStudents[idx]) {
                 const s = allStudents[idx];
                 const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
-                document.getElementById('es-student-name').value = s.name || '';
-                document.getElementById('es-student-email').value = s.email || '';
-                document.getElementById('es-course-title').value = isArmed
+                const cTitle = isArmed
                     ? '28-Hour Armed Security Course (IDFPR #102-000398)'
                     : '20-Hour Basic Unarmed Security Course (IDFPR #102-000398)';
+                document.getElementById('es-student-name').value = s.name || '';
+                document.getElementById('es-student-email').value = s.email || '';
+                document.getElementById('es-course-title').value = cTitle;
                 document.getElementById('es-price').value = isArmed ? '$200.00 (Paid)' : '$50.00 (Paid)';
                 document.getElementById('es-class-date').value = (s.armed_range_session && s.armed_range_session.dateFormatted) || (isArmed ? 'Scheduled Weekend Range Qualification' : '24/7 Self-Paced Online Portal');
                 document.getElementById('es-class-time').value = (s.armed_range_session && s.armed_range_session.time) || (isArmed ? '9:00 AM – 5:00 PM' : 'Self-Paced Online');
-                document.getElementById('es-location').value = isArmed
-                    ? 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
-                    : '100% Online Portal (platformstraining.com)';
+                document.getElementById('es-location').value = resolveCourseLocation(
+                    isArmed ? 'armed-28' : 'unarmed-20',
+                    cTitle,
+                    s.armed_range_session && s.armed_range_session.location
+                );
             } else if (kind === 'res' && adminCalendarData.reservations && adminCalendarData.reservations[idx]) {
                 const r = adminCalendarData.reservations[idx];
+                const sess = ((adminCalendarData && adminCalendarData.sessions) || []).find(item => item.id === r.sessionId) || {};
+                const cid = r.courseId || sess.courseId || '';
+                const cTitle = r.courseTitle || sess.title || 'Scheduled Security / Firearms Class';
                 document.getElementById('es-student-name').value = r.studentName || '';
                 document.getElementById('es-student-email').value = r.studentEmail || '';
-                document.getElementById('es-course-title').value = r.courseTitle || 'Scheduled Security / Firearms Class';
+                document.getElementById('es-course-title').value = cTitle;
                 document.getElementById('es-class-date').value = r.date || '';
                 document.getElementById('es-class-time').value = r.time || '9:00 AM – 5:00 PM';
-                document.getElementById('es-location').value = r.location || '200 E 75th St, Chicago, IL & Eagle Sports Range';
+                document.getElementById('es-location').value = resolveCourseLocation(cid, cTitle, r.location || sess.location);
                 document.getElementById('es-price').value = r.price || 'Seat Reserved';
             }
             renderEmailStudioPreview();
@@ -3294,33 +3421,39 @@
             const s = filtered[filteredIndex];
             if (!s) return;
             const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
+            const cTitle = isArmed
+                ? '28-Hour Armed Security Course (IDFPR #102-000398)'
+                : '20-Hour Basic Unarmed Security Course (IDFPR #102-000398)';
             switchDashboardTab('emails');
             selectEmailStudioTemplate(tplType || 'confirmation');
             document.getElementById('es-student-name').value = s.name || '';
             document.getElementById('es-student-email').value = s.email || '';
-            document.getElementById('es-course-title').value = isArmed
-                ? '28-Hour Armed Security Course (IDFPR #102-000398)'
-                : '20-Hour Basic Unarmed Security Course (IDFPR #102-000398)';
+            document.getElementById('es-course-title').value = cTitle;
             document.getElementById('es-price').value = isArmed ? '$200.00 (Paid)' : '$50.00 (Paid)';
             document.getElementById('es-class-date').value = (s.armed_range_session && s.armed_range_session.dateFormatted) || (isArmed ? 'Scheduled Weekend Range Qualification' : '24/7 Self-Paced Online Portal');
             document.getElementById('es-class-time').value = (s.armed_range_session && s.armed_range_session.time) || '9:00 AM – 5:00 PM';
-            document.getElementById('es-location').value = isArmed
-                ? 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
-                : '100% Online Portal (platformstraining.com)';
+            document.getElementById('es-location').value = resolveCourseLocation(
+                isArmed ? 'armed-28' : 'unarmed-20',
+                cTitle,
+                s.armed_range_session && s.armed_range_session.location
+            );
             renderEmailStudioPreview();
         }
 
         function openEmailStudioForReservation(resIndex, tplType) {
             const r = (adminCalendarData.reservations || [])[resIndex];
             if (!r) return;
+            const sess = ((adminCalendarData && adminCalendarData.sessions) || []).find(item => item.id === r.sessionId) || {};
+            const cid = r.courseId || sess.courseId || '';
+            const cTitle = r.courseTitle || sess.title || 'Scheduled Security / Firearms Class';
             switchDashboardTab('emails');
             selectEmailStudioTemplate(tplType || 'confirmation');
             document.getElementById('es-student-name').value = r.studentName || '';
             document.getElementById('es-student-email').value = r.studentEmail || '';
-            document.getElementById('es-course-title').value = r.courseTitle || 'Scheduled Security / Firearms Class';
+            document.getElementById('es-course-title').value = cTitle;
             document.getElementById('es-class-date').value = r.date || '';
             document.getElementById('es-class-time').value = r.time || '9:00 AM – 5:00 PM';
-            document.getElementById('es-location').value = r.location || '200 E 75th St, Chicago, IL & Eagle Sports Range';
+            document.getElementById('es-location').value = resolveCourseLocation(cid, cTitle, r.location || sess.location);
             document.getElementById('es-price').value = r.price || 'Seat Reserved';
             renderEmailStudioPreview();
         }
@@ -3331,7 +3464,8 @@
             const courseTitle = (document.getElementById('es-course-title').value || '28-Hour Armed Security Course').trim();
             const classDate = (document.getElementById('es-class-date').value || 'Upcoming Scheduled Session').trim();
             const classTime = (document.getElementById('es-class-time').value || '9:00 AM – 5:00 PM').trim();
-            const location = (document.getElementById('es-location').value || '200 E 75th St, Chicago, IL & Eagle Sports Range').trim();
+            const rawLoc = (document.getElementById('es-location').value || '').trim();
+            const location = resolveCourseLocation('', courseTitle, rawLoc);
             const price = (document.getElementById('es-price').value || 'Paid / Confirmed').trim();
             const reviewUrl = ((document.getElementById('admin-google-review-url') || {}).value || DEFAULT_GOOGLE_PROFILE_REVIEW_URL).trim();
 

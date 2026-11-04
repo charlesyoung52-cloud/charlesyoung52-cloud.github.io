@@ -3791,6 +3791,7 @@ class SecurityCourseApp {
             if (!Array.isArray(this.rangeCalendarData.reservations)) {
                 this.rangeCalendarData.reservations = [];
             }
+            const resolvedRangeLocation = sessionObj.location || 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)';
             const reservation = {
                 id: reservationId,
                 sessionId: sessionObj.id,
@@ -3799,11 +3800,13 @@ class SecurityCourseApp {
                 date: sessionObj.date,
                 endDate: sessionObj.endDate || sessionObj.date,
                 time: rangeRecord.time,
+                location: resolvedRangeLocation,
                 price: '$200 (Online Armed + Range)',
                 studentName: studentName,
                 studentPhone: phoneVal || 'Provided in Portal',
                 studentEmail: cleanEmail,
                 notes: notesVal ? `[Armed Portal Enrollment] ${notesVal}` : '[Armed Portal Enrollment]',
+                reminderSent: false,
                 createdAt: new Date().toLocaleString()
             };
             this.rangeCalendarData.reservations.unshift(reservation);

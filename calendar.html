@@ -1483,6 +1483,12 @@
                 ? `[ONLINE ARMED PAID${armedVoucher ? ' • Voucher: ' + armedVoucher : ''}] ${notes}`.trim()
                 : notes;
 
+            const courseObj = (calendarData.courses && calendarData.courses[session.courseId]) || {};
+            const resolvedLocation = session.location || courseObj.location || (
+                ['armed-28', 'firearm-requal', 'firearm-upgrade', 'ccl-refresher'].includes(session.courseId)
+                    ? 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'
+                    : 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'
+            );
             const reservation = {
                 id: 'RES-' + Date.now(),
                 sessionId: session.id,
@@ -1491,11 +1497,13 @@
                 date: session.date,
                 endDate: session.endDate,
                 time: session.time,
+                location: resolvedLocation,
                 price: isPaidOnlineArmed ? 'Included ($200 Paid Online)' : session.price,
                 studentName: name,
                 studentPhone: phone,
                 studentEmail: email,
                 notes: combinedNotes,
+                reminderSent: false,
                 createdAt: new Date().toLocaleString()
             };
 
