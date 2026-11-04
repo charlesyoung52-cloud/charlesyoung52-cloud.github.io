@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Tactical Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=3.1">
+    <link rel="stylesheet" href="styles.css?v=3.2">
 
     <style>
         /* Clean, Minimal Calendar Styles */
@@ -617,8 +617,11 @@
             </a>
 
             <nav class="desktop-nav" aria-label="Main Navigation">
-                <a href="./course/index.html" class="nav-item nav-item-online" title="Online 20HR Unarmed Course">
-                    <i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course <span class="nav-online-pulse"></span>
+                <a href="./course/index.html" class="nav-item nav-item-online" title="Online 20HR Unarmed Security Course ($40)">
+                    <i class="fas fa-laptop-code"></i> Online Unarmed <span class="nav-online-pulse"></span>
+                </a>
+                <a href="./armed-course/index.html" class="nav-item nav-item-online" title="Online 28HR Armed Security Course ($200)">
+                    <i class="fas fa-crosshairs"></i> Online Armed <span class="nav-online-pulse"></span>
                 </a>
                 <a href="courses.html" class="nav-item"><i class="fas fa-list-check"></i> Courses</a>
                 <a href="index.html#helpful-info" class="nav-item"><i class="fas fa-circle-info"></i> Helpful Info</a>
@@ -649,7 +652,8 @@
             </button>
         </div>
         <nav class="mobile-nav-links">
-            <a href="./course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course</a>
+            <a href="./course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-laptop-code"></i> Online 20HR Unarmed Course ($40)</a>
+            <a href="./armed-course/index.html" class="mobile-nav-link mobile-online-highlight"><i class="fas fa-crosshairs"></i> Online 28HR Armed Course ($200)</a>
             <a href="courses.html" class="mobile-nav-link"><i class="fas fa-list-check"></i> Courses</a>
             <a href="index.html#helpful-info" class="mobile-nav-link"><i class="fas fa-circle-info"></i> Helpful Info &amp; Reciprocity</a>
             <a href="index.html#jobs" class="mobile-nav-link"><i class="fas fa-briefcase"></i> Job Placement</a>
@@ -683,7 +687,7 @@
                 <div class="cal-tabs-row">
                     <button class="cal-course-tab active" data-course="all" onclick="selectCourseFilter('all')">All Courses</button>
                     <button class="cal-course-tab" data-course="unarmed-20" onclick="selectCourseFilter('unarmed-20')">20-HR Unarmed Online ($40)</button>
-                    <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Armed Security ($200)</button>
+                    <button class="cal-course-tab" data-course="armed-28" onclick="selectCourseFilter('armed-28')">28-HR Online Armed — Range Qual ($200)</button>
                     <button class="cal-course-tab" data-course="firearm-requal" onclick="selectCourseFilter('firearm-requal')">Firearm Requal ($125)</button>
                     <button class="cal-course-tab" data-course="firearm-upgrade" onclick="selectCourseFilter('firearm-upgrade')">Firearm Upgrade ($125)</button>
                 </div>
@@ -768,9 +772,16 @@
                         <input type="email" id="book-student-email" class="booking-form-input" placeholder="you@example.com" required>
                     </div>
                 </div>
+                <div class="booking-form-group" id="armed-paid-voucher-group" style="display:none; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.35); border-radius:6px; padding:11px 12px;">
+                    <label style="display:flex; align-items:flex-start; gap:9px; cursor:pointer; margin-bottom:8px; font-size:0.84rem; font-weight:600; color:#fff;">
+                        <input type="checkbox" id="book-armed-already-paid" onchange="syncArmedBookingPaymentUI()" style="margin-top:3px; accent-color:#d4af37;">
+                        <span>I already enrolled &amp; paid $200 in the 28-Hour Online Armed Course (reserve my included range seat with $0 due today)</span>
+                    </label>
+                    <input type="text" id="book-armed-voucher-id" class="booking-form-input" placeholder="Online Certificate / Voucher ID (e.g. PTA-IL-ARMED-...) — optional if same email" oninput="syncArmedBookingPaymentUI()" style="font-size:0.84rem; padding:8px 10px;">
+                </div>
                 <div class="booking-form-group">
                     <label for="book-student-notes">Notes (Optional)</label>
-                    <input type="text" id="book-student-notes" class="booking-form-input" placeholder="Questions or equipment notes">
+                    <input type="text" id="book-student-notes" class="booking-form-input" placeholder="Handgun platform preference (Semi-Auto / Revolver) or notes">
                 </div>
 
                 <div id="booking-confirm-feedback" style="display:none; padding:12px; border-radius:6px; margin-bottom:12px; font-size:0.86rem;"></div>
@@ -801,7 +812,7 @@
                     <h4>Training Programs</h4>
                     <ul>
                         <li><a href="./course/index.html">Online 20HR Unarmed Course ($40)</a></li>
-                        <li><a href="courses.html">28-Hour Armed Security ($200)</a></li>
+                        <li><a href="./armed-course/index.html">Online 28HR Armed Course ($200)</a></li>
                         <li><a href="courses.html">Security Firearm Requalification ($125)</a></li>
                         <li><a href="courses.html">16-Hour Concealed Carry ($200)</a></li>
                         <li><a href="courses.html">8-Hour Military &amp; LEO CCL ($125)</a></li>
@@ -908,15 +919,18 @@
             if (params.get('paid') === 'true') {
                 const paidSlot = document.getElementById('stripe-paid-banner-slot');
                 const cPaid = (calendarData.courses && calendarData.courses[activeCourseFilter]) || {};
+                const isArmedPaidFlow = activeCourseFilter === 'armed-28';
                 if (paidSlot) {
                     paidSlot.innerHTML = `
                         <div style="background:#181c24; border:1px solid #d4af37; border-radius:8px; padding:18px 22px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
                             <div>
                                 <div style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700; color:#ffffff; margin-bottom:4px;">
-                                    <i class="fas fa-check-circle" style="color:#d4af37; margin-right:6px;"></i> TUITION PAYMENT CONFIRMED
+                                    <i class="fas fa-check-circle" style="color:#d4af37; margin-right:6px;"></i> ${isArmedPaidFlow ? 'ONLINE ARMED TUITION PAID — SELECT YOUR INCLUDED RANGE DATE BELOW' : 'TUITION PAYMENT CONFIRMED'}
                                 </div>
                                 <p style="margin:0; font-size:0.9rem; color:#ffffff; line-height:1.5;">
-                                    Thank you for enrolling${cPaid.title ? ' in <strong>' + cPaid.title + '</strong>' : ''}! Your Stripe payment receipt has been sent to your email. Instructor Charles Young will contact you to confirm your class date, or you may call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> anytime.
+                                    ${isArmedPaidFlow
+                                        ? 'Your $200 Online Armed Security tuition covers your 8-hour live-fire qualification at Eagle Sports Range (ammo, targets &amp; range fees included). Click <strong>Select Date</strong> on any range session below to reserve your seat with <strong>$0 additional payment</strong>.'
+                                        : `Thank you for enrolling${cPaid.title ? ' in <strong>' + cPaid.title + '</strong>' : ''}! Your Stripe payment receipt has been sent to your email. Instructor Charles Young will contact you to confirm your class date, or you may call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> anytime.`}
                                 </p>
                             </div>
                         </div>
@@ -991,6 +1005,12 @@
                 actionAreaHtml = `
                     <a href="./course/index.html" class="btn-book-clean" style="padding:10px 20px; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
                         <i class="fas fa-play" style="color:#d4af37;"></i> Sign In to Start Online Course (${c.price})
+                    </a>
+                `;
+            } else if (activeCourseFilter === 'armed-28') {
+                actionAreaHtml = `
+                    <a href="./armed-course/index.html" class="btn-book-clean" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; padding:10px 18px; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-laptop-code"></i> Start 20-Hr Online Classroom (${c.price})
                     </a>
                 `;
             } else if (selectedSession && selectedSession.courseId === activeCourseFilter) {
@@ -1297,6 +1317,40 @@
             }).join('');
         }
 
+        function hasLocalArmedPaidReceipt(emailHint) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('paid') === 'true') return true;
+                const clean = (emailHint || '').trim().toLowerCase();
+                if (clean && localStorage.getItem('platforms_armed_stripe_paid_v1_' + clean) === 'true') return true;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i) || '';
+                    if (k.startsWith('platforms_armed_stripe_paid_v1_') && localStorage.getItem(k) === 'true') {
+                        return true;
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function syncArmedBookingPaymentUI() {
+            const sessionId = document.getElementById('book-session-id').value;
+            const session = (calendarData.sessions || []).find(s => s.id === sessionId);
+            if (!session) return;
+            const courseObj = (calendarData.courses && calendarData.courses[session.courseId]) || {};
+            const priceDisplay = session.price || courseObj.price || '$200';
+            const chk = document.getElementById('book-armed-already-paid');
+            const voucherVal = ((document.getElementById('book-armed-voucher-id') || {}).value || '').trim().toUpperCase();
+            const submitBtn = document.getElementById('book-submit-btn');
+            if (!submitBtn) return;
+
+            if (session.courseId === 'armed-28' && ((chk && chk.checked) || voucherVal.startsWith('PTA-IL-ARMED') || voucherVal.startsWith('PTA-ARMED-'))) {
+                submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Reserve Included Range Seat ($0 Due)`;
+            } else {
+                submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Continue to Payment (${priceDisplay})`;
+            }
+        }
+
         function openBookingModal(sessionId) {
             const session = (calendarData.sessions || []).find(s => s.id === sessionId);
             if (!session) return;
@@ -1309,7 +1363,7 @@
             summary.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">
                     <strong style="color:#fff; font-size:1.05rem;">${session.title}</strong>
-                    <strong style="color:#d4af37; font-size:1.15rem;">${priceDisplay}</strong>
+                    <strong style="color:#d4af37; font-size:1.15rem;">${session.courseId === 'armed-28' ? priceDisplay + ' (Included w/ Online Course)' : priceDisplay}</strong>
                 </div>
                 <div style="margin-top:6px; font-size:0.84rem; color:#ffffff; line-height:1.5;">
                     <div><i class="fas fa-calendar-day" style="color:#d4af37; margin-right:6px;"></i> <strong>${formatDateSpan(session.date, session.endDate)}</strong> &bull; ${session.time}</div>
@@ -1317,13 +1371,35 @@
                 </div>
             `;
 
+            const armedGroup = document.getElementById('armed-paid-voucher-group');
+            const armedChk = document.getElementById('book-armed-already-paid');
+            const armedVoucherInp = document.getElementById('book-armed-voucher-id');
+            if (armedGroup) {
+                if (session.courseId === 'armed-28') {
+                    armedGroup.style.display = 'block';
+                    const emailInp = document.getElementById('book-student-email');
+                    const prePaid = hasLocalArmedPaidReceipt(emailInp ? emailInp.value : '');
+                    if (armedChk) armedChk.checked = prePaid;
+                    try {
+                        const savedCert = localStorage.getItem('platforms_armed_cert_record_v1');
+                        if (savedCert && armedVoucherInp && !armedVoucherInp.value) {
+                            const parsedCert = JSON.parse(savedCert);
+                            if (parsedCert && parsedCert.cert_id) armedVoucherInp.value = parsedCert.cert_id;
+                        }
+                    } catch (e) {}
+                } else {
+                    armedGroup.style.display = 'none';
+                    if (armedChk) armedChk.checked = false;
+                }
+            }
+
             const fb = document.getElementById('booking-confirm-feedback');
             if (fb) fb.style.display = 'none';
             const submitBtn = document.getElementById('book-submit-btn');
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Continue to Payment (${priceDisplay})`;
             }
+            syncArmedBookingPaymentUI();
 
             renderCourseSpotlight();
             renderSessionsList();
@@ -1351,15 +1427,30 @@
             if (!session) return;
             const stripeUrl = getCourseStripeUrl(session.courseId);
 
+            const armedChk = document.getElementById('book-armed-already-paid');
+            const armedVoucher = ((document.getElementById('book-armed-voucher-id') || {}).value || '').trim();
+            const isPaidOnlineArmed = (session.courseId === 'armed-28') && (
+                (armedChk && armedChk.checked) ||
+                hasLocalArmedPaidReceipt(email) ||
+                armedVoucher.toUpperCase().startsWith('PTA-IL-ARMED') ||
+                armedVoucher.toUpperCase().startsWith('PTA-ARMED-')
+            );
+
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to Stripe Payment...';
+                submitBtn.innerHTML = isPaidOnlineArmed
+                    ? '<i class="fas fa-spinner fa-spin"></i> Confirming Included Range Seat...'
+                    : '<i class="fas fa-spinner fa-spin"></i> Redirecting to Stripe Payment...';
             }
 
             if (session.seatsAvailable > 0) {
                 session.seatsAvailable -= 1;
                 if (session.seatsAvailable === 0) session.status = 'Sold Out';
             }
+
+            const combinedNotes = isPaidOnlineArmed
+                ? `[ONLINE ARMED PAID${armedVoucher ? ' • Voucher: ' + armedVoucher : ''}] ${notes}`.trim()
+                : notes;
 
             const reservation = {
                 id: 'RES-' + Date.now(),
@@ -1369,11 +1460,11 @@
                 date: session.date,
                 endDate: session.endDate,
                 time: session.time,
-                price: session.price,
+                price: isPaidOnlineArmed ? 'Included ($200 Paid Online)' : session.price,
                 studentName: name,
                 studentPhone: phone,
                 studentEmail: email,
-                notes: notes,
+                notes: combinedNotes,
                 createdAt: new Date().toLocaleString()
             };
 
@@ -1393,6 +1484,23 @@
 
             renderMonthlyCalendar();
             renderSessionsList();
+
+            if (isPaidOnlineArmed) {
+                if (fb) {
+                    fb.style.display = 'block';
+                    fb.style.background = 'rgba(16, 185, 129, 0.14)';
+                    fb.style.border = '1px solid #10b981';
+                    fb.style.color = '#ffffff';
+                    fb.innerHTML = `
+                        <strong><i class="fas fa-check-circle" style="color:#34d399;"></i> Range Qualification Seat Confirmed (${reservation.id})!</strong><br>
+                        You are scheduled for <strong>${formatDateSpan(session.date, session.endDate)} (${session.time})</strong> at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong> with Instructor Charles Young. Bring your 20-Hour Online Armed Certificate, valid FOID/ID, duty belt, and eye/ear protection. Questions? Call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a>.
+                    `;
+                }
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-check-double"></i> Range Seat Confirmed';
+                }
+                return;
+            }
 
             if (fb) {
                 fb.style.display = 'block';

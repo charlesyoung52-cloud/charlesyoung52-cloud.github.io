@@ -459,7 +459,8 @@
                 <a href="../index.html" class="btn-action" style="text-decoration:none;"><i class="fas fa-house text-blue"></i> Homepage</a>
                 <button class="btn-action" onclick="fetchData()"><i class="fas fa-sync"></i> Refresh</button>
                 <button class="btn-action btn-primary" onclick="exportCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
-                <button class="btn-action" onclick="launchCourseGodMode()"><i class="fas fa-bolt text-blue"></i> Course God Mode</button>
+                <button class="btn-action" onclick="launchCourseGodMode()"><i class="fas fa-bolt text-blue"></i> Unarmed God Mode</button>
+                <button class="btn-action" onclick="launchArmedGodMode()"><i class="fas fa-crosshairs text-blue"></i> Armed God Mode</button>
                 <button class="btn-action" style="color:#f87171;" onclick="lockDashboard()"><i class="fas fa-lock"></i> Lock</button>
             </div>
         </header>
@@ -747,7 +748,7 @@
                         <div>
                             <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Type *</label>
                             <select id="edit-session-course" onchange="onAdminCourseTypeChange()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
-                                <option value="armed-28">28 HR Armed Security Course ($200)</option>
+                                <option value="armed-28">28 HR Online Armed Security — Range Qual ($200)</option>
                                 <option value="firearm-requal">Security Firearm Requalification ($125)</option>
                                 <option value="firearm-upgrade">Security Firearm Upgrade Qual ($125)</option>
                                 <option value="ccl-16">16 HR IL Concealed Carry Course ($200)</option>
@@ -1338,6 +1339,15 @@
             window.location.href = 'index.html?godmode=1';
         }
 
+        function launchArmedGodMode() {
+            isInternalAdminNav = true;
+            sessionStorage.setItem('pta_admin_auth', 'authorized');
+            sessionStorage.setItem('platforms_admin_mode', 'true');
+            sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
+            localStorage.removeItem('platforms_admin_mode');
+            window.location.href = '../armed-course/index.html?godmode=1';
+        }
+
         function lockDashboard() {
             sessionStorage.removeItem('pta_admin_auth');
             sessionStorage.removeItem('platforms_admin_mode');
@@ -1850,16 +1860,21 @@
                     attemptsPill = `<span style="color:var(--text-sub); font-size:0.82rem;">0 Attempts</span>`;
                 }
 
+                const isArmedRow = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL-ARMED');
+                const courseTag = isArmedRow
+                    ? `<span class="badge badge-info" style="font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200)</span>`
+                    : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($40)</span>`;
+
                 // Payment pill (Clean indicator without IDFPR Approved)
                 let paymentPill = `
                     <span class="badge badge-success" style="font-size:0.76rem; padding:3px 8px;">
-                        <i class="fas fa-check-circle"></i> $40 PAID
+                        <i class="fas fa-check-circle"></i> ${isArmedRow ? '$200 PAID' : '$40 PAID'}
                     </span>
                 `;
                 if (!s.is_paid) {
                     paymentPill = `
                         <span class="badge badge-warning" style="font-size:0.75rem; padding:3px 8px;">
-                            <i class="fas fa-clock"></i> Pending
+                            <i class="fas fa-clock"></i> Pending (${isArmedRow ? '$200' : '$40'})
                         </span>
                     `;
                 }
@@ -1868,7 +1883,8 @@
                     <tr>
                         <td>
                             <strong style="color:#fff; font-size:0.94rem; display:block;">${s.name}</strong>
-                            <div style="font-size:0.72rem; color:var(--text-sub); margin-top:2px;">
+                            ${courseTag}
+                            <div style="font-size:0.72rem; color:var(--text-sub); margin-top:3px;">
                                 <i class="fas fa-calendar-alt"></i> Enrolled: ${s.created_at || 'Recent'}
                             </div>
                         </td>
@@ -2001,12 +2017,15 @@
                 return;
             }
 
-            const headers = ["Student Name", "Email", "Agency", "Tuition Payment", "Payment Date", "MFA Verified", "MFA Verified Date", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
-            const rows = allStudents.map(s => [
+            const headers = ["Student Name", "Course", "Email", "Agency", "Tuition Payment", "Payment Date", "MFA Verified", "MFA Verified Date", "Modules Completed", "Exam Attempts", "Latest Score", "Best Score", "Passed", "Certificate ID", "Enrolled Date", "Last Active"];
+            const rows = allStudents.map(s => {
+                const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL-ARMED');
+                return [
                 `"${(s.name || '').replace(/"/g, '""')}"`,
+                isArmed ? '"28-HR ONLINE ARMED"' : '"20-HR ONLINE UNARMED"',
                 `"${(s.email || '').replace(/"/g, '""')}"`,
                 `"${(s.agency || '').replace(/"/g, '""')}"`,
-                s.is_paid ? "PAID $40" : "UNPAID",
+                s.is_paid ? (isArmed ? "PAID $200" : "PAID $40") : "UNPAID",
                 `"${s.payment_date || s.created_at || ''}"`,
                 s.mfa_verified ? "YES" : "NO",
                 `"${s.mfa_verified_at || ''}"`,
@@ -2018,7 +2037,8 @@
                 `"${(s.cert_id || 'None').replace(/"/g, '""')}"`,
                 `"${s.created_at || ''}"`,
                 `"${s.last_active || ''}"`
-            ]);
+            ];
+            });
 
             const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
             const encodedUri = encodeURI(csvContent);

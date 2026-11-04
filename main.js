@@ -31,29 +31,30 @@ const COURSE_DATABASE = {
         cancellation: "Instant digital access upon registration. Self-paced completion anytime 24/7 with immediate certificate issuance upon completion (no wait)."
     },
     "armed-28": {
-        title: "28 HR ARMED SECURITY COURSE",
-        category: "IDFPR Security Officer Credential (Tan Card)",
+        title: "28 HR ONLINE ARMED SECURITY COURSE",
+        category: "IDFPR Armed Security Certification (Tan Card • Online + Range)",
         price: "$200.00",
         stripeUrl: "https://buy.stripe.com/4gMaEXdJa9Un3Uw4249oc01",
-        duration: "2 Full Days (9:00 AM – 5:00 PM)",
-        location: "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range",
-        rangeNote: "Ammo, targets, and range fees are included. Students should bring their own eye and ear protection, which can also be purchased directly at the range.",
-        description: "This is the official IDFPR-approved state course for officers seeking to obtain a Firearms Control Card (Tan Card) for armed security employment in Illinois. Tuition covers full classroom instruction, legal updates, duty weapon operations, and live-fire range qualification.",
+        duration: "20 Hours Self-Paced Online (24/7) + 8-Hour Live-Fire Range Qualification",
+        location: "Classroom: 100% Online LMS Portal (24/7) | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        rangeNote: "All-inclusive $200 tuition covers both your 20-hour online classroom course AND your 8-hour live-fire qualification at Eagle Sports Range — ammunition, targets, and range fees are included. Bring eye & ear protection (also sold at the range).",
+        description: "Authorized under 68 Ill. Adm. Code 1240.510 for officers seeking an Illinois Firearm Control Card (Tan Card). Complete all 10 interactive armed modules (20 hours) and the 50-question timed written exam (75% passing, 1-hour limit, max 2 attempts) 100% online at your own pace, immediately download your sealed classroom completion certificate & paid range voucher, and schedule your included 50-round live-fire qualification at Eagle Sports Range.",
         curriculum: [
-            "Safe gun handling, firearm anatomy, and ballistics",
-            "Revolver and semi-automatic handgun operation and marksmanship",
-            "Holster draw techniques, weapon retention, and malfunction clearing",
-            "Civil and criminal liability for armed security personnel (720 ILCS 5/7-1)",
-            "IDFPR official live-fire range qualification scoring at Eagle Sports Range"
+            "Illinois 225 ILCS 447, FCC (Tan Card) rules, FOID (430 ILCS 65) & 720 ILCS 5/24 weapons exemptions",
+            "Justifiable Use of Deadly Force (720 ILCS 5/7-1 through 5/7-8), Tennessee v. Garner & Graham v. Connor",
+            "4 Cardinal Safety Rules, semi-automatic pistol & DA/SA revolver nomenclature and cycle of operations",
+            "Ammunition components, caliber verification, squib load & hangfire emergency response, Phase 1 & Phase 2 clearances",
+            "7 Marksmanship Fundamentals, 4-count retention holster draw, weapon retention & tactical reloads",
+            "Included 8-hour Eagle Sports Range 50-round live-fire qualification (7, 15 & 25 yards, min 70% = 35/50)"
         ],
         prerequisites: [
             "Prerequisite: 20-Hour Unarmed Security Course Certificate",
             "Must be at least 21 years of age",
-            "Valid FOID Card or eligible to obtain FOID",
-            "No felony convictions & no disqualifying battery convictions",
-            "Duty belt and suitable range attire"
+            "Valid Illinois FOID Card (or active FOID eligibility)",
+            "No felony convictions & no disqualifying battery/domestic violence convictions",
+            "Smartphone, tablet, or computer for online modules + duty belt/attire for range day"
         ],
-        cancellation: "No refunds. All classes can be rescheduled within 3 months. Range fees, ammunition, and weapon use included for qualification attempt."
+        cancellation: "Instant 24/7 digital access upon enrollment. Range qualification dates can be scheduled or rescheduled within 3 months at no extra cost; ammo, targets, and range fees included."
     },
     "firearm-requal": {
         title: "SECURITY FIREARM REQUALIFICATION",
@@ -225,10 +226,17 @@ function openCourseModal(courseId) {
         <h5 class="modal-section-h5"><i class="fas fa-info-circle"></i> Policy</h5>
         <p class="modal-body-p" style="font-size:0.85rem; color:#94a3b8;">${course.cancellation}</p>
 
-        <div class="modal-actions-footer" style="flex-wrap:wrap;">
+        <div class="modal-actions-footer" style="flex-wrap:wrap; gap:10px;">
             ${courseId === 'unarmed-20' ? `
             <a href="./course/index.html" class="btn-card-online btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">
-                <i class="fas fa-play"></i> Start Online Course
+                <i class="fas fa-play"></i> Start Online Course ($40)
+            </a>
+            ` : courseId === 'armed-28' ? `
+            <a href="./armed-course/index.html" class="btn-card-online btn-large" style="flex:1; min-width:210px; text-align:center; justify-content:center;">
+                <i class="fas fa-play"></i> Start Online Course ($200)
+            </a>
+            <a href="calendar.html?course=armed-28" class="btn-tactical-outline btn-large" style="flex:1; min-width:190px; text-align:center; justify-content:center;">
+                <i class="fas fa-calendar-check"></i> View Range Dates
             </a>
             ` : `
             <a href="calendar.html?course=${courseId}" class="btn-tactical-primary btn-large" style="flex:1; min-width:200px; text-align:center; justify-content:center;">

@@ -115,13 +115,18 @@ def sync_to_cloud_json():
             mod_count = cur.execute('SELECT COUNT(*) as cnt FROM progress WHERE student_id = ? AND study_done = 1 AND scenario_done = 1 AND quiz_done = 1', (sid,)).fetchone()
             completed_modules = mod_count['cnt'] if mod_count else (10 if cert else 0)
 
+            is_armed_row = str(sid or '').lower().startswith('armed::')
             students_list.append({
                 'id': r['id'],
                 'name': r['name'],
                 'email': r['email'],
                 'agency': r['agency'],
+                'course_type': 'armed' if is_armed_row else 'unarmed',
                 'is_paid': bool(r['is_paid']),
-                'payment_status': 'Paid $40 - Full Tuition (IDFPR State Mandate)' if r['is_paid'] else 'Pending Payment',
+                'payment_status': (
+                    'Paid $200 - Online Armed Security (28-Hr Tan Card)' if is_armed_row
+                    else 'Paid $40 - Online Unarmed Security (PERC)'
+                ) if r['is_paid'] else 'Pending Payment',
                 'payment_date': r['created_at'],
                 'completed_modules': completed_modules,
                 'total_modules': 10,
@@ -379,6 +384,11 @@ def index():
 def course_index():
     return send_from_directory(os.path.join(BASE_DIR, 'course'), 'index.html')
 
+@app.route('/armed-course')
+@app.route('/armed-course/')
+def armed_course_index():
+    return send_from_directory(os.path.join(BASE_DIR, 'armed-course'), 'index.html')
+
 @app.route('/admin')
 @app.route('/admin/')
 def admin_dashboard_portal():
@@ -409,6 +419,8 @@ def get_metrics():
     
     total_students = db.execute('SELECT COUNT(*) FROM students WHERE is_admin = 0').fetchone()[0]
     total_paid = db.execute('SELECT COUNT(*) FROM students WHERE is_paid = 1').fetchone()[0]
+    paid_armed = db.execute("SELECT COUNT(*) FROM students WHERE is_paid = 1 AND LOWER(id) LIKE 'armed::%'").fetchone()[0]
+    paid_unarmed = max(0, total_paid - paid_armed)
     total_exams = db.execute('SELECT COUNT(*) FROM exam_results').fetchone()[0]
     passed_exams = db.execute('SELECT COUNT(*) FROM exam_results WHERE passed = 1').fetchone()[0]
     certs_issued = db.execute('SELECT COUNT(*) FROM certificates').fetchone()[0]
@@ -445,7 +457,9 @@ def get_metrics():
     return jsonify({
         'total_students': total_students,
         'paid_students': total_paid,
-        'total_revenue': total_paid * 50, # $50 per student
+        'paid_armed_students': paid_armed,
+        'paid_unarmed_students': paid_unarmed,
+        'total_revenue': (paid_armed * 200) + (paid_unarmed * 40),
         'total_exams': total_exams,
         'passed_exams': passed_exams,
         'pass_rate': round((passed_exams / total_exams * 100), 1) if total_exams > 0 else 0,
@@ -492,7 +506,7 @@ def send_mfa_internal(email, name):
         <div style="background: #1e293b; padding: 20px; border-radius: 6px; border: 1px solid #475569; margin-bottom: 20px;">
             <p style="margin-top: 0; font-size: 15px; color: #cbd5e1;">Hello <strong>{name or 'Student Officer'}</strong>,</p>
             <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">
-                Here is your one-time 6-digit identity verification code to access the <strong>20-Hour Online Unarmed Security Course</strong>:
+                Here is your one-time 6-digit identity verification code to access your <strong>Platforms Training Academy Online Security Course</strong>:
             </p>
             <div style="text-align: center; margin: 25px 0;">
                 <span style="display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #80a315; background: #0b0d10; padding: 12px 28px; border-radius: 6px; border: 2px solid #80a315;">{code}</span>
@@ -513,7 +527,7 @@ Hello {name or 'Student Officer'},
 
 Your one-time 6-digit verification code is: {code}
 
-Enter this code on the course login screen to access your 20-Hour Online Unarmed Security Course.
+Enter this code on the course login screen to access your Platforms Training Academy Online Security Course.
 Two-step verification is enforced on every login for state compliance.
 
 Platforms Training Academy
@@ -559,7 +573,7 @@ def register_student():
 
     db = get_db()
     cur = db.cursor()
-    cur.execute('SELECT * FROM students WHERE email = ?', (email,))
+    cur.execute("SELECT * FROM students WHERE LOWER(email) = LOWER(?) ORDER BY CASE WHEN password_hash IS NOT NULL AND password_hash != '' THEN 0 ELSE 1 END, id ASC", (email,))
     existing = cur.fetchone()
     if existing and existing['password_hash']:
         return jsonify({'success': False, 'error': 'An account with this email already exists. Please sign in instead.'}), 409
@@ -569,8 +583,8 @@ def register_student():
     if existing:
         cur.execute('''
             UPDATE students SET name = ?, password_hash = ?, password_salt = ?, last_active = ?
-            WHERE id = ?
-        ''', (name, pwd_hash, salt, now_str, existing['id']))
+            WHERE LOWER(email) = LOWER(?)
+        ''', (name, pwd_hash, salt, now_str, email))
     else:
         cur.execute('''
             INSERT INTO students (id, name, email, student_id, agency, password_hash, password_salt, is_paid, is_admin, created_at, last_active)
@@ -593,7 +607,7 @@ def login_student():
 
     db = get_db()
     cur = db.cursor()
-    cur.execute('SELECT * FROM students WHERE email = ?', (email,))
+    cur.execute("SELECT * FROM students WHERE LOWER(email) = LOWER(?) ORDER BY CASE WHEN password_hash IS NOT NULL AND password_hash != '' THEN 0 ELSE 1 END, id ASC", (email,))
     student = cur.fetchone()
 
     if not student:
@@ -602,7 +616,7 @@ def login_student():
     # If student exists but hasn't set a password yet, set it now
     if not student['password_hash']:
         pwd_hash, salt = hash_password(password)
-        cur.execute('UPDATE students SET password_hash = ?, password_salt = ? WHERE id = ?', (pwd_hash, salt, student['id']))
+        cur.execute('UPDATE students SET password_hash = ?, password_salt = ? WHERE LOWER(email) = LOWER(?)', (pwd_hash, salt, email))
         db.commit()
     else:
         if not verify_password(password, student['password_hash'], student['password_salt']):
@@ -693,11 +707,11 @@ def verify_mfa_code():
     try:
         db = get_db()
         cur = db.cursor()
-        cur.execute('SELECT * FROM students WHERE id = ? OR email = ?', (email, email))
+        cur.execute('SELECT * FROM students WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)', (email, email))
         existing = cur.fetchone()
         if existing:
-            cur.execute('UPDATE students SET mfa_verified = 1, mfa_verified_at = ?, last_active = ? WHERE id = ?',
-                        (now_str, now_str, existing['id']))
+            cur.execute('UPDATE students SET mfa_verified = 1, mfa_verified_at = ?, last_active = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)',
+                        (now_str, now_str, email, email))
         else:
             cur.execute('''
                 INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, mfa_verified, mfa_verified_at, created_at, last_active)
@@ -833,11 +847,17 @@ def list_students():
         mfa_verified = bool(r['mfa_verified']) if ('mfa_verified' in r.keys() and r['mfa_verified']) else False
         mfa_verified_at = r['mfa_verified_at'] if 'mfa_verified_at' in r.keys() else None
 
+        is_armed_row = str(sid or '').lower().startswith('armed::')
         students.append({
             'id': r['id'],
             'name': r['name'],
             'email': r['email'],
             'agency': r['agency'],
+            'course_type': 'armed' if is_armed_row else 'unarmed',
+            'payment_status': (
+                'Paid $200 - Online Armed Security (28-Hr Tan Card)' if is_armed_row
+                else 'Paid $40 - Online Unarmed Security (PERC)'
+            ) if r['is_paid'] else 'Pending Payment',
             'is_paid': True if TEMPORARY_PAYWALL_DISABLED else bool(r['is_paid']),
             'completed_modules': r['completed_modules'],
             'total_modules': 10,
@@ -918,11 +938,18 @@ def student_login():
     best_score = max([e['percentage'] for e in exams]) if exams else None
     latest_exam = dict(exams[-1]) if exams else None
 
-    # Double-check payment: student must have is_paid=1 AND a verified payment_received event in analytics_events
-    pay_event = db.execute(
-        "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND (LOWER(student_id) = LOWER(?) OR LOWER(student_id) = LOWER(?)) ORDER BY id DESC LIMIT 1",
-        (student['id'], student['email'] or student_id)
-    ).fetchone()
+    # Double-check payment with strict isolation between Unarmed (<email>) and Armed (armed::<email>)
+    is_armed_login = str(student['id'] or '').lower().startswith('armed::')
+    if is_armed_login:
+        pay_event = db.execute(
+            "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) ORDER BY id DESC LIMIT 1",
+            (student['id'],)
+        ).fetchone()
+    else:
+        pay_event = db.execute(
+            "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND (LOWER(student_id) = LOWER(?) OR LOWER(student_id) = LOWER(?)) AND LOWER(student_id) NOT LIKE 'armed::%' ORDER BY id DESC LIMIT 1",
+            (student['id'], student['email'] or student_id)
+        ).fetchone()
     verified_paid = True if TEMPORARY_PAYWALL_DISABLED else (bool(student['is_paid']) and (pay_event is not None))
     if student['is_paid'] and not pay_event and not TEMPORARY_PAYWALL_DISABLED:
         db.execute('UPDATE students SET is_paid = 0 WHERE id = ?', (student['id'],))
@@ -1027,12 +1054,14 @@ def submit_exam():
         'passed': bool(passed)
     })
 
-# 7. Process & Verify Course Payment ($40.00)
+# 7. Process & Verify Course Payment ($40.00 Unarmed / $200.00 Armed — Strictly Isolated)
 @app.route('/api/payment/checkout', methods=['POST'])
 def process_payment():
     data = request.get_json() or {}
     student_id = (data.get('student_id') or '').strip()
-    email = (data.get('email') or student_id).strip().lower()
+    raw_email = (data.get('email') or '').strip().lower()
+    email = raw_email or (student_id[7:].lower() if student_id.lower().startswith('armed::') else student_id.lower())
+    course_type = (data.get('course_type') or '').strip().lower()
     session_id = (data.get('session_id') or 'stripe_verified').strip()
     payment_token = (data.get('payment_token') or '').strip()
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1040,12 +1069,29 @@ def process_payment():
     if not student_id and not email:
         return jsonify({'error': 'Missing student_id'}), 400
 
-    target_id = email or student_id
+    is_armed = student_id.lower().startswith('armed::') or course_type == 'armed' or payment_token.upper().startswith('PTA-ARMED-')
     db = get_db()
     cur = db.cursor()
-    cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)', (now_str, target_id, email))
-    
-    details_str = f"Course Fee $40.00 verified (ref: {session_id})"
+
+    if is_armed:
+        target_id = student_id if student_id.lower().startswith('armed::') else f"armed::{email}"
+        existing_armed = cur.execute('SELECT id FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
+        if existing_armed:
+            cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?)', (now_str, target_id))
+        else:
+            cur.execute('''
+                INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, created_at, last_active)
+                VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
+            ''', (target_id, data.get('name') or 'Student Officer', email, target_id, data.get('agency') or '', now_str, now_str))
+        details_str = f"Online Armed Course Fee $200.00 verified (ref: {session_id})"
+    else:
+        target_id = email or student_id
+        cur.execute(
+            "UPDATE students SET is_paid = 1, last_active = ? WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
+            (now_str, target_id, email)
+        )
+        details_str = f"Online Unarmed Course Fee $40.00 verified (ref: {session_id})"
+
     if payment_token:
         details_str += f" [{payment_token}]"
 
@@ -1120,15 +1166,25 @@ def issue_certificate():
     })
 
 # 9. Get Certificate Status
-@app.route('/api/certificate/status/<student_id>', methods=['GET'])
+@app.route('/api/certificate/status/<path:student_id>', methods=['GET'])
 def get_cert_status(student_id):
     db = get_db()
-    student = db.execute('SELECT * FROM students WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)', (student_id, student_id)).fetchone()
+    if str(student_id or '').lower().startswith('armed::'):
+        student = db.execute('SELECT * FROM students WHERE LOWER(id) = LOWER(?)', (student_id,)).fetchone()
+        pay_event = db.execute(
+            "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) ORDER BY id DESC LIMIT 1",
+            (student_id,)
+        ).fetchone()
+    else:
+        student = db.execute(
+            "SELECT * FROM students WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
+            (student_id, student_id)
+        ).fetchone()
+        pay_event = db.execute(
+            "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) AND LOWER(student_id) NOT LIKE 'armed::%' ORDER BY id DESC LIMIT 1",
+            (student_id,)
+        ).fetchone()
     cert = db.execute('SELECT * FROM certificates WHERE LOWER(student_id) = LOWER(?)', (student_id,)).fetchone()
-    pay_event = db.execute(
-        "SELECT * FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) ORDER BY id DESC LIMIT 1",
-        (student_id,)
-    ).fetchone()
 
     is_paid = True if TEMPORARY_PAYWALL_DISABLED else (bool(student and student['is_paid']) and (pay_event is not None))
     is_locked = bool(cert['is_locked']) if cert else False

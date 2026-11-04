@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Armed Security Course ($200) | Platforms Training Academy</title>
+    
+    <!-- Meta and OpenGraph -->
+    <meta name="description" content="Official 28-Hour Online Armed Security Course from Platforms Training Academy in Chicago, IL (20-Hour Online Armed Classroom + Included 8-Hour Eagle Sports Range Qualification, Ammo & Targets Included).">
+    <meta name="author" content="Platforms Training Academy - Charles Young">
+    <!-- Favicon & Touch Icons (Platforms Circle Emblem via shared ../assets/) -->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+
+    <!-- Font Awesome Icons & Realistic Signature Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Sacramento&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet matching platformstraining.com -->
+    <link rel="stylesheet" href="styles.css?v=6.0">
+
+    <!-- PDF Generation Library (Vector PDF Certificate & Paid Range Voucher) -->
+    <script src="../assets/pdf-lib.min.js"></script>
+</head>
+<body>
+
+    <!-- Admin Evaluation Mode Banner (Unlocked via Charles Young Admin PIN) -->
+    <div class="admin-mode-banner" id="admin-mode-banner" style="display:none;">
+        <span><i class="fas fa-user-shield"></i> <strong>ARMED ADMIN GOD MODE ACTIVE</strong> &bull; All 10 armed modules, 50-Q exam &amp; range voucher certificate unlocked for Instructor Charles Young</span>
+        <button onclick="app.openAdminCertificateView()"><i class="fas fa-certificate"></i> View Certificate Page</button>
+        <button onclick="app.returnToAdminDashboard()"><i class="fas fa-arrow-left"></i> Back to Admin Dashboard</button>
+        <button onclick="app.exitAdminMode()"><i class="fas fa-sign-out-alt"></i> Exit God Mode</button>
+    </div>
+
+    <!-- Top Credential & Hotline Bar (Matching Main Site) -->
+    <div class="top-credential-bar">
+        <div class="site-container top-credential-inner">
+            <div class="credential-tags">
+                <span class="cred-badge"><i class="fas fa-certificate"></i> IDFPR Approved <span class="cred-sub-code">&bull; 68 IAC 1240.510</span></span>
+                <span class="cred-badge badge-military"><i class="fas fa-medal"></i> 18-Year Combat Veteran Owned</span>
+                <span class="cred-badge badge-nra"><i class="fas fa-crosshairs"></i> NRA Certified Law Enforcement Instructor</span>
+            </div>
+            <div class="top-contact-links">
+                <span class="top-link"><i class="fas fa-phone-alt"></i> (773) 873-2591</span>
+                <span class="top-sep top-sep-email">|</span>
+                <span class="top-link top-link-email"><i class="fas fa-envelope"></i> charlesyoung@platformstraining.com</span>
+                <span class="top-sep">|</span>
+                <span class="top-loc"><i class="fas fa-map-marker-alt"></i> 200 E 75th St, Chicago, IL</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Sticky Header Navigation -->
+    <header class="site-header" id="site-header">
+        <div class="site-container header-container">
+            <a href="../index.html" class="brand-link brand-wrapper" title="Platforms Training Academy - Home" aria-label="Platforms Training Academy Home">
+                <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="brand-logo-img brand-logo">
+            </a>
+
+            <nav class="main-nav">
+                <button class="nav-btn" data-view="overview">
+                    <i class="fas fa-home"></i> Overview
+                </button>
+                <button class="nav-btn" data-view="lesson">
+                    <i class="fas fa-book-open"></i> Lessons (1-10)
+                </button>
+                <button class="nav-btn" data-view="exam" id="nav-btn-exam">
+                    <i class="fas fa-file-alt"></i> Official Exam (50 Qs)
+                </button>
+                <button class="nav-btn" data-view="results" id="nav-btn-cert">
+                    <i class="fas fa-certificate"></i> Certificate &amp; Range
+                </button>
+            </nav>
+
+            <div class="header-actions">
+                <button class="btn-guide-header" onclick="app.openNavigationGuide()" title="Armed Course Navigation Guide">
+                    <i class="fas fa-compass"></i> Guide
+                </button>
+                <button class="btn-save-progress" onclick="app.manualSaveProgress()" title="Save Course Progress">
+                    <i class="fas fa-save"></i> Save Progress
+                </button>
+                <button class="header-profile-btn" onclick="app.openLoginModal()" title="Student Account & Profile">
+                    <i class="fas fa-user-circle"></i> <span id="header-student-name-display">Student Officer</span> <span class="profile-online-dot"></span>
+                    <span id="header-account-indicator" style="font-size:0.68rem; padding:1px 6px; border-radius:4px; background:rgba(212, 175, 55,0.2); color:#ffffff; border:1px solid rgba(212, 175, 55, 0.4); margin-left:2px; font-weight:600;"><i class="fas fa-shield-alt" style="color:#d4af37;"></i> <span id="header-account-text">Account</span></span>
+                </button>
+                <button class="btn-logout-header" id="btn-header-logout" onclick="app.officerSignOut()" title="Log Out of Student Account" style="display:none;">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Progress Bar -->
+        <div class="course-progress-strip">
+            <div class="course-progress-fill" id="global-progress-fill"></div>
+        </div>
+    </header>
+
+    <!-- Main Container Views -->
+    <main class="app-main">
+
+        <!-- ===============================================================
+             VIEW 0: Mandatory Authentication Gate (Sign-In Required)
+             =============================================================== -->
+        <section id="view-auth-gate" class="view-section active">
+            <div class="auth-gate-wrapper">
+                <div class="auth-gate-card">
+                    <div class="auth-gate-shield-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <span class="auth-gate-badge">
+                        <i class="fas fa-certificate"></i> IDFPR 68 IAC 1240.510 &bull; Armed Security ("Tan Card") Portal
+                    </span>
+                    <h2 class="auth-gate-title">Armed Trainee Sign-In Required</h2>
+                    <p class="auth-gate-desc">
+                        In compliance with Illinois Department of Financial and Professional Regulation (IDFPR) standards under 225 ILCS 447 and 68 Ill. Adm. Code 1240.510, all armed security candidates must sign in with their registered trainee account (you may use the same login as your Unarmed course) before accessing armed coursework, firearm simulators, or the 50-question examination.
+                    </p>
+
+                    <div class="auth-gate-features-grid">
+                        <div class="auth-gate-feature-item">
+                            <i class="fas fa-crosshairs"></i>
+                            <strong>20-Hour Online Armed Classroom</strong>
+                            <p>10 interactive modules covering firearm safety, revolver &amp; semi-auto mechanics, marksmanship, and Illinois deadly force law.</p>
+                        </div>
+                        <div class="auth-gate-feature-item">
+                            <i class="fas fa-bullseye"></i>
+                            <strong>Included Range Qualification</strong>
+                            <p>8-hour live-fire qualification at Eagle Sports Range (ammo, targets &amp; range fees included in your $200 tuition).</p>
+                        </div>
+                        <div class="auth-gate-feature-item">
+                            <i class="fas fa-award"></i>
+                            <strong>Instant Classroom Cert &amp; Voucher</strong>
+                            <p>Official 20-Hr Classroom Certificate &amp; Paid Range Voucher generated immediately upon passing (75%, 1-hr limit, 2 attempts).</p>
+                        </div>
+                    </div>
+
+                    <div class="auth-gate-form-box" style="margin: 24px 0 16px 0; text-align: left; background: rgba(0,0,0,0.4); padding: 22px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <!-- Step 1: Trainee Officer Credentials with Password Authentication -->
+                        <div id="auth-step-credentials">
+                            <div class="auth-tab-buttons">
+                                <button type="button" id="tab-btn-signin" class="auth-tab-btn active" onclick="window.app ? window.app.setAuthTab('signin') : app.setAuthTab('signin')">
+                                    <i class="fas fa-sign-in-alt"></i> Trainee Sign In
+                                </button>
+                                <button type="button" id="tab-btn-register" class="auth-tab-btn" onclick="window.app ? window.app.setAuthTab('register') : app.setAuthTab('register')">
+                                    <i class="fas fa-user-plus"></i> New Registration
+                                </button>
+                            </div>
+
+                            <!-- Panel A: Sign In -->
+                            <div id="auth-panel-signin">
+                                <div style="margin-bottom: 14px;">
+                                    <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Email Address *</label>
+                                    <input type="email" id="auth-login-email" placeholder="officer@example.com" autocomplete="username" style="width:100%; padding:12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                </div>
+                                <div style="margin-bottom: 16px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                        <label style="font-size:0.82rem; font-weight:600; color:#ffffff; text-transform:uppercase;">Password *</label>
+                                        <button type="button" onclick="window.app ? window.app.setAuthTab('forgot') : app.setAuthTab('forgot')" style="background:none; border:none; color:var(--brand-green-bright); font-size:0.75rem; cursor:pointer; text-decoration:underline; padding:0;">Forgot Password?</button>
+                                    </div>
+                                    <div class="auth-pwd-wrapper">
+                                        <input type="password" id="auth-login-password" placeholder="••••••••••••" autocomplete="current-password" style="width:100%; padding:12px 42px 12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                        <button type="button" class="auth-pwd-toggle-btn" onclick="window.app ? window.app.togglePasswordVisibility('auth-login-password', this) : app.togglePasswordVisibility('auth-login-password', this)" title="Show/Hide Password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="auth-login-error" style="display:none; color:#ef4444; font-size:0.82rem; margin-bottom:12px; font-weight:600;">
+                                    <i class="fas fa-exclamation-circle"></i> <span id="auth-login-error-text">Invalid credentials.</span>
+                                </div>
+                                <button type="button" class="btn-auth-gate-login" onclick="window.app ? window.app.handleLoginSubmit() : app.handleLoginSubmit()" style="width:100%; margin-bottom:12px;">
+                                    <i class="fas fa-shield-alt"></i> Sign In &amp; Send Verification Code
+                                </button>
+                                <div style="text-align:center; font-size:0.8rem; color:#ffffff;">
+                                    First time at Platforms Training Academy? <button type="button" onclick="window.app ? window.app.setAuthTab('register') : app.setAuthTab('register')" style="background:none; border:none; color:var(--brand-green-bright); cursor:pointer; text-decoration:underline; font-size:0.8rem; padding:0;">Create your account</button>
+                                </div>
+                            </div>
+
+                            <!-- Panel B: New Student Registration -->
+                            <div id="auth-panel-register" style="display:none;">
+                                <div style="margin-bottom: 14px;">
+                                    <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Full Legal Trainee Name *</label>
+                                    <input type="text" id="auth-reg-name" placeholder="e.g. MARCUS THURSTON" style="width:100%; padding:12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                    <span style="font-size:0.75rem; color:#ffffff; margin-top:4px; display:block;">Enter name exactly as it must appear on your official IDFPR Armed Training Record.</span>
+                                </div>
+                                <div style="margin-bottom: 14px;">
+                                    <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Email Address *</label>
+                                    <input type="email" id="auth-reg-email" placeholder="officer@example.com" autocomplete="email" style="width:100%; padding:12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                </div>
+                                <div style="margin-bottom: 14px;">
+                                    <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Create Password * (Minimum 6 Characters)</label>
+                                    <div class="auth-pwd-wrapper">
+                                        <input type="password" id="auth-reg-password" placeholder="Create secure password" autocomplete="new-password" style="width:100%; padding:12px 42px 12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                        <button type="button" class="auth-pwd-toggle-btn" onclick="window.app ? window.app.togglePasswordVisibility('auth-reg-password', this) : app.togglePasswordVisibility('auth-reg-password', this)" title="Show/Hide Password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 16px;">
+                                    <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Confirm Password *</label>
+                                    <div class="auth-pwd-wrapper">
+                                        <input type="password" id="auth-reg-password-confirm" placeholder="Re-type password" autocomplete="new-password" style="width:100%; padding:12px 42px 12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                        <button type="button" class="auth-pwd-toggle-btn" onclick="window.app ? window.app.togglePasswordVisibility('auth-reg-password-confirm', this) : app.togglePasswordVisibility('auth-reg-password-confirm', this)" title="Show/Hide Password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="auth-reg-error" style="display:none; color:#ef4444; font-size:0.82rem; margin-bottom:12px; font-weight:600;">
+                                    <i class="fas fa-exclamation-circle"></i> <span id="auth-reg-error-text">Please complete all fields.</span>
+                                </div>
+                                <button type="button" class="btn-auth-gate-login" onclick="window.app ? window.app.handleRegisterSubmit() : app.handleRegisterSubmit()" style="width:100%; margin-bottom:12px;">
+                                    <i class="fas fa-user-shield"></i> Create Account &amp; Sign In
+                                </button>
+                                <div style="text-align:center; font-size:0.8rem; color:#ffffff;">
+                                    Already have a student account? <button type="button" onclick="window.app ? window.app.setAuthTab('signin') : app.setAuthTab('signin')" style="background:none; border:none; color:var(--brand-green-bright); cursor:pointer; text-decoration:underline; font-size:0.8rem; padding:0;">Sign In here</button>
+                                </div>
+                            </div>
+
+                            <!-- Panel C: Forgot Password -->
+                            <div id="auth-panel-forgot" style="display:none;">
+                                <div style="margin-bottom: 14px;">
+                                    <h4 style="color:#fff; margin:0 0 6px 0; font-family:'Chakra Petch', sans-serif;">Reset Course Password</h4>
+                                    <span style="font-size:0.78rem; color:#ffffff; line-height:1.4; display:block;">Enter your registered trainee email address. We will dispatch a 6-digit identity code to verify your identity and set a new password.</span>
+                                </div>
+                                <div style="margin-bottom: 16px;">
+                                    <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Registered Email Address *</label>
+                                    <input type="email" id="auth-forgot-email" placeholder="officer@example.com" style="width:100%; padding:12px 14px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-family:inherit; font-size:0.95rem;">
+                                </div>
+                                <div id="auth-forgot-error" style="display:none; color:#ef4444; font-size:0.82rem; margin-bottom:12px; font-weight:600;">
+                                    <i class="fas fa-exclamation-circle"></i> <span id="auth-forgot-error-text">Email not found.</span>
+                                </div>
+                                <button type="button" class="btn-auth-gate-login" onclick="window.app ? window.app.handleForgotPasswordSubmit() : app.handleForgotPasswordSubmit()" style="width:100%; margin-bottom:12px;">
+                                    <i class="fas fa-key"></i> Send Password Reset Code
+                                </button>
+                                <div style="text-align:center; font-size:0.8rem; color:#ffffff;">
+                                    <button type="button" onclick="window.app ? window.app.setAuthTab('signin') : app.setAuthTab('signin')" style="background:none; border:none; color:#ffffff; cursor:pointer; text-decoration:underline; font-size:0.8rem; padding:0;">
+                                        <i class="fas fa-arrow-left"></i> Return to Sign In
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Multi-Factor Authentication (Mandatory on Every Login) -->
+                        <div id="auth-step-mfa" style="display:none;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                                <div style="width:36px; height:36px; border-radius:50%; background:rgba(212, 175, 55,0.2); border:1px solid var(--brand-green); display:flex; align-items:center; justify-content:center; color:var(--brand-green-bright); font-size:1.1rem;">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div>
+                                    <h4 style="color:#fff; font-size:1rem; margin:0; font-family:'Chakra Petch', sans-serif;">TWO-STEP IDENTITY VERIFICATION (MFA)</h4>
+                                    <span style="font-size:0.75rem; color:#ffffff; font-weight:600;"><i class="fas fa-lock"></i> Mandated Identity Verification &bull; Enforced Every Login</span>
+                                </div>
+                            </div>
+
+                            <div id="mfa-email-dispatch-status" style="margin-bottom:16px; font-size:0.88rem; line-height:1.5; padding:14px; border-radius:6px; background:#14171d; border:1px solid rgba(212, 175, 55, 0.4); color:#ffffff;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
+                                    <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
+                                </div>
+                                <div>
+                                    A 6-digit identity code has been dispatched to:
+                                    <strong id="mfa-target-email-display" style="color:var(--brand-green-bright); display:inline-block;">officer@example.com</strong>
+                                </div>
+                                <div style="font-size:0.78rem; color:#ffffff; margin-top:6px;">
+                                    Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your armed course.
+                                </div>
+                            </div>
+
+                            <div id="mfa-reset-password-fields" style="display:none; margin-bottom:16px; padding:12px; background:rgba(0,0,0,0.3); border:1px solid rgba(212, 175, 55, 0.32); border-radius:6px;">
+                                <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Create New Password *</label>
+                                <div class="auth-pwd-wrapper">
+                                    <input type="password" id="auth-reset-new-password" placeholder="New password (min 6 chars)" style="width:100%; padding:10px 42px 10px 12px; background:#0b0d10; border:1px solid rgba(212, 175, 55, 0.32); border-radius:4px; color:#fff; font-size:0.9rem;">
+                                    <button type="button" class="auth-pwd-toggle-btn" onclick="window.app ? window.app.togglePasswordVisibility('auth-reset-new-password', this) : app.togglePasswordVisibility('auth-reset-new-password', this)" title="Show/Hide Password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <label style="font-size:0.82rem; font-weight:600; color:#ffffff; display:block; margin-bottom:6px; text-transform:uppercase;">Enter 6-Digit Code from Your Email *</label>
+                                <input type="text" id="mfa-code-input" maxlength="6" placeholder="000000" autocomplete="one-time-code" style="width:100%; padding:14px; background:#0b0d10; border:2px solid #d4af37; border-radius:6px; color:#fff; font-family:'Chakra Petch', monospace; font-size:1.5rem; text-align:center; letter-spacing:8px; font-weight:700;">
+                                <div id="mfa-error-message" style="display:none; color:#ef4444; font-size:0.8rem; margin-top:6px; font-weight:600;">
+                                    <i class="fas fa-exclamation-circle"></i> Invalid verification code. Please check your email and try again.
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-auth-gate-login" onclick="window.app ? window.app.verifyMfaCode() : app.verifyMfaCode()" style="width:100%; margin-bottom:12px;">
+                                <i class="fas fa-shield-alt"></i> Verify Code &amp; Launch Armed Course
+                            </button>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#ffffff;">
+                                <button type="button" onclick="window.app ? window.app.resendMfaCode() : app.resendMfaCode()" style="background:none; border:none; color:var(--brand-green-bright); cursor:pointer; text-decoration:underline; font-size:0.8rem; padding:0;">
+                                    <i class="fas fa-redo"></i> Resend Email
+                                </button>
+                                <button type="button" onclick="window.app ? window.app.backToCredentialsStep() : app.backToCredentialsStep()" style="background:none; border:none; color:#ffffff; cursor:pointer; text-decoration:underline; font-size:0.8rem; padding:0;">
+                                    <i class="fas fa-arrow-left"></i> Change Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="auth-gate-secondary-links">
+                        <span>Looking for the $40 Unarmed Course? <a href="../course/index.html">Open Unarmed Portal</a> &bull; <a href="../index.html">Platforms Home</a></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 0B: Mandatory Armed Course Enrollment & Payment Gate ($200.00)
+             =============================================================== -->
+        <section id="view-payment-gate" class="view-section">
+            <div class="payment-gate-wrapper">
+                <div class="payment-gate-card">
+                    <div class="payment-gate-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span class="payment-gate-badge">
+                        <i class="fas fa-crosshairs"></i> IDFPR 68 IAC 1240.510 &bull; 28-Hour Armed Security ("Tan Card") Certification
+                    </span>
+                    <h2 class="payment-gate-title">Armed Course Enrollment &amp; Payment Required</h2>
+                    <p class="payment-gate-desc">
+                        Welcome, <strong id="payment-gate-officer-name">Student Officer</strong> (<span id="payment-gate-officer-email">student@platformstraining.com</span>).
+                        Your trainee account is authenticated. Complete your one-time <strong>$200.00 all-inclusive tuition</strong> below to unlock all 10 online armed security modules, the 50-question written examination, AND your included Live-Fire Range Qualification at Eagle Sports Range!
+                    </p>
+
+                    <!-- Price Card Callout -->
+                    <div class="payment-gate-price-card">
+                        <div class="payment-gate-price-info">
+                            <span class="payment-gate-plan-name">Online Armed Security Course (20-Hr Online + 8-Hr Range)</span>
+                            <span class="payment-gate-plan-sub">Includes Eagle Sports Range Fee, Qualification Ammo &amp; Targets!</span>
+                        </div>
+                        <div class="payment-gate-price-box">
+                            <span class="payment-gate-currency">$</span>
+                            <span class="payment-gate-amount">200</span>
+                            <span class="payment-gate-period">.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Features Grid -->
+                    <div class="payment-gate-features-grid">
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>20-Hour Online Armed Classroom (10 Modules)</strong>
+                                <span>Gun safety, revolver &amp; semi-auto mechanics, malfunctions, marksmanship &amp; 720 ILCS 5/7-1 deadly force.</span>
+                            </div>
+                        </div>
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>34 Technical Diagrams &amp; Tactical Simulators</strong>
+                                <span>Official Academy firearm diagrams, Instructor Charles Young field narrations, and mastery quizzes.</span>
+                            </div>
+                        </div>
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>8-Hr Eagle Sports Range Qualification Included</strong>
+                                <span>Range fees, targets &amp; 50 rounds of qualification ammo at Eagle Sports Range are 100% included!</span>
+                            </div>
+                        </div>
+                        <div class="payment-gate-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>Instant Classroom Cert &amp; Paid Range Voucher</strong>
+                                <span>Download immediately upon passing the exam; present at range day for final IDFPR IL486-1138 sign-off.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Actions -->
+                    <div class="payment-gate-actions">
+                        <button class="btn-payment-gate-checkout" onclick="app.initiateCourseEnrollmentPayment()">
+                            <i class="fas fa-lock"></i> Pay All-Inclusive Tuition &amp; Unlock Armed Course ($200.00)
+                        </button>
+                        <div class="payment-gate-guarantee">
+                            <i class="fas fa-shield-alt"></i> Secure Stripe Checkout &bull; Includes Online Course + Range Fee + Ammo + Targets
+                        </div>
+                    </div>
+
+                    <!-- Secondary Options: Voucher / Verify / Log Out -->
+                    <div class="payment-gate-secondary-options">
+                        <button class="btn-payment-sub-link" onclick="app.checkExistingPaymentStatus()">
+                            <i class="fas fa-sync-alt"></i> I've Already Paid $200 / Verify Order
+                        </button>
+                        <span>&bull;</span>
+                        <button class="btn-payment-sub-link" onclick="app.promptVoucherCode()">
+                            <i class="fas fa-ticket-alt"></i> Agency Voucher Code
+                        </button>
+                        <span>&bull;</span>
+                        <button class="btn-payment-sub-link" onclick="app.officerSignOut()">
+                            <i class="fas fa-sign-out-alt"></i> Log Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 1: Course Overview & Syllabus
+             =============================================================== -->
+        <section id="view-overview" class="view-section">
+            <div class="hero-banner">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <span class="badge-tag">IDFPR 68 IAC 1240.510 &bull; 20-Hr Online + Included 8-Hr Range</span>
+                        <h2>Interactive Online Armed Security Course</h2>
+                        <p>
+                            Welcome to the official Online Armed Security Course from <strong>Platforms Training Academy</strong>.
+                            Complete all <strong>20 hours of state-mandated armed classroom instruction 100% online at your own pace</strong> across 10 interactive modules, pass your 50-question written examination (75% passing, 1-hour limit, 2 attempts), and download your instant <strong>20-Hour Armed Classroom Completion Certificate &amp; Paid Range Qualification Voucher</strong> for your included live-fire qualification at <strong>Eagle Sports Range</strong>!
+                        </p>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">20+8</span>
+                                <span class="stat-label">Online + Range Hrs</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">10</span>
+                                <span class="stat-label">Armed Modules</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">50</span>
+                                <span class="stat-label">Exam Qs (1 Hr)</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">75%</span>
+                                <span class="stat-label">Pass (2 Attempts)</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn-primary" onclick="app.startOrResumeCourse()">
+                                <i class="fas fa-play"></i> Start / Resume Armed Course
+                            </button>
+                            <button class="btn-secondary" onclick="app.showView('exam')">
+                                <i class="fas fa-clipboard-check"></i> Take 50-Question Exam
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hero-media">
+                        <video class="hero-video" autoplay muted loop playsinline disablePictureInPicture poster="assets/slide_81_pistol_qualification.jpg">
+                            <source src="../assets/platforms_intro.mp4" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Orientation & Course Navigation Banner -->
+            <div class="orientation-banner-card">
+                <div class="orientation-banner-text">
+                    <h3><i class="fas fa-compass" style="color:var(--brand-green);"></i> Armed Candidate Orientation: Online Classroom &rarr; Eagle Sports Range</h3>
+                    <p>
+                        Master all 10 sequential armed modules (Study Material, Tactical Scenario Simulator, and Check on Learning) to unlock the <strong>1-Hour, 50-Question Written Examination (75% required, 2 attempts maximum)</strong>. Upon passing, download your official Classroom Certificate &amp; Paid Range Voucher and reserve your included live-fire qualification date at Eagle Sports Range!
+                    </p>
+                </div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="app.openNavigationGuide()">
+                        <i class="fas fa-book-reader"></i> View Course Guide
+                    </button>
+                    <a href="../calendar.html?course=armed-28&paid=true" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-calendar-check"></i> View Range Qualification Dates
+                    </a>
+                </div>
+            </div>
+
+            <!-- Curriculum Syllabus Breakdown -->
+            <h3 class="section-title">20-Hour Online Armed Security Curriculum (10 Modules)</h3>
+            <div class="lessons-grid" id="overview-lessons-grid">
+                <!-- Dynamically rendered via app.js -->
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 2: Coursera-Style Lesson Viewer with Tabs & Progression
+             =============================================================== -->
+        <section id="view-lesson" class="view-section">
+            <div class="lesson-layout">
+                <!-- Sidebar Lessons Menu -->
+                <aside class="lesson-sidebar">
+                    <h3 class="sidebar-heading">Armed Modules</h3>
+                    <ul class="sidebar-list" id="lesson-sidebar-list">
+                        <!-- Populated dynamically via app.js with lock states -->
+                    </ul>
+                </aside>
+
+                <!-- Main Lesson Reader -->
+                <article class="lesson-main-content">
+                    <div class="lesson-header-meta">
+                        <span class="badge-tag" id="lesson-meta-badge">Lesson 1 &bull; 2 Hours</span>
+                        <span style="font-size:0.85rem; color:var(--text-muted);"><i class="fas fa-crosshairs" style="color:var(--brand-green);"></i> IDFPR 68 IAC 1240.510 Armed Security Curriculum</span>
+                    </div>
+
+                    <h2 class="lesson-title-main" id="lesson-title-display">Course Administration &amp; The 4 Cardinal Rules of Gun Safety</h2>
+
+                    <!-- Module Requirements Progress Strip -->
+                    <div class="module-requirements-bar" id="module-requirements-bar">
+                        <!-- Populated by app.js: 3 requirement chips and status -->
+                    </div>
+
+                    <!-- Interactive Module Navigation Tabs -->
+                    <div class="lesson-tabs-nav">
+                        <button class="lesson-tab-btn active" data-tab="study" onclick="app.switchLessonTab('study')">
+                            <i class="fas fa-book-open"></i> Comprehensive Study Material
+                        </button>
+                        <button class="lesson-tab-btn" data-tab="scenario" onclick="app.switchLessonTab('scenario')">
+                            <i class="fas fa-shield-alt"></i> Tactical Scenario Simulator
+                        </button>
+                        <button class="lesson-tab-btn" data-tab="quiz" onclick="app.switchLessonTab('quiz')">
+                            <i class="fas fa-tasks"></i> Check on Learning (Quick Quiz)
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: Comprehensive Study Material -->
+                    <div class="tab-content-panel lesson-body active" id="tab-study-content"></div>
+
+                    <!-- TAB 2: Tactical Scenario Simulator -->
+                    <div class="tab-content-panel" id="tab-scenario-content"></div>
+
+                    <!-- TAB 3: Check on Learning (Forced Remediation Quiz) -->
+                    <div class="tab-content-panel" id="tab-quiz-content"></div>
+
+                    <!-- Bottom Nav -->
+                    <div class="lesson-nav-footer">
+                        <button class="btn-secondary" id="lesson-prev-btn">
+                            <i class="fas fa-arrow-left"></i> Previous Module
+                        </button>
+                        <button class="btn-primary" id="lesson-next-btn">
+                            Next Module <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 3: Official 50-Question Armed Written Examination
+             (75% Passing = 38/50 | 1-Hour Countdown | 2 Attempts Max)
+             =============================================================== -->
+        <section id="view-exam" class="view-section">
+            <!-- Sub-container A: Locked Screen when lessons incomplete -->
+            <div id="exam-locked-view" style="display:none;">
+                <div class="exam-locked-card">
+                    <div class="exam-locked-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2>OFFICIAL 50-QUESTION ARMED EXAMINATION LOCKED</h2>
+                    <p>
+                        In accordance with <strong>68 Ill. Adm. Code 1240.510</strong> and Platforms Training Academy standards,
+                        armed candidates must complete all 10 training modules—including Study Material, Tactical Scenario Simulators,
+                        and Check-on-Learning Quizzes—before unlocking the 1-hour, 50-question written examination.
+                    </p>
+
+                    <div class="exam-progress-tracker-box">
+                        <div class="exam-progress-header">
+                            <strong style="color:var(--text-white);"><i class="fas fa-list-check"></i> Armed Module Completion Status:</strong>
+                            <span id="exam-locked-progress-ratio" style="font-weight:700; color:var(--brand-green-bright);">0 / 10 Completed</span>
+                        </div>
+                        <div class="locked-modules-grid" id="locked-modules-status-grid"></div>
+                    </div>
+
+                    <button class="btn-primary" style="font-size:1.05rem; padding:14px 28px;" onclick="app.resumeEarliestIncompleteLesson()">
+                        <i class="fas fa-arrow-right"></i> Resume Armed Course &amp; Complete Modules
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-container C: 2-Attempt Limit Exhausted Screen -->
+            <div id="exam-attempts-exhausted-view" style="display:none;">
+                <div class="exam-locked-card" style="border-color: rgba(239, 68, 68, 0.55);">
+                    <div class="exam-locked-icon" style="background: rgba(239, 68, 68, 0.14); border-color: #ef4444; color: #ef4444;">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <h2>MAXIMUM EXAM ATTEMPTS REACHED (2 OF 2 USED)</h2>
+                    <p>
+                        Per Platforms Training Academy Armed Security testing standards, trainees are allotted a maximum of <strong>2 attempts</strong> to achieve the mandatory <strong>75% (38/50)</strong> passing score within the 1-hour time limit.
+                        Please review Lessons 1–10 thoroughly and contact <strong>Lead Instructor Charles Young at (773) 873-2591</strong> for mandatory instructor remediation and a retake authorization code.
+                    </p>
+                    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:20px;">
+                        <button class="btn-secondary" onclick="app.showView('lesson')">
+                            <i class="fas fa-book-open"></i> Review Course Modules
+                        </button>
+                        <button class="btn-primary" onclick="app.promptExamRetakeUnlock()">
+                            <i class="fas fa-key"></i> Enter Instructor Retake Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-container B: Active Exam when unlocked -->
+            <div id="exam-active-view" class="exam-container">
+                <!-- Status, Attempt Counter & 1-Hour Countdown Timer Bar -->
+                <div class="exam-status-bar">
+                    <div class="exam-meta-pills">
+                        <span class="exam-pill" id="exam-answered-count">0 / 50 Answered</span>
+                        <span class="exam-attempt-pill" id="exam-attempt-pill">
+                            <i class="fas fa-layer-group"></i> <span id="exam-attempt-display">Attempt 1 of 2</span>
+                        </span>
+                        <span class="exam-countdown-pill" id="exam-countdown-pill">
+                            <i class="fas fa-hourglass-half"></i> <span id="exam-timer-display">60:00</span> Remaining
+                        </span>
+                    </div>
+
+                    <div class="exam-requirements">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">
+                            Passing Score: <strong>75%</strong> (38 / 50 min) &bull; <strong>1-Hour Limit</strong> &bull; <strong>2 Attempts Max</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Topic Domain Filters for 50 Questions -->
+                <div class="topic-filter-bar" id="topic-filter-bar"></div>
+
+                <!-- 1 to 50 Question Navigator Palette -->
+                <div class="palette-container">
+                    <div class="palette-header">
+                        <span><i class="fas fa-th"></i> Question Navigation Grid (1 - 50):</span>
+                        <span><i class="fas fa-flag" style="color:var(--warning);"></i> Flagged</span>
+                    </div>
+                    <div class="palette-grid palette-grid-50" id="palette-grid"></div>
+                </div>
+
+                <!-- Active Question Card -->
+                <div class="question-card">
+                    <div class="question-header">
+                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <span class="question-part-tag" id="question-part-label">Part 1: Safety &amp; Statutory True/False</span>
+                            <span class="question-number-tag" id="question-number-display" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Question 1 of 50</span>
+                        </div>
+                        <div class="question-tools">
+                            <button class="flag-btn" id="btn-flag-question">
+                                <i class="far fa-flag"></i> Flag
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="question-text" id="question-text-content"></h3>
+
+                    <!-- Visual Illustration -->
+                    <div class="question-visual-box" id="question-visual-container" style="display:none;"></div>
+
+                    <!-- Interactive Options Container -->
+                    <div id="question-options-container"></div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="question-nav-bar">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn-secondary" id="exam-prev-btn">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn-secondary" id="btn-clear-question" style="color:var(--text-muted);">
+                            <i class="fas fa-undo"></i> Clear Answer
+                        </button>
+                    </div>
+
+                    <button class="btn-primary" id="exam-next-btn">
+                        Next Question <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===============================================================
+             VIEW 4: Exam Results, Paid Range Voucher & Official Classroom Certificate
+             =============================================================== -->
+        <section id="view-results" class="view-section">
+            <div class="exam-container">
+                <div class="results-card">
+                    <div class="score-badge passed" id="results-score-badge">
+                        <span class="score-number" id="results-score-number">46 / 50</span>
+                        <span class="score-pct" id="results-score-percentage">92%</span>
+                    </div>
+
+                    <h2 id="results-status-title">CONGRATULATIONS — YOU PASSED!</h2>
+                    <p class="subtitle" id="results-status-subtitle">
+                        You have successfully completed the 20-Hour Online Armed Security Classroom Course &amp; Written Examination.
+                    </p>
+
+                    <div class="results-stats-row">
+                        <div class="stat-item">
+                            <span class="stat-value">38 / 50</span>
+                            <span class="stat-label">Minimum to Pass (75%)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="results-attempt-stat">1 / 2</span>
+                            <span class="stat-label">Exam Attempts Used</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="results-status-tag" style="color:var(--brand-green-bright);">CLASSROOM CERTIFIED</span>
+                            <span class="stat-label">Range Eligible</span>
+                        </div>
+                    </div>
+
+                    <!-- Remediation Notice When 2 Attempts Exhausted on Results Screen -->
+                    <div class="attempt-exhausted-box" id="results-attempts-exhausted-box" style="display:none;">
+                        <h3><i class="fas fa-exclamation-triangle"></i> All 2 Exam Attempts Used</h3>
+                        <p style="color:#e5e7eb; font-size:0.94rem; line-height:1.55; margin-bottom:14px;">
+                            You have used both allotted exam attempts without reaching the required 75% (38/50) threshold. Review the 50-question breakdown below, revisit the study modules, and contact Lead Instructor Charles Young at <strong>(773) 873-2591</strong> for remediation and a retake authorization code.
+                        </p>
+                        <button class="btn-primary" onclick="app.promptExamRetakeUnlock()">
+                            <i class="fas fa-key"></i> Enter Instructor Retake Authorization Code
+                        </button>
+                    </div>
+
+                    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+                        <button class="btn-secondary" id="btn-results-retake" onclick="app.retakeExam()">
+                            <i class="fas fa-redo"></i> Retake Exam
+                        </button>
+                        <button class="btn-primary" id="btn-results-main-action" onclick="app.handleResultsCertificateAction()">
+                            <i class="fas fa-file-pdf"></i> Download Classroom Certificate &amp; Range Voucher (PDF)
+                        </button>
+                        <a href="../calendar.html?course=armed-28&paid=true" id="btn-schedule-range-cta" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; border-color:#d4af37; color:#f3d06b;">
+                            <i class="fas fa-calendar-check"></i> Schedule Included Live-Fire Range Date
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Paid Live-Fire Range Qualification Voucher Callout (Shown on Pass) -->
+                <div class="range-voucher-banner" id="range-voucher-banner">
+                    <h3><i class="fas fa-bullseye"></i> Next Step: Your Included Live-Fire Range Qualification at Eagle Sports Range</h3>
+                    <p style="color:#d1d5db; font-size:0.95rem; line-height:1.6; margin:0;">
+                        Under <strong>68 Ill. Adm. Code 1240.510</strong>, completing this 20-hour online armed classroom course satisfies Phase 1 of your 28-Hour Illinois Firearm Control Card ("Tan Card") certification. Download and print your sealed certificate below—it doubles as your <strong>PAID Range Qualification Voucher</strong>—and reserve an upcoming weekend range session where Instructor Charles Young will administer your 50-round qualification and sign off your final IDFPR Firearm Training Certificate (Form IL486-1138).
+                    </p>
+                    <div class="range-voucher-grid">
+                        <div class="range-voucher-item">
+                            <strong>Range Facility</strong>
+                            Eagle Sports Range &bull; 5900 W 159th St, Oak Forest, IL 60452
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Tuition &amp; Gear Status</strong>
+                            PAID IN FULL ($200) &bull; Ammo, Targets &amp; Range Fee Included
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Qualification Standard</strong>
+                            50 Rounds (5, 7 &amp; 10 Yards) &bull; Min 35/50 (70%)
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Required Dress &amp; ID</strong>
+                            Gov Photo ID, Closed-Toe Shoes, Crew-Neck Shirt &amp; Printed Voucher
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <a href="../calendar.html?course=armed-28&paid=true" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fas fa-calendar-alt"></i> Book Your Included Range Qualification Date Now (No Extra Charge) &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Fallback Payment Gate on Results View if Needed -->
+                <div class="payment-checkout-card" id="results-payment-gate" style="display:none;">
+                    <div class="payment-checkout-header">
+                        <div class="payment-title-box">
+                            <h3><i class="fas fa-certificate" style="color:var(--brand-green-bright);"></i> Armed Course Tuition Verification Required</h3>
+                            <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">
+                                Complete $200.00 Armed Course enrollment to unlock your official certificate and paid range voucher.
+                            </p>
+                        </div>
+                        <div class="payment-price-tag">
+                            <div class="payment-price-amount">$200.00</div>
+                            <div class="payment-price-sub">Online + Range Included</div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="width:100%; padding:14px; font-size:1.05rem; margin-top:14px;" onclick="app.initiateCourseEnrollmentPayment()">
+                        <i class="fas fa-lock"></i> Pay $200.00 Tuition via Stripe
+                    </button>
+                </div>
+
+                <!-- Official Armed Classroom Certificate & Paid Range Voucher Intake -->
+                <div class="cert-intake-card" id="results-certificate-form-section">
+                    <div class="cert-sealed-banner" id="cert-sealed-banner" style="display:none;">
+                        <div class="cert-sealed-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="cert-sealed-content">
+                            <h4><i class="fas fa-shield-alt"></i> OFFICIAL ARMED CLASSROOM CERTIFICATE &amp; RANGE VOUCHER SEALED</h4>
+                            <p>
+                                Your official 20-Hour Online Armed Security Classroom Completion Certificate &amp; Paid Range Qualification Voucher (<strong id="sealed-cert-id-tag">PTA-IL-ARMED</strong>) has been generated, downloaded, and permanently sealed.
+                            </p>
+                            <p style="margin-top:6px; color:#fbbf24; font-weight:600;">
+                                <i class="fas fa-exclamation-triangle"></i> CRITICAL REMINDER: Save this PDF across multiple secure locations and bring a printed copy to Eagle Sports Range for your live-fire qualification and final IDFPR Form IL486-1138 sign-off.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="cert-intake-header">
+                        <h3><i class="fas fa-id-card" style="color:var(--brand-green);"></i> State of Illinois Armed Trainee Record Information</h3>
+                        <p>
+                            Complete your legal trainee details below for your <strong>20-Hour Online Armed Security Classroom Completion Certificate &amp; Paid Range Qualification Voucher</strong> (68 Ill. Adm. Code 1240.510(a)).
+                        </p>
+                    </div>
+
+                    <div class="cert-security-warning-callout" id="cert-pre-download-warning" style="background: #fef08a; border: 2px solid #a16207; border-left: 6px solid #854d0e; padding: 18px 20px; border-radius: 8px; margin-bottom: 24px; color: #713f12;">
+                        <div class="cert-security-warning-icon" style="background: #fde047; border: 2px solid #a16207; color: #854d0e;">
+                            <i class="fas fa-exclamation-triangle" style="color: #854d0e; font-size: 1.8rem;"></i>
+                        </div>
+                        <div class="cert-security-warning-text" style="color: #713f12;">
+                            <strong style="color: #713f12; font-size: 1.08rem; display: block; margin-bottom: 6px; font-weight: 800;">
+                                <i class="fas fa-certificate" style="color: #854d0e;"></i> SINGLE OFFICIAL ISSUANCE — VERIFY ALL DEMOGRAPHIC FIELDS BEFORE DOWNLOADING!
+                            </strong>
+                            <p style="color: #854d0e; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0; font-weight: 700;">
+                                Verify that your full legal name, address, DOB, SSN, physical description, and signature are 100% accurate before downloading. Once downloaded, this record locks permanently. Save backups and print a hard copy to present at Eagle Sports Range!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Trainee Information Form Grid -->
+                    <div class="cert-form-grid">
+                        <div class="cert-form-group" style="grid-column: span 12;">
+                            <label for="cert-input-name">Full Legal Name (LAST, FIRST, MIDDLE INITIAL):</label>
+                            <input type="text" id="cert-input-name" class="cert-form-input" placeholder="e.g. DOE, JOHN A." value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 6;">
+                            <label for="cert-input-address">Home Street Address:</label>
+                            <input type="text" id="cert-input-address" class="cert-form-input" placeholder="e.g. 1234 S. Michigan Ave, Apt 4B" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 3;">
+                            <label for="cert-input-city">City:</label>
+                            <input type="text" id="cert-input-city" class="cert-form-input" placeholder="e.g. Chicago" value="Chicago">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 1;">
+                            <label for="cert-input-state">State:</label>
+                            <input type="text" id="cert-input-state" class="cert-form-input" placeholder="IL" value="IL" maxlength="2">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 2;">
+                            <label for="cert-input-zip">ZIP Code:</label>
+                            <input type="text" id="cert-input-zip" class="cert-form-input" placeholder="e.g. 60619" value="" maxlength="10">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 3;">
+                            <label for="cert-input-dob">Date of Birth (MM/DD/YYYY):</label>
+                            <input type="text" id="cert-input-dob" class="cert-form-input" placeholder="MM/DD/YYYY" maxlength="10" inputmode="numeric" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 3;">
+                            <label for="cert-input-ssn">Social Security Number:</label>
+                            <input type="text" id="cert-input-ssn" class="cert-form-input" placeholder="XXX-XX-XXXX" maxlength="11" inputmode="numeric" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 1;">
+                            <label for="cert-input-weight">Weight:</label>
+                            <input type="text" id="cert-input-weight" class="cert-form-input" placeholder="185" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 1;">
+                            <label for="cert-input-height">Height:</label>
+                            <input type="text" id="cert-input-height" class="cert-form-input" placeholder="5'11" maxlength="4" inputmode="numeric" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 2;">
+                            <label for="cert-input-hair">Hair Color:</label>
+                            <input type="text" id="cert-input-hair" class="cert-form-input" placeholder="e.g. Black" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 2;">
+                            <label for="cert-input-eyes">Eye Color:</label>
+                            <input type="text" id="cert-input-eyes" class="cert-form-input" placeholder="e.g. Brown" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 8;">
+                            <label for="cert-input-signature">Trainee Electronic Signature (Type Full Legal Name):</label>
+                            <input type="text" id="cert-input-signature" class="cert-form-input" style="font-family:'Sacramento', 'Alex Brush', cursive; font-style:normal; font-weight:400; font-size:1.65rem; line-height:1.1; padding:6px 14px;" placeholder="Your Full Legal Name" value="">
+                        </div>
+
+                        <div class="cert-form-group" style="grid-column: span 4;">
+                            <label for="cert-input-trainee-date">Trainee Signature Date:</label>
+                            <input type="text" id="cert-input-trainee-date" class="cert-form-input" readonly value="">
+                        </div>
+                    </div>
+
+                    <!-- Verified Entity & Instructor Box (Read-Only) -->
+                    <div class="cert-readonly-box">
+                        <div class="cert-readonly-header">
+                            <i class="fas fa-stamp" style="color:var(--brand-green);"></i> Authorized Armed Training Entity &amp; Range Voucher Verification
+                        </div>
+                        <div class="cert-readonly-grid">
+                            <div><strong>Entity:</strong> PLATFORMS TRAINING ACADEMY</div>
+                            <div><strong>Academy Address:</strong> 200 E 75th St, Chicago, IL 60619</div>
+                            <div><strong>Lead Firearm Instructor:</strong> Charles Young</div>
+                            <div><strong>Range Location:</strong> Eagle Sports Range (Oak Forest, IL)</div>
+                            <div><strong>Range Fee / Ammo / Targets:</strong> <span style="color:#34d399; font-weight:700;">PAID &amp; INCLUDED ($200)</span></div>
+                            <div><strong>Classroom Completion Date:</strong> <span class="cert-field-compdate">11/03/2026</span></div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:16px; flex-wrap:wrap; margin-top:16px;">
+                        <button class="btn-primary" id="btn-download-cert-main" onclick="app.downloadOfficialPdfCertificate()" style="padding:14px 28px; font-size:1.05rem;">
+                            <i class="fas fa-file-pdf"></i> Download Official Armed Classroom Certificate &amp; Range Voucher (PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Live Preview of Official 20-Hour Armed Classroom Certificate & Paid Range Voucher -->
+                <div class="official-state-cert-wrapper">
+                    <div style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <span style="font-weight:700; color:#fff; font-size:0.9rem;">
+                            <i class="fas fa-eye"></i> Live Armed Classroom Certificate &amp; Range Voucher Preview (68 IAC 1240.510):
+                        </span>
+                        <span style="font-size:0.8rem; color:#aaa;">Updates live as you type above</span>
+                    </div>
+
+                    <div class="official-state-cert-sheet" id="official-state-cert-sheet">
+                        <table class="il-form-top-table">
+                            <tr>
+                                <td class="il-form-notice-box">
+                                    <strong>STATUTORY AUTHORITY:</strong> Issued pursuant to 225 ILCS 447 and 68 Ill. Adm. Code 1240.510(a) documenting completion of the 20-Hour Armed Security Classroom Curriculum. Present at Eagle Sports Range for 8-Hour Live-Fire Qualification &amp; final IDFPR Form IL486-1138 sign-off.
+                                </td>
+                                <td class="il-form-title-box">
+                                    <h2 class="il-form-main-title">Certification of Completion</h2>
+                                    <h3 class="il-form-sub-title">20-Hour Armed Security Classroom Course &amp; Range Voucher</h3>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="il-section-banner">
+                            TRAINEE: Permanent Record of 20-Hour Online Armed Classroom Training &mdash; Single Official Copy Issued.
+                        </div>
+
+                        <table class="il-grid-table" style="table-layout:fixed; width:100%; border-bottom:none;">
+                            <tr>
+                                <td class="il-grid-cell" style="width:100%; border-bottom:none;">
+                                    <span class="il-cell-label">NAME (LAST, FIRST, MIDDLE INITIAL)</span>
+                                    <div class="il-cell-value" id="prev-cert-name"></div>
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="il-grid-table" style="table-layout:fixed; width:100%; border-bottom:none;">
+                            <tr>
+                                <td class="il-grid-cell" style="width:50%; border-bottom:none;">
+                                    <span class="il-cell-label">HOME STREET ADDRESS</span>
+                                    <div class="il-cell-value" id="prev-cert-address"></div>
+                                </td>
+                                <td class="il-grid-cell" style="width:22%; border-bottom:none;">
+                                    <span class="il-cell-label">CITY</span>
+                                    <div class="il-cell-value" id="prev-cert-city">Chicago</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:10%; border-bottom:none;">
+                                    <span class="il-cell-label">STATE</span>
+                                    <div class="il-cell-value" id="prev-cert-state">IL</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:18%; border-bottom:none;">
+                                    <span class="il-cell-label">ZIP CODE</span>
+                                    <div class="il-cell-value" id="prev-cert-zip"></div>
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="il-grid-table" style="table-layout:fixed; width:100%;">
+                            <tr>
+                                <td class="il-grid-cell" style="width:18%;">
+                                    <span class="il-cell-label">DATE OF BIRTH</span>
+                                    <div class="il-cell-value" id="prev-cert-dob"></div>
+                                </td>
+                                <td class="il-grid-cell" style="width:26%;">
+                                    <span class="il-cell-label">SOCIAL SECURITY NUMBER</span>
+                                    <div class="il-cell-value" id="prev-cert-ssn"></div>
+                                </td>
+                                <td class="il-grid-cell" style="width:14%;">
+                                    <span class="il-cell-label">WEIGHT</span>
+                                    <div class="il-cell-value" id="prev-cert-weight"></div>
+                                </td>
+                                <td class="il-grid-cell" style="width:14%;">
+                                    <span class="il-cell-label">HEIGHT</span>
+                                    <div class="il-cell-value" id="prev-cert-height"></div>
+                                </td>
+                                <td class="il-grid-cell" style="width:14%;">
+                                    <span class="il-cell-label">HAIR COLOR</span>
+                                    <div class="il-cell-value" id="prev-cert-hair"></div>
+                                </td>
+                                <td class="il-grid-cell" style="width:14%;">
+                                    <span class="il-cell-label">EYE COLOR</span>
+                                    <div class="il-cell-value" id="prev-cert-eyes"></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p class="il-attest-text">
+                            I hereby certify under penalty of law that I personally completed all 20 hours of the mandated Armed Security Classroom Curriculum and passed the 50-question written examination as required under 225 ILCS 447 and 68 Ill. Adm. Code 1240.510(a).
+                        </p>
+
+                        <div class="il-sig-row">
+                            <div class="il-sig-field">
+                                <span>Signature of Trainee:</span>
+                                <span class="il-sig-underline" id="prev-cert-sig" style="min-width:280px;"></span>
+                            </div>
+                            <div class="il-sig-field">
+                                <span>Date:</span>
+                                <span class="il-sig-underline" id="prev-cert-date" style="min-width:140px;"></span>
+                            </div>
+                        </div>
+
+                        <div class="il-section-banner">
+                            COMPLETED 20-HOUR ARMED SECURITY CLASSROOM MODULES (68 ILL. ADM. CODE 1240.510(a))
+                        </div>
+
+                        <div class="il-checklist-section">
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>4 Cardinal Firearm Safety Rules, Safe Trigger Indexing, Clearing &amp; Illinois Safe Storage (720 ILCS 5/24-9)</strong></span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>Revolver &amp; Semi-Automatic Pistol Mechanics, Action Types (SA/DA/DAO), Duty Holster Draw &amp; Weapon Retention</strong></span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>Ammunition Components, +P/+P+ Safety &amp; Malfunction Clearing (Misfire, 30-Sec Hangfire, Squib, Tap-Rack &amp; Double Feed)</strong></span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>Five Fundamentals of Marksmanship (Aiming, Hold, Breath, Trigger Control &amp; Follow-Through)</strong></span>
+                            </div>
+                            <div class="il-check-item">
+                                <div class="il-checkbox" style="font-weight:bold; font-size:10pt;">&#9746;</div>
+                                <span><strong>Illinois Use of Deadly Force (720 ILCS 5/7-1), Forcible Felonies (5/2-8), Tan Card Law (225 ILCS 447) &amp; Written Exam Passed (&ge;75%)</strong></span>
+                            </div>
+                            <div class="il-check-item" style="margin-top:4px;">
+                                <div class="il-checkbox">&nbsp;</div>
+                                <span><em>Pending Live-Fire Range Qualification (8 Hours / 50 Rounds, Min 35/50 = 70% at Eagle Sports Range — Final IDFPR Form IL486-1138 Issued at Range)</em></span>
+                            </div>
+                        </div>
+
+                        <!-- Paid Range Qualification Voucher Box inside Certificate Preview -->
+                        <div style="border:2px solid #000; background:#f7f7f7; padding:8px 10px; margin:8px 0; font-size:8pt; line-height:1.35;">
+                            <div style="font-weight:bold; font-size:8.8pt; text-transform:uppercase; margin-bottom:3px;">
+                                PAID LIVE-FIRE RANGE QUALIFICATION VOUCHER &bull; TUITION PAID ($200.00 ALL-INCLUSIVE)
+                            </div>
+                            <div><strong>Range Location:</strong> Eagle Sports Range, 5900 W 159th St, Oak Forest, IL 60452 &bull; <strong>Included:</strong> Range Fee, B-27 Targets &amp; 50 Rounds Qualification Ammo</div>
+                            <div><strong>Instructions:</strong> Schedule range date at <em>platformstraining.com/calendar.html?course=armed-28&amp;paid=true</em> and present this printed voucher with valid Photo ID.</div>
+                        </div>
+
+                        <table class="il-grid-table">
+                            <tr>
+                                <td class="il-grid-cell" colspan="4">
+                                    <span class="il-cell-label">NAME OF ENTITY OFFERING TRAINING</span>
+                                    <div class="il-cell-value">PLATFORMS TRAINING ACADEMY</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="il-grid-cell" style="width:45%;">
+                                    <span class="il-cell-label">STREET ADDRESS</span>
+                                    <div class="il-cell-value">200 E 75th St</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:25%;">
+                                    <span class="il-cell-label">CITY</span>
+                                    <div class="il-cell-value">Chicago</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:10%;">
+                                    <span class="il-cell-label">STATE</span>
+                                    <div class="il-cell-value">IL</div>
+                                </td>
+                                <td class="il-grid-cell" style="width:20%;">
+                                    <span class="il-cell-label">ZIP CODE</span>
+                                    <div class="il-cell-value">60619</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="il-grid-cell" style="width:45%;">
+                                    <span class="il-cell-label">DATE CLASSROOM COMPLETED</span>
+                                    <div class="il-cell-value cert-field-compdate">11/03/2026</div>
+                                </td>
+                                <td class="il-grid-cell" colspan="3">
+                                    <span class="il-cell-label">LEAD FIREARM INSTRUCTOR</span>
+                                    <div class="il-cell-value">Charles Young</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="il-sig-row" style="margin-top:10px; margin-bottom:24px;">
+                            <div class="il-sig-field">
+                                <span>Signature of Instructor:</span>
+                                <span class="il-sig-underline il-hand-signature" style="min-width:280px;">Charles Young</span>
+                            </div>
+                            <div class="il-sig-field">
+                                <span>Date:</span>
+                                <span class="il-sig-underline cert-field-compdate" style="min-width:140px;">11/03/2026</span>
+                            </div>
+                        </div>
+
+                        <div class="il-footer-code">PTA-ARMED-20HR &bull; 68 IAC 1240.510(a)</div>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Question Review -->
+                <div class="review-section">
+                    <h3 class="section-title">Comprehensive Question-by-Question Review (50 Items)</h3>
+                    <div id="results-review-list"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===============================================================
+         MODAL 1: Armed Course Navigation & Study Guide
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-navigation-guide" onclick="if(event.target===this) app.closeNavigationGuide()">
+        <div class="lms-modal-window">
+            <button class="lms-modal-close-btn" onclick="app.closeNavigationGuide()" title="Close Guide">&times;</button>
+            
+            <h3 class="modal-header-title">
+                <i class="fas fa-compass" style="color:var(--brand-green);"></i> Armed Security Course &amp; Range Guide
+            </h3>
+            <p class="modal-header-sub">
+                Official Orientation for Platforms Training Academy Online Armed Security (68 Ill. Adm. Code 1240.510)
+            </p>
+
+            <div class="guide-steps-grid">
+                <div class="guide-step-card">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-content">
+                        <h4>10 Armed Classroom Modules (20 Hours Online)</h4>
+                        <p>
+                            Complete all 10 interactive modules in order (Lessons 1–10): Gun Safety Rules, Two-Handed Grip &amp; Stance, Revolver Anatomy, Semi-Auto Anatomy, Clearing &amp; Workspace Reloads, Ammunition &amp; +P Safety, Malfunctions, Five Marksmanship Fundamentals, Illinois Deadly Force Law, and Range Qualification Standards.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-content">
+                        <h4>3-Step Mastery in Every Module</h4>
+                        <p>
+                            Each module requires completing: (1) <strong>Study Material &amp; Technical Diagrams</strong>, (2) <strong>Tactical Scenario Simulator</strong>, and (3) <strong>Check on Learning (3/3 = 100%)</strong> with automatic remediation jumps if missed.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-content">
+                        <h4>50-Question Written Exam (75% &bull; 1 Hour &bull; 2 Attempts)</h4>
+                        <p>
+                            Once all 10 modules are mastered, you have <strong>60 minutes</strong> per attempt and a maximum of <strong>2 attempts</strong> to score at least <strong>75% (38/50)</strong>. If the 1-hour countdown reaches 00:00, your exam submits automatically.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="guide-step-card">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-content">
+                        <h4>Instant Classroom Certificate &amp; Paid Range Voucher</h4>
+                        <p>
+                            Upon passing, enter your state trainee demographics to download your sealed PDF Classroom Completion Certificate &amp; Paid Range Voucher, then click <strong>Schedule Included Live-Fire Range Date</strong> to attend Eagle Sports Range (ammo, targets &amp; range fee included in your $200 tuition!).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:right;">
+                <button class="btn-primary" onclick="app.closeNavigationGuide()">
+                    <i class="fas fa-check"></i> Got It — Return to Armed Course
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===============================================================
+         MODAL 2: Student Account, Login & Progress Save/Resume
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-student-login" onclick="if(event.target===this) app.closeLoginModal()">
+        <div class="lms-modal-window">
+            <button class="lms-modal-close-btn" onclick="app.closeLoginModal()" title="Close Profile">&times;</button>
+            
+            <h3 class="modal-header-title">
+                <i class="fas fa-user-circle" style="color:var(--brand-green);"></i> Armed Trainee Profile &amp; Progress Center
+            </h3>
+            <p class="modal-header-sub">
+                Manage your trainee credentials, save armed course progression, and export or resume your training backup.
+            </p>
+
+            <div class="officer-account-card" style="background: rgba(18, 20, 24, 0.95); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <h4 style="font-size: 1.05rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-id-card-alt text-green"></i> Armed Trainee Account
+                    </h4>
+                    <span style="font-size: 0.75rem; background: rgba(212, 175, 55,0.15); color: var(--brand-green-bright); border: 1px solid rgba(212, 175, 55,0.3); padding: 3px 10px; border-radius: 12px; font-weight: 600;">
+                        <i class="fas fa-crosshairs"></i> Online Armed Portal
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--brand-green); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;" id="officer-avatar-initials">SO</div>
+                        <div>
+                            <div style="font-weight: 700; color: #fff; font-size: 1.05rem;" id="officer-display-name">Student Officer</div>
+                            <div style="font-size: 0.82rem; color: #94a3b8;" id="officer-display-email">student@platformstraining.com</div>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="app.officerSignOut()" style="font-size: 0.88rem; padding: 8px 16px; color: #ffffff; background: linear-gradient(135deg, #231e12 0%, #16130b 100%); border: 1px solid #d4af37; font-weight: 700;">
+                        <i class="fas fa-sign-out-alt" style="color: #d4af37; margin-right: 5px;"></i> Log Out
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-modal-grid">
+                <div class="profile-card-box">
+                    <h4><i class="fas fa-id-badge"></i> Student Officer Credentials</h4>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">FULL LEGAL NAME:</label>
+                            <input type="text" id="login-modal-name" class="cert-form-input" style="width:100%;" placeholder="e.g. Officer Marcus Washington">
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">EMAIL ADDRESS / STUDENT ID:</label>
+                            <input type="text" id="login-modal-email" class="cert-form-input" style="width:100%;" placeholder="e.g. mwashington@security.com">
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">EMPLOYER / SECURITY AGENCY (OPTIONAL):</label>
+                            <input type="text" id="login-modal-agency" class="cert-form-input" style="width:100%;" placeholder="e.g. Platforms Security Services">
+                        </div>
+                        <button class="btn-primary" style="margin-top:8px;" onclick="app.saveStudentProfileFromModal()">
+                            <i class="fas fa-save"></i> Update Profile Credentials
+                        </button>
+                    </div>
+                </div>
+
+                <div class="profile-card-box">
+                    <h4><i class="fas fa-chart-line"></i> Armed Course Progress</h4>
+                    <div class="profile-stat-row">
+                        <span>Armed Modules Completed:</span>
+                        <span id="modal-stat-modules">0 / 10 Mastered</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>Current Active Module:</span>
+                        <span id="modal-stat-active-module">Lesson 1</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>Check-on-Learning Quizzes:</span>
+                        <span id="modal-stat-quizzes">0 / 30 Questions</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>50-Q Armed Exam Status:</span>
+                        <span id="modal-stat-exam-status" style="color:#f59e0b;">Locked</span>
+                    </div>
+                    <div class="profile-stat-row">
+                        <span>Last Saved:</span>
+                        <span id="modal-stat-last-saved">Just now</span>
+                    </div>
+
+                    <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                        <button class="btn-secondary" style="font-size:0.85rem; padding:8px 12px; width:100%; text-align:center;" onclick="app.manualSaveProgress()">
+                            <i class="fas fa-cloud-upload-alt"></i> Save Current Progress Now
+                        </button>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-secondary" style="font-size:0.85rem; padding:8px 10px; flex:1;" onclick="app.exportProgressFile()" title="Export JSON Progress Backup">
+                                <i class="fas fa-download"></i> Export Progress
+                            </button>
+                            <button class="btn-secondary" style="font-size:0.85rem; padding:8px 10px; flex:1;" onclick="document.getElementById('file-import-progress').click()" title="Resume from Backup File">
+                                <i class="fas fa-upload"></i> Resume from File
+                            </button>
+                            <input type="file" id="file-import-progress" style="display:none;" accept=".json" onchange="app.importProgressFile(event)">
+                        </div>
+                        <button class="btn-secondary" style="font-size:0.8rem; padding:6px 10px; color:var(--text-muted); border-color:#333; margin-top:4px;" onclick="app.resetCourseProgress()">
+                            <i class="fas fa-redo"></i> Reset Armed Progress
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:right;">
+                <button class="btn-primary" onclick="app.closeLoginModal()">
+                    <i class="fas fa-arrow-right"></i> Continue Armed Course
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===============================================================
+         MODAL 3: Instructor / Admin Evaluation PIN Login
+         =============================================================== -->
+    <div class="lms-modal-backdrop" id="modal-admin-login" onclick="if(event.target===this) app.closeAdminLoginModal()">
+        <div class="lms-modal-window" style="max-width:440px;">
+            <button class="lms-modal-close-btn" onclick="app.closeAdminLoginModal()" title="Close">&times;</button>
+            <div style="text-align:center; margin-bottom:12px;">
+                <a href="../index.html" title="Return to Homepage" style="display:inline-block; text-decoration:none;">
+                    <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy" style="height: 100px; max-width: 100%; width: auto; object-fit: contain;">
+                </a>
+            </div>
+            <h3 class="modal-header-title">
+                <i class="fas fa-user-shield" style="color:var(--brand-green);"></i> Instructor Evaluation Access
+            </h3>
+            <p class="modal-header-sub">
+                Enter Admin PIN to unlock all 10 armed modules, evaluate the 50-question exam, and preview the Armed Classroom Certificate &amp; Range Voucher.
+            </p>
+            <div style="margin:20px 0;">
+                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">ADMIN ACCESS PIN:</label>
+                <input type="password" id="admin-pin-input" class="cert-form-input" style="width:100%; font-size:1.2rem; letter-spacing:3px; text-align:center;" placeholder="••••••••••" maxlength="15" onkeydown="if(event.key==='Enter') app.submitAdminLogin()">
+                <div id="admin-pin-error" style="color:var(--danger); font-size:0.85rem; margin-top:8px; display:none;">Invalid PIN. Please try again.</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                <a href="../index.html" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;"><i class="fas fa-home"></i> Homepage</a>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" onclick="app.closeAdminLoginModal()">Cancel</button>
+                    <button class="btn-primary" onclick="app.submitAdminLogin()"><i class="fas fa-unlock"></i> Unlock God Mode</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="lms-toast" class="lms-toast" style="display:none;">
+        <i class="fas fa-check-circle" style="color:var(--brand-green-bright); font-size:1.3rem;"></i>
+        <span id="lms-toast-msg">Progress saved successfully!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="../assets/logo_wordmark_light.png" alt="Platforms Training Academy Wordmark" style="height:36px; width:auto; max-width:160px; object-fit:contain;">
+                <div>
+                    <strong style="color:var(--text-white); font-size:0.86rem;">Platforms Training Academy</strong><br>
+                    <span style="font-size:0.78rem; color:var(--text-muted);">200 E 75th St, Chicago, IL 60619 &bull; (773) 873-2591 &bull; Eagle Sports Range</span>
+                </div>
+            </div>
+            <div class="footer-copy">
+                &copy; 2026 Platforms Training Academy. All rights reserved. &bull; <a href="../index.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-home"></i> Home</a> &bull; <a href="../courses.html" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-list-check"></i> Course Catalog</a> &bull; <a href="../calendar.html?course=armed-28&paid=true" style="color:var(--brand-green-bright); text-decoration:none;"><i class="fas fa-calendar-alt"></i> Range Schedule</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Standalone Armed Academy Scripts -->
+    <script src="config.js?v=2.0"></script>
+    <script src="data.js?v=6.0"></script>
+    <script src="app.js?v=6.0"></script>
+</body>
+</html>
