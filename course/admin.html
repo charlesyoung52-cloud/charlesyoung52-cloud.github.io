@@ -508,6 +508,9 @@
                 <button class="dash-nav-tab" id="tab-btn-calendar" onclick="switchDashboardTab('calendar')">
                     <i class="fas fa-calendar-days text-blue"></i> Course Calendar &amp; Class Schedule
                 </button>
+                <button class="dash-nav-tab" id="tab-btn-emails" onclick="switchDashboardTab('emails')">
+                    <i class="fas fa-envelope-open-text text-blue"></i> Automated Emails &amp; Google Reviews
+                </button>
             </div>
 
             <!-- TAB 1: STUDENT ROSTER & EXAM ANALYTICS -->
@@ -960,11 +963,12 @@
                                     <th>Class Date &amp; Time</th>
                                     <th>Student Notes</th>
                                     <th>Reserved At</th>
+                                    <th>Automated Emails</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-reservations-table-body">
                                 <tr>
-                                    <td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td>
+                                    <td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -973,6 +977,136 @@
 
             </div>
             <!-- END TAB 3 -->
+
+            <!-- TAB 4: AUTOMATED EMAILS (CONFIRMATION, REMINDERS, & GOOGLE REVIEWS) -->
+            <div id="view-emails" style="display: none;">
+
+                <!-- Google Business Profile Direct Review Link Configuration -->
+                <div class="stat-card" style="margin-bottom: 22px; padding: 22px 24px; border: 1px solid var(--border-highlight); background: var(--bg-card);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:14px;">
+                        <div>
+                            <h3 style="color:#fff; font-size:1.15rem; margin:0 0 4px 0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-star text-blue"></i> Google Business Profile Direct Review Link
+                            </h3>
+                            <p style="font-size:0.84rem; color:#cbd5e1; margin:0;">
+                                Every Graduation Thank-You email includes a prominent <strong>&#9733;&#9733;&#9733;&#9733;&#9733; Leave a 5-Star Review on Google</strong> button that sends graduates straight to your Google Business Profile. Paste your exact Google Review shortlink (e.g., <code>https://g.page/r/.../review</code>) below or use the default direct Google Maps profile link.
+                            </p>
+                        </div>
+                        <a id="admin-test-google-review-btn" href="https://www.google.com/maps/search/?api=1&query=Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619" target="_blank" class="btn-action" style="text-decoration:none; border-color:var(--green); color:var(--green-bright);">
+                            <i class="fas fa-up-right-from-square"></i> Test Google Profile Link
+                        </a>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                        <input type="url" id="admin-google-review-url" value="https://www.google.com/maps/search/?api=1&query=Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619" placeholder="https://g.page/r/.../review" style="flex:1; min-width:280px; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:0.88rem;">
+                        <button type="button" class="btn-action btn-primary" onclick="saveGoogleReviewUrl()">
+                            <i class="fas fa-save"></i> Save Google Review Link
+                        </button>
+                    </div>
+                    <div id="google-review-url-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px; font-size:0.82rem;"></div>
+                </div>
+
+                <!-- Automated Email Studio: Composer + Live HTML Preview -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap:20px; align-items:start;">
+
+                    <!-- Left Column: Template Selector, Recipient Details, & Send Controls -->
+                    <div class="stat-card" style="padding: 22px 24px; border: 1px solid var(--border);">
+                        <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.08rem; margin:0 0 14px 0; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                            <i class="fas fa-paper-plane text-blue"></i> Student Email Dispatcher &amp; Template Selector
+                        </h4>
+
+                        <!-- 3 Template Selector Buttons -->
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">1. Select Email Template:</label>
+                            <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+                                <button type="button" class="btn-action active-email-tpl" id="tpl-btn-confirmation" onclick="selectEmailStudioTemplate('confirmation')" style="justify-content:flex-start; padding:10px 14px; border-color:var(--green); background:rgba(212,175,55,0.16); color:var(--green-bright);">
+                                    <i class="fas fa-receipt"></i> <strong>1. Class &amp; Payment Confirmation Email</strong> <span style="margin-left:auto; font-size:0.7rem; opacity:0.85;">Auto-Sent on Booking/Payment</span>
+                                </button>
+                                <button type="button" class="btn-action" id="tpl-btn-reminder" onclick="selectEmailStudioTemplate('reminder')" style="justify-content:flex-start; padding:10px 14px;">
+                                    <i class="fas fa-bell"></i> <strong>2. Upcoming Class &amp; Range Reminder Email</strong> <span style="margin-left:auto; font-size:0.7rem; opacity:0.85;">1-Click / Bulk Roster</span>
+                                </button>
+                                <button type="button" class="btn-action" id="tpl-btn-thank_you_review" onclick="selectEmailStudioTemplate('thank_you_review')" style="justify-content:flex-start; padding:10px 14px;">
+                                    <i class="fas fa-star"></i> <strong>3. Thank You + 5-Star Google Review Email</strong> <span style="margin-left:auto; font-size:0.7rem; opacity:0.85;">Auto-Sent on Graduation</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick-Fill from Student Roster or Calendar Reservation -->
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">2. Quick-Fill from Student Roster / Reservations (Optional):</label>
+                            <select id="email-studio-student-select" onchange="onEmailStudioStudentSelect()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                <option value="">-- Select a Student or Reservation to Auto-Fill --</option>
+                            </select>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                            <div>
+                                <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT NAME *</label>
+                                <input type="text" id="es-student-name" value="John A. Doe" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL *</label>
+                                <input type="email" id="es-student-email" placeholder="student@email.com" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">COURSE / CLASS TITLE *</label>
+                            <input type="text" id="es-course-title" value="28-Hour Armed Security Course (IDFPR #102-000398)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        </div>
+
+                        <div id="es-schedule-fields-group">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                                <div>
+                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SCHEDULED CLASS / RANGE DATE</label>
+                                    <input type="text" id="es-class-date" value="Saturday, Nov 7, 2026" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CLASS / RANGE TIME</label>
+                                    <input type="text" id="es-class-time" value="9:00 AM – 5:00 PM" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:12px; margin-bottom:12px;">
+                                <div>
+                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING LOCATION</label>
+                                    <input type="text" id="es-location" value="200 E 75th St, Chicago, IL & Eagle Sports Range (5900 W 159th St, Oak Forest, IL)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TUITION / STATUS</label>
+                                    <input type="text" id="es-price" value="$200.00 (Paid)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="es-feedback-banner" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:0.84rem; line-height:1.5;"></div>
+
+                        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                            <button type="button" class="btn-action btn-primary" id="es-send-btn" onclick="sendAutomatedEmailFromStudio()" style="flex:1; justify-content:center; padding:11px 16px;">
+                                <i class="fas fa-paper-plane"></i> Send Email to Student Now
+                            </button>
+                            <button type="button" class="btn-action" onclick="openMailtoFromStudio()" style="padding:11px 14px;" title="Open pre-filled email in your default mail app">
+                                <i class="fas fa-envelope-open"></i> Open in Mail App
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Live Branded HTML Email Preview -->
+                    <div class="stat-card" style="padding: 22px 24px; border: 1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                            <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.05rem; margin:0;">
+                                <i class="fas fa-eye text-blue"></i> Live HTML Email Preview
+                            </h4>
+                            <span id="es-preview-subject-pill" class="badge badge-info" style="font-size:0.72rem;">Subject Preview</span>
+                        </div>
+                        <div id="email-studio-live-preview" style="background:#060709; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto;">
+                            <!-- Populated dynamically by renderEmailStudioPreview() -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- END TAB 4 -->
 
         </main>
     </div>
@@ -1268,6 +1402,8 @@
             loadEmailJsConfig();
             loadSmtpConfig();
             loadAdminCalendarData();
+            loadGoogleReviewUrl();
+            renderEmailStudioPreview();
         }
 
         function getApiBaseUrl() {
@@ -1698,11 +1834,19 @@
             document.getElementById('tab-btn-mfa').classList.toggle('active', tab === 'mfa');
             const calBtn = document.getElementById('tab-btn-calendar');
             if (calBtn) calBtn.classList.toggle('active', tab === 'calendar');
+            const emailsBtn = document.getElementById('tab-btn-emails');
+            if (emailsBtn) emailsBtn.classList.toggle('active', tab === 'emails');
             
             document.getElementById('view-roster').style.display = (tab === 'roster') ? 'block' : 'none';
             document.getElementById('view-mfa').style.display = (tab === 'mfa') ? 'block' : 'none';
             const calView = document.getElementById('view-calendar');
             if (calView) calView.style.display = (tab === 'calendar') ? 'block' : 'none';
+            const emailsView = document.getElementById('view-emails');
+            if (emailsView) emailsView.style.display = (tab === 'emails') ? 'block' : 'none';
+            if (tab === 'emails') {
+                populateEmailStudioSelector();
+                renderEmailStudioPreview();
+            }
         }
 
         async function loadAdminCalendarData() {
@@ -1960,10 +2104,10 @@
             const list = adminCalendarData.reservations || [];
             if (countEl) countEl.textContent = list.length;
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No class reservations recorded yet.</td></tr>`;
                 return;
             }
-            tbody.innerHTML = list.map(r => `
+            tbody.innerHTML = list.map((r, rIdx) => `
                 <tr>
                     <td><code style="color:var(--green-bright);">${r.id}</code></td>
                     <td><strong style="color:#fff;">${r.studentName}</strong></td>
@@ -1975,6 +2119,13 @@
                     <td style="font-size:0.82rem; color:#cbd5e1;">${r.date} &bull; ${r.time}</td>
                     <td style="font-size:0.8rem; color:var(--text-muted);">${r.notes || '—'}</td>
                     <td style="font-size:0.78rem; color:var(--text-sub);">${r.createdAt || ''}</td>
+                    <td>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                            <button class="btn-action" style="padding:3px 7px; font-size:0.7rem;" onclick="openEmailStudioForReservation(${rIdx}, 'confirmation')" title="Send Class Confirmation"><i class="fas fa-receipt text-blue"></i> Confirm</button>
+                            <button class="btn-action" style="padding:3px 7px; font-size:0.7rem;" onclick="openEmailStudioForReservation(${rIdx}, 'reminder')" title="Send Class Reminder"><i class="fas fa-bell text-blue"></i> Remind</button>
+                            <button class="btn-action" style="padding:3px 7px; font-size:0.7rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForReservation(${rIdx}, 'thank_you_review')" title="Send Thank You + Google Review"><i class="fas fa-star"></i> Review</button>
+                        </div>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -2191,6 +2342,17 @@
                                 <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.73rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
                                     <i class="fas fa-file-signature"></i> Armed Cert (IL486-1138)
                                 </button>
+                                <div style="display:flex; gap:3px; flex-wrap:wrap;">
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.68rem;" onclick="openEmailStudioForStudent(${idx}, 'confirmation')" title="Send Class & Payment Confirmation Email">
+                                        <i class="fas fa-receipt text-blue"></i> Confirm
+                                    </button>
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.68rem;" onclick="openEmailStudioForStudent(${idx}, 'reminder')" title="Send Upcoming Class / Range Reminder Email">
+                                        <i class="fas fa-bell text-blue"></i> Remind
+                                    </button>
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.68rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForStudent(${idx}, 'thank_you_review')" title="Send Graduation Thank You + 5-Star Google Review Email">
+                                        <i class="fas fa-star"></i> Review
+                                    </button>
+                                </div>
                                 ${attemptsCount > 0 ? `
                                     <button class="btn-action" style="padding:4px 8px; font-size:0.73rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
                                         <i class="fas fa-history"></i> History (${attemptsCount})
@@ -2909,6 +3071,419 @@
                     sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Completed Certificate to Student &amp; IDFPR';
                 }
             }
+        }
+
+        // =========================================================================
+        // AUTOMATED STUDENT EMAILS (CONFIRMATION, REMINDERS, & GOOGLE REVIEWS)
+        // =========================================================================
+        let currentEmailStudioTemplate = 'confirmation';
+        const DEFAULT_GOOGLE_PROFILE_REVIEW_URL = 'https://www.google.com/maps/search/?api=1&query=Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619';
+
+        async function loadGoogleReviewUrl() {
+            let savedUrl = localStorage.getItem('platforms_google_review_url') || DEFAULT_GOOGLE_PROFILE_REVIEW_URL;
+            try {
+                const res = await fetch(getApiBaseUrl() + '/api/admin/google-review-config');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.google_review_url) {
+                        savedUrl = data.google_review_url;
+                        localStorage.setItem('platforms_google_review_url', savedUrl);
+                    }
+                }
+            } catch (e) {}
+            const inp = document.getElementById('admin-google-review-url');
+            if (inp) inp.value = savedUrl;
+            const testBtn = document.getElementById('admin-test-google-review-btn');
+            if (testBtn) testBtn.href = savedUrl;
+        }
+
+        async function saveGoogleReviewUrl() {
+            const inp = document.getElementById('admin-google-review-url');
+            const url = (inp && inp.value.trim()) || DEFAULT_GOOGLE_PROFILE_REVIEW_URL;
+            localStorage.setItem('platforms_google_review_url', url);
+            const testBtn = document.getElementById('admin-test-google-review-btn');
+            if (testBtn) testBtn.href = url;
+
+            try {
+                await fetch(getApiBaseUrl() + '/api/admin/google-review-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ google_review_url: url })
+                });
+            } catch (e) {}
+
+            renderEmailStudioPreview();
+            const fb = document.getElementById('google-review-url-feedback');
+            if (fb) {
+                fb.style.display = 'block';
+                fb.style.background = 'rgba(16, 185, 129, 0.16)';
+                fb.style.border = '1px solid rgba(16, 185, 129, 0.45)';
+                fb.style.color = '#86efac';
+                fb.innerHTML = '<i class="fas fa-check-circle"></i> Google Business Profile review link saved! All Thank-You emails will now direct graduates to this URL.';
+                setTimeout(() => { fb.style.display = 'none'; }, 4000);
+            }
+        }
+
+        function selectEmailStudioTemplate(tpl) {
+            currentEmailStudioTemplate = tpl;
+            ['confirmation', 'reminder', 'thank_you_review'].forEach(t => {
+                const btn = document.getElementById('tpl-btn-' + t);
+                if (!btn) return;
+                if (t === tpl) {
+                    btn.style.borderColor = 'var(--green)';
+                    btn.style.background = 'rgba(212,175,55,0.16)';
+                    btn.style.color = 'var(--green-bright)';
+                } else {
+                    btn.style.borderColor = 'var(--border)';
+                    btn.style.background = 'var(--bg-card)';
+                    btn.style.color = '#fff';
+                }
+            });
+            const schedGroup = document.getElementById('es-schedule-fields-group');
+            if (schedGroup) {
+                schedGroup.style.display = (tpl === 'thank_you_review') ? 'none' : 'block';
+            }
+            renderEmailStudioPreview();
+        }
+
+        function populateEmailStudioSelector() {
+            const sel = document.getElementById('email-studio-student-select');
+            if (!sel) return;
+            let html = '<option value="">-- Select a Student or Reservation to Auto-Fill --</option>';
+
+            if (allStudents && allStudents.length > 0) {
+                html += '<optgroup label="Enrolled Course Students">';
+                allStudents.forEach((s, idx) => {
+                    const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
+                    const cLabel = isArmed ? '28-Hr Armed Security' : '20-Hr Unarmed Security';
+                    html += `<option value="student:${idx}">${s.name} (${s.email || 'no email'}) — ${cLabel}</option>`;
+                });
+                html += '</optgroup>';
+            }
+
+            const resList = (adminCalendarData && adminCalendarData.reservations) || [];
+            if (resList.length > 0) {
+                html += '<optgroup label="Scheduled Class Reservations">';
+                resList.forEach((r, rIdx) => {
+                    html += `<option value="res:${rIdx}">${r.studentName} (${r.studentEmail || 'no email'}) — ${r.courseTitle} [${r.date}]</option>`;
+                });
+                html += '</optgroup>';
+            }
+
+            sel.innerHTML = html;
+        }
+
+        function onEmailStudioStudentSelect() {
+            const sel = document.getElementById('email-studio-student-select');
+            if (!sel || !sel.value) return;
+            const [kind, idxStr] = sel.value.split(':');
+            const idx = parseInt(idxStr, 10);
+
+            if (kind === 'student' && allStudents[idx]) {
+                const s = allStudents[idx];
+                const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
+                document.getElementById('es-student-name').value = s.name || '';
+                document.getElementById('es-student-email').value = s.email || '';
+                document.getElementById('es-course-title').value = isArmed
+                    ? '28-Hour Armed Security Course (IDFPR #102-000398)'
+                    : '20-Hour Basic Unarmed Security Course (IDFPR #102-000398)';
+                document.getElementById('es-price').value = isArmed ? '$200.00 (Paid)' : '$50.00 (Paid)';
+                document.getElementById('es-class-date').value = (s.armed_range_session && s.armed_range_session.dateFormatted) || (isArmed ? 'Scheduled Weekend Range Qualification' : '24/7 Self-Paced Online Portal');
+                document.getElementById('es-class-time').value = (s.armed_range_session && s.armed_range_session.time) || (isArmed ? '9:00 AM – 5:00 PM' : 'Self-Paced Online');
+                document.getElementById('es-location').value = isArmed
+                    ? 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
+                    : '100% Online Portal (platformstraining.com)';
+            } else if (kind === 'res' && adminCalendarData.reservations && adminCalendarData.reservations[idx]) {
+                const r = adminCalendarData.reservations[idx];
+                document.getElementById('es-student-name').value = r.studentName || '';
+                document.getElementById('es-student-email').value = r.studentEmail || '';
+                document.getElementById('es-course-title').value = r.courseTitle || 'Scheduled Security / Firearms Class';
+                document.getElementById('es-class-date').value = r.date || '';
+                document.getElementById('es-class-time').value = r.time || '9:00 AM – 5:00 PM';
+                document.getElementById('es-location').value = r.location || '200 E 75th St, Chicago, IL & Eagle Sports Range';
+                document.getElementById('es-price').value = r.price || 'Seat Reserved';
+            }
+            renderEmailStudioPreview();
+        }
+
+        function openEmailStudioForStudent(filteredIndex, tplType) {
+            const filtered = getFilteredStudentsList();
+            const s = filtered[filteredIndex];
+            if (!s) return;
+            const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
+            switchDashboardTab('emails');
+            selectEmailStudioTemplate(tplType || 'confirmation');
+            document.getElementById('es-student-name').value = s.name || '';
+            document.getElementById('es-student-email').value = s.email || '';
+            document.getElementById('es-course-title').value = isArmed
+                ? '28-Hour Armed Security Course (IDFPR #102-000398)'
+                : '20-Hour Basic Unarmed Security Course (IDFPR #102-000398)';
+            document.getElementById('es-price').value = isArmed ? '$200.00 (Paid)' : '$50.00 (Paid)';
+            document.getElementById('es-class-date').value = (s.armed_range_session && s.armed_range_session.dateFormatted) || (isArmed ? 'Scheduled Weekend Range Qualification' : '24/7 Self-Paced Online Portal');
+            document.getElementById('es-class-time').value = (s.armed_range_session && s.armed_range_session.time) || '9:00 AM – 5:00 PM';
+            document.getElementById('es-location').value = isArmed
+                ? 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
+                : '100% Online Portal (platformstraining.com)';
+            renderEmailStudioPreview();
+        }
+
+        function openEmailStudioForReservation(resIndex, tplType) {
+            const r = (adminCalendarData.reservations || [])[resIndex];
+            if (!r) return;
+            switchDashboardTab('emails');
+            selectEmailStudioTemplate(tplType || 'confirmation');
+            document.getElementById('es-student-name').value = r.studentName || '';
+            document.getElementById('es-student-email').value = r.studentEmail || '';
+            document.getElementById('es-course-title').value = r.courseTitle || 'Scheduled Security / Firearms Class';
+            document.getElementById('es-class-date').value = r.date || '';
+            document.getElementById('es-class-time').value = r.time || '9:00 AM – 5:00 PM';
+            document.getElementById('es-location').value = r.location || '200 E 75th St, Chicago, IL & Eagle Sports Range';
+            document.getElementById('es-price').value = r.price || 'Seat Reserved';
+            renderEmailStudioPreview();
+        }
+
+        function buildClientEmailPayload() {
+            const studentName = (document.getElementById('es-student-name').value || 'Student Officer').trim();
+            const toEmail = (document.getElementById('es-student-email').value || '').trim();
+            const courseTitle = (document.getElementById('es-course-title').value || '28-Hour Armed Security Course').trim();
+            const classDate = (document.getElementById('es-class-date').value || 'Upcoming Scheduled Session').trim();
+            const classTime = (document.getElementById('es-class-time').value || '9:00 AM – 5:00 PM').trim();
+            const location = (document.getElementById('es-location').value || '200 E 75th St, Chicago, IL & Eagle Sports Range').trim();
+            const price = (document.getElementById('es-price').value || 'Paid / Confirmed').trim();
+            const reviewUrl = ((document.getElementById('admin-google-review-url') || {}).value || DEFAULT_GOOGLE_PROFILE_REVIEW_URL).trim();
+
+            let subject = '';
+            let html = '';
+            let text = '';
+
+            if (currentEmailStudioTemplate === 'confirmation') {
+                subject = `Class & Payment Confirmation: ${courseTitle} | Platforms Training Academy`;
+                html = `
+                <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
+                    <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:20px 24px; border-bottom:2px solid #d4af37; text-align:center;">
+                        <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
+                            IDFPR Approved Curriculum #102-000398 &bull; 225 ILCS 447
+                        </div>
+                        <h2 style="color:#ffffff; font-size:20px; margin:4px 0 0 0;">PLATFORMS TRAINING ACADEMY</h2>
+                        <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">Official Class Registration &amp; Tuition Payment Confirmation</p>
+                    </div>
+                    <div style="padding:22px 24px;">
+                        <p style="font-size:15px; color:#ffffff; margin-top:0;">Welcome, <strong>${studentName}</strong>!</p>
+                        <p style="font-size:13.5px; color:#cbd5e1; line-height:1.55;">
+                            Thank you for enrolling with <strong>Platforms Training Academy</strong>. Your registration and tuition status have been confirmed:
+                        </p>
+                        <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:13px;">
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course Enrolled:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Tuition / Status:</strong> <strong style="color:#4ade80;">${price}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Scheduled Date:</strong> <strong style="color:#fff;">${classDate}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Class / Range Hours:</strong> ${classTime}</div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Training Location:</strong> ${location}</div>
+                            <div><strong style="color:#94a3b8;">Lead Instructor:</strong> Charles Young (License #263-000693)</div>
+                        </div>
+                        <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#cbd5e1; line-height:1.55;">
+                            <strong style="color:#fff; display:block; margin-bottom:4px;">What to Bring &amp; Prepare:</strong>
+                            &bull; Valid Government Photo ID (and FOID card if attending an Illinois CCL session).<br>
+                            &bull; Close-toed shoes, crew-neck shirt, and a sturdy belt (ammo, targets, and range fees included).<br>
+                            &bull; 28-Hour Armed Security students: Complete your online modules &amp; untimed exam before range day.
+                        </div>
+                    </div>
+                </div>`;
+                text = `Welcome ${studentName}!
+
+Your registration and payment with Platforms Training Academy (IDFPR Approved Curriculum #102-000398) are confirmed:
+
+Course: ${courseTitle}
+Tuition / Status: ${price}
+Date: ${classDate}
+Time: ${classTime}
+Location: ${location}
+Instructor: Charles Young (#263-000693)
+
+What to Bring: Valid Photo ID, close-toed shoes, crew-neck shirt, and a sturdy belt. Ammo, targets, and range fees are included.
+
+Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com`;
+            } else if (currentEmailStudioTemplate === 'reminder') {
+                subject = `Upcoming Class Reminder (${classDate}): ${courseTitle} | Platforms Training Academy`;
+                html = `
+                <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
+                    <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:20px 24px; border-bottom:2px solid #d4af37; text-align:center;">
+                        <div style="display:inline-block; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
+                            Upcoming Training &amp; Range Qualification Reminder
+                        </div>
+                        <h2 style="color:#ffffff; font-size:20px; margin:4px 0 0 0;">PLATFORMS TRAINING ACADEMY</h2>
+                        <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor: Charles Young</p>
+                    </div>
+                    <div style="padding:22px 24px;">
+                        <p style="font-size:15px; color:#ffffff; margin-top:0;">Hello <strong>${studentName}</strong>,</p>
+                        <p style="font-size:13.5px; color:#cbd5e1; line-height:1.55;">
+                            Friendly reminder regarding your upcoming scheduled training / range qualification session with <strong>Platforms Training Academy</strong>:
+                        </p>
+                        <div style="background:#141821; border:1px solid rgba(212,175,55,0.45); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:13px;">
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course / Session:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Scheduled Date:</strong> <strong style="color:#fbbf24;">${classDate}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Check-In &amp; Hours:</strong> ${classTime} (Arrive 15 mins early)</div>
+                            <div><strong style="color:#94a3b8;">Location:</strong> ${location}</div>
+                        </div>
+                        <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#cbd5e1; line-height:1.55;">
+                            <strong style="color:#fff; display:block; margin-bottom:4px;">Mandatory Arrival &amp; Range Checklist:</strong>
+                            &bull; Arrive 15 minutes early for sign-in and safety briefing.<br>
+                            &bull; Bring your Government Photo ID (and FOID if applicable).<br>
+                            &bull; Wear close-toed shoes, crew-neck shirt, long pants, and a sturdy belt.<br>
+                            &bull; Ammunition, targets, and range fees are included.
+                        </div>
+                    </div>
+                </div>`;
+                text = `Hello ${studentName},
+
+This is a reminder for your upcoming training session at Platforms Training Academy (Curriculum #102-000398):
+
+Course: ${courseTitle}
+Date: ${classDate}
+Time: ${classTime} (Please arrive 15 minutes early)
+Location: ${location}
+
+Checklist:
+- Bring valid Photo ID (and FOID if applicable)
+- Wear close-toed shoes, crew-neck shirt, and a sturdy belt
+- Ammo, targets, and range fees are included
+
+Questions? Call (773) 873-2591`;
+            } else {
+                subject = `Congratulations & Thank You from Platforms Training Academy! (Leave a Quick Google Review)`;
+                html = `
+                <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
+                    <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 24px; border-bottom:2px solid #d4af37; text-align:center;">
+                        <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
+                            Official Graduate &bull; IDFPR Approved Curriculum #102-000398
+                        </div>
+                        <h2 style="color:#ffffff; font-size:21px; margin:4px 0 0 0;">CONGRATULATIONS, ${studentName.toUpperCase()}!</h2>
+                        <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">Thank You for Training with Platforms Training Academy</p>
+                    </div>
+                    <div style="padding:22px 24px;">
+                        <p style="font-size:14px; color:#cbd5e1; line-height:1.6; margin-top:0;">
+                            Congratulations on completing your <strong>${courseTitle}</strong> with <strong>Platforms Training Academy</strong>! As an 18-year U.S. Army combat veteran and State Certified Instructor, it was an honor training you.
+                        </p>
+                        <div style="background:linear-gradient(135deg,rgba(212,175,55,0.14) 0%,#141821 100%); border:2px solid #d4af37; border-radius:10px; padding:18px 20px; margin:18px 0; text-align:center;">
+                            <div style="font-size:24px; letter-spacing:4px; color:#fbbf24; margin-bottom:6px;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                            <h3 style="color:#ffffff; font-size:17px; margin:0 0 6px 0;">Share Your Experience on Our Google Profile!</h3>
+                            <p style="font-size:13px; color:#e2e8f0; line-height:1.55; margin:0 0 14px 0;">
+                                Your review helps fellow security officers and Illinois residents find veteran-led training they can trust. Click below to post your review straight to our Google Business Profile:
+                            </p>
+                            <a href="${reviewUrl}" target="_blank" style="display:inline-block; background:linear-gradient(135deg,#d4af37 0%,#b89225 100%); color:#07090e; font-weight:800; font-size:14px; text-decoration:none; padding:12px 24px; border-radius:6px;">
+                                &#9733; Leave a 5-Star Review on Google &rarr;
+                            </a>
+                        </div>
+                        <p style="font-size:13px; color:#ffffff; margin-bottom:0;">
+                            Stay safe and stay sharp,<br>
+                            <strong style="color:#d4af37;">Charles Young</strong> &bull; Lead Instructor (#263-000693) &bull; (773) 873-2591
+                        </p>
+                    </div>
+                </div>`;
+                text = `Congratulations ${studentName} on completing your ${courseTitle} with Platforms Training Academy!
+
+Would you take 30 seconds to leave us a 5-star review on Google? Click the link below to post straight to our Google Business Profile:
+
+${reviewUrl}
+
+Thank you for training with us!
+Charles Young — Lead Instructor (#263-000693)
+Platforms Training Academy | (773) 873-2591`;
+            }
+
+            return { studentName, toEmail, courseTitle, classDate, classTime, location, price, reviewUrl, subject, html, text };
+        }
+
+        function renderEmailStudioPreview() {
+            const previewEl = document.getElementById('email-studio-live-preview');
+            const subjPill = document.getElementById('es-preview-subject-pill');
+            if (!previewEl) return;
+            const payload = buildClientEmailPayload();
+            previewEl.innerHTML = payload.html;
+            if (subjPill) subjPill.textContent = payload.subject;
+        }
+
+        async function sendAutomatedEmailFromStudio() {
+            const payload = buildClientEmailPayload();
+            const fb = document.getElementById('es-feedback-banner');
+            const btn = document.getElementById('es-send-btn');
+
+            if (!payload.toEmail || !payload.toEmail.includes('@')) {
+                alert('Please enter a valid student email address.');
+                document.getElementById('es-student-email').focus();
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dispatching Email...';
+            }
+
+            let sentOk = false;
+            let statusMsg = '';
+
+            try {
+                const res = await fetch(getApiBaseUrl() + '/api/emails/send-automated', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email_type: currentEmailStudioTemplate,
+                        to_email: payload.toEmail,
+                        student_name: payload.studentName,
+                        course_title: payload.courseTitle,
+                        class_date: payload.classDate,
+                        class_time: payload.classTime,
+                        location: payload.location,
+                        price: payload.price,
+                        google_review_url: payload.reviewUrl
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    sentOk = true;
+                    statusMsg = data.message || `Email sent to ${payload.toEmail}`;
+                } else {
+                    statusMsg = data.error || 'Server SMTP not yet configured';
+                }
+            } catch (e) {
+                statusMsg = e.message;
+            }
+
+            if (fb) {
+                fb.style.display = 'block';
+                const mailtoHref = `mailto:${encodeURIComponent(payload.toEmail)}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.text)}`;
+                if (sentOk) {
+                    fb.style.background = 'rgba(16, 185, 129, 0.16)';
+                    fb.style.border = '1px solid rgba(16, 185, 129, 0.45)';
+                    fb.style.color = '#86efac';
+                    fb.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Sent!</strong> ${statusMsg}`;
+                } else {
+                    fb.style.background = 'rgba(212, 175, 55, 0.16)';
+                    fb.style.border = '1px solid rgba(212, 175, 55, 0.45)';
+                    fb.style.color = '#fde68a';
+                    fb.innerHTML = `
+                        <div><i class="fas fa-envelope-open-text"></i> <strong>Ready to Send to ${payload.toEmail}:</strong> Click below to send directly from your email client (or configure SMTP in Tab 2 for automatic background delivery):</div>
+                        <div style="margin-top:8px;">
+                            <a href="${mailtoHref}" class="btn-action btn-primary" style="display:inline-flex; text-decoration:none; padding:6px 14px; font-size:0.8rem;">
+                                <i class="fas fa-paper-plane"></i> Open Pre-Filled Email to ${payload.toEmail} &rarr;
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email to Student Now';
+            }
+        }
+
+        function openMailtoFromStudio() {
+            const payload = buildClientEmailPayload();
+            if (!payload.toEmail) {
+                alert('Please enter a student email address first.');
+                return;
+            }
+            window.location.href = `mailto:${encodeURIComponent(payload.toEmail)}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.text)}`;
         }
     </script>
 </body>
