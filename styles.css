@@ -3223,3 +3223,173 @@ body, p, span, li, a, label, address, small,
         gap: 10px !important;
     }
 }
+
+
+/* ==========================================================================
+   WEB CIRCLE LOGO SIZE (180PX), MOBILE HEADER LEFT-LOGO FIX & CONDENSED MOBILE FOOTER
+   ========================================================================== */
+.auth-gate-circle-logo {
+    width: 180px !important;
+    height: 180px !important;
+    margin: 0 auto 22px auto !important;
+    padding: 4px !important;
+    border: 2.5px solid #d4af37 !important;
+    box-shadow: 0 0 36px rgba(212, 175, 55, 0.35) !important;
+}
+
+.drawer-contact-footer {
+    display: none !important;
+}
+
+.mobile-drawer {
+    justify-content: flex-start !important;
+}
+
+.mobile-nav-links {
+    justify-content: flex-start !important;
+    padding: 12px 14px !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+}
+
+@media (max-width: 1080px) {
+    .main-header .header-inner,
+    .site-header .header-container {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    .main-header .brand-link,
+    .site-header .brand-link,
+    .site-header .brand-wrapper,
+    .brand-wrapper {
+        order: 0 !important;
+        margin: 0 auto 0 0 !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        flex: 0 0 auto !important;
+    }
+    .main-header .header-cta-block,
+    .site-header .header-gate-cta,
+    .header-gate-cta {
+        order: 10 !important;
+        margin: 0 0 0 auto !important;
+        justify-content: flex-end !important;
+        flex: 0 0 auto !important;
+    }
+    .site-header .header-actions,
+    .header-actions {
+        order: 5 !important;
+        margin: 0 0 0 auto !important;
+    }
+    .site-header .main-nav,
+    .main-nav {
+        order: 20 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-gate-circle-logo {
+        width: 128px !important;
+        height: 128px !important;
+        margin: 0 auto 16px auto !important;
+    }
+
+    /* Condensed Mobile Footer with Larger Logo (76px) Maintained */
+    .site-footer {
+        padding: 14px 0 10px 0 !important;
+    }
+    .footer-container-wide,
+    .site-footer .site-container {
+        padding: 0 14px !important;
+    }
+    .footer-grid,
+    .footer-top-row {
+        display: grid !important;
+        grid-template-columns: 1.12fr 0.88fr !important;
+        gap: 10px 12px !important;
+        margin-bottom: 8px !important;
+        align-items: start !important;
+    }
+    .footer-brand-col {
+        grid-column: 1 / -1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 4px !important;
+        margin-bottom: 2px !important;
+        padding-bottom: 6px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    }
+    .footer-brand {
+        align-items: center !important;
+        justify-content: center !important;
+        margin-bottom: 0 !important;
+    }
+    .footer-logo {
+        height: 76px !important;
+        width: auto !important;
+        max-width: 285px !important;
+        object-fit: contain !important;
+        margin: 0 auto !important;
+    }
+    .footer-tagline,
+    .footer-bio {
+        display: none !important;
+    }
+    .footer-creds,
+    .footer-badges {
+        justify-content: center !important;
+        gap: 4px 10px !important;
+        font-size: 0.75rem !important;
+        line-height: 1.25 !important;
+    }
+    .footer-links-col {
+        text-align: left !important;
+    }
+    .footer-links-col h4 {
+        font-size: 0.8rem !important;
+        margin-bottom: 4px !important;
+        letter-spacing: 0.4px !important;
+    }
+    .footer-links-col ul {
+        gap: 2px !important;
+        align-items: flex-start !important;
+    }
+    .footer-links-col a {
+        font-size: 0.76rem !important;
+        line-height: 1.28 !important;
+    }
+    .footer-contact-col {
+        grid-column: 1 / -1 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+        padding-top: 6px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 4px 12px !important;
+        text-align: center !important;
+    }
+    .footer-contact-col h4 {
+        display: none !important;
+    }
+    .footer-contact-col p {
+        font-size: 0.76rem !important;
+        line-height: 1.25 !important;
+        margin: 0 !important;
+        gap: 5px !important;
+        justify-content: center !important;
+    }
+    .footer-bottom-row {
+        padding-top: 6px !important;
+        gap: 2px !important;
+        font-size: 0.72rem !important;
+        line-height: 1.25 !important;
+    }
+}
