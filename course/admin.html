@@ -1388,10 +1388,12 @@
         let allStudents = [];
         let currentFilter = 'all';
 
-        // Check authentication on startup (sessionStorage persists across page changes and clears when closing the browser)
+        // Check authentication on startup (persists across Admin Portal and both Courses until explicit logout)
         document.addEventListener('DOMContentLoaded', () => {
-            localStorage.removeItem('platforms_admin_mode');
-            if (sessionStorage.getItem('pta_admin_auth') === 'authorized') {
+            if (localStorage.getItem('pta_admin_auth') === 'authorized' ||
+                localStorage.getItem('platforms_admin_mode') === 'true' ||
+                sessionStorage.getItem('pta_admin_auth') === 'authorized' ||
+                sessionStorage.getItem('platforms_admin_mode') === 'true') {
                 showDashboard();
             } else {
                 document.getElementById('pin-input').focus();
@@ -1399,6 +1401,17 @@
 
             document.getElementById('pin-input').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') verifyPin();
+            });
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'pta_admin_auth' || e.key === 'platforms_admin_mode') {
+                    const nowAdmin = (localStorage.getItem('pta_admin_auth') === 'authorized') || (localStorage.getItem('platforms_admin_mode') === 'true');
+                    if (nowAdmin) {
+                        showDashboard();
+                    } else {
+                        lockDashboard();
+                    }
+                }
             });
         });
 
@@ -1408,9 +1421,10 @@
             const val = (inp.value || '').trim();
 
             if (val === ADMIN_PIN || val === 'Young$7738732591!') {
+                localStorage.setItem('pta_admin_auth', 'authorized');
+                localStorage.setItem('platforms_admin_mode', 'true');
                 sessionStorage.setItem('pta_admin_auth', 'authorized');
                 sessionStorage.setItem('platforms_admin_mode', 'true');
-                localStorage.removeItem('platforms_admin_mode');
                 err.style.display = 'none';
                 showDashboard();
             } else {
@@ -1421,6 +1435,8 @@
         }
 
         function showDashboard() {
+            localStorage.setItem('pta_admin_auth', 'authorized');
+            localStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
             document.getElementById('pin-modal').style.display = 'none';
@@ -1733,27 +1749,30 @@
 
         function launchCourseGodMode(targetView) {
             isInternalAdminNav = true;
+            localStorage.setItem('pta_admin_auth', 'authorized');
+            localStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
-            localStorage.removeItem('platforms_admin_mode');
-            window.location.href = 'index.html?godmode=1' + (targetView ? '&view=' + encodeURIComponent(targetView) : '');
+            window.location.href = 'index.html' + (targetView ? '?view=' + encodeURIComponent(targetView) : '');
         }
 
         function launchArmedGodMode(targetView) {
             isInternalAdminNav = true;
+            localStorage.setItem('pta_admin_auth', 'authorized');
+            localStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
-            localStorage.removeItem('platforms_admin_mode');
-            window.location.href = '../armed-course/index.html?godmode=1' + (targetView ? '&view=' + encodeURIComponent(targetView) : '');
+            window.location.href = '../armed-course/index.html' + (targetView ? '?view=' + encodeURIComponent(targetView) : '');
         }
 
         function lockDashboard() {
+            localStorage.removeItem('pta_admin_auth');
+            localStorage.removeItem('platforms_admin_mode');
             sessionStorage.removeItem('pta_admin_auth');
             sessionStorage.removeItem('platforms_admin_mode');
             sessionStorage.removeItem('pta_admin_handoff');
-            localStorage.removeItem('platforms_admin_mode');
             document.getElementById('dashboard-content').style.display = 'none';
             document.getElementById('pin-modal').style.display = 'flex';
             document.getElementById('pin-input').value = '';

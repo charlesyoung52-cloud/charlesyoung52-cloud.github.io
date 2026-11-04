@@ -19,9 +19,12 @@ class SecurityCourseApp {
         this.timerSeconds = 0;
         this.timerInterval = null;
 
-        // Admin Evaluation Mode ("God Mode") - Persists across page changes in sessionStorage; clears when browser closes
-        localStorage.removeItem('platforms_admin_mode');
-        this.isAdminMode = (sessionStorage.getItem('pta_admin_auth') === 'authorized') || (sessionStorage.getItem('platforms_admin_mode') === 'true') || window.location.search.includes('godmode=1');
+        // Admin Evaluation Mode ("God Mode") - Persists across Admin Portal & both courses until explicit logout
+        this.isAdminMode = (localStorage.getItem('pta_admin_auth') === 'authorized') ||
+                           (localStorage.getItem('platforms_admin_mode') === 'true') ||
+                           (sessionStorage.getItem('pta_admin_auth') === 'authorized') ||
+                           (sessionStorage.getItem('platforms_admin_mode') === 'true') ||
+                           window.location.search.includes('godmode=1');
 
         // Temporary Paywall Bypass Flag
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
@@ -121,6 +124,8 @@ class SecurityCourseApp {
 
         const urlParams = new URLSearchParams(window.location.search);
         if (this.isAdminMode) {
+            localStorage.setItem('pta_admin_auth', 'authorized');
+            localStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
             this.updateAdminModeUI();
@@ -566,9 +571,10 @@ class SecurityCourseApp {
         // Direct Instructor God Mode Login from Sign-In Box
         if (rawEmail === '7738732591' || cleanPass === '7738732591' || cleanPass === 'Young$7738732591!' || rawEmail === 'young$7738732591!') {
             this.isAdminMode = true;
+            localStorage.setItem('pta_admin_auth', 'authorized');
+            localStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
-            localStorage.removeItem('platforms_admin_mode');
             this.saveState();
             this.updateAdminModeUI();
             this.closeAdminLoginModal();
@@ -1473,6 +1479,10 @@ class SecurityCourseApp {
     }
 
     officerSignOut() {
+        if (this.isAdminMode) {
+            this.exitAdminMode();
+            return;
+        }
         if (confirm('Sign out of your student officer account? Your current armed course progress is saved, and you will be required to authenticate with password and email verification (MFA) upon signing back in.')) {
             try {
                 this.saveState();
@@ -3348,6 +3358,25 @@ class SecurityCourseApp {
         });
 
         // Hidden Instructor Admin Portal Access (Kept completely invisible from public students)
+        // 0. Cross-tab real-time sync with Admin Portal login/logout
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'pta_admin_auth' || e.key === 'platforms_admin_mode') {
+                const nowAdmin = (localStorage.getItem('pta_admin_auth') === 'authorized') || (localStorage.getItem('platforms_admin_mode') === 'true');
+                if (nowAdmin && !this.isAdminMode) {
+                    this.isAdminMode = true;
+                    sessionStorage.setItem('pta_admin_auth', 'authorized');
+                    sessionStorage.setItem('platforms_admin_mode', 'true');
+                    this.updateAdminModeUI();
+                    this.renderLessonsSidebar();
+                    this.renderOverviewGrid();
+                    this.updateHeaderProfileDisplay();
+                    this.showView('overview');
+                } else if (!nowAdmin && this.isAdminMode) {
+                    this.exitAdminMode();
+                }
+            }
+        });
+
         // 1. Keyboard Shortcut: Ctrl+Shift+A or Cmd+Shift+A
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -4176,9 +4205,10 @@ class SecurityCourseApp {
 
         if (verified) {
             this.isAdminMode = true;
+            localStorage.setItem('pta_admin_auth', 'authorized');
+            localStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
-            localStorage.removeItem('platforms_admin_mode');
             this.saveState();
             this.updateAdminModeUI();
             this.closeAdminLoginModal();
@@ -4194,6 +4224,8 @@ class SecurityCourseApp {
 
     navigateAdminPage(url) {
         this.isInternalAdminNav = true;
+        localStorage.setItem('pta_admin_auth', 'authorized');
+        localStorage.setItem('platforms_admin_mode', 'true');
         sessionStorage.setItem('pta_admin_auth', 'authorized');
         sessionStorage.setItem('platforms_admin_mode', 'true');
         sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
@@ -4202,6 +4234,8 @@ class SecurityCourseApp {
 
     returnToAdminDashboard() {
         this.isInternalAdminNav = true;
+        localStorage.setItem('pta_admin_auth', 'authorized');
+        localStorage.setItem('platforms_admin_mode', 'true');
         sessionStorage.setItem('pta_admin_auth', 'authorized');
         sessionStorage.setItem('platforms_admin_mode', 'true');
         sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
@@ -4210,6 +4244,7 @@ class SecurityCourseApp {
 
     exitAdminMode() {
         this.isAdminMode = false;
+        localStorage.removeItem('pta_admin_auth');
         localStorage.removeItem('platforms_admin_mode');
         sessionStorage.removeItem('pta_admin_auth');
         sessionStorage.removeItem('platforms_admin_mode');
