@@ -355,8 +355,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Interactive Contact Form Submission Handler
-function handleContactSubmit(e) {
+// Interactive Contact Form Submission Handler (Sends directly to charlesyoung@platformstraining.com)
+async function handleContactSubmit(e) {
     e.preventDefault();
     const form = document.getElementById("contact-form");
     const name = document.getElementById("contact-name").value.trim();
@@ -364,18 +364,49 @@ function handleContactSubmit(e) {
     const email = document.getElementById("contact-email").value.trim();
     const course = document.getElementById("contact-course").value;
     const message = document.getElementById("contact-message").value.trim();
+    const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Message...';
+    }
+
+    const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
+        ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
+        : 'https://charlesyoung52-cloud-github-io.onrender.com';
+
+    try {
+        await fetch(apiBase + '/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name,
+                phone,
+                email,
+                course,
+                message,
+                to: 'charlesyoung@platformstraining.com'
+            })
+        });
+    } catch (err) {}
+
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+    }
 
     const feedback = document.getElementById("form-feedback");
     feedback.className = "form-feedback-msg success";
     feedback.innerHTML = `
         <strong><i class="fas fa-check-circle"></i> Thank you, ${name}!</strong><br>
-        Your inquiry for <em>${course}</em> has been submitted. Instructor Charles Young or academy staff will contact you at <strong>${phone}</strong> shortly.
+        Your message regarding <em>${course}</em> has been sent directly to <strong>charlesyoung@platformstraining.com</strong>. Instructor Charles Young will contact you at <strong>${phone}</strong> or <strong>${email}</strong> shortly.
     `;
     feedback.style.display = "block";
 
     // Save to localStorage as a submission record
     const submissions = JSON.parse(localStorage.getItem("platforms_inquiries") || "[]");
-    submissions.push({ name, phone, email, course, message, date: new Date().toISOString() });
+    submissions.push({ name, phone, email, course, message, to: "charlesyoung@platformstraining.com", date: new Date().toISOString() });
     localStorage.setItem("platforms_inquiries", JSON.stringify(submissions));
 
     form.reset();
