@@ -4808,8 +4808,8 @@ button:disabled.btn-primary {
     }
 
     .footer-brand img {
-        height: 28px !important;
-        max-width: 140px !important;
+        height: 76px !important;
+        max-width: 285px !important;
     }
 
     .footer-brand div {
@@ -6426,5 +6426,33 @@ body.lms-gate-active .site-header .course-progress-strip {
         gap: 2px !important;
         font-size: 0.72rem !important;
         line-height: 1.25 !important;
+    }
+}
+
+/* ==========================================================================
+   UNIFIED MOBILE FOOTER LOGO (76PX HOME PAGE SIZE) & CLEAN LAYOUT
+   ========================================================================== */
+@media (max-width: 768px) {
+    .site-footer .footer-brand img.footer-logo,
+    .site-footer .footer-brand img,
+    .footer-brand img,
+    .footer-logo {
+        height: 76px !important;
+        width: auto !important;
+        max-width: 285px !important;
+        object-fit: contain !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+    .footer-tagline,
+    .footer-bio,
+    .footer-creds,
+    .footer-badges {
+        display: none !important;
+    }
+    .footer-brand-col {
+        gap: 0 !important;
+        padding-bottom: 6px !important;
+        margin-bottom: 2px !important;
     }
 }
