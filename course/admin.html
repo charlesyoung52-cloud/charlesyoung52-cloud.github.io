@@ -73,7 +73,7 @@
             color: #fff;
         }
         .brand-sub {
-            font-size: 0.75rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
             letter-spacing: 0.5px;
         }
@@ -88,7 +88,7 @@
             color: var(--text-main);
             padding: 8px 14px;
             border-radius: var(--radius);
-            font-size: 0.82rem;
+            font-size: 0.92rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -148,7 +148,7 @@
             opacity: 0.8;
         }
         .stat-label {
-            font-size: 0.76rem;
+            font-size: 0.88rem;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -165,7 +165,7 @@
             color: #fff;
         }
         .stat-desc {
-            font-size: 0.75rem;
+            font-size: 0.88rem;
             color: var(--text-sub);
             margin-top: 4px;
         }
@@ -204,7 +204,7 @@
             outline: none;
             color: #fff;
             font-family: inherit;
-            font-size: 0.88rem;
+            font-size: 0.95rem;
             width: 100%;
         }
         .filter-tabs {
@@ -218,7 +218,7 @@
             color: var(--text-muted);
             padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.78rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -284,7 +284,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.85rem;
+            font-size: 0.94rem;
         }
         thead {
             background: #101318;
@@ -292,7 +292,7 @@
         }
         th {
             padding: 14px 16px;
-            font-size: 0.74rem;
+            font-size: 0.86rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.8px;
@@ -315,7 +315,7 @@
             gap: 4px;
             padding: 3px 8px;
             border-radius: 4px;
-            font-size: 0.74rem;
+            font-size: 0.86rem;
             font-weight: 700;
             letter-spacing: 0.3px;
         }
@@ -323,7 +323,7 @@
         .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
         .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
         .badge-info { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid rgba(212, 175, 55, 0.3); }
-        .badge-cert { background: rgba(212, 175, 55, 0.2); color: var(--green-bright); border: 1px solid rgba(212, 175, 55, 0.4); font-family: 'Chakra Petch', sans-serif; font-size: 0.78rem; }
+        .badge-cert { background: rgba(212, 175, 55, 0.2); color: var(--green-bright); border: 1px solid rgba(212, 175, 55, 0.4); font-family: 'Chakra Petch', sans-serif; font-size: 0.9rem; }
         .text-green, .text-blue { color: var(--green-bright) !important; }
 
         .progress-bar-wrapper {
@@ -420,10 +420,10 @@
                 <i class="fas fa-shield-halved"></i>
             </div>
             <h2 style="font-family:'Chakra Petch',sans-serif; font-size: 1.4rem; margin-bottom: 6px;">INSTRUCTOR ACCESS</h2>
-            <p style="font-size: 0.82rem; color: var(--text-muted);">Enter Lead Instructor PIN to view student records, test scores &amp; attempts.</p>
+            <p style="font-size: 0.92rem; color: var(--text-muted);">Enter Lead Instructor PIN to view student records, test scores &amp; attempts.</p>
             
             <input type="password" id="pin-input" class="pin-input" placeholder="••••••••" maxlength="15" autofocus>
-            <div id="pin-error" style="color: var(--danger); font-size: 0.8rem; margin-bottom: 12px; display: none;">
+            <div id="pin-error" style="color: var(--danger); font-size: 0.9rem; margin-bottom: 12px; display: none;">
                 <i class="fas fa-circle-exclamation"></i> Invalid Admin PIN. Please try again.
             </div>
 
@@ -433,7 +433,7 @@
             <a href="../index.html" class="btn-action" style="width: 100%; justify-content: center; padding: 10px; margin-top: 10px; text-decoration: none;">
                 <i class="fas fa-house text-blue"></i> Return to Homepage
             </a>
-            <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-sub);">
+            <div style="margin-top: 14px; font-size: 0.88rem; color: var(--text-sub);">
                 <a href="../index.html" style="color: var(--text-sub); text-decoration: none;">Platforms Training Academy &bull; Chicago, IL</a>
             </div>
         </div>
@@ -450,7 +450,7 @@
                 <div>
                     <div class="brand-title" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                         <span>INSTRUCTOR ROSTER &amp; EXAM ANALYTICS</span>
-                        <span class="badge badge-info" id="cloud-status-badge" style="font-size:0.75rem;"><i class="fas fa-cloud-arrow-down"></i> Connecting to Cloud Server...</span>
+                        <span class="badge badge-info" id="cloud-status-badge" style="font-size:0.88rem;"><i class="fas fa-cloud-arrow-down"></i> Connecting to Cloud Server...</span>
                     </div>
                     <div class="brand-sub"><i class="fas fa-user-shield text-blue"></i> Lead Instructor: Charles Young &bull; Chicago, IL &bull; 225 ILCS 447 &bull; IDFPR Approved Curriculum #102-000398 &bull; Cloud Backend (Render + GitHub CDN)</div>
                 </div>
@@ -529,7 +529,7 @@
                     <button class="filter-btn" data-filter="retake" onclick="setFilter('retake')">Needs Retake (<span id="count-retake">0</span>)</button>
                     <button class="filter-btn" data-filter="certified" onclick="setFilter('certified')">Certified (<span id="count-certified">0</span>)</button>
                     <button class="filter-btn" data-filter="paid" onclick="setFilter('paid')">Tuition Paid (<span id="count-paid">0</span>)</button>
-                    <button class="btn-action btn-primary" style="padding:6px 12px; font-size:0.78rem;" onclick="openArmedCertModal(-1)" title="Open Official Form IL486-1138 (Armed Course Certificate) for Range Qualification & Dispatch">
+                    <button class="btn-action btn-primary" style="padding:6px 12px; font-size:0.9rem;" onclick="openArmedCertModal(-1)" title="Open Official Form IL486-1138 (Armed Course Certificate) for Range Qualification & Dispatch">
                         <i class="fas fa-file-shield"></i> + Armed Cert (IL486-1138)
                     </button>
                 </div>
@@ -578,13 +578,13 @@
                         <h3 style="color:#fff; font-size:1.15rem; margin:0 0 6px 0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
                             <i class="fas fa-shield-check text-blue"></i> Mandatory Multi-Factor Authentication (MFA) Policy
                         </h3>
-                        <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.6; max-width:780px; margin:0;">
+                        <p style="font-size:0.94rem; color:var(--text-muted); line-height:1.6; max-width:780px; margin:0;">
                             Multi-Factor Authentication is enforced on <strong>every student login</strong> via 6-digit one-time passcodes sent to candidate email inboxes. To comply with security standards, student sessions are strictly scoped to the active browser tab/window &mdash; students are <strong>automatically logged off</strong> when closing the browser, requiring password and MFA verification upon return.
                         </p>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <span class="badge badge-success" style="font-size:0.78rem; padding:4px 10px;"><i class="fas fa-lock"></i> MFA Enforced Every Login</span>
-                        <span class="badge badge-info" style="font-size:0.78rem; padding:4px 10px;"><i class="fas fa-arrow-right-from-bracket"></i> Auto-Logout on Close</span>
+                        <span class="badge badge-success" style="font-size:0.9rem; padding:4px 10px;"><i class="fas fa-lock"></i> MFA Enforced Every Login</span>
+                        <span class="badge badge-info" style="font-size:0.9rem; padding:4px 10px;"><i class="fas fa-arrow-right-from-bracket"></i> Auto-Logout on Close</span>
                     </div>
                 </div>
             </div>
@@ -596,31 +596,31 @@
                         <h3 style="color:#fff; font-size:1.15rem; margin:0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
                             <i class="fas fa-envelope-circle-check text-green"></i> Real Student MFA Email Delivery (EmailJS)
                         </h3>
-                        <span style="font-size:0.8rem; color:var(--text-muted);">
+                        <span style="font-size:0.9rem; color:var(--text-muted);">
                             Automatically dispatches 6-digit verification codes to student Gmail / Outlook / Yahoo inboxes directly from GitHub Pages.
                         </span>
                     </div>
-                    <span id="emailjs-status-badge" class="badge badge-info" style="font-size:0.75rem;">Checking Status...</span>
+                    <span id="emailjs-status-badge" class="badge badge-info" style="font-size:0.88rem;">Checking Status...</span>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-bottom:16px;">
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             EmailJS Service ID:
                         </label>
-                        <input type="text" id="admin-emailjs-service" placeholder="e.g. service_platforms or service_gmail" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="text" id="admin-emailjs-service" placeholder="e.g. service_platforms or service_gmail" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             EmailJS Template ID:
                         </label>
-                        <input type="text" id="admin-emailjs-template" placeholder="e.g. template_mfa_code" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="text" id="admin-emailjs-template" placeholder="e.g. template_mfa_code" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             EmailJS Public Key (User ID):
                         </label>
-                        <input type="text" id="admin-emailjs-publickey" placeholder="e.g. r_AbCdEf123456" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="text" id="admin-emailjs-publickey" placeholder="e.g. r_AbCdEf123456" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                 </div>
 
@@ -632,14 +632,14 @@
                     </div>
 
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="email" id="admin-emailjs-test-email" placeholder="your_email@gmail.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.85rem; width:220px;">
+                        <input type="email" id="admin-emailjs-test-email" placeholder="your_email@gmail.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem; width:220px;">
                         <button type="button" class="btn-action" style="background:#1e293b; color:#fff;" onclick="sendTestEmail()">
                             <i class="fas fa-paper-plane"></i> Send Test Verification Email
                         </button>
                     </div>
                 </div>
 
-                <div id="emailjs-feedback" style="display:none; margin-top:12px; font-size:0.85rem; padding:10px; border-radius:4px;"></div>
+                <div id="emailjs-feedback" style="display:none; margin-top:12px; font-size:0.94rem; padding:10px; border-radius:4px;"></div>
             </div>
 
             <!-- Server-Side SMTP Dispatch Configuration Panel -->
@@ -649,43 +649,43 @@
                         <h3 style="color:#fff; font-size:1.15rem; margin:0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
                             <i class="fas fa-server text-green"></i> Server-Side SMTP Email Delivery (Python Server)
                         </h3>
-                        <span style="font-size:0.8rem; color:var(--text-muted);">
+                        <span style="font-size:0.9rem; color:var(--text-muted);">
                             Direct outbound email dispatch via standard SMTP (Gmail App Password, Office365, or platformstraining.com mail server).
                         </span>
                     </div>
-                    <span id="smtp-status-badge" class="badge badge-info" style="font-size:0.75rem;">Checking Status...</span>
+                    <span id="smtp-status-badge" class="badge badge-info" style="font-size:0.88rem;">Checking Status...</span>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:16px;">
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             SMTP Host:
                         </label>
-                        <input type="text" id="admin-smtp-host" placeholder="smtp.gmail.com or mail.domain.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="text" id="admin-smtp-host" placeholder="smtp.gmail.com or mail.domain.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             Port:
                         </label>
-                        <input type="number" id="admin-smtp-port" placeholder="587 or 465" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="number" id="admin-smtp-port" placeholder="587 or 465" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             Username / Email:
                         </label>
-                        <input type="text" id="admin-smtp-user" placeholder="charlesyoung@platformstraining.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="text" id="admin-smtp-user" placeholder="charlesyoung@platformstraining.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             Password / App Password:
                         </label>
-                        <input type="password" id="admin-smtp-pass" placeholder="••••••••••••••••" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="password" id="admin-smtp-pass" placeholder="••••••••••••••••" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.78rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                        <label style="font-size:0.9rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
                             From Address:
                         </label>
-                        <input type="text" id="admin-smtp-from" placeholder="charlesyoung@platformstraining.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.9rem;">
+                        <input type="text" id="admin-smtp-from" placeholder="charlesyoung@platformstraining.com" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.96rem;">
                     </div>
                 </div>
 
@@ -697,14 +697,14 @@
                     </div>
 
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="email" id="admin-smtp-test-email" placeholder="your_email@gmail.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.85rem; width:220px;">
+                        <input type="email" id="admin-smtp-test-email" placeholder="your_email@gmail.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem; width:220px;">
                         <button type="button" class="btn-action" style="background:#1e293b; color:#fff;" onclick="sendTestSmtpEmail()">
                             <i class="fas fa-paper-plane"></i> Test SMTP Dispatch
                         </button>
                     </div>
                 </div>
 
-                <div id="smtp-feedback" style="display:none; margin-top:12px; font-size:0.85rem; padding:10px; border-radius:4px;"></div>
+                <div id="smtp-feedback" style="display:none; margin-top:12px; font-size:0.94rem; padding:10px; border-radius:4px;"></div>
             </div>
 
             </div>
@@ -720,7 +720,7 @@
                             <h3 style="color:#fff; font-size:1.2rem; margin:0 0 4px 0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
                                 <i class="fas fa-calendar-days text-blue"></i> Course Calendar &amp; Class Schedule Manager
                             </h3>
-                            <p style="font-size:0.84rem; color:var(--text-muted); margin:0;">
+                            <p style="font-size:0.92rem; color:var(--text-muted); margin:0;">
                                 Add, edit, duplicate, or remove scheduled training dates and customize course details, pricing, hours, locations, and seat availability for the public Class Calendar.
                             </p>
                         </div>
@@ -736,7 +736,7 @@
                             </a>
                         </div>
                     </div>
-                    <div id="admin-cal-save-feedback" style="display:none; margin-top:12px; padding:10px 14px; border-radius:6px; font-size:0.85rem;"></div>
+                    <div id="admin-cal-save-feedback" style="display:none; margin-top:12px; padding:10px 14px; border-radius:6px; font-size:0.94rem;"></div>
                 </div>
 
                 <!-- Add / Edit Scheduled Class Session Card -->
@@ -745,15 +745,15 @@
                         <h4 id="session-editor-heading" style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.05rem; margin:0;">
                             <i class="fas fa-calendar-plus text-blue"></i> Add / Edit Scheduled Class Date
                         </h4>
-                        <span style="font-size:0.78rem; color:var(--text-muted);">Selecting a course auto-fills standard price, hours &amp; location</span>
+                        <span style="font-size:0.9rem; color:var(--text-muted);">Selecting a course auto-fills standard price, hours &amp; location</span>
                     </div>
 
                     <input type="hidden" id="edit-session-id" value="">
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Type *</label>
-                            <select id="edit-session-course" onchange="onAdminCourseTypeChange()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Type *</label>
+                            <select id="edit-session-course" onchange="onAdminCourseTypeChange()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                                 <option value="armed-28">28 HR Online Armed Security — Range Qual ($200)</option>
                                 <option value="firearm-requal">Security Firearm Requalification ($125)</option>
                                 <option value="firearm-upgrade">Security Firearm Upgrade Qual ($125)</option>
@@ -764,50 +764,50 @@
                             </select>
                         </div>
                         <div style="grid-column: span 2;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Class Display Title *</label>
-                            <input type="text" id="edit-session-title" placeholder="e.g. 28 HR ARMED SECURITY COURSE (TAN CARD)" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Class Display Title *</label>
+                            <input type="text" id="edit-session-title" placeholder="e.g. 28 HR ARMED SECURITY COURSE (TAN CARD)" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Start Date *</label>
-                            <input type="date" id="edit-session-date" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Start Date *</label>
+                            <input type="date" id="edit-session-date" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">End Date (Multi-Day or Same)</label>
-                            <input type="date" id="edit-session-enddate" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">End Date (Multi-Day or Same)</label>
+                            <input type="date" id="edit-session-enddate" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Tuition Price *</label>
-                            <input type="text" id="edit-session-price" placeholder="$200" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Tuition Price *</label>
+                            <input type="text" id="edit-session-price" placeholder="$200" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
                         <div style="grid-column: span 2;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Class Time / Schedule Breakdown *</label>
-                            <input type="text" id="edit-session-time" placeholder="e.g. Wed 1:00 PM–5:00 PM | Thu & Fri 9:00 AM–5:00 PM" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Class Time / Schedule Breakdown *</label>
+                            <input type="text" id="edit-session-time" placeholder="e.g. Wed 1:00 PM–5:00 PM | Thu & Fri 9:00 AM–5:00 PM" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div style="grid-column: span 2;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Classroom &amp; Range Location *</label>
-                            <input type="text" id="edit-session-location" placeholder="200 E 75th St, Chicago, IL & Eagle Sports Range" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Classroom &amp; Range Location *</label>
+                            <input type="text" id="edit-session-location" placeholder="200 E 75th St, Chicago, IL & Eagle Sports Range" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:14px;">
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Lead Instructor</label>
-                            <input type="text" id="edit-session-instructor" value="Charles Young" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Lead Instructor</label>
+                            <input type="text" id="edit-session-instructor" value="Charles Young" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Total Seats</label>
-                            <input type="number" id="edit-session-seats-total" value="15" min="1" max="100" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Total Seats</label>
+                            <input type="number" id="edit-session-seats-total" value="15" min="1" max="100" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Available Seats</label>
-                            <input type="number" id="edit-session-seats-avail" value="12" min="0" max="100" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Available Seats</label>
+                            <input type="number" id="edit-session-seats-avail" value="12" min="0" max="100" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Enrollment Status</label>
-                            <select id="edit-session-status" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Enrollment Status</label>
+                            <select id="edit-session-status" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                                 <option value="Open">Open</option>
                                 <option value="Filling Fast">Filling Fast</option>
                                 <option value="Sold Out">Sold Out</option>
@@ -817,8 +817,8 @@
                     </div>
 
                     <div style="margin-bottom:14px;">
-                        <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Session Details &amp; Student Notes</label>
-                        <textarea id="edit-session-notes" rows="2" placeholder="Describe class details, range qualification schedule, and what students should bring..." style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.86rem;"></textarea>
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Session Details &amp; Student Notes</label>
+                        <textarea id="edit-session-notes" rows="2" placeholder="Describe class details, range qualification schedule, and what students should bring..." style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.94rem;"></textarea>
                     </div>
 
                     <div style="display:flex; gap:10px; justify-content:flex-end;">
@@ -835,7 +835,7 @@
                         <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1rem; margin:0;">
                             <i class="fas fa-list-check text-blue"></i> All Scheduled Calendar Dates (<span id="admin-cal-count">0</span>)
                         </h4>
-                        <select id="admin-cal-filter" onchange="renderAdminCalendarTable()" style="padding:7px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <select id="admin-cal-filter" onchange="renderAdminCalendarTable()" style="padding:7px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                             <option value="all">Filter: All Courses</option>
                             <option value="armed-28">28 HR Armed Security</option>
                             <option value="firearm-requal">Firearm Requalification</option>
@@ -874,9 +874,9 @@
                             <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.05rem; margin:0;">
                                 <i class="fas fa-sliders text-blue"></i> Edit Course Master Details (Descriptions, Tuition, Hours &amp; Requirements)
                             </h4>
-                            <span style="font-size:0.8rem; color:var(--text-muted);">Customize the course overview, curriculum bullets, prerequisites, and policies shown on the public calendar page.</span>
+                            <span style="font-size:0.9rem; color:var(--text-muted);">Customize the course overview, curriculum bullets, prerequisites, and policies shown on the public calendar page.</span>
                         </div>
-                        <select id="master-course-select" onchange="loadMasterCourseIntoEditor()" style="padding:9px 14px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-weight:700; font-size:0.88rem;">
+                        <select id="master-course-select" onchange="loadMasterCourseIntoEditor()" style="padding:9px 14px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-weight:700; font-size:0.95rem;">
                             <option value="armed-28">28 HR Armed Security Course</option>
                             <option value="firearm-requal">Security Firearm Requalification</option>
                             <option value="firearm-upgrade">Security Firearm Upgrade Qual</option>
@@ -890,54 +890,54 @@
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px;">
                         <div style="grid-column: span 2;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Official Course Title</label>
-                            <input type="text" id="mc-title" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Official Course Title</label>
+                            <input type="text" id="mc-title" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Default Tuition Price</label>
-                            <input type="text" id="mc-price" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Default Tuition Price</label>
+                            <input type="text" id="mc-price" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Badge Tag</label>
-                            <input type="text" id="mc-badge" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Badge Tag</label>
+                            <input type="text" id="mc-badge" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:14px;">
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Standard Duration &amp; Hours</label>
-                            <input type="text" id="mc-duration" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Standard Duration &amp; Hours</label>
+                            <input type="text" id="mc-duration" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Default Location</label>
-                            <input type="text" id="mc-location" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Default Location</label>
+                            <input type="text" id="mc-location" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Range &amp; Equipment Included Note</label>
-                            <input type="text" id="mc-rangenote" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.88rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Range &amp; Equipment Included Note</label>
+                            <input type="text" id="mc-rangenote" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.95rem;">
                         </div>
                     </div>
 
                     <div style="margin-bottom:14px;">
-                        <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Overview Description</label>
-                        <textarea id="mc-description" rows="2" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.86rem;"></textarea>
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Course Overview Description</label>
+                        <textarea id="mc-description" rows="2" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.94rem;"></textarea>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-bottom:14px;">
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Curriculum / Key Topics (One per line)</label>
-                            <textarea id="mc-curriculum" rows="4" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.84rem;"></textarea>
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Curriculum / Key Topics (One per line)</label>
+                            <textarea id="mc-curriculum" rows="4" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.92rem;"></textarea>
                         </div>
                         <div>
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Prerequisites &amp; Requirements (One per line)</label>
-                            <textarea id="mc-prerequisites" rows="4" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.84rem;"></textarea>
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Prerequisites &amp; Requirements (One per line)</label>
+                            <textarea id="mc-prerequisites" rows="4" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:inherit; font-size:0.92rem;"></textarea>
                         </div>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div style="flex:1; min-width:240px;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Cancellation / Rescheduling Policy</label>
-                            <input type="text" id="mc-cancellation" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">Cancellation / Rescheduling Policy</label>
+                            <input type="text" id="mc-cancellation" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                         </div>
                         <button type="button" class="btn-action btn-primary" style="margin-top:18px;" onclick="saveMasterCourseDetails()">
                             <i class="fas fa-save"></i> Update Course Details
@@ -988,7 +988,7 @@
                             <h3 style="color:#fff; font-size:1.15rem; margin:0 0 4px 0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
                                 <i class="fas fa-star text-blue"></i> Google Business Profile Direct Review Link
                             </h3>
-                            <p style="font-size:0.84rem; color:#cbd5e1; margin:0;">
+                            <p style="font-size:0.92rem; color:#cbd5e1; margin:0;">
                                 Every Graduation Thank-You email includes a prominent <strong>&#9733;&#9733;&#9733;&#9733;&#9733; Leave a 5-Star Review on Google</strong> button that sends graduates straight to your Google Business Profile. Paste your exact Google Review shortlink (e.g., <code>https://g.page/r/.../review</code>) below or use the default direct Google Maps profile link.
                             </p>
                         </div>
@@ -997,12 +997,12 @@
                         </a>
                     </div>
                     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                        <input type="url" id="admin-google-review-url" value="https://www.google.com/maps/search/?api=1&query=Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619" placeholder="https://g.page/r/.../review" style="flex:1; min-width:280px; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:0.88rem;">
+                        <input type="url" id="admin-google-review-url" value="https://www.google.com/maps/search/?api=1&query=Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619" placeholder="https://g.page/r/.../review" style="flex:1; min-width:280px; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:6px; color:#fff; font-size:0.95rem;">
                         <button type="button" class="btn-action btn-primary" onclick="saveGoogleReviewUrl()">
                             <i class="fas fa-save"></i> Save Google Review Link
                         </button>
                     </div>
-                    <div id="google-review-url-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px; font-size:0.82rem;"></div>
+                    <div id="google-review-url-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px; font-size:0.92rem;"></div>
                 </div>
 
                 <!-- Automated Email Studio: Composer + Live HTML Preview -->
@@ -1016,69 +1016,69 @@
 
                         <!-- 3 Template Selector Buttons -->
                         <div style="margin-bottom:16px;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">1. Select Email Template:</label>
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">1. Select Email Template:</label>
                             <div style="display:grid; grid-template-columns:1fr; gap:8px;">
                                 <button type="button" class="btn-action active-email-tpl" id="tpl-btn-confirmation" onclick="selectEmailStudioTemplate('confirmation')" style="justify-content:flex-start; padding:10px 14px; border-color:var(--green); background:rgba(212,175,55,0.16); color:var(--green-bright);">
-                                    <i class="fas fa-receipt"></i> <strong>1. Class &amp; Payment Confirmation Email</strong> <span style="margin-left:auto; font-size:0.7rem; opacity:0.85;">Auto-Sent on Booking/Payment</span>
+                                    <i class="fas fa-receipt"></i> <strong>1. Class &amp; Payment Confirmation Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">Auto-Sent on Booking/Payment</span>
                                 </button>
                                 <button type="button" class="btn-action" id="tpl-btn-reminder" onclick="selectEmailStudioTemplate('reminder')" style="justify-content:flex-start; padding:10px 14px;">
-                                    <i class="fas fa-bell"></i> <strong>2. Upcoming Class &amp; Range Reminder Email</strong> <span style="margin-left:auto; font-size:0.7rem; opacity:0.85;">1-Click / Bulk Roster</span>
+                                    <i class="fas fa-bell"></i> <strong>2. Upcoming Class &amp; Range Reminder Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">1-Click / Bulk Roster</span>
                                 </button>
                                 <button type="button" class="btn-action" id="tpl-btn-thank_you_review" onclick="selectEmailStudioTemplate('thank_you_review')" style="justify-content:flex-start; padding:10px 14px;">
-                                    <i class="fas fa-star"></i> <strong>3. Thank You + 5-Star Google Review Email</strong> <span style="margin-left:auto; font-size:0.7rem; opacity:0.85;">Auto-Sent on Graduation</span>
+                                    <i class="fas fa-star"></i> <strong>3. Thank You + 5-Star Google Review Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">Auto-Sent on Graduation</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Quick-Fill from Student Roster or Calendar Reservation -->
                         <div style="margin-bottom:14px;">
-                            <label style="font-size:0.74rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">2. Quick-Fill from Student Roster / Reservations (Optional):</label>
-                            <select id="email-studio-student-select" onchange="onEmailStudioStudentSelect()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-size:0.86rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">2. Quick-Fill from Student Roster / Reservations (Optional):</label>
+                            <select id="email-studio-student-select" onchange="onEmailStudioStudentSelect()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-size:0.94rem;">
                                 <option value="">-- Select a Student or Reservation to Auto-Fill --</option>
                             </select>
                         </div>
 
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
                             <div>
-                                <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT NAME *</label>
-                                <input type="text" id="es-student-name" value="John A. Doe" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT NAME *</label>
+                                <input type="text" id="es-student-name" value="John A. Doe" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                             </div>
                             <div>
-                                <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL *</label>
-                                <input type="email" id="es-student-email" placeholder="student@email.com" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL *</label>
+                                <input type="email" id="es-student-email" placeholder="student@email.com" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                             </div>
                         </div>
 
                         <div style="margin-bottom:12px;">
-                            <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">COURSE / CLASS TITLE *</label>
-                            <input type="text" id="es-course-title" value="28-Hour Armed Security Course (IDFPR #102-000398)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">COURSE / CLASS TITLE *</label>
+                            <input type="text" id="es-course-title" value="28-Hour Armed Security Course (IDFPR #102-000398)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                         </div>
 
                         <div id="es-schedule-fields-group">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
                                 <div>
-                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SCHEDULED CLASS / RANGE DATE</label>
-                                    <input type="text" id="es-class-date" value="Saturday, Nov 7, 2026" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SCHEDULED CLASS / RANGE DATE</label>
+                                    <input type="text" id="es-class-date" value="Saturday, Nov 7, 2026" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                                 </div>
                                 <div>
-                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CLASS / RANGE TIME</label>
-                                    <input type="text" id="es-class-time" value="9:00 AM – 5:00 PM" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CLASS / RANGE TIME</label>
+                                    <input type="text" id="es-class-time" value="9:00 AM – 5:00 PM" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                                 </div>
                             </div>
 
                             <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:12px; margin-bottom:12px;">
                                 <div>
-                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING LOCATION</label>
-                                    <input type="text" id="es-location" value="200 E 75th St, Chicago, IL & Eagle Sports Range (5900 W 159th St, Oak Forest, IL)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING LOCATION</label>
+                                    <input type="text" id="es-location" value="200 E 75th St, Chicago, IL & Eagle Sports Range (5900 W 159th St, Oak Forest, IL)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                                 </div>
                                 <div>
-                                    <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TUITION / STATUS</label>
-                                    <input type="text" id="es-price" value="$200.00 (Paid)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TUITION / STATUS</label>
+                                    <input type="text" id="es-price" value="$200.00 (Paid)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                                 </div>
                             </div>
                         </div>
 
-                        <div id="es-feedback-banner" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:0.84rem; line-height:1.5;"></div>
+                        <div id="es-feedback-banner" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:0.92rem; line-height:1.5;"></div>
 
                         <div style="display:flex; flex-wrap:wrap; gap:10px;">
                             <button type="button" class="btn-action btn-primary" id="es-send-btn" onclick="sendAutomatedEmailFromStudio()" style="flex:1; justify-content:center; padding:11px 16px;">
@@ -1096,7 +1096,7 @@
                             <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.05rem; margin:0;">
                                 <i class="fas fa-eye text-blue"></i> Live HTML Email Preview
                             </h4>
-                            <span id="es-preview-subject-pill" class="badge badge-info" style="font-size:0.72rem;">Subject Preview</span>
+                            <span id="es-preview-subject-pill" class="badge badge-info" style="font-size:0.86rem;">Subject Preview</span>
                         </div>
                         <div id="email-studio-live-preview" style="background:#060709; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto;">
                             <!-- Populated dynamically by renderEmailStudioPreview() -->
@@ -1131,13 +1131,13 @@
         <div class="drawer-box" style="max-width: 920px; width: 95%; max-height: 92vh; padding: 26px 28px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:18px;">
                 <div>
-                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(212,175,55,0.16); color:var(--green-bright); border:1px solid rgba(212,175,55,0.4); padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; margin-bottom:6px;">
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(212,175,55,0.16); color:var(--green-bright); border:1px solid rgba(212,175,55,0.4); padding:3px 10px; border-radius:999px; font-size:0.86rem; font-weight:700; margin-bottom:6px;">
                         <i class="fas fa-shield-halved"></i> OFFICIAL IDFPR FORM IL486-1138 10/24 (DE) &bull; CURRICULUM #102-000398
                     </div>
                     <h3 style="font-family:'Chakra Petch',sans-serif; font-size:1.25rem; color:#fff; margin:0;" id="armed-cert-modal-title">
                         Firearms Training Certificate &amp; In-Person Range Qualification Sign-Off
                     </h3>
-                    <p style="font-size:0.8rem; color:#cbd5e1; margin-top:4px;">
+                    <p style="font-size:0.9rem; color:#cbd5e1; margin-top:4px;">
                         Review the student's saved Trainee Section, enter their in-person range qualification scores, preview/download the official filled PDF certificate, and send copies to the student and <strong>FPR.SafetyUnit@illinois.gov</strong>.
                     </p>
                 </div>
@@ -1153,89 +1153,89 @@
                     <h4 style="font-family:'Chakra Petch',sans-serif; font-size:0.96rem; color:var(--green-bright); margin:0;">
                         <i class="fas fa-user-shield"></i> Part 1: Trainee Section (Saved from Student Profile)
                     </h4>
-                    <span id="ac-profile-status-pill" class="badge badge-info" style="font-size:0.72rem;">Loaded from Profile</span>
+                    <span id="ac-profile-status-pill" class="badge badge-info" style="font-size:0.86rem;">Loaded from Profile</span>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:12px;">
                     <div style="grid-column: span 2;">
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">NAME (Last, First, Middle Initial) *</label>
-                        <input type="text" id="ac-name" placeholder="DOE, JOHN A." style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">NAME (Last, First, Middle Initial) *</label>
+                        <input type="text" id="ac-name" placeholder="DOE, JOHN A." style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SSN OR ITIN *</label>
-                        <input type="text" id="ac-ssn" placeholder="XXX-XX-XXXX" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SSN OR ITIN *</label>
+                        <input type="text" id="ac-ssn" placeholder="XXX-XX-XXXX" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 2fr 1.2fr 0.6fr 0.8fr; gap:12px; margin-bottom:12px;">
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HOME STREET ADDRESS *</label>
-                        <input type="text" id="ac-address" placeholder="123 E. Michigan Ave" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HOME STREET ADDRESS *</label>
+                        <input type="text" id="ac-address" placeholder="123 E. Michigan Ave" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CITY *</label>
-                        <input type="text" id="ac-city" placeholder="Chicago" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CITY *</label>
+                        <input type="text" id="ac-city" placeholder="Chicago" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STATE *</label>
-                        <input type="text" id="ac-state" value="IL" maxlength="2" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STATE *</label>
+                        <input type="text" id="ac-state" value="IL" maxlength="2" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ZIP CODE *</label>
-                        <input type="text" id="ac-zip" placeholder="60601" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ZIP CODE *</label>
+                        <input type="text" id="ac-zip" placeholder="60601" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1.4fr; gap:12px; margin-bottom:12px;">
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">PERC NUMBER (If Applicable) 129-</label>
-                        <input type="text" id="ac-perc" placeholder="XXXXXX (Optional)" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">PERC NUMBER (If Applicable) 129-</label>
+                        <input type="text" id="ac-perc" placeholder="XXXXXX (Optional)" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">E-MAIL ADDRESS (REQUIRED) *</label>
-                        <input type="email" id="ac-email" placeholder="student@email.com" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">E-MAIL ADDRESS (REQUIRED) *</label>
+                        <input type="email" id="ac-email" placeholder="student@email.com" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:10px; margin-bottom:12px;">
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">DATE OF BIRTH</label>
-                        <input type="text" id="ac-dob" placeholder="MM/DD/YYYY" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">DATE OF BIRTH</label>
+                        <input type="text" id="ac-dob" placeholder="MM/DD/YYYY" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SEX</label>
-                        <input type="text" id="ac-sex" placeholder="M / F" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SEX</label>
+                        <input type="text" id="ac-sex" placeholder="M / F" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">RACE</label>
-                        <input type="text" id="ac-race" placeholder="e.g. Black" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">RACE</label>
+                        <input type="text" id="ac-race" placeholder="e.g. Black" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">WEIGHT</label>
-                        <input type="text" id="ac-weight" placeholder="185 lbs" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">WEIGHT</label>
+                        <input type="text" id="ac-weight" placeholder="185 lbs" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HEIGHT</label>
-                        <input type="text" id="ac-height" placeholder="5'10&quot;" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HEIGHT</label>
+                        <input type="text" id="ac-height" placeholder="5'10&quot;" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HAIR COLOR</label>
-                        <input type="text" id="ac-hair" placeholder="Black" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HAIR COLOR</label>
+                        <input type="text" id="ac-hair" placeholder="Black" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">EYE COLOR</label>
-                        <input type="text" id="ac-eyes" placeholder="Brown" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                        <label style="font-size:0.84rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">EYE COLOR</label>
+                        <input type="text" id="ac-eyes" placeholder="Brown" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.92rem;">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px;">
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINEE ELECTRONIC SIGNATURE</label>
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINEE ELECTRONIC SIGNATURE</label>
                         <input type="text" id="ac-signature" placeholder="John A. Doe" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#d4af37; font-family:'Sacramento', cursive; font-size:1.35rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINEE SIGNATURE DATE</label>
-                        <input type="text" id="ac-trainee-date" placeholder="MM/DD/YYYY" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINEE SIGNATURE DATE</label>
+                        <input type="text" id="ac-trainee-date" placeholder="MM/DD/YYYY" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                 </div>
             </div>
@@ -1246,73 +1246,73 @@
                     <h4 style="font-family:'Chakra Petch',sans-serif; font-size:0.98rem; color:var(--green-bright); margin:0;">
                         <i class="fas fa-crosshairs"></i> Part 2: Instructor In-Person Qualification &amp; Range Scores (Form IL486-1138)
                     </h4>
-                    <span style="font-size:0.74rem; color:#cbd5e1;">Course: <strong>FIREARMS TRAINING COURSE (#102-000398)</strong> &bull; Instructor: <strong>Charles Young (#263-000693)</strong></span>
+                    <span style="font-size:0.86rem; color:#cbd5e1;">Course: <strong>FIREARMS TRAINING COURSE (#102-000398)</strong> &bull; Instructor: <strong>Charles Young (#263-000693)</strong></span>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:12px; margin-bottom:14px;">
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">DATE TRAINING COMPLETED (Range Date) *</label>
-                        <input type="text" id="ac-date-completed" placeholder="MM/DD/YYYY" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#fff; font-weight:700; font-size:0.9rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">DATE TRAINING COMPLETED (Range Date) *</label>
+                        <input type="text" id="ac-date-completed" placeholder="MM/DD/YYYY" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#fff; font-weight:700; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">WRITTEN EXAMINATION SCORE (%) *</label>
-                        <input type="text" id="ac-written-score" placeholder="e.g. 92" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#4ade80; font-weight:700; font-size:0.9rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">WRITTEN EXAMINATION SCORE (%) *</label>
+                        <input type="text" id="ac-written-score" placeholder="e.g. 92" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#4ade80; font-weight:700; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">INSTRUCTOR SIGNATURE DATE *</label>
-                        <input type="text" id="ac-instructor-date" placeholder="MM/DD/YYYY" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#fff; font-weight:700; font-size:0.9rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">INSTRUCTOR SIGNATURE DATE *</label>
+                        <input type="text" id="ac-instructor-date" placeholder="MM/DD/YYYY" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#fff; font-weight:700; font-size:0.96rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING NUMBER (Official Use / Optional)</label>
-                        <input type="text" id="ac-training-number" placeholder="Optional" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING NUMBER (Official Use / Optional)</label>
+                        <input type="text" id="ac-training-number" placeholder="Optional" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                 </div>
 
-                <div style="font-size:0.75rem; font-weight:700; color:var(--green-bright); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+                <div style="font-size:0.88rem; font-weight:700; color:var(--green-bright); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                     Range Qualification — Check Weapon Type(s) &amp; Enter Range Score (%) (70% Minimum Required):
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap:12px;">
                     <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.94rem; font-weight:700; color:#fff; cursor:pointer;">
                             <input type="checkbox" id="ac-rev-check" style="width:17px; height:17px; accent-color:var(--green);">
                             Revolver
                         </label>
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" id="ac-rev-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <input type="text" id="ac-rev-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.94rem;">
                             <span style="color:#94a3b8; font-weight:700;">%</span>
                         </div>
                     </div>
 
                     <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.94rem; font-weight:700; color:#fff; cursor:pointer;">
                             <input type="checkbox" id="ac-semi-check" checked style="width:17px; height:17px; accent-color:var(--green);">
                             Semi-automatic
                         </label>
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" id="ac-semi-score" placeholder="90" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <input type="text" id="ac-semi-score" placeholder="90" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.94rem;">
                             <span style="color:#94a3b8; font-weight:700;">%</span>
                         </div>
                     </div>
 
                     <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.94rem; font-weight:700; color:#fff; cursor:pointer;">
                             <input type="checkbox" id="ac-shot-check" style="width:17px; height:17px; accent-color:var(--green);">
                             Shotgun
                         </label>
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" id="ac-shot-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <input type="text" id="ac-shot-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.94rem;">
                             <span style="color:#94a3b8; font-weight:700;">%</span>
                         </div>
                     </div>
 
                     <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.94rem; font-weight:700; color:#fff; cursor:pointer;">
                             <input type="checkbox" id="ac-rifle-check" style="width:17px; height:17px; accent-color:var(--green);">
                             Rifle
                         </label>
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" id="ac-rifle-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <input type="text" id="ac-rifle-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.94rem;">
                             <span style="color:#94a3b8; font-weight:700;">%</span>
                         </div>
                     </div>
@@ -1321,22 +1321,22 @@
 
             <!-- SECTION 3: EMAIL DISPATCH TO STUDENT & IDFPR (FPR.SafetyUnit@illinois.gov) -->
             <div style="background:#11151c; border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:16px;">
-                <div style="font-size:0.78rem; font-weight:700; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                <div style="font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-paper-plane text-blue"></i> Certificate Email Recipients (Student Copy + Official IDFPR Submission)
                 </div>
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL RECIPIENT:</label>
-                        <input type="email" id="ac-send-student-email" placeholder="student@email.com" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.85rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL RECIPIENT:</label>
+                        <input type="email" id="ac-send-student-email" placeholder="student@email.com" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
                     </div>
                     <div>
-                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">IDFPR EMAIL LISTED ON CERTIFICATE:</label>
-                        <input type="email" id="ac-send-idfpr-email" value="FPR.SafetyUnit@illinois.gov" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:var(--green-bright); font-weight:700; font-size:0.85rem;">
+                        <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">IDFPR EMAIL LISTED ON CERTIFICATE:</label>
+                        <input type="email" id="ac-send-idfpr-email" value="FPR.SafetyUnit@illinois.gov" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:var(--green-bright); font-weight:700; font-size:0.94rem;">
                     </div>
                 </div>
             </div>
 
-            <div id="ac-feedback-banner" style="display:none; margin-bottom:14px; padding:12px 16px; border-radius:6px; font-size:0.85rem; line-height:1.5;"></div>
+            <div id="ac-feedback-banner" style="display:none; margin-bottom:14px; padding:12px 16px; border-radius:6px; font-size:0.94rem; line-height:1.5;"></div>
 
             <!-- ACTION BUTTONS -->
             <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:center;">
@@ -1347,7 +1347,7 @@
                     <button type="button" class="btn-action" onclick="downloadAdminArmedCertPdf()" style="padding:10px 16px; border-color:var(--green); color:var(--green-bright);">
                         <i class="fas fa-file-pdf"></i> Preview / Download Official IL486-1138 PDF
                     </button>
-                    <button type="button" class="btn-action btn-primary" id="ac-btn-send-both" onclick="sendAdminArmedCertToStudentAndIdfpr()" style="padding:10px 18px; font-size:0.86rem;">
+                    <button type="button" class="btn-action btn-primary" id="ac-btn-send-both" onclick="sendAdminArmedCertToStudentAndIdfpr()" style="padding:10px 18px; font-size:0.94rem;">
                         <i class="fas fa-paper-plane"></i> Send Completed Certificate to Student &amp; IDFPR
                     </button>
                 </div>
@@ -2043,18 +2043,18 @@
                         <td style="white-space:nowrap; font-weight:700; color:#fff;">${dateLabel}</td>
                         <td>
                             <strong style="color:#fff; display:block;">${s.title}</strong>
-                            <span style="font-size:0.74rem; color:var(--text-sub);">${s.notes ? s.notes.slice(0, 75) + (s.notes.length > 75 ? '...' : '') : ''}</span>
+                            <span style="font-size:0.86rem; color:var(--text-sub);">${s.notes ? s.notes.slice(0, 75) + (s.notes.length > 75 ? '...' : '') : ''}</span>
                         </td>
-                        <td style="font-size:0.8rem; color:#cbd5e1;">${s.time}</td>
+                        <td style="font-size:0.9rem; color:#cbd5e1;">${s.time}</td>
                         <td><strong style="color:var(--green-bright);">${s.price}</strong></td>
-                        <td style="font-size:0.78rem; color:var(--text-muted);">${s.location}</td>
-                        <td style="font-size:0.82rem; color:#fff;">${s.seatsAvailable} / ${Math.min(10, s.seatsTotal || 10)}</td>
+                        <td style="font-size:0.9rem; color:var(--text-muted);">${s.location}</td>
+                        <td style="font-size:0.92rem; color:#fff;">${s.seatsAvailable} / ${Math.min(10, s.seatsTotal || 10)}</td>
                         <td><span class="badge ${badgeClass}">${s.status || 'Open'}</span></td>
                         <td>
                             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="editAdminSession('${s.id}')" title="Edit Class"><i class="fas fa-pen"></i> Edit</button>
-                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="duplicateAdminSessionPlus7Days('${s.id}')" title="Duplicate +1 Week"><i class="fas fa-copy"></i> +1 Wk</button>
-                                <button class="btn-action" style="padding:4px 8px; font-size:0.74rem; color:#f87171;" onclick="deleteAdminSession('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.86rem;" onclick="editAdminSession('${s.id}')" title="Edit Class"><i class="fas fa-pen"></i> Edit</button>
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.86rem;" onclick="duplicateAdminSessionPlus7Days('${s.id}')" title="Duplicate +1 Week"><i class="fas fa-copy"></i> +1 Wk</button>
+                                <button class="btn-action" style="padding:4px 8px; font-size:0.86rem; color:#f87171;" onclick="deleteAdminSession('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -2112,18 +2112,18 @@
                     <td><code style="color:var(--green-bright);">${r.id}</code></td>
                     <td><strong style="color:#fff;">${r.studentName}</strong></td>
                     <td>
-                        <div style="color:#e2e8f0; font-size:0.84rem;">${r.studentPhone}</div>
-                        <div style="color:var(--text-sub); font-size:0.76rem;">${r.studentEmail}</div>
+                        <div style="color:#e2e8f0; font-size:0.92rem;">${r.studentPhone}</div>
+                        <div style="color:var(--text-sub); font-size:0.88rem;">${r.studentEmail}</div>
                     </td>
                     <td><strong style="color:#fff;">${r.courseTitle}</strong></td>
-                    <td style="font-size:0.82rem; color:#cbd5e1;">${r.date} &bull; ${r.time}</td>
-                    <td style="font-size:0.8rem; color:var(--text-muted);">${r.notes || '—'}</td>
-                    <td style="font-size:0.78rem; color:var(--text-sub);">${r.createdAt || ''}</td>
+                    <td style="font-size:0.92rem; color:#cbd5e1;">${r.date} &bull; ${r.time}</td>
+                    <td style="font-size:0.9rem; color:var(--text-muted);">${r.notes || '—'}</td>
+                    <td style="font-size:0.9rem; color:var(--text-sub);">${r.createdAt || ''}</td>
                     <td>
                         <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                            <button class="btn-action" style="padding:3px 7px; font-size:0.7rem;" onclick="openEmailStudioForReservation(${rIdx}, 'confirmation')" title="Send Class Confirmation"><i class="fas fa-receipt text-blue"></i> Confirm</button>
-                            <button class="btn-action" style="padding:3px 7px; font-size:0.7rem;" onclick="openEmailStudioForReservation(${rIdx}, 'reminder')" title="Send Class Reminder"><i class="fas fa-bell text-blue"></i> Remind</button>
-                            <button class="btn-action" style="padding:3px 7px; font-size:0.7rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForReservation(${rIdx}, 'thank_you_review')" title="Send Thank You + Google Review"><i class="fas fa-star"></i> Review</button>
+                            <button class="btn-action" style="padding:3px 7px; font-size:0.84rem;" onclick="openEmailStudioForReservation(${rIdx}, 'confirmation')" title="Send Class Confirmation"><i class="fas fa-receipt text-blue"></i> Confirm</button>
+                            <button class="btn-action" style="padding:3px 7px; font-size:0.84rem;" onclick="openEmailStudioForReservation(${rIdx}, 'reminder')" title="Send Class Reminder"><i class="fas fa-bell text-blue"></i> Remind</button>
+                            <button class="btn-action" style="padding:3px 7px; font-size:0.84rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForReservation(${rIdx}, 'thank_you_review')" title="Send Thank You + Google Review"><i class="fas fa-star"></i> Review</button>
                         </div>
                     </td>
                 </tr>
@@ -2213,7 +2213,7 @@
                 const attemptsCount = s.exam_attempts || 0;
                 
                 // Score badges
-                let latestScoreBadge = `<span style="color:var(--text-sub); font-size:0.82rem;">Not Attempted</span>`;
+                let latestScoreBadge = `<span style="color:var(--text-sub); font-size:0.92rem;">Not Attempted</span>`;
                 if (s.latest_score !== null && s.latest_score !== undefined) {
                     if (s.latest_passed) {
                         latestScoreBadge = `<span class="badge badge-success"><i class="fas fa-check"></i> ${s.latest_score}% PASSED</span>`;
@@ -2229,18 +2229,18 @@
 
                 const isArmedRow = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL-ARMED') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL486') || !!s.armed_cert_data;
                 const courseTag = isArmedRow
-                    ? `<span class="badge badge-info" style="font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200 &bull; #102-000398)</span>`
-                    : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($50)</span>`;
+                    ? `<span class="badge badge-info" style="font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200 &bull; #102-000398)</span>`
+                    : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($50)</span>`;
 
                 // Cert Badge
-                let certBadge = `<span style="color:var(--text-sub); font-size:0.8rem;"><i class="fas fa-hourglass-half"></i> In Progress</span>`;
+                let certBadge = `<span style="color:var(--text-sub); font-size:0.9rem;"><i class="fas fa-hourglass-half"></i> In Progress</span>`;
                 if (isArmedRow) {
                     if (s.armed_cert_data && s.armed_cert_data.instructor_completed) {
                         certBadge = `
                             <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px;">
                                 <i class="fas fa-file-shield"></i> IL486-1138 Completed
                             </span>
-                            <div style="font-size:0.68rem; color:#4ade80; margin-top:2px;">
+                            <div style="font-size:0.84rem; color:#4ade80; margin-top:2px;">
                                 ${s.armed_cert_data.emailed_to_student_and_idfpr ? 'Sent to Student &amp; IDFPR' : 'Range Qualification Signed Off'}
                             </div>
                         `;
@@ -2249,19 +2249,19 @@
                             <span class="badge badge-warning" style="display:inline-flex; align-items:center; gap:4px;">
                                 <i class="fas fa-user-check"></i> Trainee Info Saved
                             </span>
-                            <div style="font-size:0.68rem; color:#fbbf24; margin-top:2px;">
+                            <div style="font-size:0.84rem; color:#fbbf24; margin-top:2px;">
                                 Awaiting Range Sign-Off (IL486-1138)
                             </div>
                         `;
                     } else {
-                        certBadge = `<span style="color:var(--text-sub); font-size:0.78rem;"><i class="fas fa-hourglass-half"></i> Pending Trainee Form</span>`;
+                        certBadge = `<span style="color:var(--text-sub); font-size:0.9rem;"><i class="fas fa-hourglass-half"></i> Pending Trainee Form</span>`;
                     }
                 } else if (s.cert_id) {
                     certBadge = `
                         <span class="badge badge-cert" title="Issued ${s.cert_issued_at || ''}" style="display:inline-flex; align-items:center; gap:4px;">
                             <i class="fas fa-award"></i> ${s.cert_id}
                         </span>
-                        <div style="font-size:0.68rem; color:var(--green-bright); margin-top:2px;">
+                        <div style="font-size:0.84rem; color:var(--green-bright); margin-top:2px;">
                             Sealed: ${s.cert_issued_at || s.latest_exam_date || 'Recent'}
                         </div>
                     `;
@@ -2270,18 +2270,18 @@
                 // Attempts pill
                 let attemptsPill = `<span class="badge badge-info">${attemptsCount} ${attemptsCount === 1 ? 'Attempt' : 'Attempts'}</span>`;
                 if (attemptsCount === 0) {
-                    attemptsPill = `<span style="color:var(--text-sub); font-size:0.82rem;">0 Attempts</span>`;
+                    attemptsPill = `<span style="color:var(--text-sub); font-size:0.92rem;">0 Attempts</span>`;
                 }
 
                 // Payment pill (Clean indicator without IDFPR Approved)
                 let paymentPill = `
-                    <span class="badge badge-success" style="font-size:0.76rem; padding:3px 8px;">
+                    <span class="badge badge-success" style="font-size:0.88rem; padding:3px 8px;">
                         <i class="fas fa-check-circle"></i> ${isArmedRow ? '$200 PAID' : '$50 PAID'}
                     </span>
                 `;
                 if (!s.is_paid) {
                     paymentPill = `
-                        <span class="badge badge-warning" style="font-size:0.75rem; padding:3px 8px;">
+                        <span class="badge badge-warning" style="font-size:0.88rem; padding:3px 8px;">
                             <i class="fas fa-clock"></i> Pending (${isArmedRow ? '$200' : '$50'})
                         </span>
                     `;
@@ -2292,35 +2292,35 @@
                         <td>
                             <strong style="color:#fff; font-size:0.94rem; display:block;">${s.name}</strong>
                             ${courseTag}
-                            <div style="font-size:0.72rem; color:var(--text-sub); margin-top:3px;">
+                            <div style="font-size:0.86rem; color:var(--text-sub); margin-top:3px;">
                                 <i class="fas fa-calendar-alt"></i> Enrolled: ${s.created_at || 'Recent'}
                             </div>
                         </td>
                         <td>
-                            <div style="color:#e2e8f0; font-size:0.85rem;"><i class="fas fa-envelope" style="color:var(--text-sub); margin-right:4px;"></i>${s.email || 'N/A'}</div>
-                            <div style="font-size:0.74rem; color:var(--text-sub); margin-top:2px;">${s.agency || 'Platforms Student'}</div>
+                            <div style="color:#e2e8f0; font-size:0.94rem;"><i class="fas fa-envelope" style="color:var(--text-sub); margin-right:4px;"></i>${s.email || 'N/A'}</div>
+                            <div style="font-size:0.86rem; color:var(--text-sub); margin-top:2px;">${s.agency || 'Platforms Student'}</div>
                             <div style="display:flex; align-items:center; gap:5px; margin-top:4px; flex-wrap:wrap;">
                                 ${s.mfa_verified ? `
-                                    <span class="badge badge-success" style="font-size:0.68rem; padding:1px 6px;" title="MFA Verified: ${s.mfa_verified_at || ''}">
+                                    <span class="badge badge-success" style="font-size:0.84rem; padding:1px 6px;" title="MFA Verified: ${s.mfa_verified_at || ''}">
                                         <i class="fas fa-shield-alt"></i> MFA Verified
                                     </span>
                                 ` : `
-                                    <span class="badge badge-warning" style="font-size:0.68rem; padding:1px 6px;">
+                                    <span class="badge badge-warning" style="font-size:0.84rem; padding:1px 6px;">
                                         <i class="fas fa-lock"></i> MFA Pending
                                     </span>
                                 `}
-                                ${s.has_password ? '<span class="badge badge-info" style="font-size:0.68rem; padding:1px 6px;"><i class="fas fa-key"></i> Password</span>' : ''}
+                                ${s.has_password ? '<span class="badge badge-info" style="font-size:0.84rem; padding:1px 6px;"><i class="fas fa-key"></i> Password</span>' : ''}
                             </div>
                         </td>
                         <td>
                             ${paymentPill}
                         </td>
                         <td>
-                            <div style="font-weight:700; color:#fff; font-size:0.86rem;">${modulesDone} / 10 Modules</div>
+                            <div style="font-weight:700; color:#fff; font-size:0.94rem;">${modulesDone} / 10 Modules</div>
                             <div class="progress-bar-wrapper" style="margin-top:4px;">
                                 <div class="progress-bar-fill" style="width: ${pctModules}%;"></div>
                             </div>
-                            <div style="font-size:0.70rem; color:var(--text-sub); margin-top:2px;">${pctModules}% Completed</div>
+                            <div style="font-size:0.84rem; color:var(--text-sub); margin-top:2px;">${pctModules}% Completed</div>
                         </td>
                         <td>
                             ${attemptsPill}
@@ -2334,27 +2334,27 @@
                         <td>
                             ${certBadge}
                         </td>
-                        <td style="color:var(--text-muted); font-size:0.78rem; white-space:nowrap;">
+                        <td style="color:var(--text-muted); font-size:0.9rem; white-space:nowrap;">
                             ${s.last_active || 'Recent'}
                         </td>
                         <td>
                             <div style="display:flex; gap:5px; flex-direction:column;">
-                                <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.73rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
+                                <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.86rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
                                     <i class="fas fa-file-signature"></i> Armed Cert (IL486-1138)
                                 </button>
                                 <div style="display:flex; gap:3px; flex-wrap:wrap;">
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.68rem;" onclick="openEmailStudioForStudent(${idx}, 'confirmation')" title="Send Class & Payment Confirmation Email">
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem;" onclick="openEmailStudioForStudent(${idx}, 'confirmation')" title="Send Class & Payment Confirmation Email">
                                         <i class="fas fa-receipt text-blue"></i> Confirm
                                     </button>
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.68rem;" onclick="openEmailStudioForStudent(${idx}, 'reminder')" title="Send Upcoming Class / Range Reminder Email">
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem;" onclick="openEmailStudioForStudent(${idx}, 'reminder')" title="Send Upcoming Class / Range Reminder Email">
                                         <i class="fas fa-bell text-blue"></i> Remind
                                     </button>
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.68rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForStudent(${idx}, 'thank_you_review')" title="Send Graduation Thank You + 5-Star Google Review Email">
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForStudent(${idx}, 'thank_you_review')" title="Send Graduation Thank You + 5-Star Google Review Email">
                                         <i class="fas fa-star"></i> Review
                                     </button>
                                 </div>
                                 ${attemptsCount > 0 ? `
-                                    <button class="btn-action" style="padding:4px 8px; font-size:0.73rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
+                                    <button class="btn-action" style="padding:4px 8px; font-size:0.86rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
                                         <i class="fas fa-history"></i> History (${attemptsCount})
                                     </button>
                                 ` : ''}
@@ -2394,7 +2394,7 @@
                 container.innerHTML = `<p style="color:var(--text-muted); padding:20px 0;">No recorded attempts yet for this student.</p>`;
             } else {
                 container.innerHTML = `
-                    <div style="margin-bottom:14px; font-size:0.82rem; color:var(--text-muted);">
+                    <div style="margin-bottom:14px; font-size:0.92rem; color:var(--text-muted);">
                         Total Recorded Attempts: <strong>${attempts.length}</strong> &bull; Best Score: <strong style="color:var(--green-bright);">${student.best_score || 0}%</strong>
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
@@ -2411,7 +2411,7 @@
                             ${attempts.map(a => `
                                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                                     <td style="padding:10px 8px;"><strong>Attempt ${a.attempt_number}</strong></td>
-                                    <td style="padding:10px 8px; color:var(--text-muted); font-size:0.78rem;">${a.date || a.completed_at || 'N/A'}</td>
+                                    <td style="padding:10px 8px; color:var(--text-muted); font-size:0.9rem;">${a.date || a.completed_at || 'N/A'}</td>
                                     <td style="padding:10px 8px;">${a.score}</td>
                                     <td style="padding:10px 8px; font-weight:700;">${a.percentage}%</td>
                                     <td style="padding:10px 8px;">
@@ -3041,7 +3041,7 @@
                         fb.style.color = '#86efac';
                         fb.innerHTML = `
                             <div><i class="fas fa-check-circle"></i> <strong>Completed Certificate Sent!</strong> ${smtpMsg}.</div>
-                            <div style="margin-top:6px; font-size:0.8rem; color:#cbd5e1;">
+                            <div style="margin-top:6px; font-size:0.9rem; color:#cbd5e1;">
                                 A copy of <code>${filename}</code> was also downloaded to your computer.
                                 <a href="${mailtoHref}" style="color:var(--green-bright); text-decoration:underline; margin-left:8px; font-weight:700;">Open in Email Client (${recipientsList}) &rarr;</a>
                             </div>
@@ -3052,11 +3052,11 @@
                         fb.style.color = '#fde68a';
                         fb.innerHTML = `
                             <div><i class="fas fa-file-circle-check"></i> <strong>Official PDF Downloaded (<code>${filename}</code>) &amp; Ready to Send!</strong></div>
-                            <div style="margin-top:6px; font-size:0.8rem; color:#e2e8f0;">
+                            <div style="margin-top:6px; font-size:0.9rem; color:#e2e8f0;">
                                 Click below to open your email addressed to both the student (<strong>${studentEmail || 'Student'}</strong>) and IDFPR (<strong>${idfprEmail}</strong>) and attach the downloaded PDF:
                             </div>
                             <div style="margin-top:8px;">
-                                <a href="${mailtoHref}" class="btn-action btn-primary" style="display:inline-flex; text-decoration:none; padding:7px 14px; font-size:0.8rem;">
+                                <a href="${mailtoHref}" class="btn-action btn-primary" style="display:inline-flex; text-decoration:none; padding:7px 14px; font-size:0.9rem;">
                                     <i class="fas fa-envelope"></i> Open Email to Student &amp; ${idfprEmail}
                                 </a>
                             </div>
@@ -3261,18 +3261,18 @@
                 html = `
                 <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
                     <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:20px 24px; border-bottom:2px solid #d4af37; text-align:center;">
-                        <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
+                        <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
                             IDFPR Approved Curriculum #102-000398 &bull; 225 ILCS 447
                         </div>
                         <h2 style="color:#ffffff; font-size:20px; margin:4px 0 0 0;">PLATFORMS TRAINING ACADEMY</h2>
-                        <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">Official Class Registration &amp; Tuition Payment Confirmation</p>
+                        <p style="color:#cbd5e1; font-size:14.5px; margin:4px 0 0 0;">Official Class Registration &amp; Tuition Payment Confirmation</p>
                     </div>
                     <div style="padding:22px 24px;">
                         <p style="font-size:15px; color:#ffffff; margin-top:0;">Welcome, <strong>${studentName}</strong>!</p>
-                        <p style="font-size:13.5px; color:#cbd5e1; line-height:1.55;">
+                        <p style="font-size:14.5px; color:#cbd5e1; line-height:1.55;">
                             Thank you for enrolling with <strong>Platforms Training Academy</strong>. Your registration and tuition status have been confirmed:
                         </p>
-                        <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:13px;">
+                        <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:14.5px;">
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course Enrolled:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Tuition / Status:</strong> <strong style="color:#4ade80;">${price}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Scheduled Date:</strong> <strong style="color:#fff;">${classDate}</strong></div>
@@ -3280,7 +3280,7 @@
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Training Location:</strong> ${location}</div>
                             <div><strong style="color:#94a3b8;">Lead Instructor:</strong> Charles Young (License #263-000693)</div>
                         </div>
-                        <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#cbd5e1; line-height:1.55;">
+                        <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:14.5px; color:#cbd5e1; line-height:1.55;">
                             <strong style="color:#fff; display:block; margin-bottom:4px;">What to Bring &amp; Prepare:</strong>
                             &bull; Valid Government Photo ID (and FOID card if attending an Illinois CCL session).<br>
                             &bull; Close-toed shoes, crew-neck shirt, and a sturdy belt (ammo, targets, and range fees included).<br>
@@ -3307,24 +3307,24 @@ Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com`;
                 html = `
                 <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
                     <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:20px 24px; border-bottom:2px solid #d4af37; text-align:center;">
-                        <div style="display:inline-block; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
+                        <div style="display:inline-block; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
                             Upcoming Training &amp; Range Qualification Reminder
                         </div>
                         <h2 style="color:#ffffff; font-size:20px; margin:4px 0 0 0;">PLATFORMS TRAINING ACADEMY</h2>
-                        <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor: Charles Young</p>
+                        <p style="color:#cbd5e1; font-size:14.5px; margin:4px 0 0 0;">IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor: Charles Young</p>
                     </div>
                     <div style="padding:22px 24px;">
                         <p style="font-size:15px; color:#ffffff; margin-top:0;">Hello <strong>${studentName}</strong>,</p>
-                        <p style="font-size:13.5px; color:#cbd5e1; line-height:1.55;">
+                        <p style="font-size:14.5px; color:#cbd5e1; line-height:1.55;">
                             Friendly reminder regarding your upcoming scheduled training / range qualification session with <strong>Platforms Training Academy</strong>:
                         </p>
-                        <div style="background:#141821; border:1px solid rgba(212,175,55,0.45); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:13px;">
+                        <div style="background:#141821; border:1px solid rgba(212,175,55,0.45); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:14.5px;">
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course / Session:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Scheduled Date:</strong> <strong style="color:#fbbf24;">${classDate}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Check-In &amp; Hours:</strong> ${classTime} (Arrive 15 mins early)</div>
                             <div><strong style="color:#94a3b8;">Location:</strong> ${location}</div>
                         </div>
-                        <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#cbd5e1; line-height:1.55;">
+                        <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:14.5px; color:#cbd5e1; line-height:1.55;">
                             <strong style="color:#fff; display:block; margin-bottom:4px;">Mandatory Arrival &amp; Range Checklist:</strong>
                             &bull; Arrive 15 minutes early for sign-in and safety briefing.<br>
                             &bull; Bring your Government Photo ID (and FOID if applicable).<br>
@@ -3353,11 +3353,11 @@ Questions? Call (773) 873-2591`;
                 html = `
                 <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
                     <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 24px; border-bottom:2px solid #d4af37; text-align:center;">
-                        <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
+                        <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
                             Official Graduate &bull; IDFPR Approved Curriculum #102-000398
                         </div>
                         <h2 style="color:#ffffff; font-size:21px; margin:4px 0 0 0;">CONGRATULATIONS, ${studentName.toUpperCase()}!</h2>
-                        <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">Thank You for Training with Platforms Training Academy</p>
+                        <p style="color:#cbd5e1; font-size:14.5px; margin:4px 0 0 0;">Thank You for Training with Platforms Training Academy</p>
                     </div>
                     <div style="padding:22px 24px;">
                         <p style="font-size:14px; color:#cbd5e1; line-height:1.6; margin-top:0;">
@@ -3366,14 +3366,14 @@ Questions? Call (773) 873-2591`;
                         <div style="background:linear-gradient(135deg,rgba(212,175,55,0.14) 0%,#141821 100%); border:2px solid #d4af37; border-radius:10px; padding:18px 20px; margin:18px 0; text-align:center;">
                             <div style="font-size:24px; letter-spacing:4px; color:#fbbf24; margin-bottom:6px;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                             <h3 style="color:#ffffff; font-size:17px; margin:0 0 6px 0;">Share Your Experience on Our Google Profile!</h3>
-                            <p style="font-size:13px; color:#e2e8f0; line-height:1.55; margin:0 0 14px 0;">
+                            <p style="font-size:14.5px; color:#e2e8f0; line-height:1.55; margin:0 0 14px 0;">
                                 Your review helps fellow security officers and Illinois residents find veteran-led training they can trust. Click below to post your review straight to our Google Business Profile:
                             </p>
                             <a href="${reviewUrl}" target="_blank" style="display:inline-block; background:linear-gradient(135deg,#d4af37 0%,#b89225 100%); color:#07090e; font-weight:800; font-size:14px; text-decoration:none; padding:12px 24px; border-radius:6px;">
                                 &#9733; Leave a 5-Star Review on Google &rarr;
                             </a>
                         </div>
-                        <p style="font-size:13px; color:#ffffff; margin-bottom:0;">
+                        <p style="font-size:14.5px; color:#ffffff; margin-bottom:0;">
                             Stay safe and stay sharp,<br>
                             <strong style="color:#d4af37;">Charles Young</strong> &bull; Lead Instructor (#263-000693) &bull; (773) 873-2591
                         </p>
@@ -3463,7 +3463,7 @@ Platforms Training Academy | (773) 873-2591`;
                     fb.innerHTML = `
                         <div><i class="fas fa-envelope-open-text"></i> <strong>Ready to Send to ${payload.toEmail}:</strong> Click below to send directly from your email client (or configure SMTP in Tab 2 for automatic background delivery):</div>
                         <div style="margin-top:8px;">
-                            <a href="${mailtoHref}" class="btn-action btn-primary" style="display:inline-flex; text-decoration:none; padding:6px 14px; font-size:0.8rem;">
+                            <a href="${mailtoHref}" class="btn-action btn-primary" style="display:inline-flex; text-decoration:none; padding:6px 14px; font-size:0.9rem;">
                                 <i class="fas fa-paper-plane"></i> Open Pre-Filled Email to ${payload.toEmail} &rarr;
                             </a>
                         </div>

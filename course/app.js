@@ -783,7 +783,7 @@ class SecurityCourseApp {
                         A 6-digit identity code has been dispatched to:
                         <strong style="color:var(--brand-green-bright); display:inline-block;">${this.pendingAuthEmail}</strong>
                     </div>
-                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                    <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                         Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
                     </div>
                 `;
@@ -808,7 +808,7 @@ class SecurityCourseApp {
                             A 6-digit identity code has been dispatched to:
                             <strong style="color:var(--brand-green-bright); display:inline-block;">${this.pendingAuthEmail}</strong>
                         </div>
-                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                             Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
                         </div>
                     `;
@@ -841,7 +841,7 @@ class SecurityCourseApp {
                         A 6-digit identity code has been dispatched to:
                         <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
                     </div>
-                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                    <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                         Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
                     </div>
                 `;
@@ -898,7 +898,7 @@ class SecurityCourseApp {
                             A 6-digit identity code has been dispatched to:
                             <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
                         </div>
-                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                             Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
                         </div>
                     `;
@@ -916,7 +916,7 @@ class SecurityCourseApp {
                             A 6-digit code has been dispatched to:
                             <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
                         </div>
-                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                             Please check your inbox (and Spam/Junk folder). Enter the 6-digit code below to proceed.
                         </div>
                     `;
@@ -934,7 +934,7 @@ class SecurityCourseApp {
                         A 6-digit code has been dispatched to:
                         <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
                     </div>
-                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                    <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                         Please check your inbox (and Spam/Junk folder). Enter the 6-digit code below to proceed.
                     </div>
                 `;
@@ -1131,7 +1131,7 @@ class SecurityCourseApp {
                             A new 6-digit identity code has been dispatched to:
                             <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
                         </div>
-                        <div style="font-size:0.78rem; color:#94a3b8; margin-top:6px;">
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
                             Please check your inbox (and Spam/Junk folder). Enter the 6-digit code below.
                         </div>
                     `;
@@ -1628,8 +1628,8 @@ class SecurityCourseApp {
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span class="item-tag">${lesson.number} &bull; ${lesson.duration}</span>
                             ${!isUnlocked 
-                                ? '<i class="fas fa-lock" style="color:#eab308; font-size:0.75rem;" title="Locked"></i>'
-                                : (isCompleted ? '<i class="fas fa-check-double" style="color:var(--brand-green); font-size:0.75rem;" title="Mastery Verified"></i>' : '')}
+                                ? '<i class="fas fa-lock" style="color:#eab308; font-size:0.88rem;" title="Locked"></i>'
+                                : (isCompleted ? '<i class="fas fa-check-double" style="color:var(--brand-green); font-size:0.88rem;" title="Mastery Verified"></i>' : '')}
                         </div>
                         <span>${lesson.title}</span>
                     </button>
@@ -1815,8 +1815,8 @@ class SecurityCourseApp {
                     <div class="scenario-feedback-box ${opt.correct ? 'correct' : 'incorrect'}" style="display:block;">
                         <strong>${opt.correct ? 'TACTICAL EXCELLENCE' : 'TACTICAL & LEGAL RISK'}:</strong> ${opt.feedback}
                         ${opt.correct 
-                            ? `<div style="margin-top:10px; font-size:0.85rem; color:var(--brand-green-bright);"><i class="fas fa-check-circle"></i> Scenario Successfully Completed! Proceed to Tab 3 (Check on Learning).</div>`
-                            : `<div style="margin-top:10px; font-size:0.85rem; color:#ef4444;"><i class="fas fa-times-circle"></i> Incorrect Tactical Decision. Review the legal principles and select the correct option to resolve this scenario.</div>`}
+                            ? `<div style="margin-top:10px; font-size:0.94rem; color:var(--brand-green-bright);"><i class="fas fa-check-circle"></i> Scenario Successfully Completed! Proceed to Tab 3 (Check on Learning).</div>`
+                            : `<div style="margin-top:10px; font-size:0.94rem; color:#ef4444;"><i class="fas fa-times-circle"></i> Incorrect Tactical Decision. Review the legal principles and select the correct option to resolve this scenario.</div>`}
                     </div>
                 `;
             }
@@ -1825,7 +1825,7 @@ class SecurityCourseApp {
                 <div class="scenario-sim-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span class="scenario-badge"><i class="fas fa-shield-alt"></i> Interactive Tactical Scenario</span>
-                        <span id="scenario-status-badge-${lesson.id}" style="${isCompleted ? 'color:var(--brand-green-bright);' : 'color:#f59e0b;'} font-size:0.85rem; font-weight:700;">
+                        <span id="scenario-status-badge-${lesson.id}" style="${isCompleted ? 'color:var(--brand-green-bright);' : 'color:#f59e0b;'} font-size:0.94rem; font-weight:700;">
                             ${isCompleted 
                                 ? '<i class="fas fa-check-circle"></i> Scenario Completed' 
                                 : '<i class="fas fa-lock"></i> Must Complete to Unlock Quiz'}
@@ -2033,9 +2033,9 @@ class SecurityCourseApp {
             feedbackBox.innerHTML = `<strong>${opt.correct ? 'TACTICAL EXCELLENCE' : 'TACTICAL & LEGAL RISK'}:</strong> ${opt.feedback}`;
             
             if (opt.correct) {
-                feedbackBox.innerHTML += `<div style="margin-top:10px; font-size:0.85rem; color:var(--brand-green-bright);"><i class="fas fa-check-circle"></i> Scenario Successfully Completed! Proceed to Tab 3 (Check on Learning).</div>`;
+                feedbackBox.innerHTML += `<div style="margin-top:10px; font-size:0.94rem; color:var(--brand-green-bright);"><i class="fas fa-check-circle"></i> Scenario Successfully Completed! Proceed to Tab 3 (Check on Learning).</div>`;
             } else {
-                feedbackBox.innerHTML += `<div style="margin-top:10px; font-size:0.85rem; color:#ef4444;"><i class="fas fa-times-circle"></i> Incorrect Tactical Decision. Under Illinois law, this action exposes you and the client to liability. Select another option to resolve this scenario.</div>`;
+                feedbackBox.innerHTML += `<div style="margin-top:10px; font-size:0.94rem; color:#ef4444;"><i class="fas fa-times-circle"></i> Incorrect Tactical Decision. Under Illinois law, this action exposes you and the client to liability. Select another option to resolve this scenario.</div>`;
             }
         }
 
@@ -2548,8 +2548,8 @@ class SecurityCourseApp {
         const effectivePct = (this.isAdminMode && !this.examPassed) ? 100 : this.examPercentage;
         scoreNum.textContent = `${effectiveScore} / ${EXAM_QUESTIONS.length}`;
         scorePct.innerHTML = (this.isAdminMode && !this.examPassed)
-            ? `<strong>100% Score</strong><br><span style="font-size:0.76rem;">Admin Preview</span>`
-            : `<strong>${effectivePct}% Score</strong><br><span style="font-size:0.78rem;">Attempt #${this.examAttempts || 1}</span>`;
+            ? `<strong>100% Score</strong><br><span style="font-size:0.88rem;">Admin Preview</span>`
+            : `<strong>${effectivePct}% Score</strong><br><span style="font-size:0.9rem;">Attempt #${this.examAttempts || 1}</span>`;
 
         if (this.examPassed || this.isAdminMode) {
             badge.className = 'score-badge passed';

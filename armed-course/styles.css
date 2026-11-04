@@ -111,7 +111,7 @@ h1, h2, h3, h4, h5, h6 {
 .top-credential-bar {
     background-color: #07080a;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.76rem;
+    font-size: 0.88rem;
     padding: 5px 0;
     line-height: 1.3;
 }
@@ -283,7 +283,7 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid transparent;
     color: var(--text-muted);
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 500;
     padding: 6px 12px;
     border-radius: var(--radius-sm);
@@ -332,14 +332,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-guide-header, .btn-save-progress {
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     padding: 6px 11px;
     border-radius: var(--radius-sm);
     white-space: nowrap;
 }
 
 .header-profile-btn {
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     padding: 5px 10px;
     white-space: nowrap;
 }
@@ -448,7 +448,7 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--brand-green);
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -487,7 +487,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stat-label {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--text-muted);
     text-transform: uppercase;
 }
@@ -627,12 +627,12 @@ video::-webkit-media-controls-panel {
 .lesson-num {
     font-family: var(--font-heading);
     color: var(--brand-green-bright);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     font-weight: 700;
 }
 
 .lesson-time {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     background: var(--bg-secondary);
     padding: 3px 8px;
@@ -646,7 +646,7 @@ video::-webkit-media-controls-panel {
 }
 
 .lesson-card p {
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     color: var(--text-muted);
     margin-bottom: 16px;
     line-height: 1.5;
@@ -658,7 +658,7 @@ video::-webkit-media-controls-panel {
     justify-content: space-between;
     padding-top: 12px;
     border-top: 1px solid var(--border-color);
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--brand-green-bright);
     font-weight: 600;
 }
@@ -707,7 +707,7 @@ video::-webkit-media-controls-panel {
     padding: 10px 14px;
     border-radius: var(--radius-sm);
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -716,7 +716,7 @@ video::-webkit-media-controls-panel {
 
 .sidebar-item-btn .item-tag {
     font-family: var(--font-heading);
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     color: var(--brand-green-bright);
 }
 
@@ -1038,7 +1038,7 @@ video::-webkit-media-controls-panel {
     border: 1px solid var(--border-color);
     padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 600;
 }
 
@@ -1062,7 +1062,7 @@ video::-webkit-media-controls-panel {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--text-muted);
 }
 
@@ -1079,7 +1079,7 @@ video::-webkit-media-controls-panel {
     height: 36px;
     border-radius: var(--radius-sm);
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     cursor: pointer;
     transition: all 0.15s ease;
     display: flex;
@@ -1157,7 +1157,7 @@ video::-webkit-media-controls-panel {
     padding: 6px 12px;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1205,7 +1205,7 @@ video::-webkit-media-controls-panel {
     padding: 10px 16px;
     background: var(--bg-card);
     border-top: 1px solid var(--border-color);
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--text-muted);
     font-style: italic;
     display: flex;
@@ -1377,7 +1377,7 @@ video::-webkit-media-controls-panel {
 }
 
 .score-pct {
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     line-height: 1.35;
     color: var(--text-muted);
     max-width: 170px;
@@ -1429,7 +1429,7 @@ video::-webkit-media-controls-panel {
     display: flex;
     justify-content: space-between;
     margin-bottom: 12px;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
 }
 
 .review-question-title {
@@ -1476,7 +1476,7 @@ video::-webkit-media-controls-panel {
     border: 1px solid var(--border-color);
     padding: 14px 18px;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     color: #cbd5e1;
 }
 
@@ -1595,7 +1595,7 @@ video::-webkit-media-controls-panel {
 }
 
 .sig-title {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: #555;
     text-transform: uppercase;
 }
@@ -1608,7 +1608,7 @@ video::-webkit-media-controls-panel {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     text-transform: uppercase;
     font-weight: 700;
     color: #d4af37;
@@ -1624,7 +1624,7 @@ video::-webkit-media-controls-panel {
     padding: 16px 24px;
     margin-top: 30px;
     color: var(--text-dark);
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -1666,11 +1666,11 @@ video::-webkit-media-controls-panel {
     }
     .btn-save-progress {
         padding: 5px 8px !important;
-        font-size: 0.78rem !important;
+        font-size: 0.9rem !important;
     }
     .nav-btn {
         padding: 5px 8px !important;
-        font-size: 0.8rem !important;
+        font-size: 0.9rem !important;
         gap: 4px !important;
     }
     .header-profile-btn #header-student-name-display {
@@ -1963,7 +1963,7 @@ video::-webkit-media-controls-panel {
     color: var(--brand-green-bright);
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
     margin-bottom: 16px;
@@ -2086,7 +2086,7 @@ video::-webkit-media-controls-panel {
     color: var(--brand-green-bright);
     padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 700;
 }
 
@@ -2144,7 +2144,7 @@ video::-webkit-media-controls-panel {
     margin-top: 14px;
     padding: 12px 16px;
     border-radius: var(--radius-sm);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     display: none;
 }
 
@@ -2183,7 +2183,7 @@ video::-webkit-media-controls-panel {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
     padding: 4px 12px;
     border-radius: 16px;
@@ -2229,7 +2229,7 @@ video::-webkit-media-controls-panel {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
     padding: 5px 12px;
     border-radius: 14px;
@@ -2252,7 +2252,7 @@ video::-webkit-media-controls-panel {
 }
 
 .req-status-msg {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 600;
     color: var(--text-muted);
 }
@@ -2288,7 +2288,7 @@ video::-webkit-media-controls-panel {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.72rem;
+    font-size: 0.86rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2303,7 +2303,7 @@ video::-webkit-media-controls-panel {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2325,7 +2325,7 @@ video::-webkit-media-controls-panel {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2347,7 +2347,7 @@ video::-webkit-media-controls-panel {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2428,7 +2428,7 @@ video::-webkit-media-controls-panel {
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-color);
-    font-size: 0.85rem;
+    font-size: 0.94rem;
 }
 
 .locked-module-item.completed {
@@ -2469,7 +2469,7 @@ video::-webkit-media-controls-panel {
 
 .cert-intake-header p {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     margin: 0;
 }
 
@@ -2488,7 +2488,7 @@ video::-webkit-media-controls-panel {
 }
 
 .cert-form-group label {
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2528,7 +2528,7 @@ video::-webkit-media-controls-panel {
 }
 
 .cert-readonly-header {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -2540,7 +2540,7 @@ video::-webkit-media-controls-panel {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     color: #ddd;
 }
 
@@ -2777,7 +2777,7 @@ video::-webkit-media-controls-panel {
     padding: 6px 14px;
     border-radius: 20px;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2807,7 +2807,7 @@ video::-webkit-media-controls-panel {
     padding: 6px 14px;
     border-radius: 4px;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2829,7 +2829,7 @@ video::-webkit-media-controls-panel {
     padding: 6px 12px;
     border-radius: 4px;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2870,7 +2870,7 @@ video::-webkit-media-controls-panel {
     background: rgba(212, 175, 55, 0.15);
     border: 1px solid var(--brand-green);
     color: var(--brand-green-bright);
-    font-size: 0.72rem;
+    font-size: 0.86rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -2888,7 +2888,7 @@ video::-webkit-media-controls-panel {
 }
 
 .narrator-byline {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--text-muted);
 }
 
@@ -2902,7 +2902,7 @@ video::-webkit-media-controls-panel {
     padding: 10px 18px;
     border-radius: var(--radius-sm);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2943,7 +2943,7 @@ video::-webkit-media-controls-panel {
     border-radius: var(--radius-sm);
     padding: 14px 18px;
     margin-top: 20px;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     line-height: 1.5;
     color: #e5e7eb;
 }
@@ -3058,7 +3058,7 @@ video::-webkit-media-controls-panel {
 
 .guide-step-content p {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     line-height: 1.5;
     margin: 0;
 }
@@ -3126,7 +3126,7 @@ video::-webkit-media-controls-panel {
     justify-content: space-between;
     padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
 }
 
 .profile-stat-row span:first-child {
@@ -3244,7 +3244,7 @@ video::-webkit-media-controls-panel {
 .narrator-badge {
     background: var(--brand-green);
     color: #000;
-    font-size: 0.65rem;
+    font-size: 0.84rem;
     font-weight: 800;
     text-transform: uppercase;
     padding: 2px 7px;
@@ -3253,7 +3253,7 @@ video::-webkit-media-controls-panel {
 }
 
 .narrator-voice-name {
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     color: var(--text-muted);
 }
 
@@ -3276,7 +3276,7 @@ video::-webkit-media-controls-panel {
     padding: 10px 18px;
     border-radius: var(--radius-sm);
     font-family: var(--font-heading);
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
@@ -3354,7 +3354,7 @@ video::-webkit-media-controls-panel {
 }
 
 .payment-price-sub {
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     color: var(--text-muted);
     text-transform: uppercase;
 }
@@ -3424,7 +3424,7 @@ video::-webkit-media-controls-panel {
 }
 
 .cert-sealed-content p {
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     color: var(--text-light);
     line-height: 1.5;
     margin: 0;
@@ -3628,7 +3628,7 @@ button:disabled.btn-primary {
 }
 
 .tier-statute-badge {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 4px;
@@ -3665,7 +3665,7 @@ button:disabled.btn-primary {
 }
 
 .tier-box-label {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3726,7 +3726,7 @@ button:disabled.btn-primary {
 .baton-zone-card.red .baton-zone-card-title { color: #f87171; }
 
 .baton-zone-badge {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 4px;
@@ -3757,7 +3757,7 @@ button:disabled.btn-primary {
 
 .baton-grid-col strong {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     text-transform: uppercase;
     margin-bottom: 6px;
     letter-spacing: 0.5px;
@@ -3808,7 +3808,7 @@ button:disabled.btn-primary {
 
 .harm-card-badge {
     display: inline-block;
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     font-weight: 800;
     padding: 5px 12px;
     border-radius: 4px;
@@ -4020,7 +4020,7 @@ button:disabled.btn-primary {
 .lesson-case-card.info-case .lesson-case-title { color: #d4af37; }
 
 .lesson-case-badge {
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 800;
     padding: 5px 12px;
     border-radius: 4px;
@@ -4092,7 +4092,7 @@ button:disabled.btn-primary {
     background: linear-gradient(90deg, #b45309 0%, #d97706 50%, #92400e 100%);
     color: #fff;
     padding: 10px 20px;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-align: center;
@@ -4112,7 +4112,7 @@ button:disabled.btn-primary {
     color: #fff;
     padding: 4px 12px;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.2s ease;
@@ -4145,7 +4145,7 @@ button:disabled.btn-primary {
 }
 
 .admin-stat-lbl {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     text-transform: uppercase;
     margin-top: 4px;
@@ -4163,7 +4163,7 @@ button:disabled.btn-primary {
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
 }
 
 .admin-table th {
@@ -4252,7 +4252,7 @@ button:disabled.btn-primary {
 
     .header-profile-btn {
         padding: 5px 10px !important;
-        font-size: 0.78rem !important;
+        font-size: 0.9rem !important;
         gap: 6px !important;
         border-radius: var(--radius-sm) !important;
         flex-shrink: 0 !important;
@@ -4294,7 +4294,7 @@ button:disabled.btn-primary {
     .nav-btn {
         flex: 0 0 auto !important;
         padding: 6px 12px !important;
-        font-size: 0.8rem !important;
+        font-size: 0.9rem !important;
         border-radius: 4px !important;
         white-space: nowrap !important;
     }
@@ -4429,7 +4429,7 @@ button:disabled.btn-primary {
 
     .lesson-tab-btn {
         width: 100% !important;
-        font-size: 0.82rem !important;
+        font-size: 0.92rem !important;
         padding: 9px 10px !important;
         text-align: center !important;
         justify-content: center !important;
@@ -4452,7 +4452,7 @@ button:disabled.btn-primary {
     }
 
     .req-chip {
-        font-size: 0.74rem !important;
+        font-size: 0.86rem !important;
         padding: 4px 8px !important;
     }
 
@@ -4510,7 +4510,7 @@ button:disabled.btn-primary {
     }
 
     .lesson-case-badge {
-        font-size: 0.75rem !important;
+        font-size: 0.88rem !important;
         padding: 3px 8px !important;
     }
 
@@ -4624,7 +4624,7 @@ button:disabled.btn-primary {
 
     .exam-pill {
         padding: 4px 8px !important;
-        font-size: 0.75rem !important;
+        font-size: 0.88rem !important;
     }
 
     .palette-container {
@@ -4642,7 +4642,7 @@ button:disabled.btn-primary {
     .palette-btn {
         width: 100% !important;
         height: 36px !important;
-        font-size: 0.8rem !important;
+        font-size: 0.9rem !important;
         padding: 0 !important;
     }
 
@@ -4687,7 +4687,7 @@ button:disabled.btn-primary {
     #exam-next-btn, #btn-submit-exam, #btn-prev-question, #btn-next-question, #btn-clear-question, #btn-flag-question {
         flex: 1 1 auto !important;
         padding: 10px 14px !important;
-        font-size: 0.9rem !important;
+        font-size: 0.96rem !important;
         box-sizing: border-box !important;
     }
 
@@ -4816,7 +4816,7 @@ button:disabled.btn-primary {
     }
 
     .footer-copy {
-        font-size: 0.74rem !important;
+        font-size: 0.86rem !important;
         line-height: 1.5 !important;
         word-break: break-word !important;
         overflow-wrap: break-word !important;
@@ -4900,7 +4900,7 @@ button:disabled.btn-primary {
     border: 1px solid rgba(212, 175, 55, 0.4);
     border-radius: 9999px;
     color: var(--brand-green-bright);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
@@ -4967,7 +4967,7 @@ button:disabled.btn-primary {
 
 .auth-gate-feature-item p {
     color: var(--text-muted);
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     line-height: 1.45;
     margin: 0;
 }
@@ -5010,7 +5010,7 @@ button:disabled.btn-primary {
     justify-content: center;
     gap: 20px;
     flex-wrap: wrap;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--text-muted);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 20px;
@@ -5138,7 +5138,7 @@ button:disabled.btn-primary {
     color: #fbbf24;
     padding: 5px 14px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -5184,7 +5184,7 @@ button:disabled.btn-primary {
 
 .payment-gate-plan-sub {
     display: block;
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     color: var(--text-muted);
     margin-top: 2px;
 }
@@ -5243,14 +5243,14 @@ button:disabled.btn-primary {
 
 .payment-gate-feature strong {
     display: block;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     color: #fff;
     margin-bottom: 2px;
 }
 
 .payment-gate-feature span {
     display: block;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     line-height: 1.4;
 }
@@ -5291,7 +5291,7 @@ button:disabled.btn-primary {
 }
 
 .payment-gate-guarantee {
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     color: var(--text-muted);
     display: flex;
     align-items: center;
@@ -5304,7 +5304,7 @@ button:disabled.btn-primary {
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     color: var(--text-muted);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 18px;
@@ -5314,7 +5314,7 @@ button:disabled.btn-primary {
     background: none;
     border: none;
     color: var(--brand-green-bright);
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
@@ -5355,7 +5355,7 @@ button:disabled.btn-primary {
 @media (max-width: 768px) {
     .top-credential-bar {
         padding: 6px 0 !important;
-        font-size: 0.75rem !important;
+        font-size: 0.88rem !important;
     }
     .site-container.top-credential-inner,
     .top-credential-inner {
@@ -5449,7 +5449,7 @@ button:disabled.btn-primary {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     font-weight: 700;
     font-family: var(--font-heading);
     letter-spacing: 0.4px;
@@ -5525,7 +5525,7 @@ button:disabled.btn-primary {
 
 .armed-slide-figure figcaption {
     padding: 11px 16px;
-    font-size: 0.85rem;
+    font-size: 0.94rem;
     line-height: 1.45;
     color: #e5e7eb;
     background: linear-gradient(180deg, #151922 0%, #0e1117 100%);
@@ -5537,7 +5537,7 @@ button:disabled.btn-primary {
     color: #d4af37;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     display: block;
     margin-bottom: 3px;
 }
@@ -5553,7 +5553,7 @@ button:disabled.btn-primary {
 .range-qual-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     background: #10141c;
 }
 
@@ -5592,7 +5592,7 @@ button:disabled.btn-primary {
     gap: 6px;
     padding: 6px 12px;
     border-radius: 6px;
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     font-weight: 700;
     letter-spacing: 0.4px;
     text-transform: uppercase;
@@ -5607,7 +5607,7 @@ button:disabled.btn-primary {
     gap: 7px;
     padding: 6px 13px;
     border-radius: 6px;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     background: rgba(16, 185, 129, 0.12);
@@ -5664,14 +5664,14 @@ button:disabled.btn-primary {
     border: 1px solid rgba(212, 175, 55, 0.28);
     border-radius: 6px;
     padding: 10px 14px;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     color: #e5e7eb;
 }
 
 .range-voucher-item strong {
     display: block;
     color: #d4af37;
-    font-size: 0.74rem;
+    font-size: 0.86rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 3px;
@@ -5737,7 +5737,7 @@ button:disabled.btn-primary {
 .top-credential-bar {
     background-color: #07080a !important;
     border-bottom: 1px solid var(--border-color) !important;
-    font-size: 0.76rem !important;
+    font-size: 0.88rem !important;
     padding: 5px 0 !important;
     line-height: 1.3 !important;
 }
@@ -5817,7 +5817,7 @@ button:disabled.btn-primary {
 .nav-item {
     padding: 6px 11px;
     color: #ffffff;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
     border-radius: var(--radius-sm);
     display: inline-flex;
@@ -5836,7 +5836,7 @@ button:disabled.btn-primary {
 }
 
 .nav-item i {
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     color: #d4af37;
 }
 
@@ -5877,7 +5877,7 @@ button:disabled.btn-primary {
     color: #ffffff;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.96rem;
     letter-spacing: 0.6px;
     padding: 9px 18px;
     border-radius: var(--radius-sm);
@@ -6036,7 +6036,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 }
 
 .drawer-contact-footer p {
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     color: #cbd5e1;
     margin: 0;
 }
@@ -6104,7 +6104,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 }
 
 .footer-tagline {
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
     color: #ffffff !important;
     line-height: 1.45 !important;
     margin-bottom: 6px !important;
@@ -6115,7 +6115,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     flex-direction: row !important;
     flex-wrap: wrap !important;
     gap: 10px !important;
-    font-size: 0.76rem !important;
+    font-size: 0.88rem !important;
     color: #ffffff !important;
 }
 
@@ -6126,7 +6126,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 
 .footer-links-col h4,
 .footer-contact-col h4 {
-    font-size: 0.84rem !important;
+    font-size: 0.92rem !important;
     margin-bottom: 8px !important;
     color: #ffffff !important;
     text-transform: uppercase !important;
@@ -6144,7 +6144,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 
 .footer-links-col a {
     color: #ffffff !important;
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
     text-decoration: none !important;
     transition: all 0.2s ease !important;
 }
@@ -6155,7 +6155,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 }
 
 .footer-contact-col p {
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
     color: #ffffff !important;
     display: flex !important;
     align-items: center !important;
@@ -6171,7 +6171,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     gap: 8px !important;
     padding-top: 12px !important;
     border-top: 1px solid var(--border-color) !important;
-    font-size: 0.74rem !important;
+    font-size: 0.86rem !important;
     color: #ffffff !important;
     box-sizing: border-box !important;
     width: 100% !important;
@@ -6190,16 +6190,16 @@ body.lms-gate-active .site-header .course-progress-strip {
 @media (max-width: 1340px) and (min-width: 1081px) {
     .nav-item {
         padding: 5px 8px;
-        font-size: 0.8rem;
+        font-size: 0.84rem;
         gap: 4px;
     }
     .nav-item-online {
         padding: 5px 10px;
-        font-size: 0.8rem;
+        font-size: 0.84rem;
     }
     .header-book-btn {
         padding: 8px 14px;
-        font-size: 0.85rem;
+        font-size: 0.94rem;
     }
     .site-header .brand-logo-img,
     .site-header .brand-logo {
@@ -6324,7 +6324,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     border: 1px solid #d4af37;
     color: #f3d06b;
     font-family: var(--font-heading);
-    font-size: 0.72rem;
+    font-size: 0.86rem;
     font-weight: 700;
     letter-spacing: 0.8px;
     padding: 3px 10px;
@@ -6354,7 +6354,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 }
 
 .armed-gate-step-desc {
-    font-size: 0.86rem;
+    font-size: 0.94rem;
     color: #e2e8f0;
     line-height: 1.5;
     margin: 0 0 14px 0;
@@ -6362,10 +6362,10 @@ body.lms-gate-active .site-header .course-progress-strip {
 
 .armed-gate-dates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
-    gap: 8px;
-    margin-bottom: 12px;
-    max-height: 250px;
+    grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+    max-height: 270px;
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -6373,13 +6373,13 @@ body.lms-gate-active .site-header .course-progress-strip {
 .armed-range-date-card {
     background: #141821;
     border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: 6px;
-    padding: 8px 10px;
+    border-radius: 7px;
+    padding: 10px 13px;
     cursor: pointer;
     transition: all 0.18s ease;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
     position: relative;
     text-align: left;
 }
@@ -6410,13 +6410,13 @@ body.lms-gate-active .site-header .course-progress-strip {
 
 .armed-range-card-date {
     font-family: var(--font-heading);
-    font-size: 0.94rem;
+    font-size: 1.04rem;
     font-weight: 700;
     color: #ffffff;
 }
 
 .armed-range-card-badge {
-    font-size: 0.68rem;
+    font-size: 0.84rem;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 4px;
@@ -6431,7 +6431,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 }
 
 .armed-range-card-meta {
-    font-size: 0.77rem;
+    font-size: 0.88rem;
     color: #cbd5e1;
     line-height: 1.35;
 }
@@ -6450,7 +6450,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 }
 
 .armed-gate-input-group label {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #ffffff;
 }
@@ -6461,7 +6461,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     border-radius: 6px;
     padding: 9px 12px;
     color: #ffffff;
-    font-size: 0.86rem;
+    font-size: 0.94rem;
     font-family: inherit;
     width: 100%;
     box-sizing: border-box;
@@ -6477,7 +6477,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     margin-top: 12px;
     padding: 10px 14px;
     border-radius: 6px;
-    font-size: 0.84rem;
+    font-size: 0.92rem;
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.35);
     color: #ffffff;
