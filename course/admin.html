@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0a0b0d;
@@ -452,7 +452,7 @@
                         <span>INSTRUCTOR ROSTER &amp; EXAM ANALYTICS</span>
                         <span class="badge badge-info" id="cloud-status-badge" style="font-size:0.75rem;"><i class="fas fa-cloud-arrow-down"></i> Connecting to Cloud Server...</span>
                     </div>
-                    <div class="brand-sub"><i class="fas fa-user-shield text-blue"></i> Lead Instructor: Charles Young &bull; Chicago, IL &bull; 225 ILCS 447 &bull; Cloud Backend (Render + GitHub CDN)</div>
+                    <div class="brand-sub"><i class="fas fa-user-shield text-blue"></i> Lead Instructor: Charles Young &bull; Chicago, IL &bull; 225 ILCS 447 &bull; IDFPR Approved Curriculum #102-000398 &bull; Cloud Backend (Render + GitHub CDN)</div>
                 </div>
             </div>
             <div class="header-actions">
@@ -526,6 +526,9 @@
                     <button class="filter-btn" data-filter="retake" onclick="setFilter('retake')">Needs Retake (<span id="count-retake">0</span>)</button>
                     <button class="filter-btn" data-filter="certified" onclick="setFilter('certified')">Certified (<span id="count-certified">0</span>)</button>
                     <button class="filter-btn" data-filter="paid" onclick="setFilter('paid')">Tuition Paid (<span id="count-paid">0</span>)</button>
+                    <button class="btn-action btn-primary" style="padding:6px 12px; font-size:0.78rem;" onclick="openArmedCertModal(-1)" title="Open Official Form IL486-1138 (Armed Course Certificate) for Range Qualification & Dispatch">
+                        <i class="fas fa-file-shield"></i> + Armed Cert (IL486-1138)
+                    </button>
                 </div>
             </div>
 
@@ -989,6 +992,237 @@
         </div>
     </div>
 
+    <!-- Official IDFPR Armed Certificate & In-Person Range Qualification Modal (Form IL486-1138) -->
+    <div id="armed-cert-modal" class="drawer-overlay" onclick="if(event.target===this) closeArmedCertModal()">
+        <div class="drawer-box" style="max-width: 920px; width: 95%; max-height: 92vh; padding: 26px 28px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:18px;">
+                <div>
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(212,175,55,0.16); color:var(--green-bright); border:1px solid rgba(212,175,55,0.4); padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; margin-bottom:6px;">
+                        <i class="fas fa-shield-halved"></i> OFFICIAL IDFPR FORM IL486-1138 10/24 (DE) &bull; CURRICULUM #102-000398
+                    </div>
+                    <h3 style="font-family:'Chakra Petch',sans-serif; font-size:1.25rem; color:#fff; margin:0;" id="armed-cert-modal-title">
+                        Firearms Training Certificate &amp; In-Person Range Qualification Sign-Off
+                    </h3>
+                    <p style="font-size:0.8rem; color:#cbd5e1; margin-top:4px;">
+                        Review the student's saved Trainee Section, enter their in-person range qualification scores, preview/download the official filled PDF certificate, and send copies to the student and <strong>FPR.SafetyUnit@illinois.gov</strong>.
+                    </p>
+                </div>
+                <button onclick="closeArmedCertModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.6rem; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+
+            <input type="hidden" id="ac-student-id" value="">
+            <input type="hidden" id="ac-cert-id" value="">
+
+            <!-- SECTION 1: TRAINEE SECTION (SAVED FROM STUDENT PROFILE) -->
+            <div style="background:#11151c; border:1px solid var(--border); border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.07); padding-bottom:8px; flex-wrap:wrap; gap:8px;">
+                    <h4 style="font-family:'Chakra Petch',sans-serif; font-size:0.96rem; color:var(--green-bright); margin:0;">
+                        <i class="fas fa-user-shield"></i> Part 1: Trainee Section (Saved from Student Profile)
+                    </h4>
+                    <span id="ac-profile-status-pill" class="badge badge-info" style="font-size:0.72rem;">Loaded from Profile</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:12px;">
+                    <div style="grid-column: span 2;">
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">NAME (Last, First, Middle Initial) *</label>
+                        <input type="text" id="ac-name" placeholder="DOE, JOHN A." style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SSN OR ITIN *</label>
+                        <input type="text" id="ac-ssn" placeholder="XXX-XX-XXXX" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 2fr 1.2fr 0.6fr 0.8fr; gap:12px; margin-bottom:12px;">
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HOME STREET ADDRESS *</label>
+                        <input type="text" id="ac-address" placeholder="123 E. Michigan Ave" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CITY *</label>
+                        <input type="text" id="ac-city" placeholder="Chicago" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STATE *</label>
+                        <input type="text" id="ac-state" value="IL" maxlength="2" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ZIP CODE *</label>
+                        <input type="text" id="ac-zip" placeholder="60601" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1.4fr; gap:12px; margin-bottom:12px;">
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">PERC NUMBER (If Applicable) 129-</label>
+                        <input type="text" id="ac-perc" placeholder="XXXXXX (Optional)" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">E-MAIL ADDRESS (REQUIRED) *</label>
+                        <input type="email" id="ac-email" placeholder="student@email.com" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:10px; margin-bottom:12px;">
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">DATE OF BIRTH</label>
+                        <input type="text" id="ac-dob" placeholder="MM/DD/YYYY" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SEX</label>
+                        <input type="text" id="ac-sex" placeholder="M / F" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">RACE</label>
+                        <input type="text" id="ac-race" placeholder="e.g. Black" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">WEIGHT</label>
+                        <input type="text" id="ac-weight" placeholder="185 lbs" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HEIGHT</label>
+                        <input type="text" id="ac-height" placeholder="5'10&quot;" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">HAIR COLOR</label>
+                        <input type="text" id="ac-hair" placeholder="Black" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.70rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">EYE COLOR</label>
+                        <input type="text" id="ac-eyes" placeholder="Brown" style="width:100%; padding:7px 9px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.84rem;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px;">
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINEE ELECTRONIC SIGNATURE</label>
+                        <input type="text" id="ac-signature" placeholder="John A. Doe" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#d4af37; font-family:'Sacramento', cursive; font-size:1.35rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINEE SIGNATURE DATE</label>
+                        <input type="text" id="ac-trainee-date" placeholder="MM/DD/YYYY" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: INSTRUCTOR IN-PERSON RANGE QUALIFICATION SECTION -->
+            <div style="background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.4); border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(212,175,55,0.2); padding-bottom:8px; flex-wrap:wrap; gap:8px;">
+                    <h4 style="font-family:'Chakra Petch',sans-serif; font-size:0.98rem; color:var(--green-bright); margin:0;">
+                        <i class="fas fa-crosshairs"></i> Part 2: Instructor In-Person Qualification &amp; Range Scores (Form IL486-1138)
+                    </h4>
+                    <span style="font-size:0.74rem; color:#cbd5e1;">Course: <strong>FIREARMS TRAINING COURSE (#102-000398)</strong> &bull; Instructor: <strong>Charles Young (#263-000693)</strong></span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:12px; margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">DATE TRAINING COMPLETED (Range Date) *</label>
+                        <input type="text" id="ac-date-completed" placeholder="MM/DD/YYYY" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#fff; font-weight:700; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">WRITTEN EXAMINATION SCORE (%) *</label>
+                        <input type="text" id="ac-written-score" placeholder="e.g. 92" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#4ade80; font-weight:700; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#f8fafc; display:block; margin-bottom:4px;">INSTRUCTOR SIGNATURE DATE *</label>
+                        <input type="text" id="ac-instructor-date" placeholder="MM/DD/YYYY" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:#fff; font-weight:700; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING NUMBER (Official Use / Optional)</label>
+                        <input type="text" id="ac-training-number" placeholder="Optional" style="width:100%; padding:9px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.86rem;">
+                    </div>
+                </div>
+
+                <div style="font-size:0.75rem; font-weight:700; color:var(--green-bright); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+                    Range Qualification — Check Weapon Type(s) &amp; Enter Range Score (%) (70% Minimum Required):
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap:12px;">
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                            <input type="checkbox" id="ac-rev-check" style="width:17px; height:17px; accent-color:var(--green);">
+                            Revolver
+                        </label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="text" id="ac-rev-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <span style="color:#94a3b8; font-weight:700;">%</span>
+                        </div>
+                    </div>
+
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                            <input type="checkbox" id="ac-semi-check" checked style="width:17px; height:17px; accent-color:var(--green);">
+                            Semi-automatic
+                        </label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="text" id="ac-semi-score" placeholder="90" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <span style="color:#94a3b8; font-weight:700;">%</span>
+                        </div>
+                    </div>
+
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                            <input type="checkbox" id="ac-shot-check" style="width:17px; height:17px; accent-color:var(--green);">
+                            Shotgun
+                        </label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="text" id="ac-shot-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <span style="color:#94a3b8; font-weight:700;">%</span>
+                        </div>
+                    </div>
+
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:#fff; cursor:pointer;">
+                            <input type="checkbox" id="ac-rifle-check" style="width:17px; height:17px; accent-color:var(--green);">
+                            Rifle
+                        </label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="text" id="ac-rifle-score" placeholder="—" style="width:58px; padding:6px 8px; background:#141820; border:1px solid var(--border); border-radius:4px; color:#fff; text-align:center; font-weight:700; font-size:0.86rem;">
+                            <span style="color:#94a3b8; font-weight:700;">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: EMAIL DISPATCH TO STUDENT & IDFPR (FPR.SafetyUnit@illinois.gov) -->
+            <div style="background:#11151c; border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin-bottom:16px;">
+                <div style="font-size:0.78rem; font-weight:700; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-paper-plane text-blue"></i> Certificate Email Recipients (Student Copy + Official IDFPR Submission)
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL RECIPIENT:</label>
+                        <input type="email" id="ac-send-student-email" placeholder="student@email.com" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.85rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">IDFPR EMAIL LISTED ON CERTIFICATE:</label>
+                        <input type="email" id="ac-send-idfpr-email" value="FPR.SafetyUnit@illinois.gov" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--green); border-radius:4px; color:var(--green-bright); font-weight:700; font-size:0.85rem;">
+                    </div>
+                </div>
+            </div>
+
+            <div id="ac-feedback-banner" style="display:none; margin-bottom:14px; padding:12px 16px; border-radius:6px; font-size:0.85rem; line-height:1.5;"></div>
+
+            <!-- ACTION BUTTONS -->
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:center;">
+                <button type="button" class="btn-action" onclick="saveAdminArmedCert(false)" style="padding:10px 16px;">
+                    <i class="fas fa-floppy-disk text-blue"></i> Save Qualification Info to Profile
+                </button>
+                <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                    <button type="button" class="btn-action" onclick="downloadAdminArmedCertPdf()" style="padding:10px 16px; border-color:var(--green); color:var(--green-bright);">
+                        <i class="fas fa-file-pdf"></i> Preview / Download Official IL486-1138 PDF
+                    </button>
+                    <button type="button" class="btn-action btn-primary" id="ac-btn-send-both" onclick="sendAdminArmedCertToStudentAndIdfpr()" style="padding:10px 18px; font-size:0.86rem;">
+                        <i class="fas fa-paper-plane"></i> Send Completed Certificate to Student &amp; IDFPR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/pdf-lib.min.js"></script>
+    <script src="assets/armed_cert_template_base64.js"></script>
     <script src="config.js?v=2.0"></script>
     <script>
         const ADMIN_PIN = "7738732591";
@@ -1427,6 +1661,7 @@
             if (!allStudents || allStudents.length === 0) {
                 allStudents = loadLocalStudentsRegistry();
             }
+            allStudents = mergeLocalStudentsAndArmedCerts(allStudents);
 
             if (cloudServerOnline) {
                 if (cloudBadge) {
@@ -1841,9 +2076,36 @@
                     bestScoreBadge = `<strong style="color:${s.best_score >= 75 ? 'var(--green-bright)' : '#f87171'}; font-size:0.92rem;">${s.best_score}%</strong>`;
                 }
 
+                const isArmedRow = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL-ARMED') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL486') || !!s.armed_cert_data;
+                const courseTag = isArmedRow
+                    ? `<span class="badge badge-info" style="font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200 &bull; #102-000398)</span>`
+                    : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($50)</span>`;
+
                 // Cert Badge
                 let certBadge = `<span style="color:var(--text-sub); font-size:0.8rem;"><i class="fas fa-hourglass-half"></i> In Progress</span>`;
-                if (s.cert_id) {
+                if (isArmedRow) {
+                    if (s.armed_cert_data && s.armed_cert_data.instructor_completed) {
+                        certBadge = `
+                            <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px;">
+                                <i class="fas fa-file-shield"></i> IL486-1138 Completed
+                            </span>
+                            <div style="font-size:0.68rem; color:#4ade80; margin-top:2px;">
+                                ${s.armed_cert_data.emailed_to_student_and_idfpr ? 'Sent to Student &amp; IDFPR' : 'Range Qualification Signed Off'}
+                            </div>
+                        `;
+                    } else if (s.armed_cert_data || s.cert_id) {
+                        certBadge = `
+                            <span class="badge badge-warning" style="display:inline-flex; align-items:center; gap:4px;">
+                                <i class="fas fa-user-check"></i> Trainee Info Saved
+                            </span>
+                            <div style="font-size:0.68rem; color:#fbbf24; margin-top:2px;">
+                                Awaiting Range Sign-Off (IL486-1138)
+                            </div>
+                        `;
+                    } else {
+                        certBadge = `<span style="color:var(--text-sub); font-size:0.78rem;"><i class="fas fa-hourglass-half"></i> Pending Trainee Form</span>`;
+                    }
+                } else if (s.cert_id) {
                     certBadge = `
                         <span class="badge badge-cert" title="Issued ${s.cert_issued_at || ''}" style="display:inline-flex; align-items:center; gap:4px;">
                             <i class="fas fa-award"></i> ${s.cert_id}
@@ -1859,11 +2121,6 @@
                 if (attemptsCount === 0) {
                     attemptsPill = `<span style="color:var(--text-sub); font-size:0.82rem;">0 Attempts</span>`;
                 }
-
-                const isArmedRow = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL-ARMED');
-                const courseTag = isArmedRow
-                    ? `<span class="badge badge-info" style="font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200)</span>`
-                    : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.66rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($40)</span>`;
 
                 // Payment pill (Clean indicator without IDFPR Approved)
                 let paymentPill = `
@@ -1930,14 +2187,15 @@
                             ${s.last_active || 'Recent'}
                         </td>
                         <td>
-                            <div style="display:flex; gap:4px; flex-direction:column;">
+                            <div style="display:flex; gap:5px; flex-direction:column;">
+                                <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.73rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
+                                    <i class="fas fa-file-signature"></i> Armed Cert (IL486-1138)
+                                </button>
                                 ${attemptsCount > 0 ? `
-                                    <button class="btn-action" style="padding:4px 8px; font-size:0.74rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
+                                    <button class="btn-action" style="padding:4px 8px; font-size:0.73rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
                                         <i class="fas fa-history"></i> History (${attemptsCount})
                                     </button>
-                                ` : `
-                                    <span style="font-size:0.75rem; color:var(--text-sub);">In Study</span>
-                                `}
+                                ` : ''}
                             </div>
                         </td>
                     </tr>
@@ -2048,6 +2306,609 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // =========================================================================
+        // OFFICIAL IDFPR ARMED CERTIFICATE (FORM IL486-1138) INSTRUCTOR WORKFLOW
+        // =========================================================================
+        function mergeLocalStudentsAndArmedCerts(existingList) {
+            const list = Array.isArray(existingList) ? [...existingList] : [];
+            const localReg = loadLocalStudentsRegistry();
+
+            // Merge local student registry entries
+            localReg.forEach(ls => {
+                const lsId = String(ls.id || ls.email || '').toLowerCase();
+                const idx = list.findIndex(item => String(item.id || item.email || '').toLowerCase() === lsId);
+                if (idx === -1) {
+                    list.push(ls);
+                } else {
+                    if (ls.armed_cert_data && !list[idx].armed_cert_data) {
+                        list[idx].armed_cert_data = ls.armed_cert_data;
+                    }
+                    if (ls.cert_id && !list[idx].cert_id) {
+                        list[idx].cert_id = ls.cert_id;
+                    }
+                    if (ls.has_passed && !list[idx].has_passed) {
+                        list[idx].has_passed = true;
+                    }
+                }
+            });
+
+            // Also scan localStorage for any platforms_armed_cert_intake_<email> keys
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('platforms_armed_cert_intake_')) {
+                        const raw = localStorage.getItem(k);
+                        if (!raw) continue;
+                        const certObj = JSON.parse(raw);
+                        if (!certObj || !certObj.email) continue;
+                        const emailLower = certObj.email.toLowerCase().trim();
+                        const armedId = 'armed::' + emailLower;
+
+                        let foundIdx = list.findIndex(item =>
+                            String(item.id || '').toLowerCase() === armedId ||
+                            (String(item.email || '').toLowerCase() === emailLower && (item.course_type === 'armed' || String(item.id || '').toLowerCase().startsWith('armed::')))
+                        );
+                        if (foundIdx === -1) {
+                            foundIdx = list.findIndex(item => String(item.email || '').toLowerCase() === emailLower);
+                        }
+
+                        if (foundIdx !== -1) {
+                            list[foundIdx].armed_cert_data = { ...(list[foundIdx].armed_cert_data || {}), ...certObj };
+                            list[foundIdx].course_type = 'armed';
+                            if (certObj.cert_id) list[foundIdx].cert_id = certObj.cert_id;
+                        } else {
+                            list.unshift({
+                                id: armedId,
+                                name: certObj.name || 'Armed Student Officer',
+                                email: emailLower,
+                                agency: 'Platforms Training Academy (Armed 28-Hr)',
+                                course_type: 'armed',
+                                is_paid: true,
+                                completed_modules: 10,
+                                total_modules: 10,
+                                exam_attempts: 1,
+                                best_score: Number(certObj.written_exam_score) || 100,
+                                latest_score: Number(certObj.written_exam_score) || 100,
+                                latest_passed: true,
+                                has_passed: true,
+                                mfa_verified: true,
+                                cert_id: certObj.cert_id || ('PTA-IL486-' + Date.now()),
+                                cert_issued_at: certObj.submitted_at || new Date().toLocaleDateString('en-US'),
+                                armed_cert_data: certObj,
+                                created_at: certObj.submitted_at || 'Recent',
+                                last_active: certObj.submitted_at || 'Recent',
+                                attempts: []
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Notice scanning local armed cert intake keys:', e);
+            }
+
+            return list;
+        }
+
+        function getFilteredStudentsList() {
+            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            return allStudents.filter(s => {
+                if (currentFilter === 'in_progress' && (s.completed_modules === 0 || s.completed_modules >= 10)) return false;
+                if (currentFilter === 'passed' && !s.has_passed) return false;
+                if (currentFilter === 'retake' && (s.exam_attempts === 0 || s.has_passed)) return false;
+                if (currentFilter === 'certified' && !s.cert_id) return false;
+                if (currentFilter === 'paid' && !s.is_paid) return false;
+                if (query) {
+                    const match = (s.name && s.name.toLowerCase().includes(query)) ||
+                                  (s.email && s.email.toLowerCase().includes(query)) ||
+                                  (s.agency && s.agency.toLowerCase().includes(query)) ||
+                                  (s.cert_id && s.cert_id.toLowerCase().includes(query));
+                    if (!match) return false;
+                }
+                return true;
+            });
+        }
+
+        function openArmedCertModal(filteredIndex) {
+            const todayStr = new Date().toLocaleDateString('en-US');
+            let student = null;
+            if (typeof filteredIndex === 'number' && filteredIndex >= 0) {
+                const filtered = getFilteredStudentsList();
+                student = filtered[filteredIndex] || null;
+            }
+
+            let d = (student && student.armed_cert_data) ? { ...student.armed_cert_data } : {};
+            const emailLower = ((student && student.email) || d.email || '').toLowerCase().trim();
+            if (emailLower) {
+                try {
+                    const localSaved = localStorage.getItem('platforms_armed_cert_intake_' + emailLower);
+                    if (localSaved) {
+                        d = { ...JSON.parse(localSaved), ...d };
+                    }
+                } catch (e) {}
+            }
+
+            const studentId = (student && student.id) || (emailLower ? ('armed::' + emailLower) : '');
+            const certId = d.cert_id || (student && student.cert_id) || ('PTA-IL486-' + Date.now().toString().slice(-6));
+
+            document.getElementById('ac-student-id').value = studentId;
+            document.getElementById('ac-cert-id').value = certId;
+
+            document.getElementById('ac-name').value = d.name || (student && student.name) || '';
+            document.getElementById('ac-ssn').value = d.ssn || '';
+            document.getElementById('ac-address').value = d.address || '';
+            document.getElementById('ac-city').value = d.city || '';
+            document.getElementById('ac-state').value = d.state || 'IL';
+            document.getElementById('ac-zip').value = d.zip || '';
+            document.getElementById('ac-perc').value = d.perc || '';
+            document.getElementById('ac-email').value = d.email || (student && student.email) || '';
+            document.getElementById('ac-dob').value = d.dob || '';
+            document.getElementById('ac-sex').value = d.sex || '';
+            document.getElementById('ac-race').value = d.race || '';
+            document.getElementById('ac-weight').value = d.weight || '';
+            document.getElementById('ac-height').value = d.height || '';
+            document.getElementById('ac-hair').value = d.hair || '';
+            document.getElementById('ac-eyes').value = d.eyes || '';
+            document.getElementById('ac-signature').value = d.signature || d.name || (student && student.name) || '';
+            document.getElementById('ac-trainee-date').value = d.trainee_date || todayStr;
+
+            // Instructor section fields
+            document.getElementById('ac-training-number').value = d.training_number || '';
+            document.getElementById('ac-date-completed').value = d.date_training_completed || todayStr;
+            const defaultWritten = d.written_exam_score || (student && (student.best_score || student.latest_score)) || '100';
+            document.getElementById('ac-written-score').value = String(defaultWritten).replace('%', '').trim();
+            document.getElementById('ac-instructor-date').value = d.instructor_date || todayStr;
+
+            document.getElementById('ac-rev-check').checked = !!d.revolver_checked;
+            document.getElementById('ac-rev-score').value = d.revolver_score || '';
+            document.getElementById('ac-semi-check').checked = (d.semiauto_checked !== undefined) ? !!d.semiauto_checked : true;
+            document.getElementById('ac-semi-score').value = d.semiauto_score || '';
+            document.getElementById('ac-shot-check').checked = !!d.shotgun_checked;
+            document.getElementById('ac-shot-score').value = d.shotgun_score || '';
+            document.getElementById('ac-rifle-check').checked = !!d.rifle_checked;
+            document.getElementById('ac-rifle-score').value = d.rifle_score || '';
+
+            document.getElementById('ac-send-student-email').value = d.email || (student && student.email) || '';
+            document.getElementById('ac-send-idfpr-email').value = 'FPR.SafetyUnit@illinois.gov';
+
+            const statusPill = document.getElementById('ac-profile-status-pill');
+            if (statusPill) {
+                if (d && d.instructor_completed) {
+                    statusPill.className = 'badge badge-success';
+                    statusPill.innerHTML = '<i class="fas fa-check-circle"></i> Range Qualification Signed Off';
+                } else if (d && d.name) {
+                    statusPill.className = 'badge badge-warning';
+                    statusPill.innerHTML = '<i class="fas fa-user-check"></i> Trainee Section Saved — Ready for Range Sign-Off';
+                } else {
+                    statusPill.className = 'badge badge-info';
+                    statusPill.innerHTML = '<i class="fas fa-file-pen"></i> New / Manual Form IL486-1138 Entry';
+                }
+            }
+
+            const fb = document.getElementById('ac-feedback-banner');
+            if (fb) fb.style.display = 'none';
+
+            document.getElementById('armed-cert-modal').style.display = 'flex';
+        }
+
+        function closeArmedCertModal() {
+            document.getElementById('armed-cert-modal').style.display = 'none';
+        }
+
+        function collectAdminArmedCertData() {
+            const email = (document.getElementById('ac-email').value || '').trim();
+            const studentId = (document.getElementById('ac-student-id').value || '').trim() || (email ? ('armed::' + email.toLowerCase()) : ('armed::student_' + Date.now()));
+            const certId = (document.getElementById('ac-cert-id').value || '').trim() || ('PTA-IL486-' + Date.now().toString().slice(-6));
+            return {
+                cert_id: certId,
+                student_id: studentId,
+                course_type: 'armed',
+                curriculum_number: '102-000398',
+                name: (document.getElementById('ac-name').value || '').trim(),
+                ssn: (document.getElementById('ac-ssn').value || '').trim(),
+                address: (document.getElementById('ac-address').value || '').trim(),
+                city: (document.getElementById('ac-city').value || '').trim(),
+                state: (document.getElementById('ac-state').value || 'IL').trim(),
+                zip: (document.getElementById('ac-zip').value || '').trim(),
+                perc: (document.getElementById('ac-perc').value || '').trim(),
+                email: email,
+                dob: (document.getElementById('ac-dob').value || '').trim(),
+                sex: (document.getElementById('ac-sex').value || '').trim(),
+                race: (document.getElementById('ac-race').value || '').trim(),
+                weight: (document.getElementById('ac-weight').value || '').trim(),
+                height: (document.getElementById('ac-height').value || '').trim(),
+                hair: (document.getElementById('ac-hair').value || '').trim(),
+                eyes: (document.getElementById('ac-eyes').value || '').trim(),
+                signature: (document.getElementById('ac-signature').value || '').trim(),
+                trainee_date: (document.getElementById('ac-trainee-date').value || '').trim(),
+                training_number: (document.getElementById('ac-training-number').value || '').trim(),
+                date_training_completed: (document.getElementById('ac-date-completed').value || '').trim(),
+                written_exam_score: (document.getElementById('ac-written-score').value || '').replace('%', '').trim(),
+                instructor_date: (document.getElementById('ac-instructor-date').value || '').trim(),
+                revolver_checked: document.getElementById('ac-rev-check').checked,
+                revolver_score: (document.getElementById('ac-rev-score').value || '').replace('%', '').trim(),
+                semiauto_checked: document.getElementById('ac-semi-check').checked,
+                semiauto_score: (document.getElementById('ac-semi-score').value || '').replace('%', '').trim(),
+                shotgun_checked: document.getElementById('ac-shot-check').checked,
+                shotgun_score: (document.getElementById('ac-shot-score').value || '').replace('%', '').trim(),
+                rifle_checked: document.getElementById('ac-rifle-check').checked,
+                rifle_score: (document.getElementById('ac-rifle-score').value || '').replace('%', '').trim(),
+                instructor_completed: true,
+                instructor_completed_at: new Date().toISOString()
+            };
+        }
+
+        async function saveAdminArmedCert(silent) {
+            const certData = collectAdminArmedCertData();
+            if (!certData.name) {
+                alert('Please enter the Trainee Name.');
+                return null;
+            }
+
+            const emailLower = (certData.email || '').toLowerCase().trim();
+            if (emailLower) {
+                localStorage.setItem('platforms_armed_cert_intake_' + emailLower, JSON.stringify(certData));
+            }
+
+            // Update local registry & allStudents
+            try {
+                const rawReg = localStorage.getItem('platforms_student_registry');
+                let reg = rawReg ? JSON.parse(rawReg) : [];
+                const idx = reg.findIndex(s => String(s.id || '').toLowerCase() === certData.student_id.toLowerCase() || (emailLower && String(s.email || '').toLowerCase() === emailLower));
+                if (idx >= 0) {
+                    reg[idx].armed_cert_data = certData;
+                    reg[idx].cert_id = certData.cert_id;
+                    reg[idx].course_type = 'armed';
+                } else {
+                    reg.unshift({
+                        id: certData.student_id,
+                        name: certData.name,
+                        email: emailLower,
+                        agency: 'Platforms Training Academy (Armed 28-Hr)',
+                        course_type: 'armed',
+                        is_paid: true,
+                        completed_modules: 10,
+                        total_modules: 10,
+                        exam_attempts: 1,
+                        best_score: Number(certData.written_exam_score) || 100,
+                        latest_score: Number(certData.written_exam_score) || 100,
+                        latest_passed: true,
+                        has_passed: true,
+                        cert_id: certData.cert_id,
+                        armed_cert_data: certData,
+                        created_at: new Date().toLocaleDateString('en-US'),
+                        last_active: new Date().toLocaleDateString('en-US')
+                    });
+                }
+                localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
+            } catch (e) {}
+
+            allStudents = mergeLocalStudentsAndArmedCerts(allStudents);
+            updateFilterCounts();
+            renderTable();
+
+            // Save to Cloud Backend
+            try {
+                await fetch(getApiBaseUrl() + '/api/admin/armed-certificate/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: certData.student_id,
+                        email: certData.email,
+                        cert_id: certData.cert_id,
+                        armed_cert_data: certData
+                    })
+                });
+            } catch (e) {}
+
+            if (!silent) {
+                const fb = document.getElementById('ac-feedback-banner');
+                if (fb) {
+                    fb.style.display = 'block';
+                    fb.style.background = 'rgba(16, 185, 129, 0.16)';
+                    fb.style.border = '1px solid rgba(16, 185, 129, 0.45)';
+                    fb.style.color = '#86efac';
+                    fb.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Saved!</strong> In-person range qualification &amp; Form IL486-1138 details saved to <strong>${certData.name}</strong>'s profile.`;
+                }
+            }
+            return certData;
+        }
+
+        function renderSignatureToPngDataUrl(sigText) {
+            if (!sigText) return null;
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 600;
+                canvas.height = 110;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0a192f';
+                ctx.font = "52px 'Sacramento', 'Brush Script MT', cursive";
+                ctx.textBaseline = 'middle';
+                ctx.fillText(sigText, 14, 58);
+                return canvas.toDataURL('image/png');
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function generateFilledArmedCertPdfBytes(certData) {
+            if (typeof PDFLib === 'undefined' || typeof ARMED_CERT_TEMPLATE_BASE64 === 'undefined') {
+                throw new Error('PDF library or Official IL486-1138 template asset not loaded.');
+            }
+            const { PDFDocument, StandardFonts, rgb } = PDFLib;
+            const pdfDoc = await PDFDocument.load(ARMED_CERT_TEMPLATE_BASE64);
+            const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            const timesItalic = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
+
+            const page = pdfDoc.getPages()[0];
+            const { height } = page.getSize();
+            const textColor = rgb(0.05, 0.08, 0.18);
+
+            const drawField = (text, x, tdFromTop, size = 10, font = helveticaFont) => {
+                if (text === undefined || text === null) return;
+                const clean = String(text).trim();
+                if (!clean) return;
+                page.drawText(clean, {
+                    x: x,
+                    y: height - tdFromTop,
+                    size: size,
+                    font: font,
+                    color: textColor
+                });
+            };
+
+            // Optional Training Number (Official Use Only)
+            if (certData.training_number) {
+                drawField(certData.training_number, 250, 148, 10, helveticaBold);
+            }
+
+            // Trainee Section (Coordinates verified on IL486-1138 10/24 DE)
+            drawField(certData.name, 32, 225, 10, helveticaBold);
+            drawField(certData.ssn, 404, 225, 10, helveticaFont);
+
+            drawField(certData.address, 32, 260, 9.5, helveticaFont);
+            drawField(certData.city, 310, 260, 9.5, helveticaFont);
+            drawField(certData.state || 'IL', 404, 260, 10, helveticaFont);
+            drawField(certData.zip, 500, 260, 10, helveticaFont);
+
+            const cleanPerc = String(certData.perc || '').replace(/^129-/, '').trim();
+            drawField(cleanPerc, 122, 301, 10, helveticaFont);
+            drawField(certData.email, 312, 300, 9.5, helveticaFont);
+
+            drawField(certData.dob, 32, 334, 9.5, helveticaFont);
+            drawField(certData.sex, 175, 334, 9.5, helveticaFont);
+            drawField(certData.race, 235, 334, 9.5, helveticaFont);
+            drawField(certData.weight, 312, 334, 9.5, helveticaFont);
+            drawField(certData.height, 360, 334, 9.5, helveticaFont);
+            drawField(certData.hair, 404, 334, 9.5, helveticaFont);
+            drawField(certData.eyes, 500, 334, 9.5, helveticaFont);
+
+            // Trainee Signature & Trainee Date
+            const sigText = certData.signature || certData.name || '';
+            const sigPngUrl = renderSignatureToPngDataUrl(sigText);
+            if (sigPngUrl) {
+                try {
+                    const pngImage = await pdfDoc.embedPng(sigPngUrl);
+                    page.drawImage(pngImage, {
+                        x: 95,
+                        y: height - 434,
+                        width: 220,
+                        height: 38
+                    });
+                } catch (e) {
+                    drawField(sigText, 105, 423, 13, timesItalic);
+                }
+            } else {
+                drawField(sigText, 105, 423, 13, timesItalic);
+            }
+            drawField(certData.trainee_date, 412, 423, 10, helveticaFont);
+
+            // Instructor In-Person Qualification Section
+            drawField(certData.date_training_completed, 34, 586, 10.5, helveticaBold);
+            drawField(String(certData.written_exam_score || '').replace('%', '').trim(), 326, 586, 10.5, helveticaBold);
+
+            // Weapon Type Checkboxes & Range Scores (%)
+            if (certData.revolver_checked) {
+                drawField('X', 33, 636, 11, helveticaBold);
+            }
+            if (certData.revolver_score) {
+                drawField(String(certData.revolver_score).replace('%', '').trim(), 106, 635, 10, helveticaBold);
+            }
+
+            if (certData.semiauto_checked) {
+                drawField('X', 172, 636, 11, helveticaBold);
+            }
+            if (certData.semiauto_score) {
+                drawField(String(certData.semiauto_score).replace('%', '').trim(), 277, 635, 10, helveticaBold);
+            }
+
+            if (certData.shotgun_checked) {
+                drawField('X', 343, 636, 11, helveticaBold);
+            }
+            if (certData.shotgun_score) {
+                drawField(String(certData.shotgun_score).replace('%', '').trim(), 414, 635, 10, helveticaBold);
+            }
+
+            if (certData.rifle_checked) {
+                drawField('X', 479, 636, 11, helveticaBold);
+            }
+            if (certData.rifle_score) {
+                drawField(String(certData.rifle_score).replace('%', '').trim(), 532, 635, 10, helveticaBold);
+            }
+
+            // Instructor Signature Date (Charles Young & #263-000693 & signature are pre-printed on template)
+            drawField(certData.instructor_date, 495, 697, 10, helveticaBold);
+
+            const pdfBytes = await pdfDoc.save();
+            const base64Pdf = await pdfDoc.saveAsBase64();
+            const safeName = (certData.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_');
+            const filename = `IDFPR_Armed_Certificate_IL486-1138_${safeName}.pdf`;
+            return { pdfBytes, base64Pdf, filename };
+        }
+
+        async function downloadAdminArmedCertPdf() {
+            const certData = await saveAdminArmedCert(true);
+            if (!certData) return;
+            try {
+                const { pdfBytes, filename } = await generateFilledArmedCertPdfBytes(certData);
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+                const fb = document.getElementById('ac-feedback-banner');
+                if (fb) {
+                    fb.style.display = 'block';
+                    fb.style.background = 'rgba(212, 175, 55, 0.16)';
+                    fb.style.border = '1px solid rgba(212, 175, 55, 0.45)';
+                    fb.style.color = '#fde68a';
+                    fb.innerHTML = `<i class="fas fa-file-pdf"></i> <strong>Official Form IL486-1138 PDF Generated!</strong> Downloaded as <code>${filename}</code>.`;
+                }
+            } catch (err) {
+                alert('Error generating Armed Certificate PDF: ' + err.message);
+            }
+        }
+
+        async function sendAdminArmedCertToStudentAndIdfpr() {
+            const certData = await saveAdminArmedCert(true);
+            if (!certData) return;
+
+            const studentEmail = (document.getElementById('ac-send-student-email').value || certData.email || '').trim();
+            const idfprEmail = (document.getElementById('ac-send-idfpr-email').value || 'FPR.SafetyUnit@illinois.gov').trim();
+            const fb = document.getElementById('ac-feedback-banner');
+            const sendBtn = document.getElementById('ac-btn-send-both');
+
+            if (!studentEmail && !idfprEmail) {
+                alert('Please enter the student email address.');
+                return;
+            }
+
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF &amp; Sending to Student + IDFPR...';
+            }
+
+            try {
+                const { pdfBytes, base64Pdf, filename } = await generateFilledArmedCertPdfBytes(certData);
+
+                // Always download a local copy of the signed PDF for the Instructor's records
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+                // Attempt server-side SMTP PDF attachment delivery to both Student and FPR.SafetyUnit@illinois.gov
+                let smtpSent = false;
+                let smtpMsg = '';
+                try {
+                    const res = await fetch(getApiBaseUrl() + '/api/admin/armed-certificate/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_id: certData.student_id,
+                            student_email: studentEmail,
+                            idfpr_email: idfprEmail,
+                            student_name: certData.name,
+                            cert_id: certData.cert_id,
+                            pdf_base64: base64Pdf,
+                            filename: filename,
+                            armed_cert_data: certData
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        smtpSent = true;
+                        smtpMsg = data.message || `Sent to ${studentEmail} and ${idfprEmail}`;
+                    } else {
+                        smtpMsg = data.error || 'SMTP server not configured';
+                    }
+                } catch (netErr) {
+                    smtpMsg = netErr.message;
+                }
+
+                // Mark as emailed in local storage too
+                certData.emailed_to_student_and_idfpr = true;
+                certData.emailed_at = new Date().toLocaleDateString('en-US');
+                const emailLower = (certData.email || '').toLowerCase().trim();
+                if (emailLower) {
+                    localStorage.setItem('platforms_armed_cert_intake_' + emailLower, JSON.stringify(certData));
+                }
+                allStudents = mergeLocalStudentsAndArmedCerts(allStudents);
+                renderTable();
+
+                const recipientsList = [studentEmail, idfprEmail].filter(Boolean).join(',');
+                const mailSubject = encodeURIComponent(`IDFPR Firearms Training Certificate (Form IL486-1138) - ${certData.name} - Curriculum #102-000398`);
+                const mailBody = encodeURIComponent(
+                    `Attached is the official completed Illinois Department of Financial and Professional Regulation (IDFPR) Firearms Training Certificate (Form IL486-1138 10/24 DE).
+
+` +
+                    `Trainee Name: ${certData.name}
+` +
+                    `Course: FIREARMS TRAINING COURSE (28-Hour Armed Security)
+` +
+                    `IDFPR Approved Curriculum Number: 102-000398
+` +
+                    `Date Training Completed: ${certData.date_training_completed}
+` +
+                    `Written Examination Score: ${certData.written_exam_score}%
+` +
+                    `State Certified Firearm Instructor: Charles Young (License #263-000693)
+` +
+                    `Platforms Training Academy | 200 E 75th St, Chicago, IL 60615`
+                );
+                const mailtoHref = `mailto:${recipientsList}?subject=${mailSubject}&body=${mailBody}`;
+
+                if (fb) {
+                    fb.style.display = 'block';
+                    if (smtpSent) {
+                        fb.style.background = 'rgba(16, 185, 129, 0.16)';
+                        fb.style.border = '1px solid rgba(16, 185, 129, 0.45)';
+                        fb.style.color = '#86efac';
+                        fb.innerHTML = `
+                            <div><i class="fas fa-check-circle"></i> <strong>Completed Certificate Sent!</strong> ${smtpMsg}.</div>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#cbd5e1;">
+                                A copy of <code>${filename}</code> was also downloaded to your computer.
+                                <a href="${mailtoHref}" style="color:var(--green-bright); text-decoration:underline; margin-left:8px; font-weight:700;">Open in Email Client (${recipientsList}) &rarr;</a>
+                            </div>
+                        `;
+                    } else {
+                        fb.style.background = 'rgba(212, 175, 55, 0.16)';
+                        fb.style.border = '1px solid rgba(212, 175, 55, 0.45)';
+                        fb.style.color = '#fde68a';
+                        fb.innerHTML = `
+                            <div><i class="fas fa-file-circle-check"></i> <strong>Official PDF Downloaded (<code>${filename}</code>) &amp; Ready to Send!</strong></div>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#e2e8f0;">
+                                Click below to open your email addressed to both the student (<strong>${studentEmail || 'Student'}</strong>) and IDFPR (<strong>${idfprEmail}</strong>) and attach the downloaded PDF:
+                            </div>
+                            <div style="margin-top:8px;">
+                                <a href="${mailtoHref}" class="btn-action btn-primary" style="display:inline-flex; text-decoration:none; padding:7px 14px; font-size:0.8rem;">
+                                    <i class="fas fa-envelope"></i> Open Email to Student &amp; ${idfprEmail}
+                                </a>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                alert('Error preparing or sending Armed Certificate: ' + err.message);
+            } finally {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Completed Certificate to Student &amp; IDFPR';
+                }
+            }
         }
     </script>
 </body>

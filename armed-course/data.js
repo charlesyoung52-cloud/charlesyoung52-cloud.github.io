@@ -1,11 +1,13 @@
 // Platforms Training Academy - 28-Hour Online Armed Security Course (20-Hr Online Classroom + 8-Hr Range Qualification)
 // Chicago, IL | platformstraining.com | Lead Instructor: Charles Young
-// State of Illinois Firearm Control Card ("Tan Card") Certification (225 ILCS 447 / 68 Ill. Adm. Code 1240.510)
+// State of Illinois Firearm Control Card ("Tan Card") Certification (225 ILCS 447 / 68 Ill. Adm. Code 1240.510 / IDFPR Approved Curriculum #102-000398)
 
 const COURSE_META = {
     title: "Online Armed Security Course",
-    subtitle: "20-Hour IDFPR Armed Classroom + Included 8-Hour Eagle Sports Range Qualification",
+    subtitle: "20-Hour IDFPR Armed Classroom (Curriculum #102-000398) + Included 8-Hour Eagle Sports Range Qualification",
     academy: "Platforms Training Academy",
+    curriculumNumber: "102-000398",
+    instructorNumber: "263-000693",
     location: "200 E 75th St, Chicago, IL 60619",
     rangeLocation: "Eagle Sports Range, 5900 W 159th St, Oak Forest, IL 60452",
     phone: "(773) 873-2591",
@@ -18,8 +20,8 @@ const COURSE_META = {
     totalQuestions: 50,
     passingCorrect: 38,
     maxAttempts: 2,
-    examDurationSeconds: 3600,
-    courseGoal: "To instill uncompromising firearm safety habits, mechanical mastery of revolvers and semi-automatic duty pistols, cartridge and malfunction diagnostics, the five fundamentals of marksmanship, Illinois deadly force law (720 ILCS 5/7-1), and live-fire range readiness required for Illinois Firearm Control Card (Tan Card) certification under 68 Ill. Adm. Code 1240.510."
+    examDurationSeconds: 0,
+    courseGoal: "To instill uncompromising firearm safety habits, mechanical mastery of revolvers and semi-automatic duty pistols, cartridge and malfunction diagnostics, the five fundamentals of marksmanship, Illinois deadly force law (720 ILCS 5/7-1), and live-fire range readiness required for Illinois Firearm Control Card (Tan Card) certification under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398)."
 };
 
 const LESSONS_DATA = [
@@ -29,12 +31,12 @@ const LESSONS_DATA = [
         title: "Course Administration, The 4 Cardinal Rules of Gun Safety & Safe Storage",
         duration: "2 Hours",
         icon: "shield-alt",
-        summary: "Course policies and testing standards (75% passing, 2 attempts, 1-hour limit), the 4 Rules for Safe Gun Handling, root causes of firearm accidents (Ignorance vs. Carelessness), safe trigger finger indexing, and statutory firearm storage (720 ILCS 5/24-9).",
+        summary: "Course policies and testing standards (75% passing, 2 attempts, untimed), the 4 Rules for Safe Gun Handling, root causes of firearm accidents (Ignorance vs. Carelessness), safe trigger finger indexing, and statutory firearm storage (720 ILCS 5/24-9).",
         content: `
             <div class="lesson-learning-objectives">
                 <h4><i class="fas fa-bullseye"></i> Learning Objectives</h4>
                 <ul>
-                    <li>Understand Platforms Training Academy administrative safety protocols and the mandatory 75% / 2-attempt / 1-hour final examination standard.</li>
+                    <li>Understand Platforms Training Academy administrative safety protocols (IDFPR Approved Curriculum #102-000398) and the mandatory 75% / 2-attempt final examination standard.</li>
                     <li>Memorize and apply the 4 Cardinal Rules for Safe Gun Handling in every duty and training environment.</li>
                     <li>Distinguish between the two primary root causes of firearm accidents: <strong>Ignorance</strong> (lack of knowledge) and <strong>Carelessness</strong> (poor or improper attitude).</li>
                     <li>Demonstrate proper Safe Trigger Finger Position along the pistol frame and comply with Illinois firearm storage mandates (720 ILCS 5/24-9).</li>
@@ -62,11 +64,11 @@ const LESSONS_DATA = [
             </div>
 
             <h3 id="sec1-1">1. Course Administration &amp; Classroom Safety Policy</h3>
-            <p>Under the Illinois Private Detective, Private Alarm, Private Security, Fingerprint Vendor, and Locksmith Act of 2004 (<strong>225 ILCS 447</strong>) and <strong>68 Ill. Adm. Code 1240.510</strong>, armed security candidates must complete <strong>20 hours of armed security classroom instruction</strong> (authorized online under Section 1240.510(a)) followed by <strong>8 hours of live-fire range training and qualification</strong> (minimum 50 rounds at Eagle Sports Range).</p>
+            <p>Under the Illinois Private Detective, Private Alarm, Private Security, Fingerprint Vendor, and Locksmith Act of 2004 (<strong>225 ILCS 447</strong>) and <strong>68 Ill. Adm. Code 1240.510</strong> (<strong>IDFPR Approved Curriculum #102-000398</strong>), armed security candidates must complete <strong>20 hours of armed security classroom instruction</strong> (authorized online under Section 1240.510(a)) followed by <strong>8 hours of live-fire range training and qualification</strong> (minimum 50 rounds at Eagle Sports Range).</p>
             <ul>
                 <li><strong>Zero Live Ammunition Policy in Study/Dry-Fire Areas:</strong> Whenever inspecting, dry-practicing, or studying firearm mechanics outside a live firing line, zero live ammunition is permitted in the immediate training workspace.</li>
                 <li><strong>Security of Firearms:</strong> Duty firearms must remain secured in an approved retention holster or locked transport case unless explicitly instructed by a Range Safety Officer on the firing line.</li>
-                <li><strong>Final Written Examination Standard:</strong> At the conclusion of all 10 online modules, you must pass a <strong>50-question comprehensive examination</strong> within a <strong>1-hour (60-minute) time limit</strong> with a minimum score of <strong>75% (38 out of 50 correct)</strong>. You are allotted a maximum of <strong>2 attempts</strong>.</li>
+                <li><strong>Final Written Examination Standard:</strong> At the conclusion of all 10 online modules, you must pass an <strong>untimed 50-question comprehensive examination</strong> with a minimum score of <strong>75% (38 out of 50 correct)</strong>. You are allotted a maximum of <strong>2 attempts</strong>.</li>
             </ul>
 
             <h3 id="sec1-2">2. The 4 Cardinal Rules for Safe Gun Handling</h3>
@@ -181,16 +183,16 @@ const LESSONS_DATA = [
             },
             {
                 id: "c1_3",
-                question: "What are the mandatory testing parameters for the Platforms Training Academy 20-Hour Armed Security Course written exam?",
+                question: "What are the mandatory testing parameters for the Platforms Training Academy 20-Hour Armed Security Course written exam (IDFPR Approved Curriculum #102-000398)?",
                 options: [
-                    "50% passing score, unlimited attempts, 3-hour time limit",
-                    "75% minimum passing score (38/50), maximum of 2 attempts, and a 1-hour time limit",
-                    "95% passing score, 1 attempt only, 15-minute time limit",
+                    "50% passing score, unlimited attempts",
+                    "75% minimum passing score (38/50) with a maximum of 2 attempts",
+                    "95% passing score, 1 attempt only",
                     "No written test is required prior to live-fire range qualification"
                 ],
-                correctAnswer: "75% minimum passing score (38/50), maximum of 2 attempts, and a 1-hour time limit",
+                correctAnswer: "75% minimum passing score (38/50) with a maximum of 2 attempts",
                 remediationTarget: "sec1-1",
-                explanation: "Per Academy and IDFPR armed training standards, trainees must score at least 75% (38/50) within 1 hour, with a maximum of 2 attempts."
+                explanation: "Per Academy and IDFPR armed training standards (IDFPR Approved Curriculum #102-000398), trainees must score at least 75% (38/50) on the 50-question written examination, with a maximum of 2 attempts."
             }
         ],
         takeaways: [
@@ -1700,8 +1702,8 @@ const LESSONS_DATA = [
                     </div>
                 </div>
                 <div class="narration-body-text">
-                    <p>Congratulations on reaching Lesson 10! Once you pass your 50-question online written exam right after this module, you will download your official <strong>20-Hour Online Armed Security Classroom Completion Certificate &amp; Paid Range Qualification Voucher</strong>—and remember, your range fee, targets, and qualification ammunition at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL)</strong> are ALREADY INCLUDED in your tuition!</p>
-                    <p>Let me tell you what gets a student sent home from the firing line vs. what gets a student signed off smoothly on IDFPR Form IL486-1138. Nobody fails range day because they shoot a 42 instead of a 50—minimum passing is <strong>35 out of 50 rounds (70%)</strong> inside the scoring area, and we coach your grip and sight alignment so you succeed. The ONLY thing that gets someone immediately disqualified on a live firing range is violating a safety rule!</p>
+                    <p>Congratulations on reaching Lesson 10! Once you pass your 50-question online written exam right after this module, you will complete the Trainee section of your official <strong>IDFPR Firearms Training Certificate (Form IL486-1138 &bull; Approved Curriculum #102-000398)</strong>, which saves directly to your student profile for me to complete after your in-person live-fire qualification at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL)</strong>—where your range fee, targets, and qualification ammunition are ALREADY INCLUDED in your tuition!</p>
+                    <p>Let me tell you what gets a student sent home from the firing line vs. what gets a student signed off smoothly on IDFPR Form IL486-1138 (and emailed to both you and <strong>FPR.SafetyUnit@illinois.gov</strong>). Nobody fails range day because they shoot a 42 instead of a 50—minimum passing is <strong>35 out of 50 rounds (70%)</strong> inside the scoring area, and we coach your grip and sight alignment so you succeed. The ONLY thing that gets someone immediately disqualified on a live firing range is violating a safety rule!</p>
                     <p>Picture what happens when a nervous student's pistol jams on the firing line: an untrained shooter turns their body 90 degrees toward the instructor while still holding the loaded gun in their hand, sweeping every student next to them! On our range, if your gun malfunctions OR you simply have a question: <strong>(1) STOP SHOOTING, (2) KEEP THE GUN POINTED DOWNRANGE IN A SAFE DIRECTION (Rule #1), (3) TAKE YOUR FINGER OFF THE TRIGGER (Rule #2), (4) RAISE YOUR NON-SHOOTING HAND, and (5) WAIT FOR ASSISTANCE</strong>. And show up dressed right: closed-toe shoes, high-necked crew shirt (hot brass down an open collar causes instant panic!), zero alcohol/drugs, and eye/ear protection on BEFORE entering the bay.</p>
                 </div>
                 <div class="narration-footer-takeaway">

@@ -42,7 +42,7 @@
       "location": "Online LMS (24/7) + Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
       "instructor": "Charles Young",
       "rangeNote": "All-inclusive $200 tuition covers 20 hours online + 8-hour live-fire qualification (ammo, targets & range fees included). Already paid online? Select a range date below at $0 extra cost.",
-      "description": "Complete all 10 armed classroom modules (20 hours) and the 50-question written exam 100% online 24/7 in our Armed LMS portal, then reserve your included 8-hour live-fire qualification date below at Eagle Sports Range.",
+      "description": "Authorized under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398). Select your in-person range qualification date, complete all 10 armed classroom modules (20 hours) and the untimed 50-question written exam 100% online 24/7, and save your Form IL486-1138 record to your profile for Instructor Charles Young to sign off after range qualification and email to you and FPR.SafetyUnit@illinois.gov.",
       "prerequisites": [
         "Prerequisite: 20-Hour Unarmed Security Course Certificate",
         "Complete 20-Hour Online Armed Classroom & Written Exam prior to Range Day",
@@ -51,11 +51,11 @@
         "Duty belt and suitable range attire"
       ],
       "curriculum": [
-        "20 Hours Online: Illinois 225 ILCS 447, FCC rules, FOID & 720 ILCS 5/7 Use of Deadly Force",
-        "20 Hours Online: Semi-auto pistol & DA/SA revolver mechanics, malfunctions & 7 marksmanship fundamentals",
-        "8 Hours In-Person Range: Safety briefing, 4-count holster draw & dry-fire coaching",
-        "8 Hours In-Person Range: Official IDFPR 50-round live-fire qualification (7, 15 & 25 yards, min 35/50 = 70%)",
-        "Same-day Instructor Charles Young sign-off on IDFPR Form IL486-1138 upon qualifying"
+        "IDFPR Approved Curriculum #102-000398 (20 Hours Online): Illinois 225 ILCS 447, FCC rules, FOID & 720 ILCS 5/7 Use of Deadly Force",
+        "20 Hours Online: Semi-auto pistol & DA/SA revolver mechanics, malfunctions & 5 marksmanship fundamentals",
+        "8 Hours In-Person Range: Safety briefing, 4-count holster draw & dry-fire coaching at Eagle Sports Range",
+        "8 Hours In-Person Range: Official IDFPR 50-round live-fire qualification (5, 7 & 10 yards, min 35/50 = 70%)",
+        "Instructor Charles Young completes IDFPR Form IL486-1138 in the Admin Portal and sends copies to the student and FPR.SafetyUnit@illinois.gov"
       ],
       "cancellation": "Online portal unlocks 24/7 immediately upon $200 enrollment. Range qualification dates may be scheduled or rescheduled within 3 months at no extra cost.",
       "stripeUrl": "https://buy.stripe.com/4gMaEXdJa9Un3Uw4249oc01"

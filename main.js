@@ -32,15 +32,15 @@ const COURSE_DATABASE = {
     },
     "armed-28": {
         title: "28 HR ONLINE ARMED SECURITY COURSE",
-        category: "IDFPR Armed Security Certification (Tan Card • Online + Range)",
+        category: "IDFPR Armed Security Certification (Curriculum #102-000398 • Tan Card • Online + Range)",
         price: "$200.00",
         stripeUrl: "https://buy.stripe.com/4gMaEXdJa9Un3Uw4249oc01",
         duration: "20 Hours Self-Paced Online (24/7) + 8-Hour Live-Fire Range Qualification",
         location: "Classroom: 100% Online LMS Portal (24/7) | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
         rangeNote: "All-inclusive $200 tuition covers both your 20-hour online classroom course AND your 8-hour live-fire qualification at Eagle Sports Range — ammunition, targets, and range fees are included. Bring eye & ear protection (also sold at the range).",
-        description: "Authorized under 68 Ill. Adm. Code 1240.510 for officers seeking an Illinois Firearm Control Card (Tan Card). Complete all 10 interactive armed modules (20 hours) and the 50-question timed written exam (75% passing, 1-hour limit, max 2 attempts) 100% online at your own pace, immediately download your sealed classroom completion certificate & paid range voucher, and schedule your included 50-round live-fire qualification at Eagle Sports Range.",
+        description: "Authorized under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398) for officers seeking an Illinois Firearm Control Card (Tan Card). Select your in-person range qualification date before enrollment, complete all 10 interactive armed modules (20 hours) and the untimed 50-question written exam (75% passing, max 2 attempts) 100% online at your own pace, and save your IDFPR Form IL486-1138 record to your profile for Instructor range sign-off and dispatch to you and IDFPR (FPR.SafetyUnit@illinois.gov).",
         curriculum: [
-            "Illinois 225 ILCS 447, FCC (Tan Card) rules, FOID (430 ILCS 65) & 720 ILCS 5/24 weapons exemptions",
+            "IDFPR Approved Curriculum #102-000398: Illinois 225 ILCS 447, FCC (Tan Card) rules, FOID (430 ILCS 65) & 720 ILCS 5/24 weapons exemptions",
             "Justifiable Use of Deadly Force (720 ILCS 5/7-1 through 5/7-8), Tennessee v. Garner & Graham v. Connor",
             "4 Cardinal Safety Rules, semi-automatic pistol & DA/SA revolver nomenclature and cycle of operations",
             "Ammunition components, caliber verification, squib load & hangfire emergency response, Phase 1 & Phase 2 clearances",

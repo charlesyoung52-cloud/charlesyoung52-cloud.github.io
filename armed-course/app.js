@@ -76,14 +76,18 @@ class SecurityCourseApp {
         this.colAnswers = {}; // { [lessonId]: { [qIdx]: bool } }
         this.scenarioSelections = {}; // { [lessonId]: optionIndex }
 
-        // Trainee certificate form data (clean defaults requiring valid student sign-in)
+        // Trainee certificate form data (Form IL486-1138 10/24 DE)
         this.studentCertData = {
             name: localStorage.getItem('platforms_student_name') || '',
             address: localStorage.getItem('platforms_student_address') || '',
             city: localStorage.getItem('platforms_student_city') || 'Chicago',
             state: localStorage.getItem('platforms_student_state') || 'IL',
             zip: localStorage.getItem('platforms_student_zip') || '',
+            perc: localStorage.getItem('platforms_student_perc') || '',
+            email: localStorage.getItem('platforms_student_email') || '',
             dob: localStorage.getItem('platforms_student_dob') || '',
+            sex: localStorage.getItem('platforms_student_sex') || '',
+            race: localStorage.getItem('platforms_student_race') || '',
             ssn: localStorage.getItem('platforms_student_ssn') || '',
             weight: localStorage.getItem('platforms_student_weight') || '',
             height: localStorage.getItem('platforms_student_height') || '',
@@ -330,11 +334,20 @@ class SecurityCourseApp {
 
             const existingIdx = registry.findIndex(s => (s.email || '').toLowerCase() === cleanEmail || s.id === studentId);
             // IMPORTANT: Do NOT overwrite Unarmed is_paid/cert_id fields; store Armed fields under armed_*
+            let savedCertIntake = null;
+            try {
+                if (cleanEmail) {
+                    const rawCert = localStorage.getItem('platforms_armed_cert_intake_' + cleanEmail);
+                    if (rawCert) savedCertIntake = JSON.parse(rawCert);
+                }
+            } catch (e) {}
+
             const armedPatch = {
                 id: (existingIdx >= 0 && registry[existingIdx].id) || studentId,
                 name: this.studentCertData.name || 'Student Officer',
                 email: this.studentEmail,
                 agency: this.studentAgency,
+                course_type: 'armed',
                 armed_is_paid: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 armed_payment_verified: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 armed_range_session: this.getSavedRangeDateRecord(cleanEmail) || (existingIdx >= 0 ? registry[existingIdx].armed_range_session : null) || null,
@@ -346,6 +359,11 @@ class SecurityCourseApp {
                 armed_has_passed: this.examPassed || false,
                 armed_cert_id: this.issuedCertId || null,
                 armed_is_cert_locked: Boolean(this.isCertLocked),
+                armed_cert_data: savedCertIntake || (existingIdx >= 0 ? registry[existingIdx].armed_cert_data : null) || {
+                    ...this.studentCertData,
+                    email: this.studentEmail || this.studentCertData.email || '',
+                    written_exam_score: this.examPercentage || null
+                },
                 mfa_verified: localStorage.getItem('platforms_mfa_verified_' + this.studentEmail) === 'true',
                 mfa_verified_at: localStorage.getItem('platforms_mfa_verified_at_' + this.studentEmail) || null,
                 created_at: (existingIdx >= 0 && registry[existingIdx].created_at) || nowStr,
@@ -2537,10 +2555,9 @@ class SecurityCourseApp {
     }
 
     updateExamCountdownUI() {
-        const duration = this.examDurationSeconds || 3600;
-        const remaining = Math.max(0, duration - (this.timerSeconds || 0));
-        const minutes = Math.floor(remaining / 60).toString().padStart(2, '0');
-        const seconds = (remaining % 60).toString().padStart(2, '0');
+        const elapsed = Math.max(0, this.timerSeconds || 0);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
 
         const timerDisplay = document.getElementById('exam-timer-display');
         if (timerDisplay) {
@@ -2550,11 +2567,6 @@ class SecurityCourseApp {
         const pill = document.getElementById('exam-countdown-pill');
         if (pill) {
             pill.classList.remove('timer-warning', 'timer-critical');
-            if (remaining <= 120) {
-                pill.classList.add('timer-critical');
-            } else if (remaining <= 600) {
-                pill.classList.add('timer-warning');
-            }
         }
 
         const attemptDisplay = document.getElementById('exam-attempt-display');
@@ -2573,12 +2585,6 @@ class SecurityCourseApp {
         this.timerInterval = setInterval(() => {
             this.timerSeconds = (this.timerSeconds || 0) + 1;
             this.updateExamCountdownUI();
-            const duration = this.examDurationSeconds || 3600;
-            if (this.timerSeconds >= duration) {
-                this.stopExamTimer();
-                alert("⏰ 1-HOUR EXAM TIME LIMIT REACHED (60:00)\n\nPer Platforms Training Academy Armed Security testing standards, your 1-hour examination window has expired. Your answered questions are now being submitted for grading.");
-                this.submitExam(true);
-            }
         }, 1000);
     }
 
@@ -2688,14 +2694,19 @@ class SecurityCourseApp {
             ? `<strong>100% Score</strong><br><span style="font-size:0.76rem;">Admin Preview</span>`
             : `<strong>${effectivePct}% Score</strong><br><span style="font-size:0.78rem;">Attempt ${attemptsUsed || 1} of ${maxAllowed}</span>`;
 
+        const examScoreReadonlyEl = document.getElementById('cert-readonly-exam-score');
+        if (examScoreReadonlyEl) {
+            examScoreReadonlyEl.textContent = `${effectivePct}% (${effectiveScore}/50 — PASSED)`;
+        }
+
         if (this.examPassed || this.isAdminMode) {
             badge.className = 'score-badge passed';
-            title.textContent = "CONGRATULATIONS — CLASSROOM EXAM PASSED!";
+            title.textContent = "CONGRATULATIONS — WRITTEN EXAM PASSED!";
             title.style.color = "var(--brand-green-bright)";
-            subtitle.textContent = `You achieved ${effectivePct}%, exceeding the mandatory 75% standard (${COURSE_META.passingCorrect}/50). Complete your trainee details below to download your Official 20-Hour Armed Classroom Certificate & Paid Eagle Sports Range Qualification Voucher!`;
+            subtitle.textContent = `You achieved ${effectivePct}%, exceeding the mandatory 75% standard (${COURSE_META.passingCorrect}/50) under IDFPR Approved Curriculum #102-000398. Complete the Trainee section of IDFPR Form IL486-1138 below to save your certification record to your student profile for Instructor Charles Young to sign off after your In-Person Range Qualification!`;
 
             if (statusTagEl) {
-                statusTagEl.textContent = "CLASSROOM CERTIFIED";
+                statusTagEl.textContent = this.isCertLocked ? "SAVED TO PROFILE" : "WRITTEN EXAM PASSED";
                 statusTagEl.style.color = "var(--brand-green-bright)";
             }
             if (rangeBannerEl) rangeBannerEl.style.display = 'block';
@@ -2715,27 +2726,23 @@ class SecurityCourseApp {
                     };
                 }
             } else {
-                // Paywall bypassed or paid: Certificate form unlocked
                 if (payGate) payGate.style.display = 'none';
                 if (certForm) certForm.style.display = 'block';
 
                 const intakeHeader = document.querySelector('#results-certificate-form-section .cert-intake-header');
                 const formGrid = document.querySelector('#results-certificate-form-section .cert-form-grid');
                 const preWarn = document.getElementById('cert-pre-download-warning');
-                const previewWrapper = document.querySelector('.official-state-cert-wrapper');
-                const bottomDownloadBtn = document.getElementById('btn-download-cert-main');
+                const bottomSubmitBtn = document.getElementById('btn-download-cert-main');
 
                 if (this.isCertLocked && !this.isAdminMode) {
-                    // Certificate permanently downloaded and sealed — block all edits and additional downloads
                     if (sealedBanner) {
                         sealedBanner.style.display = 'flex';
                         const idTag = document.getElementById('sealed-cert-id-tag');
-                        if (idTag) idTag.textContent = this.issuedCertId || 'PTA-IL-SEALED';
+                        if (idTag) idTag.textContent = this.issuedCertId || 'PTA-IL-ARMED';
                     }
                     if (intakeHeader) intakeHeader.style.display = 'none';
                     if (preWarn) preWarn.style.display = 'none';
                     if (formGrid) formGrid.style.display = 'none';
-                    if (previewWrapper) previewWrapper.style.display = 'none';
 
                     document.querySelectorAll('.cert-form-input').forEach(inp => {
                         inp.disabled = true;
@@ -2743,29 +2750,25 @@ class SecurityCourseApp {
                     });
 
                     if (mainActionBtn) {
-                        mainActionBtn.innerHTML = `<i class="fas fa-lock"></i> Certificate Issued & Permanently Locked`;
-                        mainActionBtn.disabled = true;
-                        mainActionBtn.style.opacity = '0.6';
-                        mainActionBtn.style.cursor = 'not-allowed';
+                        mainActionBtn.innerHTML = `<i class="fas fa-check-circle"></i> Certificate Record Saved to Profile (Pending Range Sign-Off)`;
+                        mainActionBtn.disabled = false;
+                        mainActionBtn.style.opacity = '1';
+                        mainActionBtn.style.cursor = 'pointer';
                         mainActionBtn.onclick = () => {
-                            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. Changes and additional certificate downloads are strictly disabled.");
+                            if (sealedBanner) sealedBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         };
                     }
-                    if (bottomDownloadBtn) {
-                        bottomDownloadBtn.innerHTML = `<i class="fas fa-lock"></i> Certificate Issued & Permanently Locked`;
-                        bottomDownloadBtn.disabled = true;
-                        bottomDownloadBtn.style.opacity = '0.6';
-                        bottomDownloadBtn.style.cursor = 'not-allowed';
-                        bottomDownloadBtn.onclick = () => {
-                            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. Changes and additional certificate downloads are strictly disabled.");
-                        };
+                    if (bottomSubmitBtn) {
+                        bottomSubmitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Saved to Profile — Pending Instructor Range Qualification Sign-Off`;
+                        bottomSubmitBtn.disabled = true;
+                        bottomSubmitBtn.style.opacity = '0.7';
+                        bottomSubmitBtn.style.cursor = 'default';
                     }
                 } else {
                     if (sealedBanner) sealedBanner.style.display = 'none';
                     if (intakeHeader) intakeHeader.style.display = 'block';
                     if (preWarn) preWarn.style.display = 'flex';
                     if (formGrid) formGrid.style.display = 'grid';
-                    if (previewWrapper) previewWrapper.style.display = 'block';
 
                     document.querySelectorAll('.cert-form-input').forEach(inp => {
                         if (inp.id === 'cert-input-trainee-date') {
@@ -2777,18 +2780,18 @@ class SecurityCourseApp {
                     });
 
                     if (mainActionBtn) {
-                        mainActionBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Classroom Certificate & Range Voucher (PDF)`;
+                        mainActionBtn.innerHTML = `<i class="fas fa-file-signature"></i> Complete & Save Armed Certificate Info to Profile`;
                         mainActionBtn.disabled = false;
                         mainActionBtn.style.opacity = '1';
                         mainActionBtn.style.cursor = 'pointer';
                         mainActionBtn.onclick = () => this.handleResultsCertificateAction();
                     }
-                    if (bottomDownloadBtn) {
-                        bottomDownloadBtn.innerHTML = `<i class="fas fa-file-pdf"></i> Download Official Armed Classroom Certificate & Range Voucher (PDF)`;
-                        bottomDownloadBtn.disabled = false;
-                        bottomDownloadBtn.style.opacity = '1';
-                        bottomDownloadBtn.style.cursor = 'pointer';
-                        bottomDownloadBtn.onclick = () => this.downloadOfficialPdfCertificate();
+                    if (bottomSubmitBtn) {
+                        bottomSubmitBtn.innerHTML = `<i class="fas fa-save"></i> Save Certificate Information to My Profile for Instructor Range Sign-Off`;
+                        bottomSubmitBtn.disabled = false;
+                        bottomSubmitBtn.style.opacity = '1';
+                        bottomSubmitBtn.style.cursor = 'pointer';
+                        bottomSubmitBtn.onclick = () => this.submitArmedCertToProfile();
                     }
                 }
             }
@@ -2884,34 +2887,38 @@ class SecurityCourseApp {
         });
         const traineeDateInput = document.getElementById('cert-input-trainee-date');
         if (traineeDateInput) traineeDateInput.value = formatted;
-        const prevDate = document.getElementById('prev-cert-date');
-        if (prevDate) prevDate.textContent = formatted;
     }
 
     bindCertFormEvents() {
         const fieldMap = [
-            { inputId: 'cert-input-name', prevId: 'prev-cert-name', key: 'name', upper: true },
-            { inputId: 'cert-input-address', prevId: 'prev-cert-address', key: 'address' },
-            { inputId: 'cert-input-city', prevId: 'prev-cert-city', key: 'city' },
-            { inputId: 'cert-input-state', prevId: 'prev-cert-state', key: 'state', upper: true },
-            { inputId: 'cert-input-zip', prevId: 'prev-cert-zip', key: 'zip' },
-            { inputId: 'cert-input-dob', prevId: 'prev-cert-dob', key: 'dob' },
-            { inputId: 'cert-input-ssn', prevId: 'prev-cert-ssn', key: 'ssn' },
-            { inputId: 'cert-input-weight', prevId: 'prev-cert-weight', key: 'weight' },
-            { inputId: 'cert-input-height', prevId: 'prev-cert-height', key: 'height' },
-            { inputId: 'cert-input-hair', prevId: 'prev-cert-hair', key: 'hair' },
-            { inputId: 'cert-input-eyes', prevId: 'prev-cert-eyes', key: 'eyes' },
-            { inputId: 'cert-input-signature', prevId: 'prev-cert-sig', key: 'signature' }
+            { inputId: 'cert-input-name', key: 'name', upper: true },
+            { inputId: 'cert-input-ssn', key: 'ssn' },
+            { inputId: 'cert-input-address', key: 'address' },
+            { inputId: 'cert-input-city', key: 'city' },
+            { inputId: 'cert-input-state', key: 'state', upper: true },
+            { inputId: 'cert-input-zip', key: 'zip' },
+            { inputId: 'cert-input-perc', key: 'perc' },
+            { inputId: 'cert-input-email', key: 'email' },
+            { inputId: 'cert-input-dob', key: 'dob' },
+            { inputId: 'cert-input-sex', key: 'sex', upper: true },
+            { inputId: 'cert-input-race', key: 'race' },
+            { inputId: 'cert-input-weight', key: 'weight' },
+            { inputId: 'cert-input-height', key: 'height' },
+            { inputId: 'cert-input-hair', key: 'hair' },
+            { inputId: 'cert-input-eyes', key: 'eyes' },
+            { inputId: 'cert-input-signature', key: 'signature' }
         ];
 
         fieldMap.forEach(item => {
             const input = document.getElementById(item.inputId);
             if (input) {
-                // Initialize input value from state
                 if (this.studentCertData[item.key]) {
                     input.value = this.studentCertData[item.key];
+                } else if (item.key === 'email' && this.studentEmail) {
+                    input.value = this.studentEmail;
                 }
-                input.addEventListener('input', (e) => {
+                const evtName = input.tagName === 'SELECT' ? 'change' : 'input';
+                input.addEventListener(evtName, (e) => {
                     if (this.isCertLocked && !this.isAdminMode) {
                         e.target.value = this.studentCertData[item.key] || '';
                         return;
@@ -2957,14 +2964,16 @@ class SecurityCourseApp {
                             val = '';
                         }
                         e.target.value = val;
+                    } else if (item.key === 'perc') {
+                        val = val.replace(/^129-\s*/i, '').trim();
+                        e.target.value = val;
                     } else if (item.upper) {
                         val = val.toUpperCase();
                         e.target.value = val;
                     }
 
                     this.studentCertData[item.key] = val;
-                    const prevEl = document.getElementById(item.prevId);
-                    if (prevEl) prevEl.textContent = val || ' ';
+                    localStorage.setItem('platforms_student_' + item.key, val);
                     this.saveState();
                 });
             }
@@ -2972,36 +2981,38 @@ class SecurityCourseApp {
     }
 
     syncCertFormToPreview() {
-        const setVal = (inputId, prevId, key, fallback) => {
+        const setVal = (inputId, key, fallback) => {
             const val = this.studentCertData[key] || fallback || '';
             const inp = document.getElementById(inputId);
             if (inp) inp.value = val;
-            const prv = document.getElementById(prevId);
-            if (prv) prv.textContent = val;
         };
 
-        setVal('cert-input-name', 'prev-cert-name', 'name', '');
-        setVal('cert-input-address', 'prev-cert-address', 'address', '');
-        setVal('cert-input-city', 'prev-cert-city', 'city', 'Chicago');
-        setVal('cert-input-state', 'prev-cert-state', 'state', 'IL');
-        setVal('cert-input-zip', 'prev-cert-zip', 'zip', '');
-        setVal('cert-input-dob', 'prev-cert-dob', 'dob', '');
-        setVal('cert-input-ssn', 'prev-cert-ssn', 'ssn', '');
-        setVal('cert-input-weight', 'prev-cert-weight', 'weight', '');
-        setVal('cert-input-height', 'prev-cert-height', 'height', '');
-        setVal('cert-input-hair', 'prev-cert-hair', 'hair', '');
-        setVal('cert-input-eyes', 'prev-cert-eyes', 'eyes', '');
-        setVal('cert-input-signature', 'prev-cert-sig', 'signature', '');
+        setVal('cert-input-name', 'name', '');
+        setVal('cert-input-ssn', 'ssn', '');
+        setVal('cert-input-address', 'address', '');
+        setVal('cert-input-city', 'city', 'Chicago');
+        setVal('cert-input-state', 'state', 'IL');
+        setVal('cert-input-zip', 'zip', '');
+        setVal('cert-input-perc', 'perc', '');
+        setVal('cert-input-email', 'email', this.studentEmail || '');
+        setVal('cert-input-dob', 'dob', '');
+        setVal('cert-input-sex', 'sex', '');
+        setVal('cert-input-race', 'race', '');
+        setVal('cert-input-weight', 'weight', '');
+        setVal('cert-input-height', 'height', '');
+        setVal('cert-input-hair', 'hair', '');
+        setVal('cert-input-eyes', 'eyes', '');
+        setVal('cert-input-signature', 'signature', '');
     }
 
-    async downloadOfficialPdfCertificate() {
+    async submitArmedCertToProfile() {
         const emailKey = (this.studentEmail || '').trim().toLowerCase();
         const armedId = this.getArmedStudentId(emailKey);
 
         if ((this.isCertLocked || this.hasLocalLockedCert(emailKey)) && !this.isAdminMode) {
             this.isCertLocked = true;
             this.renderResults();
-            alert("SECURITY LOCK: Your official Armed Classroom Certificate & Range Voucher has already been downloaded and permanently sealed for your account.");
+            alert("Your Trainee Firearms Certification Record (Form IL486-1138) has already been saved to your profile for Instructor Charles Young to complete after your In-Person Range Qualification.");
             return;
         }
 
@@ -3010,306 +3021,135 @@ class SecurityCourseApp {
             return;
         }
 
-        if (!this.isAdminMode && armedId) {
-            try {
-                const status = await this.apiCall(`/api/certificate/status/${encodeURIComponent(armedId)}`, 'GET');
-                if (status && status.is_locked) {
-                    this.isCertLocked = true;
-                    this.issuedCertId = (status.certificate && status.certificate.id) || this.issuedCertId || 'PTA-IL-ARMED-SEALED';
-                    if (emailKey) {
-                        localStorage.setItem('platforms_armed_cert_locked_' + emailKey, 'true');
-                        localStorage.setItem('platforms_armed_cert_id_' + emailKey, this.issuedCertId);
-                    }
-                    this.saveState();
-                    this.renderResults();
-                    alert("SECURITY LOCK: Our records show your official Armed Classroom Certificate & Range Voucher has already been issued and permanently sealed.");
-                    return;
-                }
-            } catch (e) {}
-        }
+        const name = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').trim().toUpperCase();
+        const ssn = (document.getElementById('cert-input-ssn')?.value || this.studentCertData.ssn || '').trim();
+        const address = (document.getElementById('cert-input-address')?.value || this.studentCertData.address || '').trim();
+        const city = (document.getElementById('cert-input-city')?.value || this.studentCertData.city || 'Chicago').trim();
+        const state = (document.getElementById('cert-input-state')?.value || this.studentCertData.state || 'IL').trim().toUpperCase();
+        const zip = (document.getElementById('cert-input-zip')?.value || this.studentCertData.zip || '').trim();
+        const percRaw = (document.getElementById('cert-input-perc')?.value || this.studentCertData.perc || '').trim();
+        const perc = percRaw.replace(/^129-\s*/i, '').trim();
+        const emailVal = (document.getElementById('cert-input-email')?.value || this.studentEmail || this.studentCertData.email || '').trim().toLowerCase();
+        const dob = (document.getElementById('cert-input-dob')?.value || this.studentCertData.dob || '').trim();
+        const sex = (document.getElementById('cert-input-sex')?.value || this.studentCertData.sex || '').trim().toUpperCase();
+        const race = (document.getElementById('cert-input-race')?.value || this.studentCertData.race || '').trim();
+        const weight = (document.getElementById('cert-input-weight')?.value || this.studentCertData.weight || '').trim();
+        const heightVal = (document.getElementById('cert-input-height')?.value || this.studentCertData.height || '').trim();
+        const hair = (document.getElementById('cert-input-hair')?.value || this.studentCertData.hair || '').trim();
+        const eyes = (document.getElementById('cert-input-eyes')?.value || this.studentCertData.eyes || '').trim();
+        const traineeSig = (document.getElementById('cert-input-signature')?.value || this.studentCertData.signature || '').trim();
+        const compDate = this.getFormattedTodayDate();
 
-        const checkName = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').trim();
-        if (!checkName) {
-            alert("Please enter your Full Legal Name on the certificate form before downloading.");
-            document.getElementById('cert-input-name')?.focus();
-            return;
+        const requiredChecks = [
+            { val: name, id: 'cert-input-name', label: 'Full Legal Name (Last, First, Middle Initial)' },
+            { val: ssn, id: 'cert-input-ssn', label: 'SSN or ITIN' },
+            { val: address, id: 'cert-input-address', label: 'Home Street Address' },
+            { val: city, id: 'cert-input-city', label: 'City' },
+            { val: state, id: 'cert-input-state', label: 'State' },
+            { val: zip, id: 'cert-input-zip', label: 'ZIP Code' },
+            { val: emailVal, id: 'cert-input-email', label: 'E-Mail Address' },
+            { val: dob, id: 'cert-input-dob', label: 'Date of Birth' },
+            { val: sex, id: 'cert-input-sex', label: 'Sex' },
+            { val: race, id: 'cert-input-race', label: 'Race' },
+            { val: weight, id: 'cert-input-weight', label: 'Weight' },
+            { val: heightVal, id: 'cert-input-height', label: 'Height' },
+            { val: hair, id: 'cert-input-hair', label: 'Color of Hair' },
+            { val: eyes, id: 'cert-input-eyes', label: 'Color of Eyes' },
+            { val: traineeSig, id: 'cert-input-signature', label: 'Trainee Electronic Signature' }
+        ];
+
+        for (const req of requiredChecks) {
+            if (!req.val) {
+                alert(`Please complete the required Trainee field: ${req.label}`);
+                document.getElementById(req.id)?.focus();
+                return;
+            }
         }
 
         const userConfirmed = confirm(
-            "⚠️ CRITICAL ARMED CERTIFICATE & RANGE VOUCHER NOTICE:\n\n" +
-            "1. Verify all demographic fields carefully! Once downloaded, this record locks permanently (single official issuance).\n\n" +
-            "2. Save this PDF across MULTIPLE LOCATIONS (computer, phone, cloud drive, email).\n\n" +
-            "3. PRINT A PHYSICAL HARD COPY and bring it with your Photo ID to Eagle Sports Range (5900 W 159th St, Oak Forest, IL) for your included Live-Fire Qualification & final IDFPR Form IL486-1138 sign-off.\n\n" +
-            "Click OK to generate and download your official PDF now."
+            "SAVE TRAINEE FIREARMS CERTIFICATION RECORD (IDFPR FORM IL486-1138):\n\n" +
+            "1. Please confirm that all your Trainee fields (Name, SSN/ITIN, Address, PERC #, Email, Physical Description, and Electronic Signature) are 100% accurate.\n\n" +
+            "2. Your completed Trainee Section and Written Examination Score will be saved directly to your student profile for Lead Instructor Charles Young.\n\n" +
+            "3. Following your In-Person Range Qualification at Eagle Sports Range, your Instructor will add your live-fire qualification scores and send your completed certificate to your email and to IDFPR (FPR.SafetyUnit@illinois.gov).\n\n" +
+            "Click OK to save your certification information to your profile now."
         );
         if (!userConfirmed) return;
 
-        try {
-            if (typeof PDFLib === 'undefined') {
-                alert("PDF generator library is initializing. Please wait a moment and try again.");
-                return;
-            }
+        const certSerial = this.issuedCertId || ('PTA-IL-ARMED-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000));
+        const effectiveScore = (this.isAdminMode && !this.examPassed) ? 50 : (this.examScore || 38);
+        const effectivePct = (this.isAdminMode && !this.examPassed) ? 100 : (this.examPercentage || 76);
 
-            const pdfDoc = await PDFLib.PDFDocument.create();
-            const page = pdfDoc.addPage([612, 792]);
-            const { width, height } = page.getSize();
-            const rgb = PDFLib.rgb;
+        this.studentCertData = {
+            name, ssn, address, city, state, zip, perc, email: emailVal,
+            dob, sex, race, weight, height: heightVal, hair, eyes, signature: traineeSig
+        };
 
-            const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-            const helveticaBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-            const timesItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
+        const armedCertRecord = {
+            cert_id: certSerial,
+            form_code: 'IL486-1138 10/24 (DE)',
+            curriculum_number: '102-000398',
+            instructor_number: '263-000693',
+            instructor_name: 'Charles Young',
+            course_name: 'FIREARMS TRAINING COURSE',
+            academy_address: '200 E 75th',
+            academy_city: 'Chicago',
+            academy_state: 'IL',
+            academy_zip: '60615',
+            student_id: armedId || ('armed::' + (emailKey || name)),
+            course_type: 'armed',
+            name,
+            ssn,
+            address,
+            city,
+            state,
+            zip,
+            perc,
+            email: emailVal,
+            dob,
+            sex,
+            race,
+            weight,
+            height: heightVal,
+            hair,
+            eyes,
+            signature: traineeSig,
+            trainee_date: compDate,
+            date_completed: '',
+            written_exam_score: effectivePct,
+            written_exam_raw: `${effectiveScore}/50`,
+            range_session: this.getSavedRangeDateRecord(emailKey) || null,
+            trainee_submitted: true,
+            submitted_at: new Date().toISOString(),
+            instructor_completed: false
+        };
 
-            const name = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').toUpperCase();
-            const address = document.getElementById('cert-input-address')?.value || this.studentCertData.address || '';
-            const city = document.getElementById('cert-input-city')?.value || this.studentCertData.city || 'Chicago';
-            const state = (document.getElementById('cert-input-state')?.value || this.studentCertData.state || 'IL').toUpperCase();
-            const zip = document.getElementById('cert-input-zip')?.value || this.studentCertData.zip || '';
-            const dob = document.getElementById('cert-input-dob')?.value || this.studentCertData.dob || '';
-            const ssn = document.getElementById('cert-input-ssn')?.value || this.studentCertData.ssn || '';
-            const weight = document.getElementById('cert-input-weight')?.value || this.studentCertData.weight || '';
-            const heightVal = document.getElementById('cert-input-height')?.value || this.studentCertData.height || '';
-            const hair = document.getElementById('cert-input-hair')?.value || this.studentCertData.hair || '';
-            const eyes = document.getElementById('cert-input-eyes')?.value || this.studentCertData.eyes || '';
-            const traineeSig = document.getElementById('cert-input-signature')?.value || this.studentCertData.signature || name;
-            const compDate = this.getFormattedTodayDate();
-            const certSerial = this.issuedCertId || ('PTA-IL-ARMED-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000));
-            const effectiveScore = (this.isAdminMode && !this.examPassed) ? 50 : (this.examScore || 38);
-            const effectivePct = (this.isAdminMode && !this.examPassed) ? 100 : (this.examPercentage || 76);
-
-            // Outer frame
-            page.drawRectangle({ x: 22, y: 22, width: width - 44, height: height - 44, borderColor: rgb(0.1, 0.1, 0.12), borderWidth: 1.8 });
-            page.drawRectangle({ x: 26, y: 26, width: width - 52, height: height - 52, borderColor: rgb(0.72, 0.58, 0.16), borderWidth: 0.9 });
-
-            // Top Notice Box & Main Title
-            page.drawRectangle({ x: 36, y: height - 92, width: 196, height: 54, borderColor: rgb(0, 0, 0), borderWidth: 0.9 });
-            const noticeLines = [
-                "STATUTORY NOTICE: Issued pursuant to",
-                "225 ILCS 447 & 68 Ill. Adm. Code 1240.510(a)",
-                "for 20-Hour Armed Classroom Completion.",
-                "Present at Eagle Sports Range for 8-Hr",
-                "Live-Fire Qualification (Form IL486-1138)."
-            ];
-            noticeLines.forEach((ln, idx) => {
-                page.drawText(ln, { x: 41, y: height - 48 - (idx * 9.5), size: 6.8, font: idx === 0 ? helveticaBold : helvetica, color: rgb(0, 0, 0) });
-            });
-
-            page.drawText("PLATFORMS TRAINING ACADEMY", { x: 248, y: height - 50, size: 11, font: helveticaBold, color: rgb(0.55, 0.42, 0.08) });
-            page.drawText("Certification of Completion", { x: 248, y: height - 67, size: 15, font: helveticaBold, color: rgb(0, 0, 0) });
-            page.drawText("20-Hour Online Armed Security Classroom & Range Voucher", { x: 248, y: height - 82, size: 9.8, font: helveticaBold, color: rgb(0.12, 0.12, 0.12) });
-            page.drawText(`Certificate No: ${certSerial}`, { x: 248, y: height - 93, size: 7.8, font: helveticaBold, color: rgb(0.25, 0.25, 0.25) });
-
-            // Section 1 Banner
-            const drawSectionBanner = (topY, text) => {
-                page.drawRectangle({ x: 36, y: topY - 18, width: 540, height: 18, color: rgb(0.9, 0.9, 0.9), borderColor: rgb(0, 0, 0), borderWidth: 1 });
-                page.drawText(text, { x: 42, y: topY - 12.5, size: 8, font: helveticaBold, color: rgb(0, 0, 0) });
-            };
-            drawSectionBanner(height - 102, "TRAINEE RECORD: Permanent Record of 20-Hour Armed Classroom Training (Single Official Copy)");
-
-            // Helper to draw labeled grid cell
-            const drawCell = (x, topY, w, h, label, val, boldVal = true) => {
-                page.drawRectangle({ x, y: topY - h, width: w, height: h, borderColor: rgb(0, 0, 0), borderWidth: 0.8 });
-                page.drawText(label, { x: x + 4, y: topY - 8.5, size: 6.2, font: helveticaBold, color: rgb(0.18, 0.18, 0.18) });
-                if (val) {
-                    page.drawText(String(val).slice(0, 65), { x: x + 4, y: topY - h + 6, size: 9.2, font: boldVal ? helveticaBold : helvetica, color: rgb(0, 0, 0) });
-                }
-            };
-
-            // Row 1: Name + Exam Score
-            const gridTop = height - 120;
-            drawCell(36, gridTop, 410, 30, "FULL LEGAL NAME (LAST, FIRST, MIDDLE INITIAL)", name);
-            drawCell(446, gridTop, 130, 30, "WRITTEN EXAM SCORE (MIN 75%)", `${effectiveScore}/50 (${effectivePct}% - PASSED)`);
-
-            // Row 2: Address, City, State, ZIP
-            const row2Top = gridTop - 30;
-            drawCell(36, row2Top, 270, 30, "HOME STREET ADDRESS", address, false);
-            drawCell(306, row2Top, 130, 30, "CITY", city, false);
-            drawCell(436, row2Top, 48, 30, "STATE", state);
-            drawCell(484, row2Top, 92, 30, "ZIP CODE", zip, false);
-
-            // Row 3: DOB, SSN, Weight, Height, Hair, Eyes
-            const row3Top = row2Top - 30;
-            drawCell(36, row3Top, 96, 30, "DATE OF BIRTH", dob, false);
-            drawCell(132, row3Top, 134, 30, "SOCIAL SECURITY NUMBER", ssn, false);
-            drawCell(266, row3Top, 68, 30, "WEIGHT", weight, false);
-            drawCell(334, row3Top, 68, 30, "HEIGHT", heightVal, false);
-            drawCell(402, row3Top, 86, 30, "HAIR COLOR", hair, false);
-            drawCell(488, row3Top, 88, 30, "EYE COLOR", eyes, false);
-
-            // Trainee Attestation & Cursive Signature
-            const attestTop = row3Top - 42;
-            page.drawText("I hereby certify that I personally completed all 20 hours of the Armed Security Classroom Course and passed the 50-question written examination under 225 ILCS 447.", {
-                x: 36, y: attestTop, size: 7.1, font: helvetica, color: rgb(0, 0, 0)
-            });
-
-            const sigLineY = attestTop - 28;
-            page.drawText("Signature of Trainee:", { x: 36, y: sigLineY, size: 8.5, font: helveticaBold, color: rgb(0, 0, 0) });
-            page.drawLine({ start: { x: 126, y: sigLineY - 2 }, end: { x: 385, y: sigLineY - 2 }, thickness: 0.9, color: rgb(0, 0, 0) });
-            page.drawText("Date:", { x: 405, y: sigLineY, size: 8.5, font: helveticaBold, color: rgb(0, 0, 0) });
-            page.drawLine({ start: { x: 432, y: sigLineY - 2 }, end: { x: 576, y: sigLineY - 2 }, thickness: 0.9, color: rgb(0, 0, 0) });
-            page.drawText(compDate, { x: 455, y: sigLineY + 1, size: 9.5, font: helveticaBold, color: rgb(0, 0, 0) });
-
-            // Render Trainee & Instructor cursive signatures via Canvas -> PNG (fallback to TimesItalic)
-            const embedCursiveSignature = async (sigText, x, y, w, h) => {
-                try {
-                    if (document.fonts && document.fonts.load) {
-                        await document.fonts.load("400 48px 'Sacramento'");
-                    }
-                    const sigCanvas = document.createElement('canvas');
-                    sigCanvas.width = 900;
-                    sigCanvas.height = 160;
-                    const ctx = sigCanvas.getContext('2d');
-                    if (ctx) {
-                        ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
-                        ctx.font = "400 68px 'Sacramento', 'Alex Brush', cursive";
-                        ctx.fillStyle = '#0b1938';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(sigText, 14, 84);
-                        const sigImage = await pdfDoc.embedPng(sigCanvas.toDataURL('image/png'));
-                        page.drawImage(sigImage, { x, y, width: w, height: h });
-                        return true;
-                    }
-                } catch (e) {}
-                return false;
-            };
-
-            const traineeSigDrawn = await embedCursiveSignature(traineeSig, 132, sigLineY - 12, 220, 36);
-            if (!traineeSigDrawn) {
-                page.drawText(traineeSig, { x: 135, y: sigLineY + 1, size: 12.5, font: timesItalic, color: rgb(0.05, 0.1, 0.25) });
-            }
-
-            // Section 2: Completed 20-Hour Armed Classroom Checklist
-            const sec2Top = sigLineY - 14;
-            drawSectionBanner(sec2Top, "COMPLETED 20-HOUR ARMED SECURITY CLASSROOM CURRICULUM (68 ILL. ADM. CODE 1240.510(a))");
-
-            const checklist = [
-                "[X]  1. Four Cardinal Rules of Safe Gun Handling, Trigger Indexing, Clearing & Illinois Safe Storage (720 ILCS 5/24-9)",
-                "[X]  2. Two-Handed Combat Grip, Revolver vs. Semi-Auto Thumb Placement, Tactical Stance, Holster Draw & Weapon Retention",
-                "[X]  3. Revolver & Semi-Automatic Pistol Mechanics, Action Types (SA / DA / DAO), Barrel Rifling & 3 Slide Functions",
-                "[X]  4. Cartridge Components, Rimfire vs. Centerfire, +P/+P+ Safety, Misfires, 30-Sec Hangfire Rule, Squibs & Malfunctions",
-                "[X]  5. Five Fundamentals of Pistol Marksmanship (Aiming, Hold Control, Breath Control, Trigger Control & Follow-Through)",
-                "[X]  6. Illinois Use of Deadly Force (720 ILCS 5/7-1), Forcible Felonies (5/2-8), Tan Card Regulations & Range Commands",
-                "[ ]  7. Pending Phase 2 Live-Fire Range Qualification (8 Hours / 50 Rounds, Min 35/50 = 70% — Form IL486-1138 Issued at Range)"
-            ];
-            let curY = sec2Top - 32;
-            checklist.forEach((item, idx) => {
-                page.drawText(item, {
-                    x: 42,
-                    y: curY,
-                    size: 7.7,
-                    font: idx < 6 ? helveticaBold : timesItalic,
-                    color: idx < 6 ? rgb(0, 0, 0) : rgb(0.25, 0.25, 0.25)
-                });
-                curY -= 14;
-            });
-
-            // Paid Live-Fire Range Qualification Voucher Box
-            const voucherTop = curY - 4;
-            const voucherH = 86;
-            page.drawRectangle({
-                x: 36, y: voucherTop - voucherH, width: 540, height: voucherH,
-                color: rgb(0.98, 0.97, 0.92), borderColor: rgb(0.65, 0.50, 0.10), borderWidth: 1.5
-            });
-            page.drawText("PAID LIVE-FIRE RANGE QUALIFICATION VOUCHER — $200.00 TUITION VERIFIED IN FULL", {
-                x: 45, y: voucherTop - 15, size: 9, font: helveticaBold, color: rgb(0.45, 0.32, 0.02)
-            });
-            page.drawText("Range Facility: Eagle Sports Range, 5900 W 159th St, Oak Forest, IL 60452  |   Academy Phone: (773) 873-2591", {
-                x: 45, y: voucherTop - 30, size: 8, font: helveticaBold, color: rgb(0, 0, 0)
-            });
-            page.drawText("Included in Tuition: 8-Hour Range Qualification, Range Fee, Official B-27 Targets & 50 Rounds Qualification Ammunition.", {
-                x: 45, y: voucherTop - 43, size: 7.8, font: helvetica, color: rgb(0, 0, 0)
-            });
-            page.drawText("Pistol Course of Fire: 50 Rounds (5 Yds: 10 2H / 10 RH / 10 LH; 7 Yds: 10 2H; 10 Yds: 10 2H) — Min Passing Score: 35/50 (70%).", {
-                x: 45, y: voucherTop - 56, size: 7.8, font: helvetica, color: rgb(0, 0, 0)
-            });
-            page.drawText("Range Day Check-In: Reserve seat at platformstraining.com/calendar.html?course=armed-28&paid=true & bring Photo ID + Closed-Toe Shoes.", {
-                x: 45, y: voucherTop - 69, size: 7.5, font: helveticaBold, color: rgb(0.1, 0.1, 0.1)
-            });
-            page.drawText(`Authorized Trainee: ${name}   |   Voucher Code: ${certSerial}`, {
-                x: 45, y: voucherTop - 80, size: 7.4, font: helveticaBold, color: rgb(0.35, 0.25, 0.02)
-            });
-
-            // Training Entity & Instructor Sign-Off Table
-            const entTop = voucherTop - voucherH - 10;
-            drawCell(36, entTop, 330, 26, "NAME OF AUTHORIZED TRAINING ENTITY", "PLATFORMS TRAINING ACADEMY");
-            drawCell(366, entTop, 210, 26, "CLASSROOM COMPLETION DATE", compDate);
-
-            const entRow2 = entTop - 26;
-            drawCell(36, entRow2, 220, 26, "ACADEMY ADDRESS", "200 E 75th St, Chicago, IL 60619", false);
-            drawCell(256, entRow2, 170, 26, "LEAD FIREARM INSTRUCTOR", "Charles Young");
-            drawCell(426, entRow2, 150, 26, "ACADEMY TELEPHONE", "(773) 873-2591", false);
-
-            // Instructor Signature Row
-            const instSigY = entRow2 - 44;
-            page.drawText("Signature of Instructor:", { x: 36, y: instSigY, size: 8.5, font: helveticaBold, color: rgb(0, 0, 0) });
-            page.drawLine({ start: { x: 136, y: instSigY - 2 }, end: { x: 385, y: instSigY - 2 }, thickness: 0.9, color: rgb(0, 0, 0) });
-            page.drawText("Date:", { x: 405, y: instSigY, size: 8.5, font: helveticaBold, color: rgb(0, 0, 0) });
-            page.drawLine({ start: { x: 432, y: instSigY - 2 }, end: { x: 576, y: instSigY - 2 }, thickness: 0.9, color: rgb(0, 0, 0) });
-            page.drawText(compDate, { x: 455, y: instSigY + 1, size: 9.5, font: helveticaBold, color: rgb(0, 0, 0) });
-
-            const instSigDrawn = await embedCursiveSignature("Charles Young", 142, instSigY - 12, 200, 36);
-            if (!instSigDrawn) {
-                page.drawText("Charles Young", { x: 148, y: instSigY + 1, size: 13, font: timesItalic, color: rgb(0.05, 0.1, 0.25) });
-            }
-
-            page.drawText("PTA-ARMED-20HR  |  68 Ill. Adm. Code 1240.510(a)  |  Platforms Training Academy, Chicago, IL", {
-                x: 36, y: 31, size: 6.8, font: helvetica, color: rgb(0.35, 0.35, 0.35)
-            });
-
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_');
-            const filename = `Illinois_20Hr_Armed_Classroom_Cert_Range_Voucher_${cleanName}.pdf`;
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            if (!this.isCertLocked || !this.isAdminMode) {
-                this.isCertLocked = true;
-                this.issuedCertId = certSerial;
-                if (emailKey) {
-                    localStorage.setItem('platforms_armed_cert_locked_' + emailKey, 'true');
-                    localStorage.setItem('platforms_armed_cert_id_' + emailKey, this.issuedCertId);
-                }
-                this.saveState();
-
-                this.apiCall('/api/certificate/issue', 'POST', {
-                    student_id: armedId || ('armed::' + name),
-                    course_type: 'armed',
-                    cert_id: this.issuedCertId,
-                    name: name,
-                    address: address,
-                    city: city,
-                    state: state,
-                    zip: zip,
-                    dob: dob,
-                    ssn: ssn,
-                    weight: weight,
-                    height: heightVal,
-                    hair: hair,
-                    eyes: eyes,
-                    signature: traineeSig,
-                    date_completed: compDate
-                });
-
-                this.renderResults();
-                this.manualSaveProgress("Official Armed Classroom Certificate & Paid Range Voucher downloaded & sealed!");
-
-                setTimeout(() => {
-                    alert(
-                        "✅ ARMED CLASSROOM CERTIFICATE & PAID RANGE VOUCHER DOWNLOADED!\n\n" +
-                        "1. Save this PDF across multiple locations and PRINT A HARD COPY.\n" +
-                        "2. Click 'Schedule Included Live-Fire Range Date' to pick your weekend session at Eagle Sports Range (Oak Forest, IL) — your range fee, targets, and 50 rounds of ammo are ALREADY PAID!"
-                    );
-                }, 350);
-            }
-        } catch (err) {
-            console.error("Armed PDF generation error:", err);
-            alert("An error occurred while generating your PDF certificate. Please verify your fields and try again.");
+        this.isCertLocked = true;
+        this.issuedCertId = certSerial;
+        if (emailKey) {
+            localStorage.setItem('platforms_armed_cert_locked_' + emailKey, 'true');
+            localStorage.setItem('platforms_armed_cert_id_' + emailKey, this.issuedCertId);
+            localStorage.setItem('platforms_armed_cert_intake_' + emailKey, JSON.stringify(armedCertRecord));
         }
+        localStorage.setItem('platforms_armed_cert_intake_latest', JSON.stringify(armedCertRecord));
+        this.saveState();
+        this.syncToLocalRegistry();
+
+        await this.apiCall('/api/certificate/issue', 'POST', armedCertRecord);
+
+        this.renderResults();
+        this.manualSaveProgress("Trainee Firearms Certification Record (Form IL486-1138) saved to your profile for Instructor range sign-off!");
+
+        setTimeout(() => {
+            alert(
+                "✅ TRAINEE CERTIFICATION RECORD SAVED TO YOUR PROFILE!\n\n" +
+                "Your Trainee section of IDFPR Form IL486-1138 and your Written Examination Score (" + effectivePct + "%) have been saved to your student profile and forwarded to the Instructor Admin Portal.\n\n" +
+                "Next Step: Attend your scheduled In-Person Range Qualification at Eagle Sports Range (5900 W 159th St, Oak Forest, IL). Upon completion of your live-fire qualification, Instructor Charles Young will enter your range scores and email your completed certificate to you and to IDFPR (FPR.SafetyUnit@illinois.gov)."
+            );
+        }, 250);
+    }
+
+    async downloadOfficialPdfCertificate() {
+        return this.submitArmedCertToProfile();
     }
 
     handleResultsCertificateAction() {
@@ -3318,11 +3158,13 @@ class SecurityCourseApp {
             if (payGate) payGate.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
-        if (this.isCertLocked && !this.isAdminMode) {
-            alert("SECURITY NOTICE: Your Armed Classroom Certificate & Range Voucher has already been downloaded and permanently sealed. Check your device's Downloads folder for your saved PDF.");
-            return;
+        const certSection = document.getElementById('results-certificate-form-section');
+        if (certSection) {
+            certSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        this.downloadOfficialPdfCertificate();
+        if (!this.isCertLocked || this.isAdminMode) {
+            setTimeout(() => document.getElementById('cert-input-name')?.focus(), 350);
+        }
     }
 
     async processCoursePayment() {
@@ -3349,7 +3191,7 @@ class SecurityCourseApp {
             this.saveState();
             this.renderQuestionPalette();
             this.showView('exam');
-            this.manualSaveProgress("Instructor Retake Authorization verified! Additional 1-hour exam attempt unlocked.");
+            this.manualSaveProgress("Instructor Retake Authorization verified! Additional exam attempt unlocked.");
         } else {
             alert("Invalid Instructor Retake Code. Please contact Lead Instructor Charles Young at (773) 873-2591 for remediation.");
         }
@@ -3365,7 +3207,7 @@ class SecurityCourseApp {
         const nextAttempt = (this.examAttempts || 0) + 1;
         const confirmMsg = this.isAdminMode
             ? "Reset current answers and restart the 50-Question Armed Exam?"
-            : `Start Exam Attempt ${nextAttempt} of ${maxAllowed}?\n\nYou will have 1 hour (60:00) to complete all 50 questions and achieve at least 75% (38/50).`;
+            : `Start Exam Attempt ${nextAttempt} of ${maxAllowed}?\n\nComplete all 50 questions (untimed) and achieve at least 75% (38/50).`;
         if (confirm(confirmMsg)) {
             this.userAnswers = {};
             this.flaggedQuestions.clear();
@@ -4087,6 +3929,27 @@ class SecurityCourseApp {
                 statExam.innerHTML = `<span style="color:var(--brand-green-bright);"><i class="fas fa-unlock"></i> Unlocked &bull; Ready</span>`;
             } else {
                 statExam.innerHTML = `<span style="color:#f59e0b;"><i class="fas fa-lock"></i> Locked (${10 - completedCount} modules left)</span>`;
+            }
+        }
+
+        const statCert = document.getElementById('modal-stat-cert-status');
+        if (statCert) {
+            const cleanEm = (this.studentEmail || '').trim().toLowerCase();
+            let savedCert = null;
+            try {
+                if (cleanEm) {
+                    const raw = localStorage.getItem('platforms_armed_cert_intake_' + cleanEm);
+                    if (raw) savedCert = JSON.parse(raw);
+                }
+            } catch (e) {}
+            if (savedCert && savedCert.instructor_completed) {
+                statCert.innerHTML = `<span style="color:#34d399;"><i class="fas fa-check-double"></i> Signed Off &amp; Sent by Instructor</span>`;
+            } else if (this.isCertLocked || (savedCert && savedCert.trainee_submitted)) {
+                statCert.innerHTML = `<span style="color:var(--brand-green-bright);"><i class="fas fa-save"></i> Saved to Profile (Pending Range Sign-Off)</span>`;
+            } else if (this.examPassed) {
+                statCert.innerHTML = `<span style="color:#fbbf24;"><i class="fas fa-edit"></i> Ready to Complete on Results Page</span>`;
+            } else {
+                statCert.innerHTML = `<span style="color:#94a3b8;">Pending Exam Pass</span>`;
             }
         }
 
