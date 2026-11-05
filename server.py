@@ -307,12 +307,58 @@ def get_google_review_url():
         pass
     return url
 
-def build_class_payment_confirmation_email(student_name, course_title, class_date="", class_time="", location="", price="", confirmation_id=""):
+def resolve_course_location(course_id="", course_title="", raw_location=""):
+    """Resolve the exact training location for the specific course that was booked."""
+    cid = (course_id or "").strip().lower()
+    ctitle = (course_title or "").strip().lower()
+    raw = (raw_location or "").strip()
+
+    generic_fallbacks = {
+        "",
+        "200 e 75th st, chicago, il & eagle sports range",
+        "200 e 75th st, chicago, il 60619 & eagle sports range (5900 w 159th st, oak forest, il 60452)",
+        "200 e 75th st, chicago, il & eagle sports range (5900 w 159th st, oak forest, il)",
+        "classroom: 200 e 75th st, chicago, il 60619 | range: eagle sports range, 5900 w 159th st, oak forest, il 60452",
+        "eagle sports range (oak forest, il)"
+    }
+
+    course_map = {
+        "unarmed-20": "100% Online LMS Portal (Phone, Tablet, or PC — platformstraining.com)",
+        "armed-28": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        "firearm-requal": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        "firearm-upgrade": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        "ccl-refresher": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        "ccl-16": "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        "ccl-8": "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+        "ccl-military": "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+    }
+
+    if raw and raw.lower() not in generic_fallbacks:
+        return raw
+
+    if cid in course_map:
+        return course_map[cid]
+
+    if "unarmed" in ctitle:
+        return course_map["unarmed-20"]
+    if "requal" in ctitle or "upgrade" in ctitle or "refresher" in ctitle or "3 hr" in ctitle or "3-hr" in ctitle:
+        return course_map["firearm-requal"]
+    if "armed" in ctitle:
+        if "range" in ctitle or (raw and "eagle" in raw.lower() and "75th" not in raw.lower()):
+            return course_map["armed-28"]
+        return "Online LMS Portal (20-Hr Classroom) + Range Qualification: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)"
+    if "concealed" in ctitle or "ccl" in ctitle:
+        return course_map["ccl-16"]
+
+    return raw or "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)"
+
+
+def build_class_payment_confirmation_email(student_name, course_title, class_date="", class_time="", location="", price="", confirmation_id="", course_id=""):
     student_name = student_name or "Student Officer"
     course_title = course_title or "IDFPR Security / Firearms Training Course"
-    class_date = class_date or "24/7 Self-Paced Online Portal / Scheduled Weekend Session"
+    class_date = class_date or "24/7 Self-Paced Online Portal / Scheduled Session"
     class_time = class_time or "9:00 AM – 5:00 PM"
-    location = location or "200 E 75th St, Chicago, IL 60619 & Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)"
+    location = resolve_course_location(course_id=course_id, course_title=course_title, raw_location=location)
     price = price or "Paid / Confirmed"
     confirmation_id = confirmation_id or ("PTA-" + datetime.now().strftime("%Y%m%d%H%M"))
 
@@ -368,7 +414,7 @@ def build_class_payment_confirmation_email(student_name, course_title, class_dat
             </p>
         </div>
         <div style="background:#060709; padding:14px 24px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #1e2430;">
-            Platforms Training Academy &bull; 200 E 75th St, Chicago, IL 60619 &bull; Eagle Sports Range, 5900 W 159th St, Oak Forest, IL 60452
+            Platforms Training Academy &bull; {location}
         </div>
     </div>
     '''
@@ -391,14 +437,20 @@ Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com
     return subject, html_body, text_body
 
 
-def build_class_reminder_email(student_name, course_title, class_date="", class_time="", location=""):
+def build_class_reminder_email(student_name, course_title, class_date="", class_time="", location="", course_id=""):
     student_name = student_name or "Student Officer"
     course_title = course_title or "IDFPR Security / Firearms Qualification Course"
-    class_date = class_date or "This Upcoming Weekend"
+    class_date = class_date or "Your Scheduled Session Date"
     class_time = class_time or "9:00 AM – 5:00 PM (Arrive 15 mins early for check-in)"
-    location = location or "Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range, 5900 W 159th St, Oak Forest, IL 60452"
+    location = resolve_course_location(course_id=course_id, course_title=course_title, raw_location=location)
 
-    maps_url = "https://www.google.com/maps/search/?api=1&query=" + location.replace(" ", "+")
+    if "75th" in location.lower():
+        maps_query = "200+E+75th+St+Chicago+IL+60619"
+    elif "eagle" in location.lower() or "159th" in location.lower():
+        maps_query = "Eagle+Sports+Range+5900+W+159th+St+Oak+Forest+IL+60452"
+    else:
+        maps_query = location.replace(" ", "+")
+    maps_url = "https://www.google.com/maps/search/?api=1&query=" + maps_query
     subject = f"Upcoming Class Reminder ({class_date}): {course_title} | Platforms Training Academy"
 
     html_body = f'''
@@ -446,7 +498,7 @@ def build_class_reminder_email(student_name, course_title, class_date="", class_
             </p>
         </div>
         <div style="background:#060709; padding:14px 24px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #1e2430;">
-            Platforms Training Academy &bull; 200 E 75th St, Chicago, IL 60619 &bull; Eagle Sports Range, Oak Forest, IL
+            Platforms Training Academy &bull; {location}
         </div>
     </div>
     '''
@@ -1807,7 +1859,7 @@ def load_calendar_data():
     db_cal = None
     file_cal = None
     db = get_db()
-    row = db.execute("SELECT value FROM settings WHERE key = 'calendar_data'").fetchone()
+    row = db.execute("SELECT value FROM app_settings WHERE key = 'calendar_data'").fetchone()
     if row and row['value']:
         try:
             db_cal = json.loads(row['value'])
@@ -1829,7 +1881,7 @@ def save_calendar_data(cal_data):
     cal_data['last_updated'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     db = get_db()
     db.execute(
-        "INSERT OR REPLACE INTO settings (key, value) VALUES ('calendar_data', ?)",
+        "INSERT OR REPLACE INTO app_settings (key, value) VALUES ('calendar_data', ?)",
         (json.dumps(cal_data),)
     )
     db.commit()
@@ -1858,10 +1910,11 @@ def api_calendar_book():
     if reservation:
         if 'reservations' not in cal or not isinstance(cal['reservations'], list):
             cal['reservations'] = []
-        cal['reservations'].insert(0, reservation)
         sid = reservation.get('sessionId')
+        matched_session = None
         for s in cal.get('sessions', []):
             if s.get('id') == sid:
+                matched_session = s
                 avail = int(s.get('seatsAvailable', 10))
                 if avail > 0:
                     s['seatsAvailable'] = avail - 1
@@ -1870,19 +1923,30 @@ def api_calendar_book():
                     elif s['seatsAvailable'] <= 5:
                         s['status'] = 'Filling Fast'
                 break
+        cid = reservation.get('courseId') or (matched_session.get('courseId') if matched_session else '')
+        ctitle = reservation.get('courseTitle') or (matched_session.get('title') if matched_session else 'Scheduled Training Class')
+        raw_loc = reservation.get('location') or (matched_session.get('location') if matched_session else '')
+        resolved_loc = resolve_course_location(course_id=cid, course_title=ctitle, raw_location=raw_loc)
+        reservation['courseId'] = cid
+        reservation['location'] = resolved_loc
+        if 'reminderSent' not in reservation:
+            reservation['reminderSent'] = False
+
+        cal['reservations'].insert(0, reservation)
         save_calendar_data(cal)
-        # Automatically dispatch Class Registration Confirmation Email
+        # Automatically dispatch Class Registration Confirmation Email with exact course location
         try:
             st_email = (reservation.get('studentEmail') or '').strip()
             if st_email and '@' in st_email:
                 subj, h_body, t_body = build_class_payment_confirmation_email(
                     reservation.get('studentName') or 'Student Officer',
-                    reservation.get('courseTitle') or 'Scheduled Training Class',
+                    ctitle,
                     reservation.get('date') or '',
                     reservation.get('time') or '9:00 AM – 5:00 PM',
-                    reservation.get('location') or '200 E 75th St, Chicago, IL & Eagle Sports Range',
+                    resolved_loc,
                     reservation.get('price') or 'Seat Reserved',
-                    reservation.get('id') or 'PTA-RES'
+                    reservation.get('id') or 'PTA-RES',
+                    course_id=cid
                 )
                 send_email_smtp(st_email, subj, h_body, t_body)
         except Exception as e:
@@ -1907,10 +1971,12 @@ def send_automated_student_email():
     email_type = (data.get('email_type') or 'confirmation').strip().lower()
     to_email = (data.get('to_email') or data.get('email') or '').strip()
     student_name = (data.get('student_name') or data.get('name') or 'Student Officer').strip()
+    course_id = (data.get('course_id') or '').strip()
     course_title = (data.get('course_title') or '28-Hour Armed Security Course (IDFPR #102-000398)').strip()
     class_date = (data.get('class_date') or '').strip()
     class_time = (data.get('class_time') or '9:00 AM – 5:00 PM').strip()
-    location = (data.get('location') or '200 E 75th St, Chicago, IL 60619 & Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)').strip()
+    raw_location = (data.get('location') or '').strip()
+    location = resolve_course_location(course_id=course_id, course_title=course_title, raw_location=raw_location)
     price = (data.get('price') or 'Paid / Confirmed').strip()
     confirmation_id = (data.get('confirmation_id') or '').strip()
     google_review_url = (data.get('google_review_url') or get_google_review_url()).strip()
@@ -1920,11 +1986,11 @@ def send_automated_student_email():
 
     if email_type == 'confirmation':
         subj, html_body, text_body = build_class_payment_confirmation_email(
-            student_name, course_title, class_date, class_time, location, price, confirmation_id
+            student_name, course_title, class_date, class_time, location, price, confirmation_id, course_id=course_id
         )
     elif email_type == 'reminder':
         subj, html_body, text_body = build_class_reminder_email(
-            student_name, course_title, class_date, class_time, location
+            student_name, course_title, class_date, class_time, location, course_id=course_id
         )
     elif email_type in ('thank_you_review', 'review', 'thank_you'):
         subj, html_body, text_body = build_thank_you_google_review_email(
@@ -1935,9 +2001,122 @@ def send_automated_student_email():
 
     ok, msg_str = send_email_smtp(to_email, subj, html_body, text_body)
     if ok:
-        return jsonify({'success': True, 'to_email': to_email, 'subject': subj, 'message': f'Email sent to {to_email}!'})
+        return jsonify({'success': True, 'to_email': to_email, 'subject': subj, 'location': location, 'message': f'Email sent to {to_email}!'})
     else:
-        return jsonify({'success': False, 'to_email': to_email, 'subject': subj, 'error': msg_str}), 500
+        return jsonify({'success': False, 'to_email': to_email, 'subject': subj, 'location': location, 'error': msg_str}), 500
+
+
+# 12. Automatic 2-Day Before Class Reminder Scheduler
+_LAST_AUTO_REMINDER_CHECK_TS = 0
+
+def check_and_send_upcoming_reminders(days_before=2):
+    """
+    Scans all scheduled course reservations in calendar.json and automatically sends
+    a Class Reminder Email 2 days before the scheduled course date (specifically when
+    0 <= (course_date - today).days <= days_before and reminderSent is not yet True).
+    Always resolves the exact location for the course that was booked.
+    """
+    cal = load_calendar_data()
+    reservations = cal.get('reservations', [])
+    sessions_by_id = {s.get('id'): s for s in cal.get('sessions', []) if s.get('id')}
+    today = datetime.now().date()
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    sent_list = []
+    due_pending_list = []
+    upcoming_within_7_days = 0
+    changed = False
+
+    for r in reservations:
+        r_date_str = (r.get('date') or '').strip()
+        if not r_date_str:
+            continue
+        try:
+            r_date = datetime.strptime(r_date_str[:10], '%Y-%m-%d').date()
+        except Exception:
+            continue
+
+        days_until = (r_date - today).days
+        if 0 <= days_until <= 7:
+            upcoming_within_7_days += 1
+
+        sess = sessions_by_id.get(r.get('sessionId')) or {}
+        cid = r.get('courseId') or sess.get('courseId') or ''
+        ctitle = r.get('courseTitle') or sess.get('title') or 'Scheduled Training Course'
+        raw_loc = r.get('location') or sess.get('location') or ''
+        exact_loc = resolve_course_location(course_id=cid, course_title=ctitle, raw_location=raw_loc)
+        if r.get('location') != exact_loc:
+            r['location'] = exact_loc
+            changed = True
+
+        # Trigger auto-reminder when course is 2 days away (or within 2 days if not yet sent)
+        if 0 <= days_until <= days_before and not r.get('reminderSent'):
+            st_email = (r.get('studentEmail') or '').strip()
+            st_name = (r.get('studentName') or 'Student Officer').strip()
+            r_time = (r.get('time') or sess.get('time') or '9:00 AM – 5:00 PM').strip()
+            if st_email and '@' in st_email:
+                subj, h_body, t_body = build_class_reminder_email(
+                    st_name, ctitle, r_date_str, r_time, exact_loc, course_id=cid
+                )
+                ok, msg_str = send_email_smtp(st_email, subj, h_body, t_body)
+                if ok:
+                    r['reminderSent'] = True
+                    r['reminderSentAt'] = now_str
+                    changed = True
+                    sent_list.append({
+                        'id': r.get('id'),
+                        'studentName': st_name,
+                        'studentEmail': st_email,
+                        'courseTitle': ctitle,
+                        'date': r_date_str,
+                        'location': exact_loc
+                    })
+                else:
+                    due_pending_list.append({
+                        'id': r.get('id'),
+                        'studentName': st_name,
+                        'studentEmail': st_email,
+                        'courseTitle': ctitle,
+                        'date': r_date_str,
+                        'time': r_time,
+                        'location': exact_loc,
+                        'reason': msg_str
+                    })
+
+    if changed:
+        save_calendar_data(cal)
+
+    return {
+        'checked_at': now_str,
+        'days_before_rule': days_before,
+        'total_reservations': len(reservations),
+        'upcoming_within_7_days': upcoming_within_7_days,
+        'sent_count': len(sent_list),
+        'sent_reminders': sent_list,
+        'due_pending': due_pending_list
+    }
+
+
+@app.before_request
+def auto_reminder_background_hook():
+    global _LAST_AUTO_REMINDER_CHECK_TS
+    import time
+    now_ts = time.time()
+    if now_ts - _LAST_AUTO_REMINDER_CHECK_TS >= 900:
+        _LAST_AUTO_REMINDER_CHECK_TS = now_ts
+        try:
+            check_and_send_upcoming_reminders(days_before=2)
+        except Exception as e:
+            print("Auto-reminder background check note:", e)
+
+
+@app.route('/api/emails/run-auto-reminders', methods=['GET', 'POST'])
+def run_auto_reminders_endpoint():
+    try:
+        result = check_and_send_upcoming_reminders(days_before=2)
+        return jsonify({'success': True, **result})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Fallback static files router (placed after all API endpoints)
 @app.route('/<path:filename>')
