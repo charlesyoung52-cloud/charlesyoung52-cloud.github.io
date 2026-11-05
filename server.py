@@ -13,7 +13,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from datetime import datetime
-from flask import Flask, request, jsonify, send_from_directory, g
+from flask import Flask, request, jsonify, send_from_directory, redirect, g
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'lms_data.db')
@@ -753,7 +753,7 @@ def armed_course_index():
 @app.route('/admin')
 @app.route('/admin/')
 def admin_dashboard_portal():
-    return send_from_directory(os.path.join(BASE_DIR, 'course'), 'admin.html')
+    return redirect('/course/admin.html')
 
 @app.route('/data/<path:filename>')
 def serve_cloud_data(filename):

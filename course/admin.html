@@ -441,25 +441,6 @@
 
     <!-- Main Admin Dashboard -->
     <div id="dashboard-content" style="display: none;">
-        <!-- Unified Admin Portal & God Mode Multi-Page Top Bar -->
-        <div id="unified-admin-godmode-bar" style="background:linear-gradient(90deg, #064e3b 0%, #047857 50%, #065f46 100%); border-bottom:1px solid rgba(16,185,129,0.45); padding:10px 20px; display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; color:#ffffff; font-size:0.9rem;">
-            <span style="display:inline-flex; align-items:center; gap:8px;">
-                <i class="fas fa-user-shield" style="color:#fde68a;"></i>
-                <strong>ADMIN &amp; GOD MODE PORTAL</strong>
-                <span id="admin-active-page-pill" style="opacity:0.9;">&bull; Page 1: Student Roster &amp; Analytics</span>
-            </span>
-            <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
-                <button type="button" id="top-nav-roster" onclick="switchDashboardTab('roster')" style="background:#ffffff; color:#064e3b; border:1px solid #ffffff; padding:5px 11px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.84rem;"><i class="fas fa-users-gear"></i> 1. Student Roster</button>
-                <button type="button" id="top-nav-calendar" onclick="switchDashboardTab('calendar')" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-calendar-days"></i> 2. Calendar Manager</button>
-                <button type="button" id="top-nav-emails" onclick="switchDashboardTab('emails')" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-envelope-open-text"></i> 3. Emails &amp; Reviews</button>
-                <button type="button" id="top-nav-mfa" onclick="switchDashboardTab('mfa')" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-shield-halved"></i> 4. Cloud MFA &amp; SMTP</button>
-                <button type="button" onclick="launchCourseGodMode()" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-bolt"></i> 5. Unarmed Course</button>
-                <button type="button" onclick="launchCourseGodMode('results')" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-certificate"></i> Unarmed Cert</button>
-                <button type="button" onclick="launchArmedGodMode()" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-crosshairs"></i> 6. Armed Course</button>
-                <button type="button" onclick="launchArmedGodMode('results')" style="background:rgba(255,255,255,0.14); color:#ffffff; border:1px solid rgba(255,255,255,0.3); padding:5px 11px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.84rem;"><i class="fas fa-certificate"></i> Armed Cert</button>
-                <button type="button" onclick="lockDashboard()" style="background:rgba(239,68,68,0.28); color:#fecaca; border:1px solid rgba(239,68,68,0.65); padding:5px 11px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.84rem;"><i class="fas fa-sign-out-alt"></i> Exit God Mode</button>
-            </div>
-        </div>
         <!-- Header -->
         <header class="admin-header">
             <div class="header-brand">
@@ -1402,6 +1383,7 @@
         const ADMIN_PIN = "7738732591";
         let allStudents = [];
         let currentFilter = 'all';
+        let isInternalAdminNav = false;
 
         // Check authentication on startup (persists across Admin Portal and both Courses until explicit logout)
         document.addEventListener('DOMContentLoaded', () => {
@@ -1763,6 +1745,11 @@
             }
         }
 
+        function resolveSiteRootPrefix() {
+            const p = window.location.pathname || '';
+            return p.replace(/\/(?:course\/(?:admin\.html)?|admin\/?)$/i, '');
+        }
+
         function launchCourseGodMode(targetView) {
             isInternalAdminNav = true;
             localStorage.setItem('pta_admin_auth', 'authorized');
@@ -1770,7 +1757,9 @@
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
-            window.location.href = 'index.html' + (targetView ? '?view=' + encodeURIComponent(targetView) : '');
+            const base = resolveSiteRootPrefix();
+            const qs = '?godmode=1' + (targetView ? '&view=' + encodeURIComponent(targetView) : '');
+            window.location.href = base + '/course/index.html' + qs;
         }
 
         function launchArmedGodMode(targetView) {
@@ -1780,7 +1769,9 @@
             sessionStorage.setItem('pta_admin_auth', 'authorized');
             sessionStorage.setItem('platforms_admin_mode', 'true');
             sessionStorage.setItem('pta_admin_handoff', String(Date.now()));
-            window.location.href = '../armed-course/index.html' + (targetView ? '?view=' + encodeURIComponent(targetView) : '');
+            const base = resolveSiteRootPrefix();
+            const qs = '?godmode=1' + (targetView ? '&view=' + encodeURIComponent(targetView) : '');
+            window.location.href = base + '/armed-course/index.html' + qs;
         }
 
         function lockDashboard() {

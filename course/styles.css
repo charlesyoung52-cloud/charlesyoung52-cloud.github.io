@@ -1686,7 +1686,7 @@ video::-webkit-media-controls-panel {
     }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1520px) {
     .badge-nra {
         display: none !important;
     }
@@ -4088,39 +4088,7 @@ button:disabled.btn-primary {
 /* ==========================================================================
    Admin Evaluation Mode ("God Mode") & Analytics Dashboard
    ========================================================================== */
-.admin-mode-banner {
-    background: linear-gradient(90deg, #b45309 0%, #d97706 50%, #92400e 100%);
-    color: #fff;
-    padding: 10px 20px;
-    font-size: 0.96rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 1001;
-}
-
-.admin-mode-banner button {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    color: #fff;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.admin-mode-banner button:hover {
-    background: #000;
-}
+.admin-mode-banner { display: none !important; }
 
 .admin-dashboard-stats-grid {
     display: grid;
@@ -5985,7 +5953,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1520px) {
     .badge-nra,
     .top-link-email,
     .top-sep-email,
@@ -6150,7 +6118,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     margin: 0 !important;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1520px) {
     .main-header .header-book-btn,
     .site-header .header-book-btn {
         display: none !important;
@@ -6287,7 +6255,7 @@ body.lms-gate-active .site-header .course-progress-strip {
     overflow: hidden !important;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1520px) {
     .main-header .header-inner,
     .site-header .header-container {
         display: flex !important;
@@ -6461,7 +6429,7 @@ body.lms-gate-active .site-header .course-progress-strip {
 /* ==========================================================================
    MOBILE LOGGED-IN LMS HEADER WRAP FIX (ZERO HORIZONTAL OVERFLOW AT 375PX)
    ========================================================================== */
-@media (max-width: 1080px) {
+@media (max-width: 1520px) {
     body:not(.lms-gate-active) .site-header .header-container {
         flex-wrap: wrap !important;
         row-gap: 6px !important;
@@ -6477,8 +6445,22 @@ body.lms-gate-active .site-header .course-progress-strip {
         padding: 4px 2px 2px 2px !important;
     }
 }
-@media (min-width: 560px) and (max-width: 1080px) {
+@media (min-width: 560px) and (max-width: 1520px) {
     body:not(.lms-gate-active) .site-header .main-nav {
         justify-content: center !important;
+    }
+}
+
+@media (max-width: 640px) {
+    body:not(.lms-gate-active) .site-header .header-actions {
+        flex-wrap: wrap !important;
+        justify-content: flex-end !important;
+        gap: 4px !important;
+        max-width: 100% !important;
+    }
+    body:not(.lms-gate-active) .site-header #btn-header-admin-back,
+    body:not(.lms-gate-active) .site-header #btn-header-logout {
+        padding: 4px 7px !important;
+        font-size: 0.72rem !important;
     }
 }

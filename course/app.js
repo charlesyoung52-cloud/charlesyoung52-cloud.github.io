@@ -2600,7 +2600,7 @@ class SecurityCourseApp {
             title.style.color = "var(--brand-green-bright)";
             subtitle.textContent = `You achieved ${this.examPercentage}%, exceeding the State of Illinois passing standard of 75% (${COURSE_META.passingCorrect} correct out of 50). In compliance with IDFPR 225 ILCS 447, complete state trainee verification below to issue your permanent training certificate.`;
 
-            const paymentSatisfied = this.temporaryPaywallDisabled || this.isPaid;
+            const paymentSatisfied = this.temporaryPaywallDisabled || this.isPaid || this.isAdminMode;
 
             if (!paymentSatisfied) {
                 // Payment Gate visible; Certificate form locked
@@ -3359,9 +3359,16 @@ class SecurityCourseApp {
         const display = document.getElementById('header-student-name-display');
         const headerAccountInd = document.getElementById('header-account-indicator');
         const headerAccountText = document.getElementById('header-account-text');
+        const adminBackBtn = document.getElementById('btn-header-admin-back');
+        if (adminBackBtn) {
+            adminBackBtn.style.display = this.isAdminMode ? 'inline-flex' : 'none';
+        }
         const logoutBtn = document.getElementById('btn-header-logout');
         if (logoutBtn) {
             logoutBtn.style.display = this.isAuthenticated() ? 'inline-flex' : 'none';
+            logoutBtn.innerHTML = this.isAdminMode
+                ? '<i class="fas fa-sign-out-alt"></i> Exit God Mode'
+                : '<i class="fas fa-sign-out-alt"></i> Log Out';
         }
 
         if (!this.isAuthenticated()) {
@@ -3766,9 +3773,9 @@ class SecurityCourseApp {
     }
 
     updateAdminModeUI() {
-        const banner = document.getElementById('admin-mode-banner');
-        if (banner) {
-            banner.style.display = this.isAdminMode ? 'flex' : 'none';
+        const adminBackBtn = document.getElementById('btn-header-admin-back');
+        if (adminBackBtn) {
+            adminBackBtn.style.display = this.isAdminMode ? 'inline-flex' : 'none';
         }
     }
 
