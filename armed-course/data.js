@@ -19,25 +19,25 @@ const COURSE_META = {
     passingScore: 75,
     totalQuestions: 50,
     passingCorrect: 38,
-    maxAttempts: 2,
+    maxAttempts: null,
     examDurationSeconds: 0,
-    courseGoal: "To instill uncompromising firearm safety habits, mechanical mastery of revolvers and semi-automatic duty pistols, cartridge and malfunction diagnostics, the five fundamentals of marksmanship, Illinois deadly force law (720 ILCS 5/7-1), and live-fire range readiness required for Illinois Firearm Control Card (Tan Card) certification under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398)."
+    courseGoal: "To instill uncompromising firearm safety habits, mastery of revolver and semi-automatic pistol components, cartridge and pistol malfunction clearing, the fundamentals of pistol shooting, Illinois deadly force law (720 ILCS 5/7-1), and range qualification readiness required for Illinois Firearm Control Card (Tan Card) certification under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398)."
 };
 
 const LESSONS_DATA = [
     {
         id: 1,
         number: "Lesson 1",
-        title: "Course Administration, The 4 Cardinal Rules of Gun Safety & Safe Storage",
+        title: "Administrative Items, 4 Rules for Safe Gun Handling, Causes of Firearm Accidents & Pistol Storage",
         duration: "2 Hours",
         icon: "shield-alt",
-        summary: "Course policies and testing standards (75% passing, 2 attempts, untimed), the 4 Rules for Safe Gun Handling, root causes of firearm accidents (Ignorance vs. Carelessness), safe trigger finger indexing, and statutory firearm storage (720 ILCS 5/24-9).",
+        summary: "Administrative items and written examination standards (75% passing = 38/50, unlimited attempts, no time limit), the 4 Rules for Safe Gun Handling, causes of firearm accidents (Ignorance vs. Carelessness), safe trigger finger position, and pistol storage (720 ILCS 5/24-9).",
         content: `
             <div class="lesson-learning-objectives">
                 <h4><i class="fas fa-bullseye"></i> Learning Objectives</h4>
                 <ul>
-                    <li>Understand Platforms Training Academy administrative safety protocols (IDFPR Approved Curriculum #102-000398) and the mandatory 75% / 2-attempt final examination standard.</li>
-                    <li>Memorize and apply the 4 Cardinal Rules for Safe Gun Handling in every duty and training environment.</li>
+                    <li>Understand Platforms Training Academy administrative items (IDFPR Approved Curriculum #102-000398) and the 75% passing (38/50) written examination standard with unlimited attempts and no time limit.</li>
+                    <li>Memorize and apply the 4 Rules for Safe Gun Handling in every duty and training environment.</li>
                     <li>Distinguish between the two primary root causes of firearm accidents: <strong>Ignorance</strong> (lack of knowledge) and <strong>Carelessness</strong> (poor or improper attitude).</li>
                     <li>Demonstrate proper Safe Trigger Finger Position along the pistol frame and comply with Illinois firearm storage mandates (720 ILCS 5/24-9).</li>
                 </ul>
@@ -63,15 +63,15 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec1-1">1. Course Administration &amp; Classroom Safety Policy</h3>
+            <h3 id="sec1-1">1. Administrative Items</h3>
             <p>Under the Illinois Private Detective, Private Alarm, Private Security, Fingerprint Vendor, and Locksmith Act of 2004 (<strong>225 ILCS 447</strong>) and <strong>68 Ill. Adm. Code 1240.510</strong> (<strong>IDFPR Approved Curriculum #102-000398</strong>), armed security candidates must complete <strong>20 hours of armed security classroom instruction</strong> (authorized online under Section 1240.510(a)) followed by <strong>8 hours of live-fire range training and qualification</strong> (minimum 50 rounds at Eagle Sports Range).</p>
             <ul>
                 <li><strong>Zero Live Ammunition Policy in Study/Dry-Fire Areas:</strong> Whenever inspecting, dry-practicing, or studying firearm mechanics outside a live firing line, zero live ammunition is permitted in the immediate training workspace.</li>
                 <li><strong>Security of Firearms:</strong> Duty firearms must remain secured in an approved retention holster or locked transport case unless explicitly instructed by a Range Safety Officer on the firing line.</li>
-                <li><strong>Final Written Examination Standard:</strong> At the conclusion of all 10 online modules, you must pass an <strong>untimed 50-question comprehensive examination</strong> with a minimum score of <strong>75% (38 out of 50 correct)</strong>. You are allotted a maximum of <strong>2 attempts</strong>.</li>
+                <li><strong>Final Written Examination Standard:</strong> At the conclusion of all 10 online lessons, you must pass the <strong>50-question comprehensive written examination</strong> with a minimum score of <strong>75% (38 out of 50 correct)</strong>. There is <strong>no time limit</strong> and you have <strong>unlimited attempts</strong>.</li>
             </ul>
 
-            <h3 id="sec1-2">2. The 4 Cardinal Rules for Safe Gun Handling</h3>
+            <h3 id="sec1-2">2. 4 Rules for Safe Gun Handling</h3>
             <p>Every armed security professional must internalize and obey the <strong>4 Rules for Safe Gun Handling</strong> without exception:</p>
             <ol>
                 <li><strong>RULE #1 — ALWAYS KEEP THE GUN POINTED IN A SAFE DIRECTION:</strong> A "safe direction" is one in which an unintended discharge would cause zero injury to any person and minimal property damage, accounting for surface ricochets and wall penetration (drywall, glass, and hollow doors do NOT stop pistol rounds).</li>
@@ -90,7 +90,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec1-3">3. Root Causes of Firearm Accidents: Ignorance vs. Carelessness</h3>
+            <h3 id="sec1-3">3. Causes of Firearm Accidents: Ignorance vs. Carelessness</h3>
             <p>Virtually 100% of firearm "accidents" are preventable negligent events stemming from two human root causes:</p>
             <div class="callout warning">
                 <strong>THE TWO ROOT CAUSES OF FIREARM ACCIDENTS:</strong>
@@ -110,7 +110,7 @@ const LESSONS_DATA = [
                 </ul>
             </div>
 
-            <h3 id="sec1-4">4. Safe Trigger Finger Position (Indexing)</h3>
+            <h3 id="sec1-4">4. Safe Trigger Finger Position</h3>
             <p>With the pistol pointed in a safe direction, the shooting-hand <strong>index finger must be placed straight alongside the frame (receiver) of the pistol, high above and away from the trigger guard</strong>. Do not rest your finger on the front of the trigger guard or hover inside the guard.</p>
 
             <figure class="armed-slide-figure">
@@ -123,7 +123,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec1-5">5. Safe Pistol Storage &amp; Illinois Safe Storage Law (720 ILCS 5/24-9)</h3>
+            <h3 id="sec1-5">5. Pistol Storage (720 ILCS 5/24-9)</h3>
             <p>Off-duty storage of your duty weapon requires both environmental protection and strict unauthorized-access prevention:</p>
             <ul>
                 <li><strong>Environmental Protection:</strong> Store firearms in a <strong>cool, dry place</strong> to prevent moisture condensation, rust, corrosion of internal springs, and lubricant degradation.</li>
@@ -185,14 +185,14 @@ const LESSONS_DATA = [
                 id: "c1_3",
                 question: "What are the mandatory testing parameters for the Platforms Training Academy 20-Hour Armed Security Course written exam (IDFPR Approved Curriculum #102-000398)?",
                 options: [
-                    "50% passing score, unlimited attempts",
-                    "75% minimum passing score (38/50) with a maximum of 2 attempts",
-                    "95% passing score, 1 attempt only",
+                    "50% minimum passing score (25/50)",
+                    "75% minimum passing score (38/50) with unlimited attempts and no time limit",
+                    "95% minimum passing score (48/50), 1 attempt only",
                     "No written test is required prior to live-fire range qualification"
                 ],
-                correctAnswer: "75% minimum passing score (38/50) with a maximum of 2 attempts",
+                correctAnswer: "75% minimum passing score (38/50) with unlimited attempts and no time limit",
                 remediationTarget: "sec1-1",
-                explanation: "Per Academy and IDFPR armed training standards (IDFPR Approved Curriculum #102-000398), trainees must score at least 75% (38/50) on the 50-question written examination, with a maximum of 2 attempts."
+                explanation: "Per Platforms Training Academy and IDFPR armed training standards (IDFPR Approved Curriculum #102-000398), trainees must score at least 75% (38/50) on the 50-question written examination, with unlimited attempts and no time limit."
             }
         ],
         takeaways: [
@@ -205,7 +205,7 @@ const LESSONS_DATA = [
     {
         id: 2,
         number: "Lesson 2",
-        title: "Two-Handed Combat Grip, Thumb Placement & Tactical Shooting Stance",
+        title: "Assuming a Two-Handed Grip, Thumb Position & Stance",
         duration: "2 Hours",
         icon: "hand-paper",
         summary: "Building a repeatable high-tang two-handed pistol grip, critical thumb placement differences between revolvers and semi-automatic pistols to prevent cylinder-gap and slide-bite injuries, and the balanced, mobile tactical stance.",
@@ -240,7 +240,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec2-1">1. Assuming a Two-Handed Grip — Step 1: The Shooting Hand</h3>
+            <h3 id="sec2-1">1. Assuming a Two-Handed Grip — Shooting Hand</h3>
             <p>A consistent two-handed grip starts the moment your shooting hand makes contact with the holstered or cleared pistol:</p>
             <ul>
                 <li><strong>High Backstrap Placement:</strong> Place the <strong>"V" (web) between the thumb and forefinger</strong> of your shooting hand as <strong>high as possible on the pistol backstrap</strong> (directly beneath the beavertail or frame tang). Leaving a gap below the tang increases muzzle flip because the bore axis sits higher above your wrist pivot.</li>
@@ -248,7 +248,7 @@ const LESSONS_DATA = [
                 <li><strong>Straight Rearward Pressure:</strong> Apply grip pressure <strong>straight to the rear</strong> (front-to-back), keeping your trigger index finger indexed straight along the frame.</li>
             </ul>
 
-            <h3 id="sec2-2">2. Assuming a Two-Handed Grip — Step 2: Adding the Support Hand</h3>
+            <h3 id="sec2-2">2. Assuming a Two-Handed Grip — Support Hand</h3>
             <p>Once the shooting hand is anchored high on the backstrap, bring your support (non-shooting) hand up to complete 360-degree contact:</p>
             <ul>
                 <li><strong>Wrap Support Fingers:</strong> Wrap the four fingers of your support hand firmly over the knuckles of your shooting-hand lower three fingers, snugging right underneath the trigger guard.</li>
@@ -276,7 +276,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec2-3">3. Thumb Position: Revolver vs. Semi-Automatic Pistol</h3>
+            <h3 id="sec2-3">3. Thumb Position — The Two-Handed Grip</h3>
             <p>Because revolvers and semi-automatic pistols vent gas and cycle moving steel differently, thumb placement MUST match the platform:</p>
             <div class="callout tip">
                 <strong>MANDATORY PLATFORM THUMB PLACEMENT RULES:</strong>
@@ -296,7 +296,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec2-4">4. Tactical Shooting Stance</h3>
+            <h3 id="sec2-4">4. Stance</h3>
             <p>Your shooting stance must serve as a <strong>stable yet mobile platform</strong> capable of absorbing recoil and allowing rapid 360-degree movement toward cover:</p>
             <ul>
                 <li><strong>Foot Placement:</strong> Feet positioned approximately <strong>shoulder-width apart</strong> (either squared or half-step staggered with support foot slightly forward).</li>
@@ -389,7 +389,7 @@ const LESSONS_DATA = [
     {
         id: 3,
         number: "Lesson 3",
-        title: "Pistol Types, Action Mechanisms, Revolver Anatomy & Barrel Rifling",
+        title: "Pistol Types, Pistol Action Types, Revolver Components & Rifling",
         duration: "2 Hours",
         icon: "cogs",
         summary: "Comparison of revolver and semi-automatic pistol platforms, Single-Action (SA), Double-Action (DA), and Double-Action-Only (DAO) trigger mechanisms, complete revolver component identification, and barrel rifling physics (lands and grooves).",
@@ -423,7 +423,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec3-1">1. Pistol Types &amp; The Three Pistol Action Types</h3>
+            <h3 id="sec3-1">1. Pistol Types &amp; Pistol Action Types</h3>
             <p>Handguns used in private security fall into two primary mechanical designs—<strong>Revolvers</strong> (housing cartridges in a revolving multi-chamber cylinder) and <strong>Semi-Automatic Pistols</strong> (feeding cartridges from a removable box magazine into a single barrel chamber)—and operate via three distinct action types:</p>
             <ul>
                 <li><strong>1. SINGLE-ACTION (SA):</strong> Each pull of the trigger performs only a <strong>single mechanical action: releasing the hammer</strong> (or striker). Because pulling the trigger cannot cock the hammer, the <strong>hammer must be manually cocked prior to the first shot</strong> (subsequent shots on a SA semi-auto are cocked automatically by the reciprocating slide).</li>
@@ -431,7 +431,7 @@ const LESSONS_DATA = [
                 <li><strong>3. DOUBLE-ACTION-ONLY (DAO):</strong> <strong>Every pull of the trigger both cocks and releases the hammer</strong> with a consistent long trigger stroke, and the firearm <strong>CANNOT be fired in Single-Action mode</strong> (hammer spur is bobbed/internal or un-cockable). Many security agencies favor DAO or consistent striker systems so every shot feels identical under stress.</li>
             </ul>
 
-            <h3 id="sec3-2">2. Revolver Major Groups &amp; External Components</h3>
+            <h3 id="sec3-2">2. Revolver Components</h3>
             <p>Every revolver is organized into three major component groups—<strong>Frame</strong>, <strong>Barrel</strong>, and <strong>Action</strong>—plus its revolving <strong>Cylinder</strong>:</p>
             <ul>
                 <li><strong>Frame:</strong> The structural backbone housing the grip panels, front strap, backstrap, and trigger guard, to which the barrel and cylinder crane attach.</li>
@@ -449,7 +449,7 @@ const LESSONS_DATA = [
                         <img src="assets/slide_18_revolver_parts1.jpg" alt="Revolver Major Groups: Barrel, Frame, Action">
                     </div>
                     <figcaption>
-                        <strong>Revolver Anatomy (Part 1) &bull; Major Groups</strong>
+                        <strong>Revolver Components (Part 1) &bull; Major Groups</strong>
                         Barrel, Frame, and internal Action contained within the frame.
                     </figcaption>
                 </figure>
@@ -458,7 +458,7 @@ const LESSONS_DATA = [
                         <img src="assets/slide_19_revolver_parts2.jpg" alt="Revolver Sight and Grip Components">
                     </div>
                     <figcaption>
-                        <strong>Revolver Anatomy (Part 2) &bull; Sights &amp; Grip Frame</strong>
+                        <strong>Revolver Components (Part 2) &bull; Sights &amp; Grip Frame</strong>
                         Front sight, rear sight, trigger guard, front strap, backstrap, and grip panels.
                     </figcaption>
                 </figure>
@@ -467,13 +467,13 @@ const LESSONS_DATA = [
                         <img src="assets/slide_20_revolver_parts3.jpg" alt="Revolver Operating Controls">
                     </div>
                     <figcaption>
-                        <strong>Revolver Anatomy (Part 3) &bull; Operating Controls</strong>
+                        <strong>Revolver Components (Part 3) &bull; Operating Controls</strong>
                         Cylinder, ejector rod, cylinder release latch, hammer, hammer spur, and trigger.
                     </figcaption>
                 </figure>
             </div>
 
-            <h3 id="sec3-3">3. Parts of a Revolver Barrel &amp; Rifling Physics</h3>
+            <h3 id="sec3-3">3. Parts of a Revolver Barrel &amp; Rifling</h3>
             <p>Notice an important mechanical distinction on a revolver: <strong>on a revolver, the firing chambers are bored into the revolving cylinder rather than integrally into the rear of the barrel</strong>. As the bullet exits the cylinder chamber, it jumps the tiny cylinder gap into the forcing cone of the barrel, travels down the rifled bore, and exits the <strong>muzzle</strong>.</p>
             <div class="callout tip">
                 <strong>WHAT IS RIFLING? (LANDS &amp; GROOVES):</strong>
@@ -574,7 +574,7 @@ const LESSONS_DATA = [
     {
         id: 4,
         number: "Lesson 4",
-        title: "Semi-Automatic Pistol Anatomy, Barrel Locking Lugs & The 3 Slide Functions",
+        title: "Semi-Automatic Pistol Components, Parts of a Semi-Automatic Pistol Barrel & Functions of a Semi-Automatic Slide",
         duration: "2 Hours",
         icon: "sliders-h",
         summary: "Detailed anatomy of modern duty semi-automatic pistols (slide, frame, barrel, ejection port, slide stop, magazine release, takedown lever, safety, beavertail), integral barrel chamber & locking lugs, and the 3 mechanical functions of the reciprocating slide.",
@@ -608,7 +608,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec4-1">1. Semi-Automatic Pistol Major Groups &amp; External Controls</h3>
+            <h3 id="sec4-1">1. Semi-Automatic Pistol Components</h3>
             <p>A semi-automatic ("autoloading") pistol harnesses recoil energy to cycle the action automatically for each shot, firing <strong>one round per single press of the trigger</strong>:</p>
             <ul>
                 <li><strong>Frame (Receiver):</strong> Lower polymer or metal chassis housing the trigger group, grip panels/front strap/backstrap, <strong>beavertail</strong> (rear frame tang protecting the hand from slide bite), trigger guard, and magazine well.</li>
@@ -650,7 +650,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec4-2">2. Parts of a Semi-Automatic Pistol Barrel</h3>
+            <h3 id="sec4-2">2. Parts of a Semi-Automatic Pistol Barrel &amp; Rifling</h3>
             <p>Unlike a revolver (where chambers sit inside the cylinder), a semi-automatic pistol barrel contains four critical integrated features:</p>
             <ol>
                 <li><strong>Chamber:</strong> The enlarged rear section of the barrel machined to the exact dimensions of a single cartridge where ignition occurs.</li>
@@ -669,7 +669,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec4-3">3. The 3 Mechanical Functions of a Semi-Automatic Slide</h3>
+            <h3 id="sec4-3">3. Functions of a Semi-Automatic Slide</h3>
             <div class="callout warning">
                 <strong>MEMORIZE THE 3 FUNCTIONS OF A SEMI-AUTOMATIC SLIDE:</strong>
                 <p>When a cartridge fires (or when the shooter manually racks the slide completely to the rear and releases it), the slide performs three sequential mechanical functions:</p>
@@ -753,7 +753,7 @@ const LESSONS_DATA = [
     {
         id: 5,
         number: "Lesson 5",
-        title: "Clearing a Pistol, Duty Holster Draw, Weapon Retention, Workspace Reloads & Cleaning",
+        title: "Clearing a Pistol, Drawing from a Holster, Loading & Reloading & Pistol Disassembly & Cleaning",
         duration: "2 Hours",
         icon: "sync-alt",
         summary: "Mandatory 3-step sequence for clearing a semi-automatic pistol, revolver unloading procedure, 4-count duty retention holster draw, weapon retention fundamentals (68 IAC 1240.510), loading/reloading from the Workspace (Tactical vs. Emergency Reloads), and safe disassembly/cleaning.",
@@ -787,7 +787,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec5-1">1. Mandatory Procedure for Clearing a Pistol</h3>
+            <h3 id="sec5-1">1. Clearing a Pistol</h3>
             <p>With the muzzle pointed in a safe direction (Rule #1) and your index finger indexed high along the frame (Rule #2):</p>
             <div class="callout warning">
                 <strong>THE 3-STEP SEMI-AUTOMATIC CLEARING SEQUENCE:</strong>
@@ -809,7 +809,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec5-2">2. Drawing from a Duty Holster &amp; Weapon Retention (68 IAC 1240.510)</h3>
+            <h3 id="sec5-2">2. Drawing from a Holster &amp; Weapon Retention (68 IAC 1240.510)</h3>
             <p>Uniformed armed security officers carry openly in a <strong>Level II or Level III active-retention duty holster</strong> designed to prevent suspect gun-grabs. Never "bowling-ball swing" or sweep your own leg/support hand during the draw:</p>
             <ol>
                 <li><strong>Count 1 — Grip &amp; Defeat Retention:</strong> Establish a high shooting-hand master grip in the holster while deactivating hood/thumb retention levers; simultaneously bring your support hand flat to your chest/sternum (safely out of the muzzle path so you never sweep your own hand!).</li>
@@ -819,7 +819,7 @@ const LESSONS_DATA = [
             </ol>
             <p><strong>Weapon Retention Fundamentals:</strong> Per FBI Law Enforcement Officers Killed and Assaulted (LEOKA) data, a high percentage of officers feloniously shot are killed with their own firearm after losing a close-quarters disarm struggle. Maintain <strong>reactionary distance (6+ feet)</strong>, blade your weapon hip ("gun side back") during interviews, and if an attacker grabs your holstered pistol: <strong>clamp down hard with both hands to trap the weapon in the holster</strong>, drop your center of gravity, pivot/turn away from the grab to shear their wrist grip, and create distance.</p>
 
-            <h3 id="sec5-3">3. Loading &amp; Reloading From Your "Workspace"</h3>
+            <h3 id="sec5-3">3. Loading &amp; Reloading</h3>
             <p>Never stare down at your beltline or waist while loading or reloading—looking at the floor blinds you to a moving threat and causes balance loss. Instead, bring the pistol in close at <strong>chin/upper-chest height slightly below eye level—known as your "Workspace."</strong></p>
             <ul>
                 <li><strong>Why the Workspace Works:</strong> Holding the pistol 10–14 inches in front of your chin lets you align the magazine into the magwell using peripheral vision while keeping your head upright and eyes scanning downrange toward the threat environment.</li>
@@ -848,7 +848,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec5-4">4. Safe Pistol Disassembly &amp; Routine Duty Maintenance</h3>
+            <h3 id="sec5-4">4. Pistol Disassembly &amp; Cleaning</h3>
             <p>Sweat, lint, rain, carbon fouling, and unburned powder accumulate inside a duty firearm every week, even if unfired. Before cleaning:</p>
             <ul>
                 <li><strong>Rule #1 of Cleaning:</strong> Remove all live ammunition and loaded magazines to a separate room, then <strong>clear the pistol completely</strong> (mag out, rack slide, visual &amp; tactile chamber check) BEFORE touching any takedown lever or trigger.</li>
@@ -930,10 +930,10 @@ const LESSONS_DATA = [
     {
         id: 6,
         number: "Lesson 6",
-        title: "Ammunition Anatomy, Rimfire vs. Centerfire, Firing Sequence, Headstamps & +P Loads",
+        title: "Cartridge Components, Rimfire & Center-Fire Cartridges, Cartridge Firing Sequence & Ammunition Storage",
         duration: "2 Hours",
         icon: "dot-circle",
-        summary: "The 4 components of a modern metallic cartridge, Rimfire vs. Centerfire ignition design, the 6-step internal firing sequence, matching barrel/headstamp/box caliber designations, +P and +P+ high-pressure warnings, and safe ammunition storage.",
+        summary: "The 4 cartridge components, Rimfire and Center-Fire cartridges, the 6-step cartridge firing sequence, cartridge designation and identification (pistol, casehead, and ammunition box), +P and +P+ cartridges, and ammunition storage.",
         content: `
             <div class="lesson-learning-objectives">
                 <h4><i class="fas fa-bullseye"></i> Learning Objectives</h4>
@@ -964,7 +964,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec6-1">1. The 4 Cartridge Components &amp; Rimfire vs. Centerfire</h3>
+            <h3 id="sec6-1">1. Cartridge Components &amp; Rimfire and Center-Fire Cartridges</h3>
             <p>In professional firearms terminology, a <strong>"round" or "cartridge"</strong> is a complete unit of ammunition consisting of four distinct components:</p>
             <ol>
                 <li><strong>Case:</strong> Brass, nickel-plated brass, aluminum, or steel container holding all other components together and expanding on firing to seal hot gases inside the chamber (obturation).</li>
@@ -999,7 +999,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec6-2">2. The 6-Step Cartridge Firing Sequence</h3>
+            <h3 id="sec6-2">2. Cartridge Firing Sequence</h3>
             <p>From the instant a round sits in battery to the audible gunshot report, six physical steps occur in milliseconds:</p>
             <ol>
                 <li><strong>Step 1:</strong> Cartridge is properly seated inside the barrel/cylinder <strong>chamber</strong>.</li>
@@ -1020,7 +1020,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec6-3">3. Cartridge Identification, +P / +P+ Pressure &amp; Safe Ammo Storage</h3>
+            <h3 id="sec6-3">3. Cartridge Designation and Identification, +P and +P+ Cartridges &amp; Ammunition Storage</h3>
             <p>To prevent catastrophic caliber mismatches, verify that the <strong>Cartridge Designation</strong> matches across all three locations:</p>
             <ul>
                 <li><strong>1. Stamped on the Pistol</strong> (barrel hood, barrel side, or slide);</li>
@@ -1131,7 +1131,7 @@ const LESSONS_DATA = [
     {
         id: 7,
         number: "Lesson 7",
-        title: "Cartridge & Mechanical Pistol Malfunctions: Diagnostics & Clearing Protocols",
+        title: "Cartridge Malfunctions, Pistol Malfunctions & Clearing Pistol Malfunctions",
         duration: "2 Hours",
         icon: "exclamation-triangle",
         summary: "Identifying and safely resolving ammunition malfunctions (Misfire, the mandatory 30-second Hangfire wait rule, and bore-obstructing Squib Loads) and mechanical pistol malfunctions (Failure to Feed, Failure to Extract, Tap-Rack remediation, and Double Feed clearing).",
@@ -1166,7 +1166,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec7-1">1. Cartridge (Ammunition) Malfunctions: Misfire, Hangfire &amp; Squib Load</h3>
+            <h3 id="sec7-1">1. Cartridge Malfunctions: Misfire, Hangfire &amp; Squib Load</h3>
             <p>Ammunition malfunctions originate inside the cartridge components rather than the pistol's feeding cycle:</p>
             <ul>
                 <li><strong>1. MISFIRE:</strong> Complete <strong>failure of a cartridge to ignite</strong> after the primer or case rim is struck by the firing pin (you press the trigger, hear <em>click</em>, and nothing fires). <em>Causes:</em> Either a defect in the cartridge (dead/contaminated primer) OR a defect in the pistol (broken/fouled firing pin or weak mainspring).</li>
@@ -1204,7 +1204,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec7-2">2. Mechanical Pistol Malfunctions: Failure to Feed, Failure to Extract &amp; Double Feed</h3>
+            <h3 id="sec7-2">2. Pistol Malfunctions: Failure to Feed, Failure to Extract &amp; Double Feed</h3>
             <p>Mechanical cycle malfunctions interrupt one of the slide's 3 mechanical functions:</p>
             <ul>
                 <li><strong>1. FAILURE TO FEED:</strong> Occurs when a live round fails to completely enter the barrel chamber after the slide cycles on a loaded magazine (often caused by an unseated magazine, weak grip/"limp-wristing", dirty feed ramp, or damaged magazine lips).</li>
@@ -1222,7 +1222,7 @@ const LESSONS_DATA = [
                 </figcaption>
             </figure>
 
-            <h3 id="sec7-3">3. Clearing Pistol Malfunctions: "Tap, Rack" vs. Double Feed Remediation</h3>
+            <h3 id="sec7-3">3. Clearing Pistol Malfunctions: "Tap, Rack" &amp; Double Feed</h3>
             <div class="callout tip">
                 <strong>CLEARING DRILL #1 — "TAP, RACK" (For Failure to Feed or Failure to Extract):</strong>
                 <ol>
@@ -1306,7 +1306,7 @@ const LESSONS_DATA = [
     {
         id: 8,
         number: "Lesson 8",
-        title: "The Five Fundamentals of Pistol Marksmanship",
+        title: "Fundamentals of Pistol Shooting",
         duration: "2 Hours",
         icon: "crosshairs",
         summary: "Mastering all 5 Pistol Shooting Fundamentals on every shot: Aiming (Sight Alignment 'Equal Height, Equal Light', Sight Picture, and Front Sight Focus), Hold Control (minimizing Arc of Movement), Breath Control (Natural Respiratory Pause), Trigger Control, and Follow-Through.",
@@ -1340,7 +1340,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec8-1">1. Fundamental #1: AIMING (Sight Alignment, Sight Picture &amp; Front Sight Focus)</h3>
+            <h3 id="sec8-1">1. Aiming: Sight Alignment, Sight Picture &amp; Front Sight Focus</h3>
             <p><strong>Aiming</strong> is the process of establishing the proper geometric relationship between the <strong>Target</strong>, the <strong>Front Sight</strong>, and the <strong>Rear Sight</strong>, and consists of two distinct components:</p>
             <ul>
                 <li><strong>A. SIGHT ALIGNMENT ("Equal Height, Equal Light"):</strong> Refers strictly to the proper relationship between the pistol's <strong>front sight and rear sight</strong>:
@@ -1399,7 +1399,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec8-2">2. Fundamentals #2 &amp; #3: HOLD CONTROL (Arc of Movement) &amp; BREATH CONTROL</h3>
+            <h3 id="sec8-2">2. Hold Control (Arc of Movement) &amp; Breath Control</h3>
             <ul>
                 <li><strong>FUNDAMENTAL #2 — HOLD CONTROL &amp; ARC OF MOVEMENT:</strong> Hold control allows you to maintain proper sight alignment and sight picture while firing the shot. Every living human body exhibits a slight, unavoidable wobble when extending a pistol at arm's length—called the <strong>Arc (or Arch) of Movement</strong>. Do NOT jerk the trigger trying to "ambush" the exact center as the sights sweep past! Instead, maintain a firm, consistent grip and balanced stance to keep your Arc of Movement inside the scoring zone; regular dry-fire and live-fire practice steadily shrinks this arc.</li>
                 <li><strong>FUNDAMENTAL #3 — BREATH CONTROL:</strong> Rising and falling chest respiration moves your shoulders and extended sights vertically off target. Take a normal breath prior to each precision shot, exhale naturally to your <strong>Natural Respiratory Pause</strong> (the relaxed 2–4 second pause at the bottom of a normal exhale before oxygen hunger sets in), and break the shot cleanly during that pause. Never hold your breath for 12+ seconds—oxygen deprivation triggers muscle tremors and blurred vision!</li>
@@ -1426,7 +1426,7 @@ const LESSONS_DATA = [
                 </figure>
             </div>
 
-            <h3 id="sec8-3">3. Fundamentals #4 &amp; #5: TRIGGER CONTROL, FOLLOW-THROUGH &amp; The Top Two</h3>
+            <h3 id="sec8-3">3. Trigger Control, Follow-Through &amp; Most Important Shooting Fundamentals</h3>
             <ul>
                 <li><strong>FUNDAMENTAL #4 — TRIGGER CONTROL:</strong> Activating the trigger smoothly so zero lateral force misaligns the sights:
                     <ul>
@@ -1519,7 +1519,7 @@ const LESSONS_DATA = [
     {
         id: 9,
         number: "Lesson 9",
-        title: "Illinois Use of Deadly Force Law, Tan Card Regulations & Post-Incident Protocol",
+        title: "Legal Use of Firearms, Use of Deadly Force & Firearm Control Card Regulations",
         duration: "2 Hours",
         icon: "balance-scale",
         summary: "Statutory justification for deadly force in Illinois (720 ILCS 5/7-1), Forcible Felonies (720 ILCS 5/2-8), absolute prohibition on deadly force to protect property alone (720 ILCS 5/7-3), aggressor/fleeing-felon limits, IDFPR Tan Card compliance (225 ILCS 447), and post-shooting procedures.",
@@ -1678,7 +1678,7 @@ const LESSONS_DATA = [
     {
         id: 10,
         number: "Lesson 10",
-        title: "Live-Fire Range Safety, Firing Line Commands & Official 50-Round Qualification",
+        title: "Range Qualification: Range Safety, Range Commands & Qualification Standards",
         duration: "2 Hours",
         icon: "bullseye",
         summary: "Preparing for your included Live-Fire Range Qualification at Eagle Sports Range: mandatory PPE and dress code, firing-line malfunction/question protocol (raise non-shooting hand), official Range Commands (LOAD, BEGIN FIRING, CEASE FIRE / Physical Contact), and exact 35/50 Pistol & Rifle/Shotgun Qualification courses of fire.",
@@ -1712,7 +1712,7 @@ const LESSONS_DATA = [
                 </div>
             </div>
 
-            <h3 id="sec10-1">1. Mandatory Range Safety &amp; Dress Code Rules</h3>
+            <h3 id="sec10-1">1. Range Safety</h3>
             <p>Every trainee attending Live-Fire Range Qualification at Eagle Sports Range must strictly obey all five range safety mandates:</p>
             <ul>
                 <li><strong>1. Wear Eye &amp; Ear Protection at ALL Times:</strong> Impact-rated wrap-around ballistic glasses and hearing protection must be worn before crossing the range bay threshold and kept on until exiting.</li>
@@ -1722,7 +1722,7 @@ const LESSONS_DATA = [
                 <li><strong>5. DO NOT Attempt to Clear Malfunctions on the Range Without Permission &amp; Supervision:</strong> During supervised range qualification, never self-clear a jammed or misfired gun at the bench without an Instructor standing beside you.</li>
             </ul>
 
-            <h3 id="sec10-2">2. Firing-Line Malfunction Protocol &amp; Official Range Commands</h3>
+            <h3 id="sec10-2">2. Range Commands</h3>
             <div class="callout warning">
                 <strong>5-STEP RANGE MALFUNCTION OR QUESTION PROTOCOL:</strong>
                 <p>If you believe you have experienced a firearm/cartridge malfunction OR simply have a question on the firing line:</p>
@@ -1742,7 +1742,7 @@ const LESSONS_DATA = [
                 <li><strong>"CEASE FIRE" / PHYSICAL CONTACT:</strong> <em>Anyone</em> on a range may call "CEASE FIRE!" upon observing any hazard. If anyone calls <strong>"CEASE FIRE"</strong>—OR if an Instructor makes <strong>physical contact</strong> with your shoulder/arm—immediately <strong>take your finger off the trigger, stop firing, keep the gun pointed downrange in a safe direction, and follow the Instructor's instructions</strong>!</li>
             </ul>
 
-            <h3 id="sec10-3">3. Official 50-Round Pistol &amp; Rifle/Shotgun Qualification Standards</h3>
+            <h3 id="sec10-3">3. Pistol Qualification Standards &amp; Rifle/Shotgun Qualification Standards</h3>
             <p>To pass Illinois Armed Security live-fire qualification under <strong>68 Ill. Adm. Code 1240.510(b)</strong> and Platforms Training Academy standards, you must fire <strong>50 total rounds</strong> and score at least <strong>35 out of 50 rounds (70%) inside the target scoring area</strong>:</p>
 
             <div class="range-qual-table-wrap">
@@ -1897,13 +1897,13 @@ const EXAM_QUESTIONS = [
         id: 1,
         part: "Part 1: Safety & Statutory True/False",
         type: "tf",
-        question: "One of the 4 Cardinal Rules for Safe Gun Handling is to ALWAYS keep your finger off the trigger until you are ready to shoot.",
+        question: "One of the 4 Rules for Safe Gun Handling is to ALWAYS keep your finger off the trigger until you are ready to shoot.",
         options: ["True", "False"],
         correctAnswer: "True",
         illustration: {
             type: "image",
             src: "assets/slide_05_four_safety_rules.jpg",
-            caption: "Academy Safety Standard: The 4 Cardinal Rules for Safe Gun Handling."
+            caption: "Academy Safety Standard: 4 Rules for Safe Gun Handling."
         },
         explanation: "TRUE. Rule #2 requires keeping your index finger straight along the frame, outside and away from the trigger guard, until your sights are aligned on target and you have decided to shoot."
     },
@@ -2460,7 +2460,7 @@ const EXAM_QUESTIONS = [
         explanation: "Because the chamber is already blocked, tapping and racking cannot clear a Double Feed—you must lock the slide/remove the magazine, clear the chamber completely, and insert a fresh magazine."
     },
 
-    // --- PART 5: THE FIVE FUNDAMENTALS OF PISTOL MARKSMANSHIP (36-43) ---
+    // --- PART 5: FUNDAMENTALS OF PISTOL SHOOTING (36-43) ---
     {
         id: 36,
         part: "Part 5: Marksmanship Fundamentals",

@@ -1511,6 +1511,13 @@ class SecurityCourseApp {
         alert(`🔒 MODULE ${lessonId} IS LOCKED\n\nIn accordance with IDFPR course requirements, you must complete all sections of Module ${prereqLesson} (Study Material, Tactical Scenario Simulator, and Check on Learning Quick Quiz) before unlocking Module ${lessonId}.`);
     }
 
+    toggleMobileDrawer(open) {
+        const drawer = document.getElementById('mobile-drawer');
+        const backdrop = document.getElementById('drawer-backdrop');
+        if (drawer) drawer.classList.toggle('open', Boolean(open));
+        if (backdrop) backdrop.classList.toggle('active', Boolean(open));
+    }
+
     // =========================================================================
     // View Routing
     // =========================================================================
@@ -2488,15 +2495,13 @@ class SecurityCourseApp {
     }
 
     startExamTimer() {
+        const timerDisplay = document.getElementById('exam-timer-display');
+        if (timerDisplay) {
+            timerDisplay.textContent = 'No Time Limit';
+        }
         if (this.timerInterval) return;
         this.timerInterval = setInterval(() => {
             this.timerSeconds++;
-            const minutes = Math.floor(this.timerSeconds / 60).toString().padStart(2, '0');
-            const seconds = (this.timerSeconds % 60).toString().padStart(2, '0');
-            const timerDisplay = document.getElementById('exam-timer-display');
-            if (timerDisplay) {
-                timerDisplay.textContent = `${minutes}:${seconds}`;
-            }
         }, 1000);
     }
 
@@ -2689,11 +2694,14 @@ class SecurityCourseApp {
             badge.className = 'score-badge failed';
             title.textContent = "EXAM NOT PASSED — 75% REQUIRED";
             title.style.color = "var(--danger)";
-            subtitle.textContent = `You scored ${this.examPercentage}% (${this.examScore} correct out of 50). A minimum of 75% (${COURSE_META.passingCorrect} correct) is required to pass the Illinois 20-Hour Unarmed Security qualification. Review your answers below and retake the exam when ready.`;
+            subtitle.textContent = `You scored ${this.examPercentage}% (${this.examScore} correct out of 50). A minimum of 75% (${COURSE_META.passingCorrect} correct) is required to pass the Illinois 20-Hour Unarmed Security qualification. You have unlimited attempts with no time limit—review your answers below and retake the exam when ready.`;
             if (payGate) payGate.style.display = 'none';
             if (certForm) certForm.style.display = 'none';
             if (mainActionBtn) {
-                mainActionBtn.innerHTML = `<i class="fas fa-redo"></i> Retake Exam to Qualify`;
+                mainActionBtn.disabled = false;
+                mainActionBtn.style.opacity = '1';
+                mainActionBtn.style.cursor = 'pointer';
+                mainActionBtn.innerHTML = `<i class="fas fa-redo"></i> Retake Exam (Unlimited Attempts)`;
                 mainActionBtn.onclick = () => this.retakeExam();
             }
         }
@@ -3091,7 +3099,7 @@ class SecurityCourseApp {
     }
 
     retakeExam() {
-        if (confirm("Are you sure you want to retake the 50-Question Exam? Your previous exam answers will be reset.")) {
+        if (confirm("Start a new 50-Question Exam attempt?\n\nYou have unlimited attempts and no time limit. Your previous exam answers will be reset.")) {
             this.userAnswers = {};
             this.flaggedQuestions.clear();
             this.examCompleted = false;

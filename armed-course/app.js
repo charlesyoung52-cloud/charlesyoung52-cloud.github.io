@@ -30,8 +30,8 @@ class SecurityCourseApp {
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
         this.temporaryPaywallDisabled = false;
         this.stripePaymentUrl = "https://buy.stripe.com/4gMaEXdJa9Un3Uw4249oc01";
-        this.examDurationSeconds = (typeof COURSE_META !== 'undefined' && COURSE_META.examDurationSeconds) ? COURSE_META.examDurationSeconds : 3600;
-        this.baseMaxAttempts = (typeof COURSE_META !== 'undefined' && COURSE_META.maxAttempts) ? COURSE_META.maxAttempts : 2;
+        this.examDurationSeconds = 0;
+        this.baseMaxAttempts = Infinity;
 
         // Payment & Permanent Certificate Sealing (Strictly isolated to Armed course per student email)
         const initEmail = (localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
@@ -162,7 +162,7 @@ class SecurityCourseApp {
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
             setTimeout(() => {
-                this.manualSaveProgress("Armed course tuition confirmed ($200.00)! All 10 armed modules & Eagle Sports Range voucher unlocked.");
+                this.manualSaveProgress("Armed course tuition confirmed ($200.00)! All 10 armed lessons & Eagle Sports Range voucher unlocked.");
             }, 500);
         }
 
@@ -234,7 +234,7 @@ class SecurityCourseApp {
     }
 
     getMaxAllowedAttempts() {
-        return (this.baseMaxAttempts || 2) + (this.bonusAttempts || 0);
+        return Infinity;
     }
 
     saveState() {
@@ -367,7 +367,7 @@ class SecurityCourseApp {
                 armed_payment_verified: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 armed_range_session: this.getSavedRangeDateRecord(cleanEmail) || (existingIdx >= 0 ? registry[existingIdx].armed_range_session : null) || null,
                 armed_completed_modules: completedCount,
-                armed_total_modules: 10,
+                armed_total_modules: LESSONS_DATA.length,
                 armed_exam_attempts: this.examAttempts || (this.examCompleted ? 1 : 0),
                 armed_best_score: this.examPercentage || null,
                 armed_latest_score: this.examPercentage || null,
@@ -1673,8 +1673,7 @@ class SecurityCourseApp {
         const exhaustedView = document.getElementById('exam-attempts-exhausted-view');
         const activeView = document.getElementById('exam-active-view');
         const allDone = this.areAllLessonsCompleted();
-        const maxAllowed = this.getMaxAllowedAttempts();
-        const attemptsExhausted = !this.isAdminMode && !this.examPassed && (this.examAttempts >= maxAllowed);
+        const attemptsExhausted = false;
 
         if (!allDone) {
             if (lockedView) lockedView.style.display = 'block';
@@ -2067,7 +2066,7 @@ class SecurityCourseApp {
                             ${(isQuizDone || this.isAdminMode)
                                 ? (lesson.id < LESSONS_DATA.length 
                                     ? `Next: Module ${lesson.id + 1} <i class="fas fa-arrow-right"></i>` 
-                                    : `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`)
+                                    : `All ${LESSONS_DATA.length} Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`)
                                 : `Complete All 3 Questions to Advance <i class="fas fa-lock"></i>`}
                         </button>
                     </div>
@@ -2286,7 +2285,7 @@ class SecurityCourseApp {
                 if (lessonId < LESSONS_DATA.length) {
                     colNextBtn.innerHTML = `Next: Module ${lessonId + 1} <i class="fas fa-arrow-right"></i>`;
                 } else {
-                    colNextBtn.innerHTML = `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
+                    colNextBtn.innerHTML = `All ${LESSONS_DATA.length} Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
                 }
             } else {
                 colNextBtn.classList.add('btn-module-locked');
@@ -2326,7 +2325,7 @@ class SecurityCourseApp {
                 if (lessonId < LESSONS_DATA.length) {
                     colNextBtn.innerHTML = `Next: Module ${lessonId + 1} <i class="fas fa-arrow-right"></i>`;
                 } else {
-                    colNextBtn.innerHTML = `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
+                    colNextBtn.innerHTML = `All ${LESSONS_DATA.length} Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
                 }
             }
         }
@@ -2352,7 +2351,7 @@ class SecurityCourseApp {
                     nextBtn.innerHTML = `Next: Module ${lessonId + 1} <i class="fas fa-arrow-right"></i>`;
                     nextBtn.onclick = () => this.loadLesson(lessonId + 1);
                 } else {
-                    nextBtn.innerHTML = `All 10 Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
+                    nextBtn.innerHTML = `All ${LESSONS_DATA.length} Modules Complete! Begin 50-Q Exam <i class="fas fa-graduation-cap"></i>`;
                     nextBtn.onclick = () => this.showView('exam');
                 }
             }
@@ -2593,13 +2592,9 @@ class SecurityCourseApp {
     }
 
     updateExamCountdownUI() {
-        const elapsed = Math.max(0, this.timerSeconds || 0);
-        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-        const seconds = (elapsed % 60).toString().padStart(2, '0');
-
         const timerDisplay = document.getElementById('exam-timer-display');
         if (timerDisplay) {
-            timerDisplay.textContent = `${minutes}:${seconds}`;
+            timerDisplay.textContent = 'No Time Limit';
         }
 
         const pill = document.getElementById('exam-countdown-pill');
@@ -2609,11 +2604,10 @@ class SecurityCourseApp {
 
         const attemptDisplay = document.getElementById('exam-attempt-display');
         if (attemptDisplay) {
-            const maxAllowed = this.getMaxAllowedAttempts();
-            const currentAttemptNum = Math.min((this.examAttempts || 0) + 1, maxAllowed);
+            const currentAttemptNum = (this.examAttempts || 0) + 1;
             attemptDisplay.textContent = this.isAdminMode
-                ? `Instructor Mode`
-                : `Attempt ${currentAttemptNum} of ${maxAllowed}`;
+                ? 'Instructor Mode'
+                : `Attempt #${currentAttemptNum} (Unlimited)`;
         }
     }
 
@@ -2637,10 +2631,9 @@ class SecurityCourseApp {
         const total = EXAM_QUESTIONS.length;
         const answered = Object.keys(this.userAnswers).length;
         const unanswered = total - answered;
-        const maxAllowed = this.getMaxAllowedAttempts();
-        const attemptNum = Math.min((this.examAttempts || 0) + 1, maxAllowed);
+        const attemptNum = (this.examAttempts || 0) + 1;
 
-        let message = `Submit your 50-Question Armed Security Examination (Attempt ${attemptNum} of ${maxAllowed})?\n\nYou have answered ${answered} of ${total} questions.`;
+        let message = `Submit your 50-Question Armed Security Examination (Attempt #${attemptNum} — Unlimited Attempts)?\n\nYou have answered ${answered} of ${total} questions.`;
         if (unanswered > 0) {
             message += `\n\nWARNING: You have ${unanswered} UNANSWERED questions! Unanswered items count as incorrect (38/50 = 75% required to pass).`;
         }
@@ -2712,12 +2705,10 @@ class SecurityCourseApp {
         const sealedBanner = document.getElementById('cert-sealed-banner');
         const mainActionBtn = document.getElementById('btn-results-main-action');
 
-        const maxAllowed = this.getMaxAllowedAttempts();
         const attemptsUsed = this.examAttempts || (this.examCompleted ? 1 : 0);
-        const attemptsExhausted = !this.isAdminMode && !this.examPassed && (attemptsUsed >= maxAllowed);
 
         const attemptStatEl = document.getElementById('results-attempt-stat');
-        if (attemptStatEl) attemptStatEl.textContent = `${attemptsUsed} / ${maxAllowed}`;
+        if (attemptStatEl) attemptStatEl.textContent = `#${attemptsUsed || 1} (Unlimited)`;
 
         const statusTagEl = document.getElementById('results-status-tag');
         const rangeBannerEl = document.getElementById('range-voucher-banner');
@@ -2730,7 +2721,7 @@ class SecurityCourseApp {
         scoreNum.textContent = `${effectiveScore} / ${EXAM_QUESTIONS.length}`;
         scorePct.innerHTML = (this.isAdminMode && !this.examPassed)
             ? `<strong>100% Score</strong><br><span style="font-size:0.88rem;">Admin Preview</span>`
-            : `<strong>${effectivePct}% Score</strong><br><span style="font-size:0.9rem;">Attempt ${attemptsUsed || 1} of ${maxAllowed}</span>`;
+            : `<strong>${effectivePct}% Score</strong><br><span style="font-size:0.9rem;">Attempt #${attemptsUsed || 1}</span>`;
 
         const examScoreReadonlyEl = document.getElementById('cert-readonly-exam-score');
         if (examScoreReadonlyEl) {
@@ -2835,37 +2826,27 @@ class SecurityCourseApp {
             }
         } else {
             badge.className = 'score-badge failed';
-            title.textContent = attemptsExhausted
-                ? "EXAM NOT PASSED — 2 OF 2 ATTEMPTS USED"
-                : "EXAM NOT PASSED — 75% REQUIRED";
+            title.textContent = "EXAM NOT PASSED — 75% REQUIRED";
             title.style.color = "var(--danger)";
-            const attemptsLeft = Math.max(0, maxAllowed - attemptsUsed);
-            subtitle.textContent = attemptsExhausted
-                ? `You scored ${this.examPercentage}% (${this.examScore}/50) on Attempt ${attemptsUsed} of ${maxAllowed}. Both standard attempts have been used; contact Lead Instructor Charles Young at (773) 873-2591 for remediation and an Instructor Retake Code.`
-                : `You scored ${this.examPercentage}% (${this.examScore}/50). A minimum of 75% (${COURSE_META.passingCorrect}/50) is required. You have ${attemptsLeft} attempt remaining—review every missed explanation below carefully before retaking!`;
+            subtitle.textContent = `You scored ${this.examPercentage}% (${this.examScore}/50). A minimum of 75% (${COURSE_META.passingCorrect}/50) is required. You have unlimited attempts with no time limit—review every missed explanation below carefully before retaking!`;
 
             if (statusTagEl) {
-                statusTagEl.textContent = attemptsExhausted ? "REMEDIATION REQ." : "RETAKE AVAILABLE";
+                statusTagEl.textContent = "RETAKE AVAILABLE";
                 statusTagEl.style.color = "#ef4444";
             }
             if (rangeBannerEl) rangeBannerEl.style.display = 'none';
             if (scheduleCtaEl) scheduleCtaEl.style.display = 'none';
             if (payGate) payGate.style.display = 'none';
             if (certForm) certForm.style.display = 'none';
-            if (exhaustedBoxEl) exhaustedBoxEl.style.display = attemptsExhausted ? 'block' : 'none';
-            if (retakeBtnEl) retakeBtnEl.style.display = attemptsExhausted ? 'none' : 'inline-flex';
+            if (exhaustedBoxEl) exhaustedBoxEl.style.display = 'none';
+            if (retakeBtnEl) retakeBtnEl.style.display = 'inline-flex';
 
             if (mainActionBtn) {
                 mainActionBtn.disabled = false;
                 mainActionBtn.style.opacity = '1';
                 mainActionBtn.style.cursor = 'pointer';
-                if (attemptsExhausted) {
-                    mainActionBtn.innerHTML = `<i class="fas fa-key"></i> Enter Instructor Retake Code`;
-                    mainActionBtn.onclick = () => this.promptExamRetakeUnlock();
-                } else {
-                    mainActionBtn.innerHTML = `<i class="fas fa-redo"></i> Start Attempt ${attemptsUsed + 1} of ${maxAllowed}`;
-                    mainActionBtn.onclick = () => this.retakeExam();
-                }
+                mainActionBtn.innerHTML = `<i class="fas fa-redo"></i> Retake 50-Q Exam (Unlimited Attempts)`;
+                mainActionBtn.onclick = () => this.retakeExam();
             }
         }
 
@@ -3236,16 +3217,10 @@ class SecurityCourseApp {
     }
 
     retakeExam() {
-        const maxAllowed = this.getMaxAllowedAttempts();
-        if (!this.isAdminMode && !this.examPassed && (this.examAttempts || 0) >= maxAllowed) {
-            alert(`MAXIMUM EXAM ATTEMPTS REACHED (${maxAllowed} of ${maxAllowed} used).\n\nPer Academy Armed Security standards, please contact Lead Instructor Charles Young at (773) 873-2591 for remediation and an Instructor Retake Authorization Code.`);
-            this.promptExamRetakeUnlock();
-            return;
-        }
         const nextAttempt = (this.examAttempts || 0) + 1;
         const confirmMsg = this.isAdminMode
             ? "Reset current answers and restart the 50-Question Armed Exam?"
-            : `Start Exam Attempt ${nextAttempt} of ${maxAllowed}?\n\nComplete all 50 questions (untimed) and achieve at least 75% (38/50).`;
+            : `Start Exam Attempt #${nextAttempt}?\n\nYou have unlimited attempts and no time limit to achieve at least 75% (38/50).`;
         if (confirm(confirmMsg)) {
             this.userAnswers = {};
             this.flaggedQuestions.clear();
@@ -3974,11 +3949,14 @@ class SecurityCourseApp {
         if (statModules) statModules.textContent = `${completedCount} / ${LESSONS_DATA.length} Mastered`;
 
         const statActive = document.getElementById('modal-stat-active-module');
-        if (statActive) statActive.textContent = `Lesson ${this.currentLessonId}`;
+        if (statActive) {
+            const curLes = LESSONS_DATA.find(l => l.id === this.currentLessonId);
+            statActive.textContent = curLes ? curLes.title : `Module ${this.currentLessonId}`;
+        }
 
         const totalQuizAns = Object.values(this.colAnswers).reduce((acc, curr) => acc + Object.values(curr).filter(Boolean).length, 0);
         const statQuizzes = document.getElementById('modal-stat-quizzes');
-        if (statQuizzes) statQuizzes.textContent = `${totalQuizAns} / 30 Questions Mastered`;
+        if (statQuizzes) statQuizzes.textContent = `${totalQuizAns} / ${LESSONS_DATA.length * 3} Questions Mastered`;
 
         const statExam = document.getElementById('modal-stat-exam-status');
         if (statExam) {
@@ -3987,7 +3965,7 @@ class SecurityCourseApp {
             } else if (this.areAllLessonsCompleted()) {
                 statExam.innerHTML = `<span style="color:var(--brand-green-bright);"><i class="fas fa-unlock"></i> Unlocked &bull; Ready</span>`;
             } else {
-                statExam.innerHTML = `<span style="color:#f59e0b;"><i class="fas fa-lock"></i> Locked (${10 - completedCount} modules left)</span>`;
+                statExam.innerHTML = `<span style="color:#f59e0b;"><i class="fas fa-lock"></i> Locked (${LESSONS_DATA.length - completedCount} modules left)</span>`;
             }
         }
 
@@ -4341,7 +4319,7 @@ class SecurityCourseApp {
                     <div class="admin-stat-lbl">Revenue Authorized</div>
                 </div>
                 <div class="admin-stat-card">
-                    <div class="admin-stat-val">${completedCount} / 10</div>
+                    <div class="admin-stat-val">${completedCount} / ${LESSONS_DATA.length}</div>
                     <div class="admin-stat-lbl">Modules Mastered</div>
                 </div>
                 <div class="admin-stat-card">
@@ -4378,7 +4356,7 @@ class SecurityCourseApp {
                         <tr>
                             <td><strong>${s.name}</strong></td>
                             <td>${s.email || 'N/A'}<br><small style="color:var(--text-muted);">${s.agency || 'N/A'}</small></td>
-                            <td>${s.completed_modules} / 10</td>
+                            <td>${s.completed_modules} / ${s.total_modules || LESSONS_DATA.length}</td>
                             <td><strong>${attemptsCount}</strong> attempt${attemptsCount === 1 ? '' : 's'}<br><small>${passStatus}</small></td>
                             <td>${best}</td>
                             <td>${isCert}</td>
@@ -4390,7 +4368,7 @@ class SecurityCourseApp {
                     <tr>
                         <td><strong>${this.studentCertData.name || 'Candidate Officer'}</strong></td>
                         <td>${this.studentEmail || 'N/A'}<br><small style="color:var(--text-muted);">${this.studentAgency}</small></td>
-                        <td>${this.getCompletedLessonsCount()} / 10</td>
+                        <td>${this.getCompletedLessonsCount()} / ${LESSONS_DATA.length}</td>
                         <td>${this.examAttempts || (this.examCompleted ? 1 : 0)} attempts</td>
                         <td>${this.examCompleted ? this.examPercentage + '%' : 'In Progress'}</td>
                         <td>${this.isCertLocked ? `<span style="color:var(--warning);"><i class="fas fa-lock"></i> ${this.issuedCertId || 'PTA-IL-SEALED'}</span>` : '<span style="color:var(--text-muted);">Not issued</span>'}</td>

@@ -118,11 +118,12 @@ def sync_to_cloud_json():
             latest_exam = dict(exams[-1]) if exams else None
             cert = cur.execute('SELECT * FROM certificates WHERE student_id = ?', (sid,)).fetchone()
             
+            is_armed_row = str(sid or '').lower().startswith('armed::')
+            default_total_mods = 10
             # Count modules
             mod_count = cur.execute('SELECT COUNT(*) as cnt FROM progress WHERE student_id = ? AND study_done = 1 AND scenario_done = 1 AND quiz_done = 1', (sid,)).fetchone()
-            completed_modules = mod_count['cnt'] if mod_count else (10 if cert else 0)
+            completed_modules = mod_count['cnt'] if mod_count else (default_total_mods if cert else 0)
 
-            is_armed_row = str(sid or '').lower().startswith('armed::')
             students_list.append({
                 'id': r['id'],
                 'name': r['name'],
@@ -136,7 +137,7 @@ def sync_to_cloud_json():
                 ) if r['is_paid'] else 'Pending Payment',
                 'payment_date': r['created_at'],
                 'completed_modules': completed_modules,
-                'total_modules': 10,
+                'total_modules': default_total_mods,
                 'exam_attempts': len(exams),
                 'best_score': best_score,
                 'latest_score': latest_exam['percentage'] if latest_exam else None,

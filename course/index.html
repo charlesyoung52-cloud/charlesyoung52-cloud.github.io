@@ -21,7 +21,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Sacramento&display=swap" rel="stylesheet">
     
     <!-- Custom Stylesheet matching platformstraining.com -->
-    <link rel="stylesheet" href="styles.css?v=9.2">
+    <link rel="stylesheet" href="styles.css?v=9.3">
 
 
 
@@ -635,18 +635,21 @@
 
             <!-- Sub-container B: Active Exam when unlocked -->
             <div id="exam-active-view" class="exam-container">
-                <!-- Status & Timer Bar -->
+                <!-- Status & No Time Limit Bar -->
                 <div class="exam-status-bar">
                     <div class="exam-progress-info">
                         <span class="exam-pill" id="exam-answered-count">0 / 50 Answered</span>
-                        <span class="exam-pill timer">
-                            <i class="fas fa-stopwatch"></i> <span id="exam-timer-display">00:00</span>
+                        <span class="exam-pill">
+                            <i class="fas fa-redo-alt"></i> Unlimited Attempts
+                        </span>
+                        <span class="exam-pill">
+                            <i class="fas fa-infinity"></i> <span id="exam-timer-display">No Time Limit</span>
                         </span>
                     </div>
 
                     <div class="exam-requirements">
                         <span style="font-size: 0.94rem; color: var(--text-muted);">
-                            Passing Score: <strong>75%</strong> (38 / 50 items minimum) &bull; Unlimited Retakes
+                            Passing Score: <strong>75%</strong> (38 / 50 items minimum) &bull; <strong>No Time Limit</strong> &bull; <strong>Unlimited Attempts</strong>
                         </span>
                     </div>
                 </div>
@@ -1220,9 +1223,9 @@
                 <div class="guide-step-card">
                     <div class="guide-step-num">5</div>
                     <div class="guide-step-content">
-                        <h4>Official 50-Question State Qualification Exam</h4>
+                        <h4>Official 50-Question State Qualification Exam (No Time Limit &bull; Unlimited Attempts)</h4>
                         <p>
-                            Once all 10 modules are mastered, the final exam unlocks. The exam consists of 50 multiple choice questions with a 75% minimum passing threshold (38/50 correct). You have unlimited retakes, an active stopwatch timer, category filter chips, and question flagging.
+                            Once all 10 modules are mastered, the final exam unlocks. The exam consists of 50 multiple choice questions with a 75% minimum passing threshold (38/50 correct). You have <strong>unlimited attempts</strong> with <strong>no time limit</strong>, category filter chips, and question flagging.
                         </p>
                     </div>
                 </div>
@@ -1464,7 +1467,7 @@
     <!-- Standalone Academy Scripts -->
     <script src="config.js?v=2.0"></script>
     <script src="data.js?v=3.6"></script>
-    <script src="app.js?v=9.5"></script>
+    <script src="app.js?v=10.1"></script>
 </body>
 
 

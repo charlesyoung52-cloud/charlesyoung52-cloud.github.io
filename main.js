@@ -13,7 +13,7 @@ const COURSE_DATABASE = {
         duration: "Self-Paced (20 Hours Online)",
         location: "100% Online LMS Portal (Phone, Tablet, or PC)",
         rangeNote: "No range session required. Study all 10 modules, interactive scenarios, and practice quizzes 100% online. You will receive your certificate immediately upon completion with no waiting period.",
-        description: "Official IDFPR-approved 20-hour curriculum required for all unarmed security officers in Illinois to obtain a Permanent Employee Registration Card (PERC). Complete your training 100% online at your own pace 24/7, pass the practice exam, and receive your official certificate immediately upon completion — there is absolutely no wait time.",
+        description: "Official IDFPR-approved 20-hour curriculum required for all unarmed security officers in Illinois to obtain a Permanent Employee Registration Card (PERC). Complete your training 100% online at your own pace 24/7, pass the 50-question final exam (75% passing, unlimited attempts, no time limit), and receive your official certificate immediately upon completion — there is absolutely no wait time.",
         curriculum: [
             "Illinois Private Detective, Private Alarm, Private Security Act of 2004 (225 ILCS 447)",
             "Role of the Security Officer, ethics, professional conduct & de-escalation",
@@ -38,14 +38,14 @@ const COURSE_DATABASE = {
         duration: "20 Hours Self-Paced Online (24/7) + 8-Hour Live-Fire Range Qualification",
         location: "Classroom: 100% Online LMS Portal (24/7) | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
         rangeNote: "All-inclusive $200 tuition covers both your 20-hour online classroom course AND your 8-hour live-fire qualification at Eagle Sports Range — ammunition, targets, and range fees are included. Bring eye & ear protection (also sold at the range).",
-        description: "Authorized under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398) for officers seeking an Illinois Firearm Control Card (Tan Card). Select your in-person range qualification date before enrollment, complete all 10 interactive armed modules (20 hours) and the untimed 50-question written exam (75% passing, max 2 attempts) 100% online at your own pace, and save your IDFPR Form IL486-1138 record to your profile for Instructor range sign-off and dispatch to you and IDFPR (FPR.SafetyUnit@illinois.gov).",
+        description: "Authorized under 68 Ill. Adm. Code 1240.510 (IDFPR Approved Curriculum #102-000398) for officers seeking an Illinois Firearm Control Card (Tan Card). Select your in-person range qualification date before enrollment, complete all 10 online armed lessons (20 hours) and the 50-question written exam (75% passing, unlimited attempts, no time limit) 100% online at your own pace, and save your IDFPR Form IL486-1138 record to your profile for Instructor range sign-off and dispatch to you and IDFPR (FPR.SafetyUnit@illinois.gov).",
         curriculum: [
-            "IDFPR Approved Curriculum #102-000398: Illinois 225 ILCS 447, FCC (Tan Card) rules, FOID (430 ILCS 65) & 720 ILCS 5/24 weapons exemptions",
-            "Justifiable Use of Deadly Force (720 ILCS 5/7-1 through 5/7-8), Tennessee v. Garner & Graham v. Connor",
-            "4 Cardinal Safety Rules, semi-automatic pistol & DA/SA revolver nomenclature and cycle of operations",
-            "Ammunition components, caliber verification, squib load & hangfire emergency response, Phase 1 & Phase 2 clearances",
-            "7 Marksmanship Fundamentals, 4-count retention holster draw, weapon retention & tactical reloads",
-            "Included 8-hour Eagle Sports Range 50-round live-fire qualification (7, 15 & 25 yards, min 70% = 35/50)"
+            "4 Rules for Safe Gun Handling, Causes of Firearm Accidents, Safe Trigger Finger Position, Assuming a Two-Handed Grip, Thumb Position & Stance",
+            "Pistol Types, Pistol Action Types, Revolver & Semi-Automatic Pistol Components, Rifling, Clearing a Pistol, Drawing from a Holster, Loading & Reloading",
+            "Cartridge Components, Rimfire & Center-Fire Cartridges, +P/+P+ Safety, Cartridge & Pistol Malfunctions (Hangfire, Squib, Tap-Rack, Double Feed) & Fundamentals of Pistol Shooting",
+            "Illinois Statutory Armed Authority: Justifiable Use of Deadly Force (720 ILCS 5/7-1) & IDFPR Firearm Control Card (Tan Card) Rules (225 ILCS 447 / 68 IAC 1240.510)",
+            "Official 50-Question Written Examination (75% passing = 38/50, unlimited attempts, no time limit)",
+            "Included 8-hour Eagle Sports Range 50-round live-fire qualification (5, 7 & 10 yards, min 70% = 35/50)"
         ],
         prerequisites: [
             "Prerequisite: 20-Hour Unarmed Security Course Certificate",

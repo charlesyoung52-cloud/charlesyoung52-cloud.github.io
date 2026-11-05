@@ -6456,3 +6456,29 @@ body.lms-gate-active .site-header .course-progress-strip {
         margin-bottom: 2px !important;
     }
 }
+
+
+/* ==========================================================================
+   MOBILE LOGGED-IN LMS HEADER WRAP FIX (ZERO HORIZONTAL OVERFLOW AT 375PX)
+   ========================================================================== */
+@media (max-width: 1080px) {
+    body:not(.lms-gate-active) .site-header .header-container {
+        flex-wrap: wrap !important;
+        row-gap: 6px !important;
+    }
+    body:not(.lms-gate-active) .site-header .main-nav {
+        flex: 1 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
+        order: 20 !important;
+        padding: 4px 2px 2px 2px !important;
+    }
+}
+@media (min-width: 560px) and (max-width: 1080px) {
+    body:not(.lms-gate-active) .site-header .main-nav {
+        justify-content: center !important;
+    }
+}
