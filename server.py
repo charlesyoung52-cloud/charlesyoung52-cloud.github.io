@@ -77,6 +77,13 @@ def seed_from_cloud_json():
                     s.get('created_at'),
                     s.get('last_active')
                 ))
+            if s.get('is_paid'):
+                cur.execute("SELECT id FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?)", (sid,))
+                if not cur.fetchone():
+                    cur.execute(
+                        "INSERT INTO analytics_events (event_type, student_id, details, timestamp) VALUES ('payment_received', ?, ?, ?)",
+                        (sid, s.get('payment_status') or 'Verified Stripe Payment', s.get('payment_date') or s.get('created_at') or '')
+                    )
             # Restore exam attempts
             for a in s.get('attempts', []):
                 cur.execute('SELECT id FROM exam_results WHERE student_id = ? AND attempt_number = ?', (sid, a.get('attempt_number', 1)))
