@@ -1,13 +1,26 @@
 {
-  "last_synced": "2026-10-30 01:30:00",
-  "source": "Platforms Cloud Roster Engine (Render + GitHub CDN)",
+  "updated_at": "2026-11-06 16:00:00",
   "metrics": {
     "total_students": 0,
     "paid_students": 0,
     "completed_modules": 0,
     "total_exams": 0,
-    "pass_rate": 0,
-    "certs_issued": 0
+    "passed_exams": 0,
+    "pass_rate": 0.0,
+    "avg_score": 0.0,
+    "certs_issued": 0,
+    "modules_stats": {
+      "Lesson 1": 0,
+      "Lesson 2": 0,
+      "Lesson 3": 0,
+      "Lesson 4": 0,
+      "Lesson 5": 0,
+      "Lesson 6": 0,
+      "Lesson 7": 0,
+      "Lesson 8": 0,
+      "Lesson 9": 0,
+      "Lesson 10": 0
+    }
   },
   "students": []
 }

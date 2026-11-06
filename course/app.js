@@ -3489,7 +3489,7 @@ class SecurityCourseApp {
         const officerNameEl = document.getElementById('payment-gate-officer-name');
         const officerEmailEl = document.getElementById('payment-gate-officer-email');
         if (officerNameEl) officerNameEl.textContent = this.studentCertData.name || 'Student Officer';
-        if (officerEmailEl) officerEmailEl.textContent = this.studentEmail || 'student@platformstraining.com';
+        if (officerEmailEl) officerEmailEl.textContent = this.studentEmail || 'Not signed in';
     }
 
     initiateCourseEnrollmentPayment() {
@@ -3555,7 +3555,7 @@ class SecurityCourseApp {
         const dispEmail = document.getElementById('officer-display-email');
         const avatarInitials = document.getElementById('officer-avatar-initials');
         if (dispName) dispName.textContent = this.studentCertData.name || 'Student Officer';
-        if (dispEmail) dispEmail.textContent = this.studentEmail || 'student@platformstraining.com';
+        if (dispEmail) dispEmail.textContent = this.studentEmail || 'Not signed in';
         if (avatarInitials) {
             const parts = (this.studentCertData.name || 'SO').split(' ');
             avatarInitials.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0][0] || 'S');

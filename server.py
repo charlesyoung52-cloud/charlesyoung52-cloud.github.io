@@ -905,10 +905,76 @@ Message:
     ok, msg = send_email_smtp(target_email, subject, html_body, text_body, reply_to=email if '@' in email else '')
     return jsonify({'success': True, 'email_sent': ok, 'recipient': target_email, 'message': msg})
 
+
+FAKE_TEST_EMAILS = {
+    'student@platformstraining.com',
+    'armed::student@platformstraining.com',
+    'test@platformstraining.com',
+    'armed::test@platformstraining.com',
+    'cadet.test@gmail.com',
+    'madams@chicago-security.test',
+    'marcus.test@platformstraining.com',
+    'anonymous',
+    ''
+}
+FAKE_TEST_NAMES = {
+    'doe, john a.',
+    'john a. doe',
+    'john doe',
+    'student officer',
+    'trainee officer',
+    'test student',
+    'armed student officer'
+}
+
+def is_fake_or_test_identity(email_or_id='', name=''):
+    e = str(email_or_id or '').strip().lower()
+    raw_e = e[7:] if e.startswith('armed::') else e
+    n = str(name or '').strip().lower()
+    if e in FAKE_TEST_EMAILS or raw_e in FAKE_TEST_EMAILS:
+        return True
+    if raw_e.endswith('.test') or raw_e.endswith('@example.com') or 'test@' in raw_e or raw_e.startswith('cadet.test') or raw_e.startswith('marcus.test'):
+        return True
+    if n in FAKE_TEST_NAMES:
+        return True
+    return False
+
+def purge_test_and_fake_records(db):
+    try:
+        cur = db.cursor()
+        for tbl, col in [
+            ('students', 'id'),
+            ('students', 'email'),
+            ('progress', 'student_id'),
+            ('exam_results', 'student_id'),
+            ('certificates', 'student_id'),
+            ('analytics_events', 'student_id'),
+        ]:
+            cur.execute(f"""
+                DELETE FROM {tbl}
+                WHERE LOWER(TRIM(COALESCE({col}, ''))) IN ('student@platformstraining.com', 'armed::student@platformstraining.com', 'test@platformstraining.com', 'armed::test@platformstraining.com', 'anonymous')
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%test@%'
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%.test'
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%@example.com'
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE 'cadet.test%'
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE 'marcus.test%'
+            """)
+        cur.execute("""
+            DELETE FROM students
+            WHERE LOWER(TRIM(COALESCE(name, ''))) IN ('doe, john a.', 'john a. doe', 'john doe', 'student officer', 'trainee officer', 'test student', 'armed student officer')
+        """)
+        cur.execute("DELETE FROM progress WHERE student_id NOT IN (SELECT id FROM students)")
+        cur.execute("DELETE FROM exam_results WHERE student_id NOT IN (SELECT id FROM students)")
+        cur.execute("DELETE FROM certificates WHERE student_id NOT IN (SELECT id FROM students)")
+        db.commit()
+    except Exception as e:
+        print("Purge test records note:", e)
+
 # 2. Metrics & Analytics Dashboard Data
 @app.route('/api/metrics', methods=['GET'])
 def get_metrics():
     db = get_db()
+    purge_test_and_fake_records(db)
     
     total_students = db.execute('SELECT COUNT(*) FROM students WHERE is_admin = 0').fetchone()[0]
     total_paid = db.execute('SELECT COUNT(*) FROM students WHERE is_paid = 1').fetchone()[0]
@@ -1310,6 +1376,7 @@ def test_smtp_route():
 @app.route('/api/students', methods=['GET'])
 def list_students():
     db = get_db()
+    purge_test_and_fake_records(db)
     rows = db.execute('''
         SELECT s.*, 
                (SELECT COUNT(*) FROM progress p WHERE p.student_id = s.id AND p.study_done = 1 AND p.scenario_done = 1 AND p.quiz_done = 1) as completed_modules,
@@ -1388,6 +1455,8 @@ def student_login():
 
     if not student_id:
         return jsonify({'success': False, 'error': 'Student email or ID required'}), 400
+    if is_fake_or_test_identity(student_id, name) or is_fake_or_test_identity(email, name):
+        return jsonify({'success': False, 'error': 'Real student profile required'}), 200
 
     db = get_db()
     cur = db.cursor()
