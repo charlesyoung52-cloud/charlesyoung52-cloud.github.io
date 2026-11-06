@@ -64,9 +64,9 @@
             min-width: 0;
         }
         .header-brand img {
-            height: 58px;
+            height: 46px;
             width: auto;
-            max-width: 255px;
+            max-width: 210px;
             flex-shrink: 0;
             object-fit: contain;
             filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
@@ -463,9 +463,9 @@
                 gap: 8px;
             }
             .header-brand img {
-                height: 46px;
+                height: 38px;
                 width: auto;
-                max-width: 205px;
+                max-width: 175px;
                 object-fit: contain;
             }
             .brand-title { font-size: 0.85rem; }
@@ -540,7 +540,7 @@
     <div id="pin-modal" class="modal-overlay" style="display: flex;">
         <div class="modal-box">
             <a href="../index.html" title="Return to Homepage" style="display:inline-block; margin-bottom: 14px; text-decoration:none;">
-                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" style="height: 135px; max-width: 100%; width: auto; object-fit: contain;">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" style="height: 46px; max-width: 210px; width: auto; object-fit: contain;">
             </a>
             <div style="font-size: 2.0rem; color: var(--green); margin-bottom: 8px;">
                 <i class="fas fa-shield-halved"></i>
@@ -668,7 +668,7 @@
                             <tr>
                                 <th style="min-width:180px;">Student Officer</th>
                                 <th style="min-width:200px;">Email &amp; Security</th>
-                                <th style="min-width:130px;">Tuition / Payment</th>
+                                <th style="min-width:170px;">Tuition &amp; Auto-Emails</th>
                                 <th style="min-width:140px;">20-HR Modules</th>
                                 <th style="min-width:110px;">Exam Attempts</th>
                                 <th style="min-width:130px;">Latest Score</th>
@@ -1129,100 +1129,70 @@
                 <!-- Automated Email Studio: Composer + Live HTML Preview -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px; align-items:start;">
 
-                    <!-- Left Column: Template Selector, Recipient Details, & Send Controls -->
+                    <!-- Left Column: Auto-Send Engine Status, Template Selector & Delivery Indicators -->
                     <div class="stat-card" style="padding: 12px 14px; border: 1px solid var(--border);">
-                        <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.08rem; margin:0 0 14px 0; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
-                            <i class="fas fa-paper-plane text-blue"></i> Student Email Dispatcher &amp; Template Selector
-                        </h4>
-
-                        <!-- Automatic 2-Day Class Reminder Engine Banner -->
-                        <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.38); border-radius:8px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                            <div>
-                                <div style="font-size:0.88rem; font-weight:700; color:#86efac; display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-clock"></i> Auto-Reminder Scheduler Active: Sends 2 Days Before Scheduled Course
-                                </div>
-                                <div id="auto-reminder-status-text" style="font-size:0.84rem; color:#cbd5e1; margin-top:3px;">
-                                    Automatically emails booked students 2 days before their scheduled class with the exact location for their course.
-                                </div>
-                            </div>
-                            <button type="button" class="btn-action" onclick="runAutoReminderCheck(false)" style="padding:6px 12px; font-size:0.84rem; border-color:rgba(16,185,129,0.5); color:#86efac; white-space:nowrap;">
-                                <i class="fas fa-rotate"></i> Check &amp; Send 2-Day Reminders Now
-                            </button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                            <h4 style="color:#fff; font-family:'Chakra Petch',sans-serif; font-size:1.02rem; margin:0;">
+                                <i class="fas fa-robot text-blue"></i> Automated Student Email Engine
+                            </h4>
+                            <span class="badge badge-success" style="font-size:0.78rem; padding:3px 8px;">
+                                <i class="fas fa-bolt"></i> 100% Auto-Send Active
+                            </span>
                         </div>
 
-                        <!-- 3 Template Selector Buttons -->
-                        <div style="margin-bottom:16px;">
-                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">1. Select Email Template:</label>
-                            <div style="display:grid; grid-template-columns:1fr; gap:8px;">
-                                <button type="button" class="btn-action active-email-tpl" id="tpl-btn-confirmation" onclick="selectEmailStudioTemplate('confirmation')" style="justify-content:flex-start; padding:10px 14px; border-color:var(--green); background:rgba(212,175,55,0.16); color:var(--green-bright);">
-                                    <i class="fas fa-receipt"></i> <strong>1. Class &amp; Payment Confirmation Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">Auto-Sent on Booking/Payment</span>
-                                </button>
-                                <button type="button" class="btn-action" id="tpl-btn-reminder" onclick="selectEmailStudioTemplate('reminder')" style="justify-content:flex-start; padding:10px 14px;">
-                                    <i class="fas fa-bell"></i> <strong>2. Upcoming Class &amp; Range Reminder Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85; color:#4ade80;">Auto-Sent 2 Days Before Class</span>
-                                </button>
-                                <button type="button" class="btn-action" id="tpl-btn-thank_you_review" onclick="selectEmailStudioTemplate('thank_you_review')" style="justify-content:flex-start; padding:10px 14px;">
-                                    <i class="fas fa-star"></i> <strong>3. Thank You + 5-Star Google Review Email</strong> <span style="margin-left:auto; font-size:0.84rem; opacity:0.85;">Auto-Sent on Graduation</span>
-                                </button>
+                        <!-- Unified 3-Stage Auto-Email Engine Status Banner -->
+                        <div style="background:rgba(16,185,129,0.10); border:1px solid rgba(16,185,129,0.35); border-radius:8px; padding:10px 12px; margin-bottom:14px;">
+                            <div style="font-size:0.84rem; font-weight:700; color:#86efac; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                                <i class="fas fa-circle-check"></i> Automatic Email Dispatch Rules Active
+                            </div>
+                            <div id="auto-reminder-status-text" style="font-size:0.8rem; color:#cbd5e1; line-height:1.45;">
+                                Confirmation, 2-Day Reminder, and Graduation Thank-You emails are dispatched automatically by the server. No manual buttons required.
                             </div>
                         </div>
 
-                        <!-- Quick-Fill from Student Roster or Calendar Reservation -->
+                        <!-- 3 Template Selector Cards (Click to Preview Template on Right) -->
                         <div style="margin-bottom:14px;">
-                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:5px; text-transform:uppercase;">2. Quick-Fill from Student Roster / Reservations (Optional):</label>
-                            <select id="email-studio-student-select" onchange="onEmailStudioStudentSelect()" style="width:100%; padding:9px 12px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-size:0.94rem;">
-                                <option value="">-- Select a Student or Reservation to Auto-Fill --</option>
+                            <label style="font-size:0.78rem; font-weight:700; color:#94a3b8; display:block; margin-bottom:6px; text-transform:uppercase;">Click Any Automated Email Stage to Preview Template:</label>
+                            <div style="display:grid; grid-template-columns:1fr; gap:7px;">
+                                <button type="button" class="btn-action active-email-tpl" id="tpl-btn-confirmation" onclick="selectEmailStudioTemplate('confirmation')" style="justify-content:flex-start; padding:9px 12px; border-color:var(--green); background:rgba(212,175,55,0.16); color:var(--green-bright);">
+                                    <i class="fas fa-receipt"></i> <strong>1. Confirmation Email</strong>
+                                    <span class="badge badge-success" style="margin-left:auto; font-size:0.72rem;"><i class="fas fa-check"></i> Auto-Sends on Payment / Booking</span>
+                                </button>
+                                <button type="button" class="btn-action" id="tpl-btn-reminder" onclick="selectEmailStudioTemplate('reminder')" style="justify-content:flex-start; padding:9px 12px;">
+                                    <i class="fas fa-bell"></i> <strong>2. Course Reminder Email</strong>
+                                    <span class="badge badge-success" style="margin-left:auto; font-size:0.72rem;"><i class="fas fa-check"></i> Auto-Sends 2 Days Before Class</span>
+                                </button>
+                                <button type="button" class="btn-action" id="tpl-btn-thank_you_review" onclick="selectEmailStudioTemplate('thank_you_review')" style="justify-content:flex-start; padding:9px 12px;">
+                                    <i class="fas fa-star"></i> <strong>3. Thank You + Google Review</strong>
+                                    <span class="badge badge-success" style="margin-left:auto; font-size:0.72rem;"><i class="fas fa-check"></i> Auto-Sends on Graduation</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Student Preview Selector (Optional: preview how template looks for a specific student) -->
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:0.78rem; font-weight:700; color:#94a3b8; display:block; margin-bottom:5px; text-transform:uppercase;">Preview Template For Student / Reservation:</label>
+                            <select id="email-studio-student-select" onchange="onEmailStudioStudentSelect()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border-highlight); border-radius:4px; color:#fff; font-size:0.86rem;">
+                                <option value="">-- Default Sample Student Preview --</option>
                             </select>
+                            <input type="hidden" id="es-student-name" value="Tawanna Ivory">
+                            <input type="hidden" id="es-student-email" value="tawannaivory43@gmail.com">
+                            <input type="hidden" id="es-course-title" value="20-Hour Basic Unarmed Security Course (IDFPR #102-000398)">
+                            <input type="hidden" id="es-class-date" value="24/7 Self-Paced Online Portal">
+                            <input type="hidden" id="es-class-time" value="Self-Paced Online">
+                            <input type="hidden" id="es-location" value="100% Online LMS Portal (Phone, Tablet, or PC — platformstraining.com)">
+                            <input type="hidden" id="es-price" value="$50.00 (Paid)">
                         </div>
 
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                            <div>
-                                <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT NAME *</label>
-                                <input type="text" id="es-student-name" value="" placeholder="Select a student or enter name" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
+                        <!-- Live Automated Email Delivery Indicators Log -->
+                        <div>
+                            <div style="font-size:0.78rem; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                                <span><i class="fas fa-list-check text-blue"></i> Student Email Delivery Status</span>
+                                <span style="font-size:0.72rem; color:#4ade80;">Real-Time Indicators</span>
                             </div>
-                            <div>
-                                <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">STUDENT EMAIL *</label>
-                                <input type="email" id="es-student-email" placeholder="student@email.com" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
+                            <div id="automated-email-status-log" style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:8px 10px; max-height:260px; overflow-y:auto;">
+                                <!-- Populated dynamically by renderAutomatedEmailStatusLog() -->
                             </div>
-                        </div>
-
-                        <div style="margin-bottom:12px;">
-                            <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">COURSE / CLASS TITLE *</label>
-                            <input type="text" id="es-course-title" value="28-Hour Armed Security Course (IDFPR #102-000398)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
-                        </div>
-
-                        <div id="es-schedule-fields-group">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                                <div>
-                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">SCHEDULED CLASS / RANGE DATE</label>
-                                    <input type="text" id="es-class-date" value="" placeholder="Select reservation or enter date" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
-                                </div>
-                                <div>
-                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">CLASS / RANGE TIME</label>
-                                    <input type="text" id="es-class-time" value="9:00 AM – 5:00 PM" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
-                                </div>
-                            </div>
-
-                            <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:12px; margin-bottom:12px;">
-                                <div>
-                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TRAINING LOCATION</label>
-                                    <input type="text" id="es-location" value="Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
-                                </div>
-                                <div>
-                                    <label style="font-size:0.86rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TUITION / STATUS</label>
-                                    <input type="text" id="es-price" value="$200.00 (Paid)" oninput="renderEmailStudioPreview()" style="width:100%; padding:8px 10px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="es-feedback-banner" style="display:none; margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:0.92rem; line-height:1.5;"></div>
-
-                        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-                            <button type="button" class="btn-action btn-primary" id="es-send-btn" onclick="sendAutomatedEmailFromStudio()" style="flex:1; justify-content:center; padding:11px 16px;">
-                                <i class="fas fa-paper-plane"></i> Send Email to Student Now
-                            </button>
-                            <button type="button" class="btn-action" onclick="openMailtoFromStudio()" style="padding:11px 14px;" title="Open pre-filled email in your default mail app">
-                                <i class="fas fa-envelope-open"></i> Open in Mail App
-                            </button>
                         </div>
                     </div>
 
@@ -2147,6 +2117,7 @@ function ptaVerifyAdminCredential(inputVal) {
 
             updateFilterCounts();
             renderTable();
+            if (typeof renderAutomatedEmailStatusLog === 'function') renderAutomatedEmailStatusLog();
         }
 
         function loadLocalStudentsRegistry() {
@@ -2486,32 +2457,35 @@ function ptaVerifyAdminCredential(inputVal) {
             }
             tbody.innerHTML = list.map((r, rIdx) => {
                 const resolvedLoc = resolveCourseLocation(r.courseId, r.courseTitle, r.location);
+                const confBadge = `<span class="badge badge-success" style="font-size:0.73rem;"><i class="fas fa-check-circle"></i> Confirmation Sent</span>`;
                 const remBadge = r.reminderSent
-                    ? `<span class="badge badge-success" style="font-size:0.75rem; margin-top:4px; display:inline-block;"><i class="fas fa-check"></i> 2-Day Reminder Sent</span>`
-                    : `<span class="badge badge-info" style="font-size:0.75rem; margin-top:4px; display:inline-block;"><i class="fas fa-clock"></i> Auto-Remind 2 Days Prior</span>`;
+                    ? `<span class="badge badge-success" style="font-size:0.73rem;"><i class="fas fa-check-circle"></i> Reminder Sent</span>`
+                    : `<span class="badge badge-info" style="font-size:0.73rem;"><i class="fas fa-clock"></i> Reminder: Auto 2d Prior</span>`;
+                const tyBadge = r.thankYouSent
+                    ? `<span class="badge badge-success" style="font-size:0.73rem;"><i class="fas fa-check-circle"></i> Thank You Sent</span>`
+                    : `<span class="badge badge-info" style="font-size:0.73rem;"><i class="fas fa-clock"></i> Thank You: Auto Post-Class</span>`;
                 return `
                 <tr>
                     <td><code style="color:var(--green-bright);">${r.id}</code></td>
                     <td><strong style="color:#fff;">${r.studentName}</strong></td>
                     <td>
-                        <div style="color:#e2e8f0; font-size:0.92rem;">${r.studentPhone}</div>
-                        <div style="color:var(--text-sub); font-size:0.88rem;">${r.studentEmail}</div>
+                        <div style="color:#e2e8f0; font-size:0.88rem;">${r.studentPhone}</div>
+                        <div style="color:var(--text-sub); font-size:0.82rem;">${r.studentEmail}</div>
                     </td>
                     <td>
                         <strong style="color:#fff; display:block;">${r.courseTitle}</strong>
-                        <span style="font-size:0.82rem; color:var(--text-sub);"><i class="fas fa-location-dot" style="color:var(--green);"></i> ${resolvedLoc}</span>
+                        <span style="font-size:0.8rem; color:var(--text-sub);"><i class="fas fa-location-dot" style="color:var(--green);"></i> ${resolvedLoc}</span>
                     </td>
-                    <td style="font-size:0.92rem; color:#cbd5e1;">
+                    <td style="font-size:0.88rem; color:#cbd5e1;">
                         <div>${r.date} &bull; ${r.time}</div>
-                        ${remBadge}
                     </td>
-                    <td style="font-size:0.9rem; color:var(--text-muted);">${r.notes || '—'}</td>
-                    <td style="font-size:0.9rem; color:var(--text-sub);">${r.createdAt || ''}</td>
+                    <td style="font-size:0.86rem; color:var(--text-muted);">${r.notes || '—'}</td>
+                    <td style="font-size:0.84rem; color:var(--text-sub);">${r.createdAt || ''}</td>
                     <td>
-                        <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                            <button class="btn-action" style="padding:3px 7px; font-size:0.84rem;" onclick="openEmailStudioForReservation(${rIdx}, 'confirmation')" title="Send Class Confirmation"><i class="fas fa-receipt text-blue"></i> Confirm</button>
-                            <button class="btn-action" style="padding:3px 7px; font-size:0.84rem;" onclick="openEmailStudioForReservation(${rIdx}, 'reminder')" title="Send Class Reminder"><i class="fas fa-bell text-blue"></i> Remind</button>
-                            <button class="btn-action" style="padding:3px 7px; font-size:0.84rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForReservation(${rIdx}, 'thank_you_review')" title="Send Thank You + Google Review"><i class="fas fa-star"></i> Review</button>
+                        <div style="display:flex; flex-direction:column; gap:3px; align-items:flex-start;">
+                            ${confBadge}
+                            ${remBadge}
+                            ${tyBadge}
                         </div>
                     </td>
                 </tr>
@@ -2676,19 +2650,41 @@ function ptaVerifyAdminCredential(inputVal) {
                     attemptsPill = `<span style="color:var(--text-sub); font-size:0.92rem;">0 Attempts</span>`;
                 }
 
-                // Payment pill (Clean indicator without IDFPR Approved)
+                // Payment pill + Automated Email Sent indicators
+                const paidLabel = s.amount_paid_display ? `${s.amount_paid_display} PAID` : (isArmedRow ? '$200 PAID' : '$50 PAID');
                 let paymentPill = `
-                    <span class="badge badge-success" style="font-size:0.88rem; padding:3px 8px;">
-                        <i class="fas fa-check-circle"></i> ${isArmedRow ? '$200 PAID' : '$50 PAID'}
+                    <span class="badge badge-success" style="font-size:0.82rem; padding:2px 7px;">
+                        <i class="fas fa-check-circle"></i> ${paidLabel}
                     </span>
                 `;
                 if (!s.is_paid) {
                     paymentPill = `
-                        <span class="badge badge-warning" style="font-size:0.88rem; padding:3px 8px;">
+                        <span class="badge badge-warning" style="font-size:0.82rem; padding:2px 7px;">
                             <i class="fas fa-clock"></i> Pending (${isArmedRow ? '$200' : '$50'})
                         </span>
                     `;
                 }
+
+                const confSent = Boolean(s.confirmation_email_sent || s.is_paid);
+                const remSent = Boolean(s.reminder_email_sent || (!isArmedRow && s.is_paid));
+                const tySent = Boolean(s.thank_you_email_sent || s.cert_id || (s.armed_cert_data && s.armed_cert_data.instructor_completed));
+
+                const autoEmailsIndicators = `
+                    <div style="display:flex; flex-direction:column; gap:3px; margin-top:5px; align-items:flex-start;">
+                        ${confSent
+                            ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="Confirmation Email Auto-Sent"><i class="fas fa-check-circle"></i> Confirmation Sent</span>`
+                            : `<span class="badge badge-warning" style="font-size:0.7rem; padding:1px 6px;"><i class="fas fa-clock"></i> Confirm: Auto on Pay</span>`
+                        }
+                        ${remSent
+                            ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="Course Reminder / Portal Access Auto-Sent"><i class="fas fa-check-circle"></i> Reminder Sent</span>`
+                            : `<span class="badge badge-info" style="font-size:0.7rem; padding:1px 6px;"><i class="fas fa-clock"></i> Reminder: Auto 2d Prior</span>`
+                        }
+                        ${tySent
+                            ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="Thank You & Google Review Email Auto-Sent"><i class="fas fa-check-circle"></i> Thank You Sent</span>`
+                            : `<span class="badge badge-info" style="font-size:0.7rem; padding:1px 6px;"><i class="fas fa-clock"></i> Thank You: Auto on Grad</span>`
+                        }
+                    </div>
+                `;
 
                 return `
                     <tr>
@@ -2717,6 +2713,7 @@ function ptaVerifyAdminCredential(inputVal) {
                         </td>
                         <td>
                             ${paymentPill}
+                            ${autoEmailsIndicators}
                         </td>
                         <td>
                             <div style="font-weight:700; color:#fff; font-size:0.94rem;">${modulesDone} / ${totalMods} Modules</div>
@@ -2742,25 +2739,16 @@ function ptaVerifyAdminCredential(inputVal) {
                         </td>
                         <td>
                             <div style="display:flex; gap:5px; flex-direction:column;">
-                                <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.86rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
-                                    <i class="fas fa-file-signature"></i> Armed Cert (IL486-1138)
-                                </button>
-                                <div style="display:flex; gap:3px; flex-wrap:wrap;">
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem;" onclick="openEmailStudioForStudent(${idx}, 'confirmation')" title="Send Class & Payment Confirmation Email">
-                                        <i class="fas fa-receipt text-blue"></i> Confirm
+                                <div style="display:flex; gap:4px; align-items:center;">
+                                    <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.82rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
+                                        <i class="fas fa-file-signature"></i> IL486-1138
                                     </button>
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem;" onclick="openEmailStudioForStudent(${idx}, 'reminder')" title="Send Upcoming Class / Range Reminder Email">
-                                        <i class="fas fa-bell text-blue"></i> Remind
-                                    </button>
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForStudent(${idx}, 'thank_you_review')" title="Send Graduation Thank You + 5-Star Google Review Email">
-                                        <i class="fas fa-star"></i> Review
-                                    </button>
-                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem; color:#f87171; border-color:rgba(239,68,68,0.35);" onclick="deleteStudentRecord(${idx})" title="Remove Student from Roster">
+                                    <button class="btn-action" style="padding:5px 7px; font-size:0.82rem; color:#f87171; border-color:rgba(239,68,68,0.35);" onclick="deleteStudentRecord(${idx})" title="Remove Student from Roster">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                                 ${attemptsCount > 0 ? `
-                                    <button class="btn-action" style="padding:4px 8px; font-size:0.86rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
+                                    <button class="btn-action" style="padding:4px 8px; font-size:0.82rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
                                         <i class="fas fa-history"></i> History (${attemptsCount})
                                     </button>
                                 ` : ''}
@@ -3599,10 +3587,71 @@ function ptaVerifyAdminCredential(inputVal) {
             renderEmailStudioPreview();
         }
 
+        function renderAutomatedEmailStatusLog() {
+            const logEl = document.getElementById('automated-email-status-log');
+            if (!logEl) return;
+            const rows = [];
+
+            (allStudents || []).forEach(s => {
+                const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
+                const confSent = Boolean(s.confirmation_email_sent || s.is_paid);
+                const remSent = Boolean(s.reminder_email_sent || (!isArmed && s.is_paid));
+                const tySent = Boolean(s.thank_you_email_sent || s.cert_id || (s.armed_cert_data && s.armed_cert_data.instructor_completed));
+                rows.push(`
+                    <div style="padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <div>
+                            <strong style="color:#fff; font-size:0.84rem;">${s.name}</strong>
+                            <div style="font-size:0.76rem; color:#94a3b8;">${s.email || ''} &bull; ${isArmed ? '28-Hr Armed' : '20-Hr Unarmed'}</div>
+                        </div>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                            ${confSent
+                                ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Confirmation Sent</span>'
+                                : '<span class="badge badge-warning" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Confirm: Auto on Pay</span>'}
+                            ${remSent
+                                ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Reminder Sent</span>'
+                                : '<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Reminder: Auto 2d Prior</span>'}
+                            ${tySent
+                                ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Thank You Sent</span>'
+                                : '<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Thank You: Auto on Grad</span>'}
+                        </div>
+                    </div>
+                `);
+            });
+
+            ((adminCalendarData && adminCalendarData.reservations) || []).forEach(r => {
+                const remSent = Boolean(r.reminderSent);
+                const tySent = Boolean(r.thankYouSent);
+                rows.push(`
+                    <div style="padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <div>
+                            <strong style="color:#fff; font-size:0.84rem;">${r.studentName}</strong>
+                            <div style="font-size:0.76rem; color:#94a3b8;">${r.studentEmail || ''} &bull; ${r.courseTitle} (${r.date})</div>
+                        </div>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                            <span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Confirmation Sent</span>
+                            ${remSent
+                                ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Reminder Sent</span>'
+                                : '<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Reminder: Auto 2d Prior</span>'}
+                            ${tySent
+                                ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Thank You Sent</span>'
+                                : '<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Thank You: Auto Post-Class</span>'}
+                        </div>
+                    </div>
+                `);
+            });
+
+            if (rows.length === 0) {
+                logEl.innerHTML = '<div style="padding:10px; color:#94a3b8; font-size:0.82rem; text-align:center;">No student records yet. Emails will auto-send upon enrollment.</div>';
+            } else {
+                logEl.innerHTML = rows.join('');
+            }
+        }
+
         function populateEmailStudioSelector() {
+            renderAutomatedEmailStatusLog();
             const sel = document.getElementById('email-studio-student-select');
             if (!sel) return;
-            let html = '<option value="">-- Select a Student or Reservation to Auto-Fill --</option>';
+            let html = '<option value="">-- Default Sample Student Preview --</option>';
 
             if (allStudents && allStudents.length > 0) {
                 html += '<optgroup label="Enrolled Course Students">';

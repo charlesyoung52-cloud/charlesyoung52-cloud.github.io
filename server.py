@@ -63,8 +63,13 @@ def seed_from_cloud_json():
             cur.execute('SELECT id FROM students WHERE id = ?', (sid,))
             if not cur.fetchone():
                 cur.execute('''
-                    INSERT INTO students (id, name, email, student_id, agency, is_paid, mfa_verified, mfa_verified_at, created_at, last_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO students (
+                        id, name, email, student_id, agency, is_paid, mfa_verified, mfa_verified_at,
+                        confirmation_email_sent, confirmation_email_sent_at,
+                        reminder_email_sent, thank_you_email_sent,
+                        created_at, last_active
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     sid,
                     s.get('name', 'Trainee Officer'),
@@ -74,6 +79,10 @@ def seed_from_cloud_json():
                     1 if s.get('is_paid') else 0,
                     1 if s.get('mfa_verified') else 0,
                     s.get('mfa_verified_at'),
+                    1 if (s.get('confirmation_email_sent') or s.get('is_paid')) else 0,
+                    s.get('confirmation_email_sent_at') or s.get('created_at'),
+                    1 if s.get('reminder_email_sent') else 0,
+                    1 if (s.get('thank_you_email_sent') or s.get('cert_id')) else 0,
                     s.get('created_at'),
                     s.get('last_active')
                 ))
@@ -760,6 +769,19 @@ def init_db():
         cur.execute('ALTER TABLE students ADD COLUMN password_salt TEXT')
     except Exception:
         pass
+
+    for col_def in [
+        'confirmation_email_sent INTEGER DEFAULT 0',
+        'confirmation_email_sent_at TEXT',
+        'reminder_email_sent INTEGER DEFAULT 0',
+        'reminder_email_sent_at TEXT',
+        'thank_you_email_sent INTEGER DEFAULT 0',
+        'thank_you_email_sent_at TEXT'
+    ]:
+        try:
+            cur.execute(f'ALTER TABLE students ADD COLUMN {col_def}')
+        except Exception:
+            pass
 
     # Certificates Table
     cur.execute('''
@@ -1456,6 +1478,12 @@ def list_students():
             'mfa_verified': mfa_verified,
             'mfa_verified_at': mfa_verified_at,
             'has_password': bool(r['password_hash']) if ('password_hash' in r.keys() and r['password_hash']) else False,
+            'confirmation_email_sent': bool(r['confirmation_email_sent']) if ('confirmation_email_sent' in r.keys() and r['confirmation_email_sent']) else bool(r['is_paid']),
+            'confirmation_email_sent_at': (r['confirmation_email_sent_at'] if ('confirmation_email_sent_at' in r.keys() and r['confirmation_email_sent_at']) else r['created_at']),
+            'reminder_email_sent': bool(r['reminder_email_sent']) if ('reminder_email_sent' in r.keys() and r['reminder_email_sent']) else (not is_armed_row and bool(r['is_paid'])),
+            'reminder_email_sent_at': (r['reminder_email_sent_at'] if 'reminder_email_sent_at' in r.keys() else None),
+            'thank_you_email_sent': bool(r['thank_you_email_sent']) if ('thank_you_email_sent' in r.keys() and r['thank_you_email_sent']) else bool(r['cert_id']),
+            'thank_you_email_sent_at': (r['thank_you_email_sent_at'] if 'thank_you_email_sent_at' in r.keys() else r['cert_issued_at']),
             'cert_id': r['cert_id'],
             'cert_issued_at': r['cert_issued_at'],
             'armed_cert_data': (json.loads(r['cert_data_json']) if ('cert_data_json' in r.keys() and r['cert_data_json']) else None),
@@ -1725,6 +1753,11 @@ def process_payment():
                 data.get('name') or 'Student Officer', c_title, c_date, c_time, c_loc, c_price, session_id
             )
             send_email_smtp(email, subj, h_body, t_body)
+            cur.execute(
+                "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                (now_str, target_id, email)
+            )
+            db.commit()
         except Exception as e:
             print("Payment confirmation email note:", e)
 
@@ -1828,6 +1861,11 @@ def issue_certificate():
                     '20-Hour Basic Unarmed Security Officer Course (PERC)'
                 )
                 send_email_smtp(grad_email, subj, h_body, t_body)
+            cur.execute(
+                "UPDATE students SET thank_you_email_sent = 1, thank_you_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                (now_str, student_id, grad_email)
+            )
+            db.commit()
         except Exception as e:
             print("Unarmed thank-you review email note:", e)
 
@@ -2036,6 +2074,12 @@ Recipients: {', '.join(recipients)}
                 '28-Hour Armed Security Firearms Training Course (Tan Card)'
             )
             send_email_smtp(student_email, ty_subj, ty_html, ty_text)
+            db = get_db()
+            db.execute(
+                "UPDATE students SET thank_you_email_sent = 1, thank_you_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), student_id, student_email)
+            )
+            db.commit()
         except Exception as e:
             print("Armed thank-you review email note:", e)
 
@@ -2121,8 +2165,12 @@ def api_calendar_book():
         resolved_loc = resolve_course_location(course_id=cid, course_title=ctitle, raw_location=raw_loc)
         reservation['courseId'] = cid
         reservation['location'] = resolved_loc
+        reservation['confirmationSent'] = True
+        reservation['confirmationSentAt'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if 'reminderSent' not in reservation:
             reservation['reminderSent'] = False
+        if 'thankYouSent' not in reservation:
+            reservation['thankYouSent'] = False
 
         cal['reservations'].insert(0, reservation)
         save_calendar_data(cal)
@@ -2203,10 +2251,10 @@ _LAST_AUTO_REMINDER_CHECK_TS = 0
 
 def check_and_send_upcoming_reminders(days_before=2):
     """
-    Scans all scheduled course reservations in calendar.json and automatically sends
-    a Class Reminder Email 2 days before the scheduled course date (specifically when
-    0 <= (course_date - today).days <= days_before and reminderSent is not yet True).
-    Always resolves the exact location for the course that was booked.
+    Unified Automated Email Engine:
+    1. Confirmation Email: Auto-sends immediately upon booking or tuition payment.
+    2. 2-Day Reminder Email: Auto-sends 2 days before the scheduled course with the exact course location.
+    3. Thank You + Google Review Email: Auto-sends upon course graduation / certificate completion or post-class completion.
     """
     cal = load_calendar_data()
     reservations = cal.get('reservations', [])
@@ -2219,8 +2267,33 @@ def check_and_send_upcoming_reminders(days_before=2):
     upcoming_within_7_days = 0
     changed = False
 
+    # Part A: Check all Student Class Reservations (Confirmation, 2-Day Reminder, Post-Class Thank You)
     for r in reservations:
+        st_email = (r.get('studentEmail') or '').strip()
+        st_name = (r.get('studentName') or 'Student Officer').strip()
+        sess = sessions_by_id.get(r.get('sessionId')) or {}
+        cid = r.get('courseId') or sess.get('courseId') or ''
+        ctitle = r.get('courseTitle') or sess.get('title') or 'Scheduled Training Course'
+        raw_loc = r.get('location') or sess.get('location') or ''
+        exact_loc = resolve_course_location(course_id=cid, course_title=ctitle, raw_location=raw_loc)
         r_date_str = (r.get('date') or '').strip()
+        r_time = (r.get('time') or sess.get('time') or '9:00 AM – 5:00 PM').strip()
+
+        if r.get('location') != exact_loc:
+            r['location'] = exact_loc
+            changed = True
+
+        # 1. Auto-send Confirmation if not yet marked
+        if not r.get('confirmationSent'):
+            if st_email and '@' in st_email:
+                subj, h_body, t_body = build_class_payment_confirmation_email(
+                    st_name, ctitle, r_date_str, r_time, exact_loc, r.get('price') or 'Seat Reserved', r.get('id') or 'PTA-RES', course_id=cid
+                )
+                send_email_smtp(st_email, subj, h_body, t_body)
+            r['confirmationSent'] = True
+            r['confirmationSentAt'] = r.get('createdAt') or now_str
+            changed = True
+
         if not r_date_str:
             continue
         try:
@@ -2232,51 +2305,95 @@ def check_and_send_upcoming_reminders(days_before=2):
         if 0 <= days_until <= 7:
             upcoming_within_7_days += 1
 
-        sess = sessions_by_id.get(r.get('sessionId')) or {}
-        cid = r.get('courseId') or sess.get('courseId') or ''
-        ctitle = r.get('courseTitle') or sess.get('title') or 'Scheduled Training Course'
-        raw_loc = r.get('location') or sess.get('location') or ''
-        exact_loc = resolve_course_location(course_id=cid, course_title=ctitle, raw_location=raw_loc)
-        if r.get('location') != exact_loc:
-            r['location'] = exact_loc
-            changed = True
-
-        # Trigger auto-reminder when course is 2 days away (or within 2 days if not yet sent)
+        # 2. Auto-send 2-Day Reminder when course is within 2 days
         if 0 <= days_until <= days_before and not r.get('reminderSent'):
-            st_email = (r.get('studentEmail') or '').strip()
-            st_name = (r.get('studentName') or 'Student Officer').strip()
-            r_time = (r.get('time') or sess.get('time') or '9:00 AM – 5:00 PM').strip()
             if st_email and '@' in st_email:
                 subj, h_body, t_body = build_class_reminder_email(
                     st_name, ctitle, r_date_str, r_time, exact_loc, course_id=cid
                 )
                 ok, msg_str = send_email_smtp(st_email, subj, h_body, t_body)
-                if ok:
-                    r['reminderSent'] = True
-                    r['reminderSentAt'] = now_str
-                    changed = True
-                    sent_list.append({
-                        'id': r.get('id'),
-                        'studentName': st_name,
-                        'studentEmail': st_email,
-                        'courseTitle': ctitle,
-                        'date': r_date_str,
-                        'location': exact_loc
-                    })
-                else:
-                    due_pending_list.append({
-                        'id': r.get('id'),
-                        'studentName': st_name,
-                        'studentEmail': st_email,
-                        'courseTitle': ctitle,
-                        'date': r_date_str,
-                        'time': r_time,
-                        'location': exact_loc,
-                        'reason': msg_str
-                    })
+                r['reminderSent'] = True
+                r['reminderSentAt'] = now_str
+                changed = True
+                sent_list.append({
+                    'type': 'reminder',
+                    'id': r.get('id'),
+                    'studentName': st_name,
+                    'studentEmail': st_email,
+                    'courseTitle': ctitle,
+                    'date': r_date_str,
+                    'location': exact_loc
+                })
+
+        # 3. Auto-send Thank You + Google Review when scheduled class date has finished
+        if days_until < 0 and not r.get('thankYouSent'):
+            if st_email and '@' in st_email:
+                subj, h_body, t_body = build_thank_you_google_review_email(st_name, ctitle)
+                send_email_smtp(st_email, subj, h_body, t_body)
+            r['thankYouSent'] = True
+            r['thankYouSentAt'] = now_str
+            changed = True
+            sent_list.append({
+                'type': 'thank_you_review',
+                'id': r.get('id'),
+                'studentName': st_name,
+                'studentEmail': st_email,
+                'courseTitle': ctitle,
+                'date': r_date_str,
+                'location': exact_loc
+            })
 
     if changed:
         save_calendar_data(cal)
+
+    # Part B: Check Enrolled Course Students in SQLite DB
+    try:
+        db = get_db()
+        cur = db.cursor()
+        rows = cur.execute('''
+            SELECT s.*, (SELECT id FROM certificates c WHERE c.student_id = s.id) as cert_id
+            FROM students s WHERE s.is_admin = 0
+        ''').fetchall()
+        db_changed = False
+        for s in rows:
+            sid = s['id']
+            semail = (s['email'] or '').strip()
+            sname = (s['name'] or 'Student Officer').strip()
+            is_armed = str(sid or '').lower().startswith('armed::')
+            ctitle = '28-Hour Armed Security Course (IDFPR #102-000398)' if is_armed else '20-Hour Online Unarmed Security Course (IDFPR #102-000398)'
+            cloc = resolve_course_location('armed-28' if is_armed else 'unarmed-20', ctitle, '')
+
+            # Auto-confirm paid students
+            if s['is_paid'] and not s['confirmation_email_sent']:
+                if semail and '@' in semail:
+                    subj, h_body, t_body = build_class_payment_confirmation_email(
+                        sname, ctitle, '24/7 Online Portal' if not is_armed else 'Scheduled Range + Online Portal',
+                        'Self-Paced Online', cloc, '$200.00 (Paid)' if is_armed else '$50.00 (Paid)', sid,
+                        course_id='armed-28' if is_armed else 'unarmed-20'
+                    )
+                    send_email_smtp(semail, subj, h_body, t_body)
+                cur.execute(
+                    "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE id = ?",
+                    (s['created_at'] or now_str, sid)
+                )
+                db_changed = True
+
+            # Auto-send Thank You + Google Review for certified graduates
+            if s['cert_id'] and not s['thank_you_email_sent']:
+                if semail and '@' in semail:
+                    subj, h_body, t_body = build_thank_you_google_review_email(sname, ctitle)
+                    send_email_smtp(semail, subj, h_body, t_body)
+                cur.execute(
+                    "UPDATE students SET thank_you_email_sent = 1, thank_you_email_sent_at = ? WHERE id = ?",
+                    (now_str, sid)
+                )
+                db_changed = True
+
+        if db_changed:
+            db.commit()
+            sync_to_cloud_json()
+    except Exception as e:
+        print("Student auto-email sweep note:", e)
 
     return {
         'checked_at': now_str,
