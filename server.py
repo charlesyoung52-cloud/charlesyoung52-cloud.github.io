@@ -749,10 +749,188 @@ Lead Instructor | Platforms Training Academy
 '''
     return subject, html_body, text_body
 
+# =========================================================================
+# MongoDB Cloud Database Engine (MongoDB Atlas + Local SQLite Read/Write Sync)
+# =========================================================================
+try:
+    from pymongo import MongoClient, UpdateOne
+    PYMONGO_AVAILABLE = True
+except Exception:
+    MongoClient = None
+    UpdateOne = None
+    PYMONGO_AVAILABLE = False
+
+_MONGO_CLIENT = None
+_MONGO_URI_CACHED = None
+_MONGO_LAST_SYNCED = None
+_MONGO_LAST_ERROR = None
+
+def get_mongo_config():
+    uri = (os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI') or '').strip()
+    db_name = (os.environ.get('MONGODB_DB_NAME') or 'platforms_training_academy').strip()
+    if not uri or uri.startswith('mongodb+srv://<USERNAME>'):
+        uri = ''
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT key, value FROM app_settings WHERE key IN ('mongodb_uri', 'mongodb_db_name')").fetchall()
+        conn.close()
+        for r in rows:
+            if r['key'] == 'mongodb_uri' and r['value'] and not uri:
+                uri = r['value'].strip()
+            elif r['key'] == 'mongodb_db_name' and r['value']:
+                db_name = r['value'].strip()
+    except Exception:
+        pass
+    return {'uri': uri, 'db_name': db_name or 'platforms_training_academy'}
+
+def mask_mongo_uri(uri):
+    if not uri:
+        return ''
+    try:
+        if '://' in uri and '@' in uri:
+            scheme, rest = uri.split('://', 1)
+            creds, host_part = rest.rsplit('@', 1)
+            user = creds.split(':', 1)[0] if ':' in creds else creds
+            return f"{scheme}://{user}:••••••••@{host_part}"
+    except Exception:
+        pass
+    return uri[:16] + '••••••••'
+
+def get_mongo_db(force_reconnect=False):
+    global _MONGO_CLIENT, _MONGO_URI_CACHED, _MONGO_LAST_ERROR
+    if not PYMONGO_AVAILABLE:
+        _MONGO_LAST_ERROR = 'pymongo driver not installed'
+        return None, _MONGO_LAST_ERROR
+    cfg = get_mongo_config()
+    uri = cfg['uri']
+    db_name = cfg['db_name']
+    if not uri:
+        _MONGO_LAST_ERROR = 'MONGODB_URI not configured yet'
+        return None, _MONGO_LAST_ERROR
+    try:
+        if force_reconnect or _MONGO_CLIENT is None or _MONGO_URI_CACHED != uri:
+            if _MONGO_CLIENT is not None:
+                try:
+                    _MONGO_CLIENT.close()
+                except Exception:
+                    pass
+            _MONGO_CLIENT = MongoClient(uri, serverSelectionTimeoutMS=4500, connectTimeoutMS=4500)
+            _MONGO_CLIENT.admin.command('ping')
+            _MONGO_URI_CACHED = uri
+        _MONGO_LAST_ERROR = None
+        return _MONGO_CLIENT[db_name], None
+    except Exception as e:
+        _MONGO_LAST_ERROR = str(e)
+        return None, str(e)
+
+def sync_sqlite_to_mongodb(conn=None):
+    global _MONGO_LAST_SYNCED
+    mdb, err = get_mongo_db()
+    if mdb is None:
+        return False, err
+    close_after = False
+    try:
+        if conn is None:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            close_after = True
+        cur = conn.cursor()
+
+        table_specs = [
+            ('students', lambda d: {'id': d['id']}),
+            ('progress', lambda d: {'student_id': d['student_id'], 'lesson_id': d['lesson_id']}),
+            ('exam_results', lambda d: {'student_id': d['student_id'], 'attempt_number': d.get('attempt_number', 1)}),
+            ('certificates', lambda d: {'id': d['id']}),
+            ('analytics_events', lambda d: {'id': d['id']}),
+            ('app_settings', lambda d: {'key': d['key']})
+        ]
+
+        for table_name, key_fn in table_specs:
+            rows = cur.execute(f"SELECT * FROM {table_name}").fetchall()
+            col_names = [desc[0] for desc in cur.description] if cur.description else []
+            ops = []
+            for r in rows:
+                doc = {col_names[i]: r[i] for i in range(len(col_names))}
+                if table_name == 'app_settings' and doc.get('key') == 'mongodb_uri':
+                    continue
+                ops.append(UpdateOne(key_fn(doc), {'$set': doc}, upsert=True))
+            if ops:
+                mdb[table_name].bulk_write(ops, ordered=False)
+
+        _MONGO_LAST_SYNCED = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return True, _MONGO_LAST_SYNCED
+    except Exception as e:
+        print(f"[MONGODB SYNC WARNING] Could not sync SQLite -> MongoDB: {e}")
+        return False, str(e)
+    finally:
+        if close_after and conn is not None:
+            conn.close()
+
+def seed_from_mongodb():
+    global _MONGO_LAST_SYNCED
+    mdb, err = get_mongo_db()
+    if mdb is None:
+        return False, err
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+
+        for table_name in ('students', 'progress', 'exam_results', 'certificates', 'analytics_events', 'app_settings'):
+            docs = list(mdb[table_name].find({}, {'_id': 0}))
+            if not docs:
+                continue
+            col_info = cur.execute(f"PRAGMA table_info({table_name})").fetchall()
+            valid_cols = [c[1] for c in col_info]
+            for doc in docs:
+                filtered = {k: v for k, v in doc.items() if k in valid_cols}
+                if not filtered:
+                    continue
+                cols_sql = ', '.join(filtered.keys())
+                placeholders = ', '.join(['?'] * len(filtered))
+                cur.execute(
+                    f"INSERT OR REPLACE INTO {table_name} ({cols_sql}) VALUES ({placeholders})",
+                    tuple(filtered.values())
+                )
+
+        conn.commit()
+        conn.close()
+        _MONGO_LAST_SYNCED = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"[MONGODB SYNC] Restored collections from MongoDB ({get_mongo_config()['db_name']}) at {_MONGO_LAST_SYNCED}.")
+        return True, _MONGO_LAST_SYNCED
+    except Exception as e:
+        print(f"[MONGODB SEED WARNING] Could not seed from MongoDB: {e}")
+        return False, str(e)
+
+def delete_student_from_mongodb(identifier):
+    if not identifier:
+        return
+    mdb, _ = get_mongo_db()
+    if mdb is None:
+        return
+    try:
+        import re
+        pattern = re.compile(f"^{re.escape(str(identifier))}$", re.IGNORECASE)
+        mdb['students'].delete_many({'$or': [{'id': pattern}, {'email': pattern}]})
+        mdb['progress'].delete_many({'student_id': pattern})
+        mdb['exam_results'].delete_many({'student_id': pattern})
+        mdb['certificates'].delete_many({'student_id': pattern})
+        mdb['analytics_events'].delete_many({'student_id': pattern})
+    except Exception as e:
+        print(f"[MONGODB DELETE NOTE] {e}")
+
+class MongoSyncedConnection(sqlite3.Connection):
+    def commit(self):
+        super().commit()
+        try:
+            sync_sqlite_to_mongodb(conn=self)
+        except Exception:
+            pass
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DB_PATH)
+        db = g._database = sqlite3.connect(DB_PATH, factory=MongoSyncedConnection)
         db.row_factory = sqlite3.Row
     return db
 
@@ -916,6 +1094,8 @@ def init_db():
 
 init_db()
 seed_from_cloud_json()
+seed_from_mongodb()
+sync_sqlite_to_mongodb()
 
 # =========================================================================
 # Static File Routes
@@ -1635,6 +1815,7 @@ def admin_delete_student():
         cur.execute('DELETE FROM exam_results WHERE LOWER(student_id) = LOWER(?)', (val,))
         cur.execute('DELETE FROM certificates WHERE LOWER(student_id) = LOWER(?)', (val,))
         cur.execute('DELETE FROM analytics_events WHERE LOWER(student_id) = LOWER(?)', (val,))
+        delete_student_from_mongodb(val)
     db.commit()
     try:
         sync_to_cloud_json()
@@ -2870,6 +3051,98 @@ def run_auto_reminders_endpoint():
         return jsonify({'success': True, **result})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =========================================================================
+# MongoDB Cloud Database Configuration & Live Two-Way Sync Endpoints
+# =========================================================================
+def _get_mongodb_status_payload():
+    cfg = get_mongo_config()
+    uri = cfg['uri']
+    db_name = cfg['db_name']
+    mdb, err = get_mongo_db()
+    counts = {
+        'students': 0,
+        'certificates': 0,
+        'exam_results': 0,
+        'progress': 0,
+        'analytics_events': 0,
+        'app_settings': 0
+    }
+    connected = False
+    if mdb is not None:
+        try:
+            for col_name in counts.keys():
+                counts[col_name] = mdb[col_name].count_documents({})
+            connected = True
+        except Exception as e:
+            err = str(e)
+    return {
+        'pymongo_installed': PYMONGO_AVAILABLE,
+        'has_uri': bool(uri),
+        'masked_uri': mask_mongo_uri(uri),
+        'db_name': db_name,
+        'connected': connected,
+        'last_synced': _MONGO_LAST_SYNCED,
+        'error': err if not connected else None,
+        'collections': counts
+    }
+
+@app.route('/api/admin/mongodb-config', methods=['GET', 'POST'])
+def handle_mongodb_config():
+    if request.method == 'GET':
+        return jsonify({'success': True, **_get_mongodb_status_payload()})
+
+    data = request.get_json() or {}
+    new_uri = (data.get('uri') or data.get('mongodb_uri') or '').strip()
+    new_db_name = (data.get('db_name') or data.get('mongodb_db_name') or 'platforms_training_academy').strip()
+
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    if new_uri and '••••' not in new_uri:
+        cur.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES ('mongodb_uri', ?)", (new_uri,))
+        os.environ['MONGODB_URI'] = new_uri
+    if new_db_name:
+        cur.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES ('mongodb_db_name', ?)", (new_db_name,))
+        os.environ['MONGODB_DB_NAME'] = new_db_name
+    conn.commit()
+    conn.close()
+
+    # Reconnect and perform bidirectional sync (MongoDB <-> SQLite)
+    mdb, err = get_mongo_db(force_reconnect=True)
+    if mdb is not None:
+        seed_from_mongodb()
+        sync_sqlite_to_mongodb()
+        sync_to_cloud_json()
+        return jsonify({
+            'success': True,
+            'message': f"Connected to MongoDB ({new_db_name}) and synchronized all collections!",
+            **_get_mongodb_status_payload()
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'error': err or 'Unable to connect to MongoDB URI.',
+            **_get_mongodb_status_payload()
+        }), 400
+
+@app.route('/api/admin/mongodb-sync', methods=['POST'])
+def trigger_mongodb_sync():
+    mdb, err = get_mongo_db(force_reconnect=True)
+    if mdb is None:
+        return jsonify({
+            'success': False,
+            'error': err or 'MONGODB_URI is not configured yet.',
+            **_get_mongodb_status_payload()
+        }), 400
+    seed_from_mongodb()
+    ok, msg = sync_sqlite_to_mongodb()
+    sync_to_cloud_json()
+    return jsonify({
+        'success': bool(ok),
+        'message': f"MongoDB two-way sync completed at {msg}" if ok else msg,
+        **_get_mongodb_status_payload()
+    })
 
 # Fallback static files router (placed after all API endpoints)
 @app.route('/<path:filename>')

@@ -11,3 +11,7 @@ services:
         value: 10000
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: MONGODB_DB_NAME
+        value: platforms_training_academy
+      - key: MONGODB_URI
+        sync: false

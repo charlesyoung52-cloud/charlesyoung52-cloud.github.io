@@ -804,6 +804,73 @@
                 <div id="emailjs-feedback" style="display:none; margin-top:12px; font-size:0.94rem; padding:10px; border-radius:4px;"></div>
             </div>
 
+            <!-- MongoDB Cloud Database (Atlas) Configuration & Sync Panel -->
+            <div class="stat-card" style="margin-top: 12px; padding: 14px 16px; border: 1px solid rgba(16,185,129,0.45); background: var(--bg-card);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
+                    <div>
+                        <h3 style="color:#fff; font-size:1.15rem; margin:0; font-family:'Chakra Petch',sans-serif; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-database" style="color:#10b981;"></i> MongoDB Cloud Database (Atlas) &mdash; Primary Persistence Engine
+                        </h3>
+                        <span style="font-size:0.9rem; color:var(--text-muted);">
+                            Automatic real-time two-way synchronization for <code>students</code>, <code>certificates</code> (Armed Form IL486-1138 &amp; Unarmed PDFs), <code>exam_results</code>, <code>progress</code>, and <code>app_settings</code>.
+                        </span>
+                    </div>
+                    <span id="mongodb-status-badge" class="badge badge-info" style="font-size:0.88rem;">Checking MongoDB...</span>
+                </div>
+
+                <!-- Collection Counts Summary Bar -->
+                <div id="mongodb-collections-bar" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:14px;">
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:8px 12px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Students Collection</div>
+                        <div id="mongo-count-students" style="font-size:1.25rem; font-weight:800; color:#4ade80; font-family:'Chakra Petch',sans-serif;">&mdash;</div>
+                    </div>
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:8px 12px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Certificates (PDFs)</div>
+                        <div id="mongo-count-certificates" style="font-size:1.25rem; font-weight:800; color:#e5c158; font-family:'Chakra Petch',sans-serif;">&mdash;</div>
+                    </div>
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:8px 12px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Exam Results</div>
+                        <div id="mongo-count-exams" style="font-size:1.25rem; font-weight:800; color:#38bdf8; font-family:'Chakra Petch',sans-serif;">&mdash;</div>
+                    </div>
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:8px 12px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Module Progress</div>
+                        <div id="mongo-count-progress" style="font-size:1.25rem; font-weight:800; color:#c084fc; font-family:'Chakra Petch',sans-serif;">&mdash;</div>
+                    </div>
+                    <div style="background:#0b0d10; border:1px solid var(--border); border-radius:6px; padding:8px 12px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Last Synced</div>
+                        <div id="mongo-last-synced" style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-top:4px;">Not synced yet</div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px; margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:0.88rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            MongoDB Connection String (<code>MONGODB_URI</code>):
+                        </label>
+                        <input type="password" id="admin-mongodb-uri" placeholder="mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.94rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.88rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                            Database Name (<code>MONGODB_DB_NAME</code>):
+                        </label>
+                        <input type="text" id="admin-mongodb-dbname" value="platforms_training_academy" placeholder="platforms_training_academy" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.94rem;">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <button type="button" class="btn-action" style="background:#10b981; color:#051b11; font-weight:800;" onclick="saveMongoDbConfig()">
+                            <i class="fas fa-plug"></i> Save &amp; Connect MongoDB
+                        </button>
+                        <button type="button" class="btn-action" style="background:#1e293b; color:#fff; border:1px solid rgba(56,189,248,0.4);" onclick="syncMongoDbNow()">
+                            <i class="fas fa-sync-alt"></i> Sync All Collections Now
+                        </button>
+                    </div>
+                    <span id="mongodb-masked-uri-display" style="font-size:0.82rem; color:var(--text-muted); font-family:monospace;"></span>
+                </div>
+                <div id="mongodb-feedback" style="display:none; margin-top:12px; font-size:0.92rem; padding:10px; border-radius:4px;"></div>
+            </div>
+
             <!-- Server-Side SMTP Dispatch Configuration Panel -->
             <div class="stat-card" style="margin-top: 12px; padding: 12px 14px; border: 1px solid var(--border-highlight); background: var(--bg-card);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
@@ -1660,6 +1727,7 @@ function ptaVerifyAdminCredential(inputVal) {
             fetchData();
             loadEmailJsConfig();
             loadSmtpConfig();
+            loadMongoDbConfig();
             loadAdminCalendarData();
             loadGoogleReviewUrl();
             renderEmailStudioPreview();
@@ -1818,6 +1886,146 @@ function ptaVerifyAdminCredential(inputVal) {
                         feedback.style.color = '#fca5a5';
                         feedback.style.border = '1px solid rgba(239,68,68,0.4)';
                         feedback.innerHTML = `<i class="fas fa-times-circle"></i> EmailJS Error (${response.status}): ${err}`;
+                    }
+                }
+            } catch (err) {
+                if (feedback) {
+                    feedback.style.background = 'rgba(239,68,68,0.15)';
+                    feedback.style.color = '#fca5a5';
+                    feedback.style.border = '1px solid rgba(239,68,68,0.4)';
+                    feedback.innerHTML = `<i class="fas fa-times-circle"></i> Network error: ${err.message}`;
+                }
+            }
+        }
+
+
+        function applyMongoStatusUi(data) {
+            const badge = document.getElementById('mongodb-status-badge');
+            const dbInp = document.getElementById('admin-mongodb-dbname');
+            const uriInp = document.getElementById('admin-mongodb-uri');
+            const maskedEl = document.getElementById('mongodb-masked-uri-display');
+            const cStudents = document.getElementById('mongo-count-students');
+            const cCerts = document.getElementById('mongo-count-certificates');
+            const cExams = document.getElementById('mongo-count-exams');
+            const cProg = document.getElementById('mongo-count-progress');
+            const lastSyncEl = document.getElementById('mongo-last-synced');
+
+            if (dbInp && data.db_name) dbInp.value = data.db_name;
+            if (uriInp && data.has_uri) uriInp.placeholder = data.masked_uri || '•••••••••••••••• (Saved in Server Vault)';
+            if (maskedEl) maskedEl.textContent = data.masked_uri ? ('URI: ' + data.masked_uri) : 'Set MONGODB_URI in Render / env/.env or paste above';
+
+            const cols = data.collections || {};
+            if (cStudents) cStudents.textContent = (cols.students !== undefined) ? cols.students : '0';
+            if (cCerts) cCerts.textContent = (cols.certificates !== undefined) ? cols.certificates : '0';
+            if (cExams) cExams.textContent = (cols.exam_results !== undefined) ? cols.exam_results : '0';
+            if (cProg) cProg.textContent = (cols.progress !== undefined) ? cols.progress : '0';
+            if (lastSyncEl) lastSyncEl.textContent = data.last_synced || (data.connected ? 'Connected' : 'Pending URI');
+
+            if (badge) {
+                if (data.connected) {
+                    badge.className = 'badge badge-success';
+                    badge.innerHTML = '<i class="fas fa-check-circle"></i> Connected to MongoDB (' + (data.db_name || 'platforms_training_academy') + ')';
+                } else if (data.has_uri) {
+                    badge.className = 'badge badge-danger';
+                    badge.innerHTML = '<i class="fas fa-times-circle"></i> Connection Error';
+                } else {
+                    badge.className = 'badge badge-warning';
+                    badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Awaiting MONGODB_URI';
+                }
+            }
+        }
+
+        async function loadMongoDbConfig() {
+            const baseUrl = getApiBaseUrl();
+            try {
+                const res = await fetch(baseUrl + '/api/admin/mongodb-config');
+                if (res.ok) {
+                    const data = await res.json();
+                    applyMongoStatusUi(data);
+                }
+            } catch (e) {}
+        }
+
+        async function saveMongoDbConfig() {
+            const uri = (document.getElementById('admin-mongodb-uri').value || '').trim();
+            const dbName = (document.getElementById('admin-mongodb-dbname').value || 'platforms_training_academy').trim();
+            const feedback = document.getElementById('mongodb-feedback');
+            const baseUrl = getApiBaseUrl();
+
+            if (feedback) {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(56,189,248,0.12)';
+                feedback.style.color = '#7dd3fc';
+                feedback.style.border = '1px solid rgba(56,189,248,0.35)';
+                feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to MongoDB cluster and syncing collections...';
+            }
+
+            try {
+                const res = await fetch(baseUrl + '/api/admin/mongodb-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uri: uri, db_name: dbName })
+                });
+                const data = await res.json();
+                applyMongoStatusUi(data);
+                if (res.ok && data.success) {
+                    if (feedback) {
+                        feedback.style.background = 'rgba(16,185,129,0.15)';
+                        feedback.style.color = '#86efac';
+                        feedback.style.border = '1px solid rgba(16,185,129,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Connected!</strong> ${data.message || 'MongoDB is now active and synchronized.'}`;
+                    }
+                    document.getElementById('admin-mongodb-uri').value = '';
+                    fetchData();
+                } else {
+                    if (feedback) {
+                        feedback.style.background = 'rgba(239,68,68,0.15)';
+                        feedback.style.color = '#fca5a5';
+                        feedback.style.border = '1px solid rgba(239,68,68,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-times-circle"></i> MongoDB Connection Error: ${data.error || 'Verify your MONGODB_URI connection string and IP Access List (0.0.0.0/0).'}`;
+                    }
+                }
+            } catch (err) {
+                if (feedback) {
+                    feedback.style.background = 'rgba(239,68,68,0.15)';
+                    feedback.style.color = '#fca5a5';
+                    feedback.style.border = '1px solid rgba(239,68,68,0.4)';
+                    feedback.innerHTML = `<i class="fas fa-times-circle"></i> Network error: ${err.message}`;
+                }
+            }
+        }
+
+        async function syncMongoDbNow() {
+            const feedback = document.getElementById('mongodb-feedback');
+            const baseUrl = getApiBaseUrl();
+            if (feedback) {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(56,189,248,0.12)';
+                feedback.style.color = '#7dd3fc';
+                feedback.style.border = '1px solid rgba(56,189,248,0.35)';
+                feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running two-way sync with MongoDB...';
+            }
+            try {
+                const res = await fetch(baseUrl + '/api/admin/mongodb-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                applyMongoStatusUi(data);
+                if (res.ok && data.success) {
+                    if (feedback) {
+                        feedback.style.background = 'rgba(16,185,129,0.15)';
+                        feedback.style.color = '#86efac';
+                        feedback.style.border = '1px solid rgba(16,185,129,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Synced!</strong> ${data.message}`;
+                    }
+                    fetchData();
+                } else {
+                    if (feedback) {
+                        feedback.style.background = 'rgba(239,68,68,0.15)';
+                        feedback.style.color = '#fca5a5';
+                        feedback.style.border = '1px solid rgba(239,68,68,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-times-circle"></i> Sync Error: ${data.error || 'MongoDB URI not configured.'}`;
                     }
                 }
             } catch (err) {
