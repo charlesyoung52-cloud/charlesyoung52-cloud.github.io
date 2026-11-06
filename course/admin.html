@@ -356,6 +356,15 @@
         tr:hover td {
             background: rgba(255, 255, 255, 0.02);
         }
+        tr.armed-pending-instructor-row {
+            background: rgba(248, 113, 113, 0.07);
+            outline: 1.5px solid rgba(248, 113, 113, 0.65);
+            outline-offset: -1.5px;
+            box-shadow: inset 4px 0 0 #f87171;
+        }
+        tr.armed-pending-instructor-row:hover td {
+            background: rgba(248, 113, 113, 0.12);
+        }
 
         /* Table Badges & Elements */
         .badge {
@@ -654,9 +663,6 @@
                     <button class="filter-btn" data-filter="retake" onclick="setFilter('retake')">Needs Retake (<span id="count-retake">0</span>)</button>
                     <button class="filter-btn" data-filter="certified" onclick="setFilter('certified')">Certified (<span id="count-certified">0</span>)</button>
                     <button class="filter-btn" data-filter="paid" onclick="setFilter('paid')">Tuition Paid (<span id="count-paid">0</span>)</button>
-                    <button class="btn-action btn-primary" style="padding:6px 12px; font-size:0.9rem;" onclick="openArmedCertModal(-1)" title="Open Official Form IL486-1138 (Armed Course Certificate) for Range Qualification & Dispatch">
-                        <i class="fas fa-file-shield"></i> + Armed Cert (IL486-1138)
-                    </button>
                 </div>
             </div>
 
@@ -689,6 +695,37 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Instructor Certificate Database Archive (Armed IL486-1138 & Unarmed IL486-0486) -->
+            <details class="compact-collapse" style="margin-top: 12px;" open>
+                <summary>
+                    <span><i class="fas fa-database text-blue"></i> Instructor Certificate Database — Saved Armed &amp; Unarmed Certificates (<span id="cert-db-count">0</span>)</span>
+                    <span style="font-size:0.75rem; color:#94a3b8; font-weight:500;">Tap to expand / collapse <i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="collapse-body" style="padding: 10px 12px;">
+                    <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:8px;">
+                        Every Armed certificate completed &amp; sent by the Instructor and every Unarmed certificate downloaded or emailed by a student is automatically archived here for your permanent IDFPR records.
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Certificate ID</th>
+                                    <th>Student Name</th>
+                                    <th>Course &amp; State Form</th>
+                                    <th>Student &amp; IDFPR Emails</th>
+                                    <th>Date Completed</th>
+                                    <th>Status</th>
+                                    <th>Saved Copy</th>
+                                </tr>
+                            </thead>
+                            <tbody id="instructor-cert-db-tbody">
+                                <tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-muted);">No saved certificates in database yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
 
             </div>
             <!-- END TAB 1 -->
@@ -1455,7 +1492,7 @@
                         <i class="fas fa-file-pdf"></i> Preview / Download Official IL486-1138 PDF
                     </button>
                     <button type="button" class="btn-action btn-primary" id="ac-btn-send-both" onclick="sendAdminArmedCertToStudentAndIdfpr()" style="padding:10px 18px; font-size:0.94rem;">
-                        <i class="fas fa-paper-plane"></i> Send Completed Certificate to Student &amp; IDFPR
+                        <i class="fas fa-paper-plane"></i> Save &amp; Send Certificate (Student &amp; IDFPR)
                     </button>
                 </div>
             </div>
@@ -2118,6 +2155,7 @@ function ptaVerifyAdminCredential(inputVal) {
 
             updateFilterCounts();
             renderTable();
+            loadInstructorCertificateDatabase();
             if (typeof renderAutomatedEmailStatusLog === 'function') renderAutomatedEmailStatusLog();
         }
 
@@ -2549,28 +2587,27 @@ function ptaVerifyAdminCredential(inputVal) {
             renderTable();
         }
 
-        function renderTable() {
-            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
-            const tbody = document.getElementById('students-table-body');
+        function isArmedPendingInstructorCompletion(s) {
+            if (!isArmedStudentRow(s)) return false;
+            const instrDone = Boolean(s.armed_cert_data && s.armed_cert_data.instructor_completed);
+            return !instrDone;
+        }
 
-            let filtered = allStudents.filter(s => {
-                // Filter tabs
-                if (currentFilter === 'in_progress' && (s.completed_modules === 0 || s.completed_modules >= getStudentTotalModules(s))) return false;
-                if (currentFilter === 'passed' && !s.has_passed) return false;
-                if (currentFilter === 'retake' && (s.exam_attempts === 0 || s.has_passed)) return false;
-                if (currentFilter === 'certified' && !s.cert_id) return false;
-                if (currentFilter === 'paid' && !s.is_paid) return false;
-
-                // Search query
-                if (query) {
-                    const match = (s.name && s.name.toLowerCase().includes(query)) ||
-                                  (s.email && s.email.toLowerCase().includes(query)) ||
-                                  (s.agency && s.agency.toLowerCase().includes(query)) ||
-                                  (s.cert_id && s.cert_id.toLowerCase().includes(query));
-                    if (!match) return false;
-                }
-                return true;
+        function sortStudentsPendingArmedFirst(list) {
+            return [...list].sort((a, b) => {
+                const aPending = isArmedPendingInstructorCompletion(a) ? 0 : 1;
+                const bPending = isArmedPendingInstructorCompletion(b) ? 0 : 1;
+                if (aPending !== bPending) return aPending - bPending;
+                const aPrefilled = (aPending === 0 && a.armed_cert_data && (a.armed_cert_data.trainee_submitted || a.armed_cert_data.name)) ? 0 : 1;
+                const bPrefilled = (bPending === 0 && b.armed_cert_data && (b.armed_cert_data.trainee_submitted || b.armed_cert_data.name)) ? 0 : 1;
+                if (aPrefilled !== bPrefilled) return aPrefilled - bPrefilled;
+                return 0;
             });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('students-table-body');
+            const filtered = getFilteredStudentsList();
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
@@ -2581,6 +2618,7 @@ function ptaVerifyAdminCredential(inputVal) {
                         </td>
                     </tr>
                 `;
+                loadInstructorCertificateDatabase();
                 return;
             }
 
@@ -2605,42 +2643,51 @@ function ptaVerifyAdminCredential(inputVal) {
                     bestScoreBadge = `<strong style="color:${s.best_score >= 75 ? 'var(--green-bright)' : '#f87171'}; font-size:0.92rem;">${s.best_score}%</strong>`;
                 }
 
-                const isArmedRow = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL-ARMED') || String(s.cert_id || '').toUpperCase().startsWith('PTA-IL486') || !!s.armed_cert_data;
+                const isArmedRow = isArmedStudentRow(s);
+                const isPendingInstructor = isArmedPendingInstructorCompletion(s);
                 const courseTag = isArmedRow
                     ? `<span class="badge badge-info" style="font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200 &bull; #102-000398)</span>`
                     : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($50)</span>`;
 
-                // Cert Badge
+                const pendingInstructorTag = isPendingInstructor
+                    ? `<div style="margin-top:4px;"><span class="badge badge-danger" style="background:rgba(248,113,113,0.16); color:#fca5a5; border:1px solid rgba(248,113,113,0.55); font-size:0.72rem; cursor:pointer;" onclick="openArmedCertModal(${idx})" title="Click to open prefilled Form IL486-1138 and complete Instructor section"><i class="fas fa-circle-exclamation"></i> Pending Instructor Cert Completion</span></div>`
+                    : '';
+
+                // Cert Badge (lives inside the Student Profile — click to open prefilled certificate or download saved DB copy)
                 let certBadge = `<span style="color:var(--text-sub); font-size:0.9rem;"><i class="fas fa-hourglass-half"></i> In Progress</span>`;
                 if (isArmedRow) {
                     if (s.armed_cert_data && s.armed_cert_data.instructor_completed) {
                         certBadge = `
-                            <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px;">
+                            <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px; cursor:pointer;" onclick="openArmedCertModal(${idx})" title="Click to view or re-send completed Form IL486-1138">
                                 <i class="fas fa-file-shield"></i> IL486-1138 Completed
                             </span>
-                            <div style="font-size:0.84rem; color:#4ade80; margin-top:2px;">
-                                ${s.armed_cert_data.emailed_to_student_and_idfpr ? 'Sent to Student &amp; IDFPR' : 'Range Qualification Signed Off'}
+                            <div style="font-size:0.78rem; color:#4ade80; margin-top:2px;">
+                                ${s.armed_cert_data.emailed_to_student_and_idfpr ? 'Saved in DB &amp; Sent (Student + IDFPR)' : 'Saved in Instructor DB'}
                             </div>
                         `;
                     } else if (s.armed_cert_data || s.cert_id) {
                         certBadge = `
-                            <span class="badge badge-warning" style="display:inline-flex; align-items:center; gap:4px;">
-                                <i class="fas fa-user-check"></i> Trainee Info Saved
-                            </span>
-                            <div style="font-size:0.84rem; color:#fbbf24; margin-top:2px;">
-                                Awaiting Range Sign-Off (IL486-1138)
+                            <button type="button" class="btn-action" style="background:rgba(248,113,113,0.16); border:1px solid rgba(248,113,113,0.65); color:#fecaca; padding:4px 8px; font-size:0.78rem; font-weight:700;" onclick="openArmedCertModal(${idx})" title="Student completed online portion &amp; Part 1 — click to open prefilled Form IL486-1138 and fill out missing Instructor fields">
+                                <i class="fas fa-file-signature"></i> Open Prefilled IL486-1138
+                            </button>
+                            <div style="font-size:0.76rem; color:#fca5a5; margin-top:3px;">
+                                Trainee Part 1 Saved &bull; Click to Complete
                             </div>
                         `;
                     } else {
-                        certBadge = `<span style="color:var(--text-sub); font-size:0.9rem;"><i class="fas fa-hourglass-half"></i> Pending Trainee Form</span>`;
+                        certBadge = `
+                            <button type="button" class="btn-action" style="border-color:rgba(248,113,113,0.45); color:#fca5a5; padding:4px 8px; font-size:0.76rem;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 in Student Profile">
+                                <i class="fas fa-hourglass-half"></i> Awaiting Trainee Part 1 (IL486-1138)
+                            </button>
+                        `;
                     }
                 } else if (s.cert_id) {
                     certBadge = `
                         <span class="badge badge-cert" title="Issued ${s.cert_issued_at || ''}" style="display:inline-flex; align-items:center; gap:4px;">
                             <i class="fas fa-award"></i> ${s.cert_id}
                         </span>
-                        <div style="font-size:0.84rem; color:var(--green-bright); margin-top:2px;">
-                            Sealed: ${s.cert_issued_at || s.latest_exam_date || 'Recent'}
+                        <div style="font-size:0.78rem; color:var(--green-bright); margin-top:2px;">
+                            <i class="fas fa-database"></i> Saved in Cert DB (${s.cert_issued_at || s.latest_exam_date || 'Sealed'})
                         </div>
                     `;
                 }
@@ -2691,11 +2738,22 @@ function ptaVerifyAdminCredential(inputVal) {
                     </div>
                 `;
 
+                const profileCertActionBtn = isArmedRow
+                    ? `<button class="btn-action ${isPendingInstructor ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.8rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Student's Prefilled Form IL486-1138 — Complete Instructor Section, Save to DB &amp; Send to Student + IDFPR">
+                           <i class="fas fa-file-signature"></i> ${isPendingInstructor ? 'Complete Cert' : 'View / Send Cert'}
+                       </button>`
+                    : (s.cert_id
+                        ? `<button class="btn-action" style="padding:5px 8px; font-size:0.8rem; white-space:nowrap; border-color:var(--green); color:var(--green-bright);" onclick="downloadSavedStudentCert(${idx})" title="Download Saved Copy of Student's Unarmed Certificate (Form IL486-0486) from Database">
+                               <i class="fas fa-file-arrow-down"></i> Saved Cert
+                           </button>`
+                        : '');
+
                 return `
-                    <tr>
+                    <tr class="${isPendingInstructor ? 'armed-pending-instructor-row' : ''}">
                         <td>
                             <strong style="color:#fff; font-size:0.94rem; display:block;">${s.name}</strong>
                             ${courseTag}
+                            ${pendingInstructorTag}
                             <div style="font-size:0.86rem; color:var(--text-sub); margin-top:3px;">
                                 <i class="fas fa-calendar-alt"></i> Enrolled: ${s.created_at || 'Recent'}
                             </div>
@@ -2745,9 +2803,7 @@ function ptaVerifyAdminCredential(inputVal) {
                         <td>
                             <div style="display:flex; gap:5px; flex-direction:column;">
                                 <div style="display:flex; gap:4px; align-items:center;">
-                                    <button class="btn-action ${isArmedRow ? 'btn-primary' : ''}" style="padding:5px 8px; font-size:0.82rem; white-space:nowrap;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 — Add In-Person Range Qualification & Email to Student + IDFPR">
-                                        <i class="fas fa-file-signature"></i> IL486-1138
-                                    </button>
+                                    ${profileCertActionBtn}
                                     <button class="btn-action" style="padding:5px 7px; font-size:0.82rem; color:#f87171; border-color:rgba(239,68,68,0.35);" onclick="deleteStudentRecord(${idx})" title="Remove Student from Roster">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -2762,6 +2818,8 @@ function ptaVerifyAdminCredential(inputVal) {
                     </tr>
                 `;
             }).join('');
+
+            loadInstructorCertificateDatabase();
         }
 
 
@@ -3001,7 +3059,7 @@ function ptaVerifyAdminCredential(inputVal) {
 
         function getFilteredStudentsList() {
             const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
-            return allStudents.filter(s => {
+            const filtered = allStudents.filter(s => {
                 if (currentFilter === 'in_progress' && (s.completed_modules === 0 || s.completed_modules >= getStudentTotalModules(s))) return false;
                 if (currentFilter === 'passed' && !s.has_passed) return false;
                 if (currentFilter === 'retake' && (s.exam_attempts === 0 || s.has_passed)) return false;
@@ -3016,6 +3074,7 @@ function ptaVerifyAdminCredential(inputVal) {
                 }
                 return true;
             });
+            return sortStudentsPendingArmedFirst(filtered);
         }
 
         function openArmedCertModal(filteredIndex) {
@@ -3196,7 +3255,30 @@ function ptaVerifyAdminCredential(inputVal) {
             updateFilterCounts();
             renderTable();
 
-            // Save to Cloud Backend
+            // Generate & save PDF copy to Instructor Certificate Database
+            let base64Pdf = '';
+            let filename = '';
+            try {
+                const gen = await generateFilledArmedCertPdfBytes(certData);
+                base64Pdf = gen.base64Pdf || '';
+                filename = gen.filename || '';
+                if (emailLower && base64Pdf) {
+                    localStorage.setItem('platforms_saved_armed_cert_' + emailLower, JSON.stringify({
+                        cert_id: certData.cert_id,
+                        student_id: certData.student_id,
+                        student_name: certData.name,
+                        student_email: emailLower,
+                        idfpr_email: 'FPR.SafetyUnit@illinois.gov',
+                        course_type: 'armed',
+                        pdf_base64: base64Pdf,
+                        pdf_filename: filename,
+                        instructor_completed: 1,
+                        issued_at: new Date().toLocaleDateString('en-US')
+                    }));
+                }
+            } catch (e) {}
+
+            // Save to Cloud Backend Instructor Certificate Database
             try {
                 await fetch(getApiBaseUrl() + '/api/admin/armed-certificate/save', {
                     method: 'POST',
@@ -3205,10 +3287,13 @@ function ptaVerifyAdminCredential(inputVal) {
                         student_id: certData.student_id,
                         email: certData.email,
                         cert_id: certData.cert_id,
+                        pdf_base64: base64Pdf,
+                        pdf_filename: filename,
                         armed_cert_data: certData
                     })
                 });
             } catch (e) {}
+            loadInstructorCertificateDatabase();
 
             if (!silent) {
                 const fb = document.getElementById('ac-feedback-banner');
@@ -3447,15 +3532,30 @@ function ptaVerifyAdminCredential(inputVal) {
                     smtpMsg = netErr.message;
                 }
 
-                // Mark as emailed in local storage too
+                // Mark as emailed & saved in Instructor Certificate Database + local storage
                 certData.emailed_to_student_and_idfpr = true;
                 certData.emailed_at = new Date().toLocaleDateString('en-US');
                 const emailLower = (certData.email || '').toLowerCase().trim();
                 if (emailLower) {
                     localStorage.setItem('platforms_armed_cert_intake_' + emailLower, JSON.stringify(certData));
+                    localStorage.setItem('platforms_saved_armed_cert_' + emailLower, JSON.stringify({
+                        cert_id: certData.cert_id,
+                        student_id: certData.student_id,
+                        student_name: certData.name,
+                        student_email: studentEmail || emailLower,
+                        idfpr_email: idfprEmail,
+                        course_type: 'armed',
+                        pdf_base64: base64Pdf,
+                        pdf_filename: filename,
+                        instructor_completed: 1,
+                        emailed_to_student: 1,
+                        emailed_to_idfpr: 1,
+                        issued_at: new Date().toLocaleDateString('en-US')
+                    }));
                 }
                 allStudents = mergeLocalStudentsAndArmedCerts(allStudents);
                 renderTable();
+                loadInstructorCertificateDatabase();
 
                 const recipientsList = [studentEmail, idfprEmail].filter(Boolean).join(',');
                 const mailSubject = encodeURIComponent(`IDFPR Firearms Training Certificate (Form IL486-1138) - ${certData.name} - Curriculum #102-000398`);
@@ -3514,9 +3614,161 @@ function ptaVerifyAdminCredential(inputVal) {
             } finally {
                 if (sendBtn) {
                     sendBtn.disabled = false;
-                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Completed Certificate to Student &amp; IDFPR';
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Save &amp; Send Certificate (Student &amp; IDFPR)';
                 }
             }
+        }
+
+        // =========================================================================
+        // INSTRUCTOR CERTIFICATE DATABASE (ARMED & UNARMED SAVED CERTIFICATES)
+        // =========================================================================
+        let cachedInstructorCertDb = [];
+
+        async function loadInstructorCertificateDatabase() {
+            const tbody = document.getElementById('instructor-cert-db-tbody');
+            const badge = document.getElementById('cert-db-count-badge');
+            let records = [];
+
+            try {
+                const res = await fetch(getApiBaseUrl() + '/api/admin/certificates');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data.certificates)) {
+                        records = data.certificates;
+                    }
+                }
+            } catch (e) {}
+
+            // Merge any browser-saved Armed or Unarmed certificates from localStorage
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && (k.startsWith('platforms_saved_armed_cert_') || k.startsWith('platforms_saved_unarmed_cert_'))) {
+                        const obj = JSON.parse(localStorage.getItem(k) || 'null');
+                        if (obj && (obj.cert_id || obj.student_email)) {
+                            const exists = records.some(r =>
+                                (obj.cert_id && r.cert_id === obj.cert_id) ||
+                                (obj.student_email && String(r.student_email || '').toLowerCase() === String(obj.student_email || '').toLowerCase() && r.course_type === obj.course_type)
+                            );
+                            if (!exists) {
+                                records.unshift({
+                                    cert_id: obj.cert_id || ('CERT-' + Date.now()),
+                                    student_id: obj.student_id || '',
+                                    student_name: obj.student_name || 'Student',
+                                    student_email: obj.student_email || '',
+                                    idfpr_email: obj.idfpr_email || '',
+                                    course_type: obj.course_type || (k.includes('_armed_') ? 'armed' : 'unarmed'),
+                                    issued_at: obj.issued_at || 'Saved',
+                                    pdf_filename: obj.pdf_filename || 'IDFPR_Certificate.pdf',
+                                    has_pdf: !!obj.pdf_base64,
+                                    pdf_base64: obj.pdf_base64 || '',
+                                    instructor_completed: obj.instructor_completed !== undefined ? obj.instructor_completed : 1,
+                                    emailed_to_student: obj.emailed_to_student || 0,
+                                    emailed_to_idfpr: obj.emailed_to_idfpr || 0
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            cachedInstructorCertDb = records;
+            if (badge) {
+                badge.textContent = `${records.length} Saved Certificate${records.length === 1 ? '' : 's'}`;
+            }
+            if (!tbody) return;
+
+            if (records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:var(--slate); padding:18px;">
+                            No saved Armed or Unarmed certificates in database yet. Certificates automatically save here when an Unarmed student downloads/emails their certificate or when the Instructor saves &amp; sends an Armed certificate.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = records.map((r, idx) => {
+                const isArmed = String(r.course_type || '').toLowerCase() === 'armed';
+                const courseBadge = isArmed
+                    ? `<span class="badge" style="background:rgba(248,113,113,0.16); color:#fca5a5; border:1px solid rgba(248,113,113,0.4);"><i class="fas fa-crosshairs"></i> 28-Hr Armed (IL486-1138)</span>`
+                    : `<span class="badge badge-info"><i class="fas fa-shield-halved"></i> 20-Hr Unarmed</span>`;
+                const deliveryParts = [];
+                if (r.emailed_to_student) deliveryParts.push(`<span class="badge badge-success" style="font-size:0.68rem;"><i class="fas fa-envelope-circle-check"></i> Sent to Student</span>`);
+                if (r.emailed_to_idfpr) deliveryParts.push(`<span class="badge badge-gold" style="font-size:0.68rem;"><i class="fas fa-building-columns"></i> Sent to IDFPR</span>`);
+                if (r.has_pdf) deliveryParts.push(`<span class="badge" style="background:rgba(16,185,129,0.14); color:#6ee7b7; border:1px solid rgba(16,185,129,0.35); font-size:0.68rem;"><i class="fas fa-database"></i> PDF Stored</span>`);
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight:700; color:var(--white);">${r.student_name || 'Student'}</div>
+                            <div style="font-size:0.78rem; color:var(--slate);">${r.student_email || ''}</div>
+                        </td>
+                        <td>${courseBadge}</td>
+                        <td style="font-family:monospace; color:var(--gold); font-size:0.82rem;">${r.cert_id || '—'}</td>
+                        <td>
+                            <div style="display:flex; flex-wrap:wrap; gap:4px;">${deliveryParts.join(' ') || '<span style="color:var(--slate); font-size:0.78rem;">Saved in DB</span>'}</div>
+                        </td>
+                        <td style="font-size:0.8rem; color:var(--slate-light);">${r.updated_at || r.issued_at || '—'}</td>
+                        <td>
+                            <button class="btn-action btn-primary" onclick="downloadSavedCertByIndex(${idx})" style="padding:5px 10px; font-size:0.76rem;">
+                                <i class="fas fa-file-arrow-down"></i> Download Saved PDF
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function triggerBase64PdfDownload(base64Str, filename) {
+            const cleanBase64 = String(base64Str || '').replace(/^data:application\/pdf;base64,/, '').trim();
+            const byteCharacters = atob(cleanBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename || 'IDFPR_Certificate.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+        }
+
+        async function downloadSavedCertByIndex(idx) {
+            const rec = cachedInstructorCertDb[idx];
+            if (!rec) return;
+            if (rec.pdf_base64) {
+                triggerBase64PdfDownload(rec.pdf_base64, rec.pdf_filename || `${rec.cert_id || 'Certificate'}.pdf`);
+                return;
+            }
+            const lookup = encodeURIComponent(rec.cert_id || rec.student_id || rec.student_email || '');
+            window.open(getApiBaseUrl() + '/api/admin/certificates/download/' + lookup, '_blank');
+        }
+
+        async function downloadSavedStudentCert(filteredIndex) {
+            const filtered = getFilteredStudentsList();
+            const s = filtered[filteredIndex];
+            if (!s) return;
+            const emailLower = String(s.email || '').toLowerCase().trim();
+            try {
+                const localUnarmed = emailLower ? JSON.parse(localStorage.getItem('platforms_saved_unarmed_cert_' + emailLower) || 'null') : null;
+                if (localUnarmed && localUnarmed.pdf_base64) {
+                    triggerBase64PdfDownload(localUnarmed.pdf_base64, localUnarmed.pdf_filename || `Unarmed_Certificate_${s.name || 'Student'}.pdf`);
+                    return;
+                }
+                const localArmed = emailLower ? JSON.parse(localStorage.getItem('platforms_saved_armed_cert_' + emailLower) || 'null') : null;
+                if (localArmed && localArmed.pdf_base64) {
+                    triggerBase64PdfDownload(localArmed.pdf_base64, localArmed.pdf_filename || `Armed_Certificate_${s.name || 'Student'}.pdf`);
+                    return;
+                }
+            } catch (e) {}
+            const lookup = encodeURIComponent(s.cert_id || s.id || s.email || '');
+            window.open(getApiBaseUrl() + '/api/admin/certificates/download/' + lookup, '_blank');
         }
 
         // =========================================================================

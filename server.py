@@ -875,10 +875,22 @@ def init_db():
         )
     ''')
 
-    try:
-        cur.execute('ALTER TABLE certificates ADD COLUMN cert_data_json TEXT')
-    except Exception:
-        pass
+    for cert_col_def in [
+        'cert_data_json TEXT',
+        "course_type TEXT DEFAULT 'unarmed'",
+        'student_email TEXT',
+        'idfpr_email TEXT',
+        'pdf_base64 TEXT',
+        'pdf_filename TEXT',
+        'instructor_completed INTEGER DEFAULT 0',
+        'emailed_to_student INTEGER DEFAULT 0',
+        'emailed_to_idfpr INTEGER DEFAULT 0',
+        'updated_at TEXT'
+    ]:
+        try:
+            cur.execute(f'ALTER TABLE certificates ADD COLUMN {cert_col_def}')
+        except Exception:
+            pass
 
     # Analytics Events Table
     cur.execute('''
@@ -1497,7 +1509,12 @@ def list_students():
                (SELECT COUNT(*) FROM progress p WHERE p.student_id = s.id AND p.study_done = 1 AND p.scenario_done = 1 AND p.quiz_done = 1) as completed_modules,
                (SELECT id FROM certificates c WHERE c.student_id = s.id) as cert_id,
                (SELECT issued_at FROM certificates c WHERE c.student_id = s.id) as cert_issued_at,
-               (SELECT cert_data_json FROM certificates c WHERE c.student_id = s.id) as cert_data_json
+               (SELECT cert_data_json FROM certificates c WHERE c.student_id = s.id) as cert_data_json,
+               (SELECT CASE WHEN c.pdf_base64 IS NOT NULL AND LENGTH(c.pdf_base64) > 20 THEN 1 ELSE 0 END FROM certificates c WHERE c.student_id = s.id) as has_saved_cert_pdf,
+               (SELECT pdf_filename FROM certificates c WHERE c.student_id = s.id) as cert_filename,
+               (SELECT instructor_completed FROM certificates c WHERE c.student_id = s.id) as cert_instructor_completed,
+               (SELECT emailed_to_student FROM certificates c WHERE c.student_id = s.id) as cert_emailed_to_student,
+               (SELECT emailed_to_idfpr FROM certificates c WHERE c.student_id = s.id) as cert_emailed_to_idfpr
         FROM students s
         WHERE s.is_admin = 0
         ORDER BY s.last_active DESC
@@ -1531,12 +1548,25 @@ def list_students():
         mfa_verified_at = r['mfa_verified_at'] if 'mfa_verified_at' in r.keys() else None
 
         is_armed_row = str(sid or '').lower().startswith('armed::')
+        armed_cert_obj = None
+        if 'cert_data_json' in r.keys() and r['cert_data_json']:
+            try:
+                armed_cert_obj = json.loads(r['cert_data_json'])
+            except Exception:
+                armed_cert_obj = None
+        instructor_done = bool(
+            (r['cert_instructor_completed'] if 'cert_instructor_completed' in r.keys() else 0)
+            or (armed_cert_obj and armed_cert_obj.get('instructor_completed'))
+        )
+        armed_pending_instructor = bool(is_armed_row and not instructor_done)
+
         students.append({
             'id': r['id'],
             'name': r['name'],
             'email': r['email'],
             'agency': r['agency'],
             'course_type': 'armed' if is_armed_row else 'unarmed',
+            'armed_pending_instructor': armed_pending_instructor,
             'payment_status': (
                 'Paid $200 - Online Armed Security (28-Hr Tan Card)' if is_armed_row
                 else 'Paid $50 - Online Unarmed Security (PERC)'
@@ -1569,11 +1599,22 @@ def list_students():
             'thank_you_email_sent_at': (r['thank_you_email_sent_at'] if 'thank_you_email_sent_at' in r.keys() else r['cert_issued_at']),
             'cert_id': r['cert_id'],
             'cert_issued_at': r['cert_issued_at'],
-            'armed_cert_data': (json.loads(r['cert_data_json']) if ('cert_data_json' in r.keys() and r['cert_data_json']) else None),
+            'has_saved_cert_pdf': bool(r['has_saved_cert_pdf']) if 'has_saved_cert_pdf' in r.keys() else False,
+            'cert_filename': r['cert_filename'] if 'cert_filename' in r.keys() else None,
+            'cert_emailed_to_student': bool(r['cert_emailed_to_student']) if 'cert_emailed_to_student' in r.keys() else False,
+            'cert_emailed_to_idfpr': bool(r['cert_emailed_to_idfpr']) if 'cert_emailed_to_idfpr' in r.keys() else False,
+            'armed_cert_data': armed_cert_obj if is_armed_row else None,
+            'unarmed_cert_data': armed_cert_obj if not is_armed_row else None,
             'created_at': r['created_at'],
             'last_active': r['last_active'],
             'attempts': attempts
         })
+
+    # Sort so Online Armed Security students pending instructor certificate completion appear at the top of the list
+    students.sort(key=lambda s: (
+        0 if s.get('armed_pending_instructor') else 1,
+        0 if (s.get('armed_pending_instructor') and s.get('armed_cert_data')) else 1
+    ))
     try:
         sync_to_cloud_json()
     except Exception: pass
@@ -1867,34 +1908,51 @@ def process_payment():
         'message': 'Payment authorized and verified successfully!'
     })
 
-# 8. Issue Certificate & Lock Against New Certificate Creation
+# 8. Issue Certificate & Save to Instructor Certificate Database (Armed Part 1 & Unarmed Completed PDF)
 @app.route('/api/certificate/issue', methods=['POST'])
 def issue_certificate():
     data = request.get_json() or {}
-    student_id = data.get('student_id')
-    cert_id = data.get('cert_id', 'PTA-IL-' + datetime.now().strftime('%Y%m%d%H%M%S'))
+    student_id = (data.get('student_id') or '').strip()
+    cert_id = (data.get('cert_id') or ('PTA-IL-' + datetime.now().strftime('%Y%m%d%H%M%S'))).strip()
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     if not student_id:
         return jsonify({'error': 'Missing student_id'}), 400
 
+    pdf_base64 = data.get('pdf_base64') or ''
+    if ',' in pdf_base64:
+        pdf_base64 = pdf_base64.split(',', 1)[1]
+    pdf_filename = (data.get('pdf_filename') or data.get('filename') or '').strip()
+
+    # Strip large pdf_base64 out of cert_data_json metadata dict to keep JSON clean while storing pdf_base64 in its column
+    meta_dict = {k: v for k, v in data.items() if k != 'pdf_base64'}
+    cert_json_str = json.dumps(meta_dict)
+
     db = get_db()
     cur = db.cursor()
 
-    cert_json_str = json.dumps(data)
-
-    # Check if certificate already exists
-    cur.execute('SELECT * FROM certificates WHERE student_id = ?', (student_id,))
+    cur.execute('SELECT * FROM certificates WHERE LOWER(student_id) = LOWER(?)', (student_id,))
     existing = cur.fetchone()
     is_armed_req = str(student_id or '').lower().startswith('armed::') or data.get('course_type') == 'armed'
+    course_type_val = 'armed' if is_armed_req else 'unarmed'
+    student_email_val = (data.get('email') or (student_id[7:] if str(student_id).lower().startswith('armed::') else (student_id if '@' in str(student_id) else ''))).strip().lower()
 
     if existing and existing['is_locked'] == 1 and not is_armed_req:
+        # Still allow saving the PDF copy into the instructor database if it wasn't saved yet
+        if pdf_base64:
+            cur.execute('''
+                UPDATE certificates
+                SET pdf_base64 = ?, pdf_filename = COALESCE(NULLIF(?, ''), pdf_filename), updated_at = ?
+                WHERE LOWER(student_id) = LOWER(?)
+            ''', (pdf_base64, pdf_filename, now_str, student_id))
+            db.commit()
         return jsonify({
             'success': True,
             'is_locked': True,
             'already_issued': True,
             'cert_id': existing['id'],
             'issued_at': existing['issued_at'],
+            'saved_to_instructor_db': True,
             'message': 'Certificate was previously issued and sealed under IDFPR regulations.'
         })
 
@@ -1906,34 +1964,45 @@ def issue_certificate():
                 merged_data = json.loads(existing['cert_data_json'])
         except Exception:
             pass
-        merged_data.update(data)
+        merged_data.update(meta_dict)
+        instr_done = 1 if merged_data.get('instructor_completed') else 0
         cur.execute('''
             UPDATE certificates SET
                 trainee_name = ?, address = ?, city = ?, state = ?, zip = ?,
                 dob = ?, ssn = ?, weight = ?, height = ?, hair = ?, eyes = ?,
-                signature = ?, date_completed = ?, cert_data_json = ?
-            WHERE student_id = ?
+                signature = ?, date_completed = ?, cert_data_json = ?,
+                course_type = 'armed', student_email = ?, instructor_completed = ?,
+                pdf_base64 = COALESCE(NULLIF(?, ''), pdf_base64),
+                pdf_filename = COALESCE(NULLIF(?, ''), pdf_filename),
+                updated_at = ?
+            WHERE LOWER(student_id) = LOWER(?)
         ''', (
             data.get('name', ''), data.get('address', ''), data.get('city', ''),
             data.get('state', 'IL'), data.get('zip', ''), data.get('dob', ''),
             data.get('ssn', ''), data.get('weight', ''), data.get('height', ''),
             data.get('hair', ''), data.get('eyes', ''), data.get('signature', ''),
-            data.get('date_completed', ''), json.dumps(merged_data), student_id
+            data.get('date_completed', ''), json.dumps(merged_data),
+            student_email_val, instr_done, pdf_base64, pdf_filename, now_str, student_id
         ))
     else:
-        # Insert new certificate
+        # Insert new certificate (Unarmed completed certificate or Armed Part 1 Trainee submission)
+        instr_done = 0 if is_armed_req else 1
         cur.execute('''
             INSERT INTO certificates (
                 id, student_id, trainee_name, address, city, state, zip,
                 dob, ssn, weight, height, hair, eyes, signature,
-                date_completed, issued_at, is_locked, cert_data_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+                date_completed, issued_at, is_locked, cert_data_json,
+                course_type, student_email, pdf_base64, pdf_filename,
+                instructor_completed, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             cert_id, student_id, data.get('name', ''), data.get('address', ''),
             data.get('city', ''), data.get('state', 'IL'), data.get('zip', ''),
             data.get('dob', ''), data.get('ssn', ''), data.get('weight', ''),
             data.get('height', ''), data.get('hair', ''), data.get('eyes', ''),
-            data.get('signature', ''), data.get('date_completed', ''), now_str, cert_json_str
+            data.get('signature', ''), data.get('date_completed', ''), now_str, cert_json_str,
+            course_type_val, student_email_val, pdf_base64 or None, pdf_filename or None,
+            instr_done, now_str
         ))
 
     try:
@@ -1944,14 +2013,14 @@ def issue_certificate():
     cur.execute('''
         INSERT INTO analytics_events (event_type, student_id, details, timestamp)
         VALUES ('certificate_issued', ?, ?, ?)
-    ''', (student_id, f"Certificate {cert_id} sealed and issued", now_str))
+    ''', (student_id, f"Certificate {cert_id} ({course_type_val}) saved to database", now_str))
 
     db.commit()
 
     # Automatically send Graduation Thank You + Google Review Email for Unarmed graduates
     if not is_armed_req:
         try:
-            grad_email = (data.get('email') or (student_id if '@' in str(student_id) else '')).strip()
+            grad_email = student_email_val
             if grad_email and '@' in grad_email:
                 subj, h_body, t_body = build_thank_you_google_review_email(
                     data.get('name') or 'Graduate Officer',
@@ -1970,8 +2039,120 @@ def issue_certificate():
         'success': True,
         'cert_id': cert_id,
         'is_locked': True,
-        'message': 'Certificate issued and permanently sealed.'
+        'saved_to_instructor_db': True,
+        'message': 'Certificate issued and saved in Instructor Database.'
     })
+
+
+# 8B. Email Unarmed Certificate PDF to Student Email on File & Save Copy to Instructor Database
+@app.route('/api/certificate/email-unarmed', methods=['POST'])
+def email_unarmed_certificate():
+    data = request.get_json() or {}
+    student_id = (data.get('student_id') or '').strip()
+    student_email = (data.get('email') or data.get('student_email') or '').strip().lower()
+    if not student_email and '@' in student_id:
+        student_email = student_id.lower()
+    student_name = (data.get('name') or data.get('student_name') or 'Graduate Officer').strip()
+    cert_id = (data.get('cert_id') or ('PTA-IL-' + datetime.now().strftime('%Y%m%d%H%M%S'))).strip()
+    pdf_base64 = data.get('pdf_base64') or ''
+    filename = (data.get('filename') or f"Illinois_20Hr_Unarmed_Certificate_{student_name.replace(' ', '_')}.pdf").strip()
+    date_completed = (data.get('date_completed') or datetime.now().strftime('%m/%d/%Y')).strip()
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    if not student_email or '@' not in student_email:
+        return jsonify({'success': False, 'error': 'Valid student email address on file is required.'}), 400
+    if not pdf_base64:
+        return jsonify({'success': False, 'error': 'Missing generated PDF certificate attachment.'}), 400
+
+    try:
+        if ',' in pdf_base64:
+            pdf_base64 = pdf_base64.split(',', 1)[1]
+        pdf_bytes = base64.b64decode(pdf_base64)
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Invalid PDF payload: {e}'}), 400
+
+    # Save/update certificate in Instructor Database so instructor always has a copy
+    try:
+        db = get_db()
+        cur = db.cursor()
+        target_sid = student_id or student_email
+        existing = cur.execute('SELECT * FROM certificates WHERE LOWER(student_id) = LOWER(?)', (target_sid,)).fetchone()
+        meta_dict = {k: v for k, v in data.items() if k != 'pdf_base64'}
+        if existing:
+            cur.execute('''
+                UPDATE certificates
+                SET pdf_base64 = ?, pdf_filename = ?, student_email = ?, emailed_to_student = 1, instructor_completed = 1, updated_at = ?
+                WHERE LOWER(student_id) = LOWER(?)
+            ''', (pdf_base64, filename, student_email, now_str, target_sid))
+        else:
+            cur.execute('''
+                INSERT INTO certificates (
+                    id, student_id, trainee_name, address, city, state, zip,
+                    dob, ssn, weight, height, hair, eyes, signature,
+                    date_completed, issued_at, is_locked, cert_data_json,
+                    course_type, student_email, pdf_base64, pdf_filename,
+                    instructor_completed, emailed_to_student, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'unarmed', ?, ?, ?, 1, 1, ?)
+            ''', (
+                cert_id, target_sid, student_name, data.get('address', ''),
+                data.get('city', ''), data.get('state', 'IL'), data.get('zip', ''),
+                data.get('dob', ''), data.get('ssn', ''), data.get('weight', ''),
+                data.get('height', ''), data.get('hair', ''), data.get('eyes', ''),
+                data.get('signature', ''), date_completed, now_str, json.dumps(meta_dict),
+                student_email, pdf_base64, filename, now_str
+            ))
+        db.commit()
+        sync_to_cloud_json()
+    except Exception as db_err:
+        print("Save unarmed cert on email note:", db_err)
+
+    subject = f"Your Official Illinois 20-Hour Unarmed Security Certificate (Form IL486-0486) - {student_name}"
+    html_body = f'''
+    <div style="font-family:Arial,sans-serif; max-width:620px; padding:24px; background:#0f172a; color:#f8fafc; border-radius:10px; border:1px solid #334155;">
+        <h2 style="color:#d4af37; margin-top:0;">Platforms Training Academy &bull; Official 20-Hour Unarmed Security Certificate</h2>
+        <p style="color:#e2e8f0; line-height:1.6;">
+            Congratulations, <strong>{student_name}</strong>! Attached to this email is your official completed <strong>State of Illinois Certification of Completion of a Basic Training Course — Form IL486-0486 (20-Hour Unarmed Security Officer / PERC)</strong>.
+        </p>
+        <div style="background:#1e293b; border-left:4px solid #d4af37; padding:14px 16px; border-radius:6px; margin:16px 0; font-size:14px; color:#f1f5f9;">
+            <div><strong>Trainee Name:</strong> {student_name}</div>
+            <div><strong>Course Completed:</strong> 20-Hour Basic Unarmed Security Training (225 ILCS 447)</div>
+            <div><strong>IDFPR Approved Curriculum Number:</strong> 102-000398</div>
+            <div><strong>Date Training Completed:</strong> {date_completed}</div>
+            <div><strong>Lead Instructor:</strong> Charles Young (License #263-000693)</div>
+            <div><strong>Certificate Serial ID:</strong> {cert_id}</div>
+        </div>
+        <p style="font-size:13px; color:#fde68a; line-height:1.5;">
+            <strong>Important:</strong> Please save the attached PDF certificate across multiple secure locations and print a physical hard copy for your permanent records and Illinois PERC application.
+        </p>
+        <p style="font-size:12px; color:#64748b; margin-bottom:0;">
+            Platforms Training Academy &bull; 200 E 75th St, Chicago, IL 60615 &bull; platformstraining.com
+        </p>
+    </div>
+    '''
+    text_body = f'''Platforms Training Academy - Official 20-Hour Unarmed Security Certificate (Form IL486-0486)
+Trainee Name: {student_name}
+Course: 20-Hour Basic Unarmed Security Training (IDFPR #102-000398)
+Date Completed: {date_completed}
+Certificate ID: {cert_id}
+Instructor: Charles Young (License #263-000693)
+'''
+    ok, msg_str = send_email_smtp_with_pdf([student_email], subject, html_body, text_body, pdf_bytes, filename)
+    if ok:
+        return jsonify({
+            'success': True,
+            'to_email': student_email,
+            'cert_id': cert_id,
+            'saved_to_instructor_db': True,
+            'message': f'Official Unarmed Certificate emailed to {student_email} and saved in Academy Database!'
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'to_email': student_email,
+            'cert_id': cert_id,
+            'saved_to_instructor_db': True,
+            'error': msg_str
+        }), 500
 
 # 9. Get Certificate Status
 @app.route('/api/certificate/status/<path:student_id>', methods=['GET'])
@@ -2018,6 +2199,11 @@ def admin_save_armed_certificate():
     cert_data = data.get('armed_cert_data') or {}
     cert_id = cert_data.get('cert_id') or data.get('cert_id') or ('PTA-IL486-' + datetime.now().strftime('%Y%m%d%H%M%S'))
     cert_data['cert_id'] = cert_id
+    pdf_base64 = data.get('pdf_base64') or ''
+    if ',' in pdf_base64:
+        pdf_base64 = pdf_base64.split(',', 1)[1]
+    pdf_filename = (data.get('pdf_filename') or data.get('filename') or '').strip()
+    instr_done = 1 if cert_data.get('instructor_completed') else 0
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     db = get_db()
@@ -2025,8 +2211,8 @@ def admin_save_armed_certificate():
 
     # Ensure student row exists
     st = cur.execute('SELECT * FROM students WHERE LOWER(id) = LOWER(?)', (student_id,)).fetchone()
+    clean_email = raw_email or (cert_data.get('email') or '').strip().lower() or student_id.replace('armed::', '')
     if not st:
-        clean_email = raw_email or student_id.replace('armed::', '')
         cur.execute('''
             INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, created_at, last_active)
             VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
@@ -2041,7 +2227,11 @@ def admin_save_armed_certificate():
             UPDATE certificates SET
                 trainee_name = ?, address = ?, city = ?, state = ?, zip = ?,
                 dob = ?, ssn = ?, weight = ?, height = ?, hair = ?, eyes = ?,
-                signature = ?, date_completed = ?, cert_data_json = ?
+                signature = ?, date_completed = ?, cert_data_json = ?,
+                course_type = 'armed', student_email = ?, instructor_completed = ?,
+                pdf_base64 = COALESCE(NULLIF(?, ''), pdf_base64),
+                pdf_filename = COALESCE(NULLIF(?, ''), pdf_filename),
+                updated_at = ?
             WHERE LOWER(student_id) = LOWER(?)
         ''', (
             cert_data.get('name', ''), cert_data.get('address', ''), cert_data.get('city', ''),
@@ -2049,22 +2239,24 @@ def admin_save_armed_certificate():
             cert_data.get('ssn', ''), cert_data.get('weight', ''), cert_data.get('height', ''),
             cert_data.get('hair', ''), cert_data.get('eyes', ''), cert_data.get('signature', ''),
             cert_data.get('date_training_completed', '') or cert_data.get('trainee_date', ''),
-            cert_json_str, student_id
+            cert_json_str, clean_email, instr_done, pdf_base64, pdf_filename, now_str, student_id
         ))
     else:
         cur.execute('''
             INSERT INTO certificates (
                 id, student_id, trainee_name, address, city, state, zip,
                 dob, ssn, weight, height, hair, eyes, signature,
-                date_completed, issued_at, is_locked, cert_data_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+                date_completed, issued_at, is_locked, cert_data_json,
+                course_type, student_email, pdf_base64, pdf_filename,
+                instructor_completed, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'armed', ?, ?, ?, ?, ?)
         ''', (
             cert_id, student_id, cert_data.get('name', ''), cert_data.get('address', ''),
             cert_data.get('city', ''), cert_data.get('state', 'IL'), cert_data.get('zip', ''),
             cert_data.get('dob', ''), cert_data.get('ssn', ''), cert_data.get('weight', ''),
             cert_data.get('height', ''), cert_data.get('hair', ''), cert_data.get('eyes', ''),
             cert_data.get('signature', ''), cert_data.get('date_training_completed', '') or now_str,
-            now_str, cert_json_str
+            now_str, cert_json_str, clean_email, pdf_base64 or None, pdf_filename or None, instr_done, now_str
         ))
 
     db.commit()
@@ -2077,10 +2269,11 @@ def admin_save_armed_certificate():
         'success': True,
         'cert_id': cert_id,
         'armed_cert_data': cert_data,
-        'message': 'Armed Certificate (IL486-1138) qualification info saved to student profile.'
+        'saved_to_instructor_db': True,
+        'message': 'Armed Certificate (IL486-1138) qualification info saved to student profile and Instructor Database.'
     })
 
-# 9C. Admin Portal: Send Completed Armed Certificate PDF to Student & IDFPR (FPR.SafetyUnit@illinois.gov)
+# 9C. Admin Portal: Save & Send Completed Armed Certificate PDF to Student & IDFPR (FPR.SafetyUnit@illinois.gov)
 @app.route('/api/admin/armed-certificate/send-email', methods=['POST'])
 def admin_send_armed_certificate_email():
     data = request.get_json() or {}
@@ -2092,6 +2285,8 @@ def admin_send_armed_certificate_email():
     filename = (data.get('filename') or f"IDFPR_Firearms_Training_Certificate_{student_name.replace(' ', '_')}.pdf").strip()
     cert_data = data.get('armed_cert_data') or {}
     student_id = (data.get('student_id') or '').strip()
+    if not student_id and student_email:
+        student_id = f"armed::{student_email.lower()}"
 
     if not pdf_base64:
         return jsonify({'success': False, 'error': 'Missing generated PDF certificate attachment'}), 400
@@ -2112,8 +2307,56 @@ def admin_send_armed_certificate_email():
     if not recipients:
         return jsonify({'success': False, 'error': 'At least one valid recipient email is required'}), 400
 
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     date_completed = cert_data.get('date_training_completed') or datetime.now().strftime('%m/%d/%Y')
     written_score = cert_data.get('written_exam_score') or '100'
+
+    # Always save the completed Armed certificate + PDF into the Instructor Database first
+    try:
+        cert_data['instructor_completed'] = True
+        cert_data['instructor_completed_at'] = now_str
+        cert_data['emailed_to_student_and_idfpr'] = True
+        cert_data['emailed_at'] = now_str
+        cert_data['student_email'] = student_email
+        cert_data['idfpr_email'] = idfpr_email
+        db = get_db()
+        cur = db.cursor()
+        existing = cur.execute('SELECT * FROM certificates WHERE LOWER(student_id) = LOWER(?)', (student_id,)).fetchone()
+        if existing:
+            cur.execute('''
+                UPDATE certificates SET
+                    trainee_name = ?, date_completed = ?, cert_data_json = ?,
+                    course_type = 'armed', student_email = ?, idfpr_email = ?,
+                    pdf_base64 = ?, pdf_filename = ?,
+                    instructor_completed = 1, emailed_to_student = 1, emailed_to_idfpr = 1,
+                    updated_at = ?
+                WHERE LOWER(student_id) = LOWER(?)
+            ''', (
+                student_name, date_completed, json.dumps(cert_data),
+                student_email, idfpr_email, pdf_base64, filename, now_str, student_id
+            ))
+        else:
+            cur.execute('''
+                INSERT INTO certificates (
+                    id, student_id, trainee_name, address, city, state, zip,
+                    dob, ssn, weight, height, hair, eyes, signature,
+                    date_completed, issued_at, is_locked, cert_data_json,
+                    course_type, student_email, idfpr_email, pdf_base64, pdf_filename,
+                    instructor_completed, emailed_to_student, emailed_to_idfpr, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'armed', ?, ?, ?, ?, 1, 1, 1, ?)
+            ''', (
+                cert_id, student_id, student_name, cert_data.get('address', ''),
+                cert_data.get('city', ''), cert_data.get('state', 'IL'), cert_data.get('zip', ''),
+                cert_data.get('dob', ''), cert_data.get('ssn', ''), cert_data.get('weight', ''),
+                cert_data.get('height', ''), cert_data.get('hair', ''), cert_data.get('eyes', ''),
+                cert_data.get('signature', ''), date_completed, now_str, json.dumps(cert_data),
+                student_email, idfpr_email, pdf_base64, filename, now_str
+            ))
+        db.commit()
+        sync_to_cloud_json()
+    except Exception as save_err:
+        print("Save completed armed cert to DB note:", save_err)
+
     subject = f"IDFPR Firearms Training Certificate (Form IL486-1138) - {student_name} - Curriculum #102-000398"
 
     html_body = f'''
@@ -2151,19 +2394,6 @@ Recipients: {', '.join(recipients)}
 
     ok, msg_str = send_email_smtp_with_pdf(recipients, subject, html_body, text_body, pdf_bytes, filename)
 
-    # Also update certificate record if student_id provided
-    if student_id and cert_data:
-        try:
-            now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cert_data['emailed_to_student_and_idfpr'] = True
-            cert_data['emailed_at'] = now_str
-            db = get_db()
-            db.execute('UPDATE certificates SET cert_data_json = ? WHERE LOWER(student_id) = LOWER(?)', (json.dumps(cert_data), student_id))
-            db.commit()
-            sync_to_cloud_json()
-        except Exception:
-            pass
-
     if ok and student_email and '@' in student_email:
         try:
             ty_subj, ty_html, ty_text = build_thank_you_google_review_email(
@@ -2181,9 +2411,80 @@ Recipients: {', '.join(recipients)}
             print("Armed thank-you review email note:", e)
 
     if ok:
-        return jsonify({'success': True, 'recipients': recipients, 'message': msg_str})
+        return jsonify({'success': True, 'saved_to_instructor_db': True, 'recipients': recipients, 'message': msg_str})
     else:
-        return jsonify({'success': False, 'recipients': recipients, 'error': msg_str}), 500
+        return jsonify({'success': False, 'saved_to_instructor_db': True, 'recipients': recipients, 'error': msg_str}), 500
+
+
+# 9D. Instructor Certificate Database Endpoints (List & Download Saved Armed/Unarmed Certificates)
+@app.route('/api/admin/certificates', methods=['GET'])
+def admin_list_saved_certificates():
+    db = get_db()
+    rows = db.execute('''
+        SELECT id, student_id, trainee_name, address, city, state, zip, dob,
+               date_completed, issued_at, updated_at, course_type, student_email,
+               idfpr_email, pdf_filename, instructor_completed, emailed_to_student,
+               emailed_to_idfpr, cert_data_json,
+               CASE WHEN pdf_base64 IS NOT NULL AND LENGTH(pdf_base64) > 20 THEN 1 ELSE 0 END as has_pdf
+        FROM certificates
+        ORDER BY COALESCE(updated_at, issued_at) DESC
+    ''').fetchall()
+    certs = []
+    for r in rows:
+        c_obj = {}
+        if r['cert_data_json']:
+            try:
+                c_obj = json.loads(r['cert_data_json'])
+            except Exception:
+                c_obj = {}
+        is_armed = (r['course_type'] == 'armed') or str(r['student_id'] or '').lower().startswith('armed::')
+        certs.append({
+            'id': r['id'],
+            'student_id': r['student_id'],
+            'trainee_name': r['trainee_name'],
+            'course_type': 'armed' if is_armed else 'unarmed',
+            'form_code': 'IL486-1138 (28-Hr Armed)' if is_armed else 'IL486-0486 (20-Hr Unarmed)',
+            'student_email': r['student_email'] or c_obj.get('email') or '',
+            'idfpr_email': r['idfpr_email'] or ('FPR.SafetyUnit@illinois.gov' if is_armed else ''),
+            'date_completed': r['date_completed'] or '',
+            'issued_at': r['issued_at'] or '',
+            'updated_at': r['updated_at'] or r['issued_at'] or '',
+            'has_pdf': bool(r['has_pdf']),
+            'pdf_filename': r['pdf_filename'] or (f"IDFPR_Armed_Certificate_IL486-1138_{(r['trainee_name'] or 'Student').replace(' ', '_')}.pdf" if is_armed else f"Illinois_20Hr_Unarmed_Certificate_{(r['trainee_name'] or 'Student').replace(' ', '_')}.pdf"),
+            'instructor_completed': bool(r['instructor_completed']) if is_armed else True,
+            'emailed_to_student': bool(r['emailed_to_student']),
+            'emailed_to_idfpr': bool(r['emailed_to_idfpr']),
+            'cert_data': c_obj
+        })
+    return jsonify({'success': True, 'certificates': certs})
+
+
+@app.route('/api/admin/certificates/download/<path:lookup_id>', methods=['GET'])
+def admin_download_saved_certificate(lookup_id):
+    db = get_db()
+    row = db.execute('''
+        SELECT * FROM certificates
+        WHERE LOWER(id) = LOWER(?) OR LOWER(student_id) = LOWER(?) OR LOWER(student_email) = LOWER(?)
+        ORDER BY COALESCE(updated_at, issued_at) DESC LIMIT 1
+    ''', (lookup_id, lookup_id, lookup_id)).fetchone()
+    if not row:
+        return jsonify({'success': False, 'error': 'Certificate not found in Instructor Database'}), 404
+    c_obj = {}
+    if row['cert_data_json']:
+        try:
+            c_obj = json.loads(row['cert_data_json'])
+        except Exception:
+            c_obj = {}
+    return jsonify({
+        'success': True,
+        'cert_id': row['id'],
+        'student_id': row['student_id'],
+        'trainee_name': row['trainee_name'],
+        'course_type': row['course_type'],
+        'pdf_base64': row['pdf_base64'] or '',
+        'pdf_filename': row['pdf_filename'] or f"Official_Certificate_{(row['trainee_name'] or 'Student').replace(' ', '_')}.pdf",
+        'cert_data': c_obj
+    })
 
 # 10. Course Calendar & Schedule Management (Admin & Public)
 CALENDAR_JSON_PATH = os.path.join(DATA_DIR, 'calendar.json')

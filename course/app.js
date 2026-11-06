@@ -2953,6 +2953,157 @@ class SecurityCourseApp {
         setVal('cert-input-hair', 'prev-cert-hair', 'hair', '');
         setVal('cert-input-eyes', 'prev-cert-eyes', 'eyes', '');
         setVal('cert-input-signature', 'prev-cert-sig', 'signature', '');
+
+        const emailOnFile = (this.studentEmail || 'email on file').trim();
+        document.querySelectorAll('.cert-student-email-display').forEach(el => {
+            el.textContent = emailOnFile;
+        });
+    }
+
+    async buildUnarmedCertPdfPayload() {
+        if (typeof PDFLib === 'undefined' || typeof UNARMED_CERT_TEMPLATE_BASE64 === 'undefined') {
+            throw new Error("Certificate generator library is initializing. Please wait a moment and try again.");
+        }
+
+        const binaryString = atob(UNARMED_CERT_TEMPLATE_BASE64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+        const page = pdfDoc.getPages()[0];
+        const { height } = page.getSize();
+
+        const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+        const helveticaBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+        const timesItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
+
+        const name = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').trim().toUpperCase();
+        const address = document.getElementById('cert-input-address')?.value || this.studentCertData.address || '';
+        const city = document.getElementById('cert-input-city')?.value || this.studentCertData.city || 'Chicago';
+        const state = (document.getElementById('cert-input-state')?.value || this.studentCertData.state || 'IL').toUpperCase();
+        const zip = document.getElementById('cert-input-zip')?.value || this.studentCertData.zip || '';
+        const dob = document.getElementById('cert-input-dob')?.value || this.studentCertData.dob || '';
+        const ssn = document.getElementById('cert-input-ssn')?.value || this.studentCertData.ssn || '';
+        const weight = document.getElementById('cert-input-weight')?.value || this.studentCertData.weight || '';
+        const heightVal = document.getElementById('cert-input-height')?.value || this.studentCertData.height || '';
+        const hair = document.getElementById('cert-input-hair')?.value || this.studentCertData.hair || '';
+        const eyes = document.getElementById('cert-input-eyes')?.value || this.studentCertData.eyes || '';
+        const traineeSig = document.getElementById('cert-input-signature')?.value || this.studentCertData.signature || name;
+        const compDate = this.studentCertData.date_completed || this.getFormattedTodayDate();
+
+        // Persist into studentCertData so even after locking the form, Email to Email on File uses the exact sealed data
+        this.studentCertData = {
+            ...this.studentCertData,
+            name, address, city, state, zip, dob, ssn, weight, height: heightVal, hair, eyes, signature: traineeSig, date_completed: compDate
+        };
+
+        page.drawText(name, { x: 35, y: height - 137, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(address, { x: 35, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(city, { x: 294, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(state, { x: 395, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(zip, { x: 490, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+        page.drawText(dob, { x: 35, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(ssn, { x: 150, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(weight, { x: 294, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(heightVal, { x: 342, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(hair, { x: 392, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(eyes, { x: 490, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+        let sigDrawn = false;
+        try {
+            if (document.fonts && document.fonts.load) {
+                await document.fonts.load("400 48px 'Sacramento'");
+            }
+            const sigCanvas = document.createElement('canvas');
+            sigCanvas.width = 900;
+            sigCanvas.height = 160;
+            const ctx = sigCanvas.getContext('2d');
+            if (ctx) {
+                ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+                ctx.font = "400 68px 'Sacramento', 'Alex Brush', cursive";
+                ctx.fillStyle = '#0b1938';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(traineeSig, 12, 85);
+                const sigDataUrl = sigCanvas.toDataURL('image/png');
+                const sigImage = await pdfDoc.embedPng(sigDataUrl);
+                page.drawImage(sigImage, {
+                    x: 136,
+                    y: height - 290,
+                    width: 225,
+                    height: 40
+                });
+                sigDrawn = true;
+            }
+        } catch (sigErr) {
+            console.warn('Signature canvas fallback:', sigErr);
+        }
+        if (!sigDrawn) {
+            page.drawText(traineeSig, { x: 140, y: height - 273, size: 13, font: timesItalic, color: PDFLib.rgb(0.05, 0.08, 0.15) });
+        }
+        page.drawText(compDate, { x: 432, y: height - 273, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+        page.drawText(compDate, { x: 35, y: height - 672, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
+        page.drawText(compDate, { x: 435, y: height - 739, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+        const pdfBytes = await pdfDoc.save();
+        const base64Pdf = await pdfDoc.saveAsBase64();
+        const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = `Illinois_20Hr_Unarmed_Certificate_${cleanName}.pdf`;
+        const certId = this.issuedCertId || ('PTA-IL-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000));
+        this.issuedCertId = certId;
+
+        return {
+            pdfBytes,
+            base64Pdf,
+            filename,
+            certId,
+            fields: {
+                name, address, city, state, zip, dob, ssn, weight,
+                height: heightVal, hair, eyes, signature: traineeSig, date_completed: compDate
+            }
+        };
+    }
+
+    async saveUnarmedCertToInstructorDatabase(certPayload) {
+        const emailKey = (this.studentEmail || '').trim().toLowerCase();
+        const record = {
+            student_id: emailKey || certPayload.fields.name,
+            email: emailKey,
+            cert_id: certPayload.certId,
+            course_type: 'unarmed',
+            pdf_base64: certPayload.base64Pdf,
+            pdf_filename: certPayload.filename,
+            ...certPayload.fields
+        };
+        try {
+            if (emailKey) {
+                localStorage.setItem('platforms_saved_unarmed_cert_' + emailKey, JSON.stringify({
+                    ...record,
+                    saved_at: new Date().toISOString()
+                }));
+            }
+            // Update local registry so Admin Portal sees the saved Unarmed certificate even offline
+            const regRaw = localStorage.getItem('platforms_student_registry');
+            if (regRaw) {
+                const reg = JSON.parse(regRaw);
+                if (Array.isArray(reg)) {
+                    const idx = reg.findIndex(s => String(s.email || s.id || '').toLowerCase() === emailKey);
+                    if (idx >= 0) {
+                        reg[idx].cert_id = certPayload.certId;
+                        reg[idx].has_saved_cert_pdf = true;
+                        reg[idx].cert_filename = certPayload.filename;
+                        reg[idx].unarmed_cert_data = certPayload.fields;
+                        localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
+                    }
+                }
+            }
+        } catch (e) {}
+
+        await this.apiCall('/api/certificate/issue', 'POST', record);
     }
 
     async downloadOfficialPdfCertificate() {
@@ -2960,7 +3111,7 @@ class SecurityCourseApp {
         if ((this.isCertLocked || this.hasLocalLockedCert(emailKey)) && !this.isAdminMode) {
             this.isCertLocked = true;
             this.renderResults();
-            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. Changes and additional downloads are disabled.");
+            alert("SECURITY LOCK: Your official certificate of completion has already been downloaded and permanently sealed for your account. You can still click 'Email Certificate to Email on File' above to receive a copy at your registered email address.");
             return;
         }
 
@@ -2969,24 +3120,6 @@ class SecurityCourseApp {
             return;
         }
 
-        // Double-check backend certificate lock before generating PDF
-        if (!this.isAdminMode && emailKey) {
-            try {
-                const status = await this.apiCall(`/api/certificate/status/${encodeURIComponent(emailKey)}`, 'GET');
-                if (status && status.is_locked) {
-                    this.isCertLocked = true;
-                    this.issuedCertId = (status.certificate && status.certificate.id) || this.issuedCertId || 'PTA-IL-SEALED';
-                    localStorage.setItem('platforms_cert_locked', 'true');
-                    localStorage.setItem('platforms_cert_locked_' + emailKey, 'true');
-                    this.saveState();
-                    this.renderResults();
-                    alert("SECURITY LOCK: Our records show your official certificate of completion has already been issued and permanently sealed. Duplicate certificates cannot be generated.");
-                    return;
-                }
-            } catch (e) {}
-        }
-
-        // Require trainee name before locking and downloading
         const checkName = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').trim();
         if (!checkName) {
             alert("Please enter your Full Legal Name on the certificate form before downloading.");
@@ -2994,12 +3127,11 @@ class SecurityCourseApp {
             return;
         }
 
-        // Mandatory Pre-Download Security Warning Confirmation
         const userConfirmed = confirm(
             "⚠️ CRITICAL CERTIFICATE NOTICE:\n\n" +
-            "1. This certificate is the ONLY copy that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.\n\n" +
-            "2. We strongly recommend that you save this certificate PDF in MULTIPLE LOCATIONS (e.g. your computer, smartphone, cloud storage, and email backup).\n\n" +
-            "3. In addition, please PRINT A PHYSICAL HARD COPY immediately for your permanent records and state PERC license application.\n\n" +
+            "1. Please confirm your legal name and demographic fields are 100% accurate.\n\n" +
+            "2. A copy of your certificate will be downloaded to your device AND archived in the Platforms Training Academy Instructor Database.\n\n" +
+            "3. You may also email a copy to your email on file (" + (this.studentEmail || 'on file') + ").\n\n" +
             "Click OK to download your official certificate now."
         );
         if (!userConfirmed) {
@@ -3007,103 +3139,10 @@ class SecurityCourseApp {
         }
 
         try {
-            if (typeof PDFLib === 'undefined' || typeof UNARMED_CERT_TEMPLATE_BASE64 === 'undefined') {
-                alert("Certificate generator library is initializing. Please wait a moment and try again.");
-                return;
-            }
+            const certPayload = await this.buildUnarmedCertPdfPayload();
+            const { pdfBytes, filename, certId } = certPayload;
 
-            // Decode base64 to binary
-            const binaryString = atob(UNARMED_CERT_TEMPLATE_BASE64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-
-            const pdfDoc = await PDFLib.PDFDocument.load(bytes);
-            const page = pdfDoc.getPages()[0];
-            const { height } = page.getSize();
-
-            const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-            const helveticaBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-            const timesItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
-
-            // Extract values
-            const name = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').toUpperCase();
-            const address = document.getElementById('cert-input-address')?.value || this.studentCertData.address || '';
-            const city = document.getElementById('cert-input-city')?.value || this.studentCertData.city || 'Chicago';
-            const state = (document.getElementById('cert-input-state')?.value || this.studentCertData.state || 'IL').toUpperCase();
-            const zip = document.getElementById('cert-input-zip')?.value || this.studentCertData.zip || '';
-            const dob = document.getElementById('cert-input-dob')?.value || this.studentCertData.dob || '';
-            const ssn = document.getElementById('cert-input-ssn')?.value || this.studentCertData.ssn || '';
-            const weight = document.getElementById('cert-input-weight')?.value || this.studentCertData.weight || '';
-            const heightVal = document.getElementById('cert-input-height')?.value || this.studentCertData.height || '';
-            const hair = document.getElementById('cert-input-hair')?.value || this.studentCertData.hair || '';
-            const eyes = document.getElementById('cert-input-eyes')?.value || this.studentCertData.eyes || '';
-            const traineeSig = document.getElementById('cert-input-signature')?.value || this.studentCertData.signature || name;
-            const compDate = this.getFormattedTodayDate();
-
-            // Stamp Trainee Fields:
-            // NAME
-            page.drawText(name, { x: 35, y: height - 137, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
-            // Address row
-            page.drawText(address, { x: 35, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(city, { x: 294, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(state, { x: 395, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(zip, { x: 490, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-
-            // DOB / SSN / Physical details row
-            page.drawText(dob, { x: 35, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(ssn, { x: 150, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(weight, { x: 294, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(heightVal, { x: 342, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(hair, { x: 392, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(eyes, { x: 490, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-
-            // Trainee Signature & Date (Realistic Thin Handwritten Signature via Canvas -> PNG or Fallback)
-            let sigDrawn = false;
-            try {
-                if (document.fonts && document.fonts.load) {
-                    await document.fonts.load("400 48px 'Sacramento'");
-                }
-                const sigCanvas = document.createElement('canvas');
-                sigCanvas.width = 900;
-                sigCanvas.height = 160;
-                const ctx = sigCanvas.getContext('2d');
-                if (ctx) {
-                    ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
-                    ctx.font = "400 68px 'Sacramento', 'Alex Brush', cursive";
-                    ctx.fillStyle = '#0b1938';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(traineeSig, 12, 85);
-                    const sigDataUrl = sigCanvas.toDataURL('image/png');
-                    const sigImage = await pdfDoc.embedPng(sigDataUrl);
-                    page.drawImage(sigImage, {
-                        x: 136,
-                        y: height - 290,
-                        width: 225,
-                        height: 40
-                    });
-                    sigDrawn = true;
-                }
-            } catch (sigErr) {
-                console.warn('Signature canvas fallback:', sigErr);
-            }
-            if (!sigDrawn) {
-                page.drawText(traineeSig, { x: 140, y: height - 273, size: 13, font: timesItalic, color: PDFLib.rgb(0.05, 0.08, 0.15) });
-            }
-            page.drawText(compDate, { x: 432, y: height - 273, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-
-            // Bottom Instructor Section (Platforms Training Academy & Charles Young)
-            // Note: Authentic hand signature of Charles Young is already on the certificate template
-            page.drawText(compDate, { x: 35, y: height - 672, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
-            page.drawText(compDate, { x: 435, y: height - 739, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
-
-            const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_');
-            const filename = `Illinois_20Hr_Unarmed_Certificate_${cleanName}.pdf`;
-
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
@@ -3111,10 +3150,12 @@ class SecurityCourseApp {
             link.click();
             document.body.removeChild(link);
 
-            // Seal certificate permanently against future edits/creation and purge from session for security
+            // Save copy to Instructor Certificate Database
+            await this.saveUnarmedCertToInstructorDatabase(certPayload);
+
             if (!this.isCertLocked || !this.isAdminMode) {
                 this.isCertLocked = true;
-                this.issuedCertId = this.issuedCertId || ('PTA-IL-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000));
+                this.issuedCertId = certId;
                 localStorage.setItem('platforms_cert_locked', 'true');
                 localStorage.setItem('platforms_cert_id', this.issuedCertId);
                 if (emailKey) {
@@ -3122,43 +3163,101 @@ class SecurityCourseApp {
                     localStorage.setItem('platforms_cert_id_' + emailKey, this.issuedCertId);
                 }
                 this.saveState();
-
-                // Send to backend
-                this.apiCall('/api/certificate/issue', 'POST', {
-                    student_id: this.studentEmail || name,
-                    cert_id: this.issuedCertId,
-                    name: name,
-                    address: address,
-                    city: city,
-                    state: state,
-                    zip: zip,
-                    dob: dob,
-                    ssn: ssn,
-                    weight: weight,
-                    height: heightVal,
-                    hair: hair,
-                    eyes: eyes,
-                    signature: traineeSig,
-                    date_completed: compDate
-                });
-
                 this.renderResults();
-                this.manualSaveProgress("Official Certificate generated, downloaded & sealed permanently!");
+                this.manualSaveProgress("Official Certificate downloaded & saved to Academy Database!");
 
-                // Post-download immediate security alert
                 setTimeout(() => {
                     alert(
                         "✅ CERTIFICATE DOWNLOAD COMPLETE!\n\n" +
-                        "Your official Illinois 20-Hour Unarmed Security Training Certificate (Form IL486-0486) has been generated and downloaded.\n\n" +
-                        "⚠️ CRITICAL REMINDER:\n" +
-                        "This is the ONLY copy of your certificate that you will receive. Platforms Training Academy does NOT issue duplicate copies under any circumstances.\n\n" +
-                        "Please verify the PDF in your Downloads folder right now, save the certificate in MULTIPLE LOCATIONS (computer, smartphone, cloud drive, email), and PRINT A PHYSICAL HARD COPY immediately."
+                        "Your official Illinois 20-Hour Unarmed Security Training Certificate (Form IL486-0486) has been downloaded to your device and saved to the Platforms Training Academy Database.\n\n" +
+                        "You can also click 'Email Certificate to Email on File' on this page to send a copy directly to your registered email address."
                     );
                 }, 350);
             }
         } catch (err) {
             console.error("PDF download error:", err);
             alert("An error occurred while generating your official PDF. Please verify your details and try downloading again.");
+        }
+    }
+
+    async emailOfficialPdfCertificate() {
+        if (!this.isAuthorized()) {
+            this.showView('payment-gate');
+            return;
+        }
+
+        let targetEmail = (this.studentEmail || '').trim().toLowerCase();
+        if (!targetEmail || !targetEmail.includes('@')) {
+            const prompted = prompt("Enter the email address on file where your Official Certificate PDF should be sent:", targetEmail || "");
+            if (!prompted || !prompted.includes('@')) return;
+            targetEmail = prompted.trim().toLowerCase();
+            this.studentEmail = targetEmail;
+            localStorage.setItem('platforms_student_email', targetEmail);
+        }
+
+        const checkName = (document.getElementById('cert-input-name')?.value || this.studentCertData.name || '').trim();
+        if (!checkName) {
+            alert("Please enter your Full Legal Name on the certificate form first.");
+            document.getElementById('cert-input-name')?.focus();
+            return;
+        }
+
+        const btnMain = document.getElementById('btn-email-cert-main');
+        const btnSealed = document.getElementById('btn-email-sealed-cert');
+        const fb = document.getElementById('unarmed-cert-email-feedback');
+
+        if (btnMain) {
+            btnMain.disabled = true;
+            btnMain.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Emailing Certificate to ${targetEmail}...`;
+        }
+        if (btnSealed) {
+            btnSealed.disabled = true;
+            btnSealed.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Emailing Certificate to ${targetEmail}...`;
+        }
+
+        try {
+            const certPayload = await this.buildUnarmedCertPdfPayload();
+            await this.saveUnarmedCertToInstructorDatabase(certPayload);
+
+            const res = await this.apiCall('/api/certificate/email-unarmed', 'POST', {
+                student_id: targetEmail,
+                email: targetEmail,
+                cert_id: certPayload.certId,
+                pdf_base64: certPayload.base64Pdf,
+                filename: certPayload.filename,
+                ...certPayload.fields
+            });
+
+            if (!this.isCertLocked && !this.isAdminMode) {
+                this.isCertLocked = true;
+                localStorage.setItem('platforms_cert_locked', 'true');
+                localStorage.setItem('platforms_cert_id', certPayload.certId);
+                localStorage.setItem('platforms_cert_locked_' + targetEmail, 'true');
+                localStorage.setItem('platforms_cert_id_' + targetEmail, certPayload.certId);
+                this.saveState();
+            }
+
+            if (fb) {
+                fb.style.display = 'block';
+                fb.style.background = 'rgba(16, 185, 129, 0.16)';
+                fb.style.border = '1px solid rgba(16, 185, 129, 0.45)';
+                fb.style.color = '#86efac';
+                fb.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Certificate Emailed &amp; Saved!</strong> Your official 20-Hour Unarmed Security Certificate (<code>${certPayload.filename}</code>) has been sent to <strong>${targetEmail}</strong> and saved in the Academy Database.`;
+            }
+            this.manualSaveProgress(`Official Certificate emailed to ${targetEmail} & saved in database!`);
+            alert(`✅ CERTIFICATE EMAILED TO ${targetEmail.toUpperCase()}!\n\nYour official Illinois 20-Hour Unarmed Security Certificate (Form IL486-0486) has been emailed to ${targetEmail} and archived in the Platforms Training Academy Database.`);
+        } catch (err) {
+            console.error("Email unarmed certificate error:", err);
+            alert("Could not email certificate automatically. Please click Download Official State Certificate (PDF) to save your copy directly.");
+        } finally {
+            if (btnMain) {
+                btnMain.disabled = false;
+                btnMain.innerHTML = `<i class="fas fa-envelope" style="color:var(--brand-green-bright);"></i> Email Certificate to Email on File (<span class="cert-student-email-display">${targetEmail}</span>)`;
+            }
+            if (btnSealed) {
+                btnSealed.disabled = false;
+                btnSealed.innerHTML = `<i class="fas fa-envelope-circle-check" style="color:var(--brand-green-bright);"></i> Email Certificate to Email on File (<span class="cert-student-email-display">${targetEmail}</span>)`;
+            }
         }
     }
 
