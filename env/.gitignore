@@ -1,0 +1,9 @@
+# Ignore all real environment & secret files in env/
+.env
+.env.*
+!.env.example
+*.local
+*.secret
+*.key
+*.pem
+*.json

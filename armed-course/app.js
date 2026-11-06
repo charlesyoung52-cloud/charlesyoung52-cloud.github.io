@@ -1,3 +1,86 @@
+// Salted SHA-256 Credential Verifier (Zero Plaintext Secrets in Client Source)
+function ptaSha256Hex(ascii) {
+    function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+    }
+    var mathPow = Math.pow;
+    var maxWord = mathPow(2, 32);
+    var lengthProperty = 'length';
+    var i, j;
+    var result = '';
+    var words = [];
+    var asciiBitLength = ascii[lengthProperty] * 8;
+    var hash = ptaSha256Hex.h = ptaSha256Hex.h || [];
+    var k = ptaSha256Hex.k = ptaSha256Hex.k || [];
+    var primeCounter = k[lengthProperty];
+    var isComposite = {};
+    for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+            for (i = 0; i < 313; i += candidate) {
+                isComposite[i] = candidate;
+            }
+            hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+            k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+    }
+    ascii += '\x80';
+    while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+        j = ascii.charCodeAt(i);
+        if (j >> 8) return '';
+        words[i >> 2] |= j << ((3 - i) % 4) * 8;
+    }
+    words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+    words[words[lengthProperty]] = (asciiBitLength);
+    var w = hash.slice(0);
+    for (j = 0; j < words[lengthProperty];) {
+        var wSlice = words.slice(j, j += 16);
+        var oldHash = w.slice(0);
+        for (i = 0; i < 64; i++) {
+            var i2 = i + j;
+            var w15 = wSlice[i - 15], w2 = wSlice[i - 2];
+            var a = w[0], e = w[4];
+            var temp1 = w[7]
+                + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+                + ((e & w[5]) ^ ((~e) & w[6]))
+                + k[i]
+                + (wSlice[i] = (i < 16) ? wSlice[i] : (
+                    wSlice[i - 16]
+                    + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+                    + wSlice[i - 7]
+                    + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+                ) | 0);
+            var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+                + ((a & w[1]) ^ (a & w[2]) ^ (w[1] & w[2]));
+            w = [(temp1 + temp2) | 0].concat(w);
+            w[4] = (w[4] + temp1) | 0;
+            w.pop();
+        }
+        for (i = 0; i < 8; i++) {
+            w[i] = (w[i] + oldHash[i]) | 0;
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            var b = (w[i] >> (j * 8)) & 255;
+            result += ((b < 16) ? 0 : '') + b.toString(16);
+        }
+    }
+    return result;
+}
+
+function ptaVerifyAdminCredential(inputVal) {
+    if (!inputVal) return false;
+    var clean = String(inputVal).trim();
+    var h = ptaSha256Hex('PTA_IL_IDFPR_102_000398_SALT_v1::' + clean);
+    return (
+        h === 'e7879f76f4474c38a4e4d90617a9a7a116d3e6f9e1b8e0240801f70a866f296e' ||
+        h === '272683d1e264f25c384fcfc6e6db2ad65e59577b7f4def1b1af1d6e6f5a74f60' ||
+        h === 'd4310666d52f42f16d0b8450b7f7120891fe844a239f652ffe5c4d917a49bb35' ||
+        h === 'a0c0a5571285ff739e2bd7008074797d56733f002ef75df4be54f342ff6cf889'
+    );
+}
+
 // Platforms Training Academy - Interactive Online Armed Security Course ($200)
 // 20-Hour Online Armed Classroom + Included 8-Hour Eagle Sports Range Qualification
 // Application Controller & State Engine (68 Ill. Adm. Code 1240.510)
@@ -569,7 +652,7 @@ class SecurityCourseApp {
         const cleanPass = rawPassword.trim();
 
         // Direct Instructor God Mode Login from Sign-In Box
-        if (rawEmail === '7738732591' || cleanPass === '7738732591' || cleanPass === 'Young$7738732591!' || rawEmail === 'young$7738732591!') {
+        if (ptaVerifyAdminCredential(rawEmail) || ptaVerifyAdminCredential(cleanPass)) {
             this.isAdminMode = true;
             localStorage.setItem('pta_admin_auth', 'authorized');
             localStorage.setItem('platforms_admin_mode', 'true');
@@ -3194,7 +3277,7 @@ class SecurityCourseApp {
         const code = prompt("Enter Instructor Retake Authorization Code (obtained from Lead Instructor Charles Young at 773-873-2591):");
         if (!code) return;
         const clean = code.trim();
-        if (clean === 'Young$7738732591!' || clean === '7738732591') {
+        if (ptaVerifyAdminCredential(clean)) {
             this.bonusAttempts = (this.bonusAttempts || 0) + 1;
             const cleanEmail = (this.studentEmail || '').trim().toLowerCase();
             if (cleanEmail) {
@@ -3864,7 +3947,7 @@ class SecurityCourseApp {
         const input = prompt("Enter your $200 Armed Course Stripe Checkout Session ID (starts with cs_live_) or Instructor Authorization Code:");
         if (!input) return;
         const trimmed = input.trim();
-        if ((trimmed.startsWith('cs_live_') && trimmed.length > 20) || trimmed === 'Young$7738732591!') {
+        if ((trimmed.startsWith('cs_live_') && trimmed.length > 20) || ptaVerifyAdminCredential(trimmed)) {
             await this.confirmAndSaveSelectedRangeDate();
             this.recordVerifiedPayment(this.studentEmail, trimmed);
             this.saveState();
@@ -3886,7 +3969,7 @@ class SecurityCourseApp {
         const code = prompt("Enter Agency / Instructor Authorization Code:");
         if (!code) return;
         const clean = code.trim();
-        if (clean === 'Young$7738732591!') {
+        if (ptaVerifyAdminCredential(clean)) {
             await this.confirmAndSaveSelectedRangeDate();
             this.recordVerifiedPayment(this.studentEmail, 'instructor_armed_voucher_authorized');
             this.saveState();
@@ -4185,7 +4268,7 @@ class SecurityCourseApp {
         const err = document.getElementById('admin-pin-error');
         const pin = inp ? inp.value.trim() : '';
 
-        let verified = (pin === '7738732591' || pin === 'Young$7738732591!');
+        let verified = ptaVerifyAdminCredential(pin);
         if (!verified) {
             const apiRes = await this.apiCall('/api/admin/login', 'POST', { pin: pin });
             if (apiRes && apiRes.success) verified = true;

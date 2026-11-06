@@ -1,3 +1,39 @@
+# ==============================================================================
+# Platforms Training Academy — Root Security .gitignore
+# ==============================================================================
+
+# 1. Environment & Secret Vaults
+env/.env
+env/.env.*
+!env/.env.example
+env/*.local
+env/*.secret
+env/*.key
+env/*.pem
 .env
-*.env
+.env.*
+!.env.example
+
+# 2. Databases & Local Runtime State
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# 3. Keys, Certificates & Credentials
+*.pem
+*.key
+*.p12
+*.pfx
+mcp_config.json
+
+# 4. Python & Tooling Artifacts
 __pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.system_generated/
+scratch/
+*.log
+*.tmp

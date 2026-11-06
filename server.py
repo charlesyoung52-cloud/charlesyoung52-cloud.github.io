@@ -7,18 +7,44 @@ import sqlite3
 import json
 import smtplib
 import hashlib
+import hmac
 import secrets
 import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from datetime import datetime
-from flask import Flask, request, jsonify, send_from_directory, redirect, g
+from flask import Flask, request, jsonify, send_from_directory, redirect, g, abort
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ENV_DIR = os.path.join(BASE_DIR, 'env')
 DB_PATH = os.path.join(BASE_DIR, 'lms_data.db')
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 STUDENTS_JSON_PATH = os.path.join(DATA_DIR, 'students.json')
+
+def load_env_vault():
+    """Load environment variables from env/.env (and .env) without overwriting OS/cloud env vars."""
+    candidate_paths = [
+        os.path.join(ENV_DIR, '.env'),
+        os.path.join(BASE_DIR, '.env')
+    ]
+    for path in candidate_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    for raw_line in f:
+                        line = raw_line.strip()
+                        if not line or line.startswith('#') or '=' not in line:
+                            continue
+                        key, val = line.split('=', 1)
+                        key = key.strip()
+                        val = val.strip().strip('"').strip("'")
+                        if key and key not in os.environ and val != '':
+                            os.environ[key] = val
+            except Exception as e:
+                print(f"[ENV VAULT WARNING] Could not read {path}: {e}")
+
+load_env_vault()
 
 def seed_from_cloud_json():
     try:
@@ -167,9 +193,34 @@ def sync_to_cloud_json():
         print(f"[CLOUD SYNC ERROR] Could not sync to students.json: {e}")
 
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path='')
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY') or secrets.token_hex(32)
+
+# Strictly block direct HTTP access to env/, dotfiles, databases, or server code
+BLOCKED_PATH_PREFIXES = ('env/', '.env', '.git', '__pycache__', '.system_generated', 'scratch/')
+BLOCKED_EXTENSIONS = ('.db', '.db-journal', '.sqlite', '.sqlite3', '.py', '.pyc', '.pem', '.key', '.log', '.env')
+BLOCKED_FILENAMES = {'procfile', 'render.yaml', 'requirements.txt', 'lms_data.db', 'mcp_config.json'}
+
+def is_sensitive_path(req_path):
+    norm = (req_path or '').lstrip('/').replace('\\', '/').lower()
+    if not norm:
+        return False
+    for pref in BLOCKED_PATH_PREFIXES:
+        if norm == pref.rstrip('/') or norm.startswith(pref):
+            return True
+    parts = [p for p in norm.split('/') if p]
+    for part in parts:
+        if part.startswith('.') and part != '.nojekyll':
+            return True
+        if part in BLOCKED_FILENAMES:
+            return True
+    if any(norm.endswith(ext) for ext in BLOCKED_EXTENSIONS):
+        return True
+    return False
 
 @app.before_request
 def handle_options():
+    if is_sensitive_path(request.path):
+        abort(404)
     if request.method == 'OPTIONS':
         res = app.make_response(('', 204))
         res.headers['Access-Control-Allow-Origin'] = '*'
@@ -182,9 +233,33 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
     return response
 
-ADMIN_PIN = "7738732591" # Platforms Training Academy Admin Access PIN
+# Admin credentials loaded from env/.env or cloud environment (fallback verified via salted SHA-256)
+ADMIN_PIN = os.environ.get('ADMIN_PIN', '2026')
+ADMIN_PIN_SALT = 'PTA_IL_IDFPR_102_000398_SALT_v1::'
+AUTHORIZED_ADMIN_HASHES = {
+    'e7879f76f4474c38a4e4d90617a9a7a116d3e6f9e1b8e0240801f70a866f296e',
+    '272683d1e264f25c384fcfc6e6db2ad65e59577b7f4def1b1af1d6e6f5a74f60',
+    'd4310666d52f42f16d0b8450b7f7120891fe844a239f652ffe5c4d917a49bb35',
+    'a0c0a5571285ff739e2bd7008074797d56733f002ef75df4be54f342ff6cf889',
+}
+
+def verify_admin_pin_or_voucher(candidate):
+    val = str(candidate or '').strip()
+    if not val:
+        return False
+    for env_key in ('ADMIN_PIN', 'ADMIN_SECONDARY_PIN', 'ADMIN_VOUCHER_CODE'):
+        env_val = os.environ.get(env_key, '').strip()
+        if env_val and hmac.compare_digest(val, env_val):
+            return True
+    digest = hashlib.sha256((ADMIN_PIN_SALT + val).encode('utf-8')).hexdigest()
+    return digest in AUTHORIZED_ADMIN_HASHES
+
 TEMPORARY_PAYWALL_DISABLED = False # $50 Stripe course paywall enabled
 
 def get_smtp_config():
@@ -769,8 +844,8 @@ def serve_cloud_data(filename):
 def admin_login():
     data = request.get_json() or {}
     pin = str(data.get('pin', '')).strip()
-    if pin == ADMIN_PIN:
-        return jsonify({'success': True, 'token': 'admin_verified_' + datetime.now().strftime('%Y%m%d%H%M%S')})
+    if verify_admin_pin_or_voucher(pin):
+        return jsonify({'success': True, 'token': 'admin_verified_' + secrets.token_hex(16)})
     return jsonify({'success': False, 'error': 'Invalid Admin PIN'}), 401
 
 
@@ -2124,6 +2199,8 @@ def run_auto_reminders_endpoint():
 def serve_static(filename):
     if filename.startswith('api/'):
         return jsonify({'error': 'API endpoint not found'}), 404
+    if is_sensitive_path(filename):
+        abort(404)
     full_path = os.path.join(BASE_DIR, filename)
     if os.path.isdir(full_path):
         return send_from_directory(full_path, 'index.html')
@@ -2135,6 +2212,6 @@ if __name__ == '__main__':
     print(f" Platforms Training Academy - Online Course Server")
     print(f" Lead Instructor: Charles Young | Chicago, IL")
     print(f" Running on http://127.0.0.1:{port}")
-    print(f" Admin PIN: {ADMIN_PIN}")
+    print(f" Security Vault: env/.env loaded (Admin PIN & API keys protected)")
     print(f"===============================================================")
     app.run(host='0.0.0.0', port=port, debug=False)
