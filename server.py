@@ -448,16 +448,54 @@ def resolve_course_location(course_id="", course_title="", raw_location=""):
 def build_class_payment_confirmation_email(student_name, course_title, class_date="", class_time="", location="", price="", confirmation_id="", course_id=""):
     student_name = student_name or "Student Officer"
     course_title = course_title or "IDFPR Security / Firearms Training Course"
-    class_date = class_date or "24/7 Self-Paced Online Portal / Scheduled Session"
-    class_time = class_time or "9:00 AM – 5:00 PM"
+    is_armed = ("armed" in course_title.lower() and "unarmed" not in course_title.lower()) or str(course_id).lower() == "armed-28"
+    is_unarmed = "unarmed" in course_title.lower() or str(course_id).lower() == "unarmed-20"
+
+    if is_armed:
+        class_date = class_date or "Selected In-Person Range Qualification Date"
+        class_time = class_time or "9:00 AM – 5:00 PM (In-Person Range Qualification)"
+    elif is_unarmed:
+        class_date = class_date or "24/7 Self-Paced Online Portal"
+        class_time = class_time or "Self-Paced Online Access"
+    else:
+        class_date = class_date or "Scheduled Session Date"
+        class_time = class_time or "9:00 AM – 5:00 PM"
+
     location = resolve_course_location(course_id=course_id, course_title=course_title, raw_location=location)
     price = price or "Paid / Confirmed"
     confirmation_id = confirmation_id or ("PTA-" + datetime.now().strftime("%Y%m%d%H%M"))
 
-    is_armed = "armed" in course_title.lower() and "unarmed" not in course_title.lower()
-    is_unarmed = "unarmed" in course_title.lower()
     portal_url = "https://platformstraining.com/armed-course/" if is_armed else ("https://platformstraining.com/course/" if is_unarmed else "https://platformstraining.com/calendar.html")
-    portal_btn_text = "Launch 28-Hour Online Armed Portal" if is_armed else ("Launch 20-Hour Online Unarmed Portal" if is_unarmed else "View Class Schedule & Details")
+    portal_btn_text = "Launch 28-Hour Online Armed Portal Now" if is_armed else ("Launch 20-Hour Online Unarmed Portal" if is_unarmed else "View Class Schedule & Details")
+    date_row_label = "Chosen In-Person Range Date:" if is_armed else "Scheduled Date:"
+
+    armed_mandatory_online_callout = ""
+    armed_mandatory_text_block = ""
+    if is_armed:
+        armed_mandatory_online_callout = f'''
+            <div style="background:rgba(239,68,68,0.14); border:2px solid #ef4444; border-radius:8px; padding:16px 18px; margin:18px 0;">
+                <div style="font-size:13px; font-weight:800; color:#fca5a5; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+                    &#9888; MANDATORY: COMPLETE ONLINE PORTION BEFORE YOUR IN-PERSON RANGE QUALIFICATION
+                </div>
+                <div style="font-size:13.5px; color:#ffffff; line-height:1.6;">
+                    You <strong>MUST complete 100% of the online portion</strong> of the 28-Hour Armed Security Course <strong>BEFORE</strong> arriving at Eagle Sports Range for your chosen in-person range qualification date (<strong>{class_date}</strong>):
+                    <ul style="margin:8px 0 8px 0; padding-left:18px; color:#f1f5f9;">
+                        <li>Complete all <strong>10 Online Armed Training Modules</strong> (20-Hour Classroom Portion)</li>
+                        <li>Pass the <strong>Untimed 50-Question Written Final Examination</strong> (75% or higher)</li>
+                        <li>Complete and save <strong>Part 1 (Trainee Section) of Official IDFPR Form IL486-1138</strong> inside the portal</li>
+                    </ul>
+                    <span style="color:#fde68a; font-weight:700;">Important: Students who have not completed the online portion prior to their chosen in-person range qualification date will not be permitted on the firing line.</span>
+                </div>
+            </div>
+        '''
+        armed_mandatory_text_block = f'''
+IMPORTANT - MANDATORY REQUIREMENT BEFORE IN-PERSON RANGE QUALIFICATION ({class_date}):
+You MUST complete 100% of the online portion of the 28-Hour Armed Security Course BEFORE arriving at Eagle Sports Range for your chosen in-person range qualification date:
+1. Complete all 10 Online Armed Training Modules.
+2. Pass the Untimed 50-Question Written Final Exam (75%+).
+3. Complete and save Part 1 (Trainee Section) of Official IDFPR Form IL486-1138 in the portal.
+Students who have not completed the online portion before their in-person range qualification will not be permitted on the firing line.
+'''
 
     subject = f"Class & Payment Confirmation: {course_title} | Platforms Training Academy"
     html_body = f'''
@@ -479,21 +517,22 @@ def build_class_payment_confirmation_email(student_name, course_title, class_dat
                     Registration &amp; Class Summary
                 </div>
                 <table style="width:100%; border-collapse:collapse; font-size:14px; color:#f1f5f9;">
-                    <tr><td style="padding:5px 0; color:#94a3b8; width:145px;">Course Enrolled:</td><td style="padding:5px 0; font-weight:700; color:#ffffff;">{course_title}</td></tr>
+                    <tr><td style="padding:5px 0; color:#94a3b8; width:185px;">Course Enrolled:</td><td style="padding:5px 0; font-weight:700; color:#ffffff;">{course_title}</td></tr>
                     <tr><td style="padding:5px 0; color:#94a3b8;">Confirmation ID:</td><td style="padding:5px 0; color:#e5c158; font-family:monospace; font-weight:700;">{confirmation_id}</td></tr>
                     <tr><td style="padding:5px 0; color:#94a3b8;">Tuition / Status:</td><td style="padding:5px 0; color:#4ade80; font-weight:700;">{price}</td></tr>
-                    <tr><td style="padding:5px 0; color:#94a3b8;">Scheduled Date:</td><td style="padding:5px 0; font-weight:700; color:#ffffff;">{class_date}</td></tr>
+                    <tr><td style="padding:5px 0; color:#94a3b8;">{date_row_label}</td><td style="padding:5px 0; font-weight:700; color:#ffffff;">{class_date}</td></tr>
                     <tr><td style="padding:5px 0; color:#94a3b8;">Class / Range Hours:</td><td style="padding:5px 0; color:#e2e8f0;">{class_time}</td></tr>
                     <tr><td style="padding:5px 0; color:#94a3b8;">Training Location:</td><td style="padding:5px 0; color:#e2e8f0;">{location}</td></tr>
                     <tr><td style="padding:5px 0; color:#94a3b8;">Lead Instructor:</td><td style="padding:5px 0; color:#e2e8f0;">Charles Young (State License #263-000693)</td></tr>
                 </table>
             </div>
+            {armed_mandatory_online_callout}
             <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:16px 18px; margin-bottom:22px;">
-                <div style="font-size:13px; font-weight:700; color:#ffffff; margin-bottom:8px;">What You Need to Know Before Class / Range Day:</div>
+                <div style="font-size:13px; font-weight:700; color:#ffffff; margin-bottom:8px;">What You Need to Know:</div>
                 <ul style="margin:0; padding-left:18px; font-size:13px; color:#cbd5e1; line-height:1.65;">
-                    <li><strong>Valid Government Photo ID:</strong> Bring your Driver's License or State ID (and FOID card if attending an Illinois CCL session).</li>
-                    <li><strong>Range Attire (For Live-Fire Sessions):</strong> Wear close-toed shoes, crew-neck shirt, and a sturdy belt. Ammunition, targets, eye/ear protection, and range fees at Eagle Sports Range are included!</li>
-                    <li><strong>28-Hour Armed Security Students:</strong> Complete your 20-hour online coursework and untimed written exam in the online portal prior to your scheduled in-person range qualification date.</li>
+                    {'''<li><strong>Self-Paced 20-Hour Online Course:</strong> Complete all 10 online modules, interactive scenarios, and the untimed final examination at your own pace from any phone, tablet, or computer. Your official IDFPR Certificate of Completion is issued immediately upon passing!</li>''' if is_unarmed else '''<li><strong>Valid Government Photo ID:</strong> Bring your Driver's License or State ID (and FOID card if attending an Illinois CCL session).</li>
+                    <li><strong>Range Attire (For Live-Fire Qualification):</strong> Wear close-toed shoes, crew-neck shirt, long pants, and a sturdy belt. Ammunition, targets, eye/ear protection, and range fees at Eagle Sports Range are included!</li>
+                    <li><strong>Online Portion Must Be Completed First:</strong> Ensure all online modules, the untimed written exam, and Form IL486-1138 Part 1 are completed in the portal before your chosen in-person range qualification date.</li>'''}
                 </ul>
             </div>
             <div style="text-align:center; margin:24px 0;">
@@ -518,11 +557,11 @@ Your registration and tuition status are confirmed:
 - Course: {course_title}
 - Confirmation ID: {confirmation_id}
 - Tuition / Status: {price}
-- Scheduled Date: {class_date}
+- {date_row_label} {class_date}
 - Time: {class_time}
 - Location: {location}
 - Lead Instructor: Charles Young (#263-000693)
-
+{armed_mandatory_text_block}
 Access Portal: {portal_url}
 Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com
 '''
@@ -531,10 +570,11 @@ Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com
 
 def build_class_reminder_email(student_name, course_title, class_date="", class_time="", location="", course_id=""):
     student_name = student_name or "Student Officer"
-    course_title = course_title or "IDFPR Security / Firearms Qualification Course"
-    class_date = class_date or "Your Scheduled Session Date"
+    course_title = course_title or "28-Hour Armed Security Course — In-Person Range Qualification"
+    class_date = class_date or "Your Selected In-Person Qualification Date"
     class_time = class_time or "9:00 AM – 5:00 PM (Arrive 15 mins early for check-in)"
     location = resolve_course_location(course_id=course_id, course_title=course_title, raw_location=location)
+    is_armed = ("armed" in course_title.lower() and "unarmed" not in course_title.lower()) or str(course_id).lower() == "armed-28"
 
     if "75th" in location.lower():
         maps_query = "200+E+75th+St+Chicago+IL+60619"
@@ -543,13 +583,38 @@ def build_class_reminder_email(student_name, course_title, class_date="", class_
     else:
         maps_query = location.replace(" ", "+")
     maps_url = "https://www.google.com/maps/search/?api=1&query=" + maps_query
-    subject = f"Upcoming Class Reminder ({class_date}): {course_title} | Platforms Training Academy"
+    subject = f"In-Person Range Qualification Reminder ({class_date}): {course_title} | Platforms Training Academy"
+
+    armed_mandatory_online_callout = ""
+    armed_mandatory_text_block = ""
+    if is_armed:
+        armed_mandatory_online_callout = f'''
+            <div style="background:rgba(239,68,68,0.14); border:2px solid #ef4444; border-radius:8px; padding:16px 18px; margin:18px 0;">
+                <div style="font-size:13px; font-weight:800; color:#fca5a5; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+                    &#9888; MANDATORY: ONLINE PORTION MUST BE COMPLETED BEFORE ARRIVING AT THE RANGE
+                </div>
+                <div style="font-size:13.5px; color:#ffffff; line-height:1.6;">
+                    Before arriving for your chosen in-person range qualification on <strong>{class_date}</strong>, you <strong>MUST have completed 100% of the online portion</strong> of the course:
+                    <ul style="margin:8px 0 8px 0; padding-left:18px; color:#f1f5f9;">
+                        <li>All <strong>10 Online Armed Training Modules</strong> completed</li>
+                        <li><strong>Untimed 50-Question Written Final Examination</strong> passed (75%+)</li>
+                        <li><strong>Part 1 (Trainee Section) of Official IDFPR Form IL486-1138</strong> saved in your online portal</li>
+                    </ul>
+                    <span style="color:#fde68a; font-weight:700;">If you have not yet finished your online modules and written exam, log in at <a href="https://platformstraining.com/armed-course/" style="color:#d4af37;">platformstraining.com/armed-course/</a> and complete them before {class_date}.</span>
+                </div>
+            </div>
+        '''
+        armed_mandatory_text_block = f'''
+MANDATORY REQUIREMENT BEFORE IN-PERSON RANGE QUALIFICATION ({class_date}):
+You MUST complete 100% of the online portion (all 10 online modules, the untimed 50-question written final exam, and Part 1 of Form IL486-1138) BEFORE arriving at Eagle Sports Range for your in-person qualification.
+Online Portal: https://platformstraining.com/armed-course/
+'''
 
     html_body = f'''
     <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
         <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:24px 28px; border-bottom:2px solid #d4af37; text-align:center;">
             <div style="display:inline-block; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
-                Upcoming Training &amp; Range Qualification Reminder
+                Upcoming In-Person Qualification Reminder (2 Days Prior)
             </div>
             <h1 style="color:#ffffff; font-size:22px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
             <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor: Charles Young</p>
@@ -557,36 +622,37 @@ def build_class_reminder_email(student_name, course_title, class_date="", class_
         <div style="padding:26px 28px;">
             <p style="font-size:16px; color:#ffffff; margin-top:0;">Hello <strong>{student_name}</strong>,</p>
             <p style="font-size:14px; color:#cbd5e1; line-height:1.6;">
-                This is a friendly reminder from <strong>Platforms Training Academy</strong> regarding your upcoming scheduled training / live-fire range qualification session. We look forward to seeing you!
+                This is your automated reminder for your selected <strong>in-person range qualification date</strong> with <strong>Platforms Training Academy</strong>:
             </p>
             <div style="background:#141821; border:1px solid rgba(212,175,55,0.45); border-left:4px solid #d4af37; border-radius:8px; padding:18px 20px; margin:20px 0;">
                 <div style="font-size:12px; font-weight:700; color:#d4af37; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px;">
-                    Your Scheduled Session Details
+                    Your Selected In-Person Qualification Details
                 </div>
                 <table style="width:100%; border-collapse:collapse; font-size:14px; color:#f1f5f9;">
-                    <tr><td style="padding:5px 0; color:#94a3b8; width:145px;">Course / Session:</td><td style="padding:5px 0; font-weight:700; color:#ffffff;">{course_title}</td></tr>
-                    <tr><td style="padding:5px 0; color:#94a3b8;">Date:</td><td style="padding:5px 0; font-weight:700; color:#fbbf24;">{class_date}</td></tr>
+                    <tr><td style="padding:5px 0; color:#94a3b8; width:175px;">Course / Qualification:</td><td style="padding:5px 0; font-weight:700; color:#ffffff;">{course_title}</td></tr>
+                    <tr><td style="padding:5px 0; color:#94a3b8;">Chosen Qualification Date:</td><td style="padding:5px 0; font-weight:700; color:#fbbf24;">{class_date}</td></tr>
                     <tr><td style="padding:5px 0; color:#94a3b8;">Check-In &amp; Hours:</td><td style="padding:5px 0; color:#ffffff;">{class_time} <span style="color:#94a3b8; font-size:12px;">(Arrive 15 mins early)</span></td></tr>
-                    <tr><td style="padding:5px 0; color:#94a3b8;">Location:</td><td style="padding:5px 0; color:#e2e8f0;">{location}</td></tr>
+                    <tr><td style="padding:5px 0; color:#94a3b8;">Range Location:</td><td style="padding:5px 0; color:#e2e8f0;">{location}</td></tr>
                 </table>
             </div>
+            {armed_mandatory_online_callout}
             <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:16px 18px; margin-bottom:22px;">
                 <div style="font-size:13px; font-weight:700; color:#ffffff; margin-bottom:8px;">Mandatory Arrival &amp; Range Checklist:</div>
                 <ul style="margin:0; padding-left:18px; font-size:13px; color:#cbd5e1; line-height:1.65;">
-                    <li><strong>Arrive 15 Minutes Early:</strong> Ensures prompt sign-in and safety briefing with Instructor Charles Young.</li>
+                    <li><strong>Online Portion Must Be Completed First:</strong> All 10 online modules, the untimed written exam, and Form IL486-1138 Part 1 must be finished before you arrive at the range.</li>
+                    <li><strong>Arrive 15 Minutes Early:</strong> Ensures prompt sign-in and range safety briefing with Instructor Charles Young.</li>
                     <li><strong>Bring Valid Photo ID:</strong> Government-issued Driver's License or State ID (plus FOID card if applicable).</li>
                     <li><strong>Required Range Dress Code:</strong> Close-toed shoes, crew-neck shirt (no low-cut tops), long pants, and a sturdy belt.</li>
                     <li><strong>Equipment Provided:</strong> Ammunition, targets, and range fees are included.</li>
-                    <li><strong>Armed Security Candidates:</strong> Please ensure your online modules, untimed final exam, and Form IL486-1138 Trainee Section are saved in your profile so Instructor Charles Young can add your range qualification scores and submit your certificate to IDFPR.</li>
                 </ul>
             </div>
             <div style="text-align:center; margin:24px 0;">
                 <a href="{maps_url}" style="display:inline-block; background:linear-gradient(135deg,#d4af37 0%,#b89225 100%); color:#07090e; font-weight:800; font-size:14px; text-decoration:none; padding:12px 24px; border-radius:6px;">
-                    Open Training Location in Google Maps &rarr;
+                    Open Range Location in Google Maps &rarr;
                 </a>
             </div>
             <p style="font-size:13px; color:#94a3b8; line-height:1.5; text-align:center; margin-bottom:0;">
-                Need to reach us before class? Call or text <strong>(773) 873-2591</strong> or email <a href="mailto:charlesyoung@platformstraining.com" style="color:#d4af37; text-decoration:none;">charlesyoung@platformstraining.com</a>.
+                Need to reach us before range day? Call or text <strong>(773) 873-2591</strong> or email <a href="mailto:charlesyoung@platformstraining.com" style="color:#d4af37; text-decoration:none;">charlesyoung@platformstraining.com</a>.
             </p>
         </div>
         <div style="background:#060709; padding:14px 24px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #1e2430;">
@@ -594,20 +660,21 @@ def build_class_reminder_email(student_name, course_title, class_date="", class_
         </div>
     </div>
     '''
-    text_body = f'''PLATFORMS TRAINING ACADEMY - UPCOMING CLASS & RANGE REMINDER
+    text_body = f'''PLATFORMS TRAINING ACADEMY - IN-PERSON RANGE QUALIFICATION REMINDER
 IDFPR Approved Curriculum #102-000398
 
 Hello {student_name},
-This is a reminder for your upcoming training session:
+This is your reminder for your chosen in-person range qualification session:
 - Course: {course_title}
-- Date: {class_date}
+- Chosen Qualification Date: {class_date}
 - Time: {class_time} (Please arrive 15 minutes early)
 - Location: {location}
-
+{armed_mandatory_text_block}
 Checklist:
-1. Bring a valid Government Photo ID (and FOID if applicable).
-2. Wear close-toed shoes, crew-neck shirt, and a sturdy belt.
-3. Ammo, targets, and range fees are included.
+1. Complete 100% of the online portion (modules + written exam + Form IL486-1138 Part 1) BEFORE arriving at the range.
+2. Bring a valid Government Photo ID (and FOID if applicable).
+3. Wear close-toed shoes, crew-neck shirt, and a sturdy belt.
+4. Ammo, targets, and range fees are included.
 
 Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com
 '''
@@ -776,7 +843,8 @@ def init_db():
         'reminder_email_sent INTEGER DEFAULT 0',
         'reminder_email_sent_at TEXT',
         'thank_you_email_sent INTEGER DEFAULT 0',
-        'thank_you_email_sent_at TEXT'
+        'thank_you_email_sent_at TEXT',
+        'range_qualification_date TEXT'
     ]:
         try:
             cur.execute(f'ALTER TABLE students ADD COLUMN {col_def}')
@@ -1435,6 +1503,13 @@ def list_students():
         ORDER BY s.last_active DESC
     ''').fetchall()
 
+    cal_data = load_calendar_data()
+    armed_res_by_email = {}
+    for res_item in (cal_data.get('reservations') or []):
+        remail = str(res_item.get('studentEmail') or '').strip().lower()
+        if remail and remail not in armed_res_by_email:
+            armed_res_by_email[remail] = res_item
+
     students = []
     for r in rows:
         sid = r['id']
@@ -1480,8 +1555,16 @@ def list_students():
             'has_password': bool(r['password_hash']) if ('password_hash' in r.keys() and r['password_hash']) else False,
             'confirmation_email_sent': bool(r['confirmation_email_sent']) if ('confirmation_email_sent' in r.keys() and r['confirmation_email_sent']) else bool(r['is_paid']),
             'confirmation_email_sent_at': (r['confirmation_email_sent_at'] if ('confirmation_email_sent_at' in r.keys() and r['confirmation_email_sent_at']) else r['created_at']),
-            'reminder_email_sent': bool(r['reminder_email_sent']) if ('reminder_email_sent' in r.keys() and r['reminder_email_sent']) else (not is_armed_row and bool(r['is_paid'])),
-            'reminder_email_sent_at': (r['reminder_email_sent_at'] if 'reminder_email_sent_at' in r.keys() else None),
+            'reminder_not_applicable': (not is_armed_row),
+            'range_qualification_date': (
+                (r['range_qualification_date'] if ('range_qualification_date' in r.keys() and r['range_qualification_date']) else None)
+                or (armed_res_by_email.get(str(r['email'] or '').strip().lower(), {}).get('date') if is_armed_row else None)
+            ),
+            'reminder_email_sent': (
+                (bool(r['reminder_email_sent']) if ('reminder_email_sent' in r.keys() and r['reminder_email_sent']) else False)
+                or bool(armed_res_by_email.get(str(r['email'] or '').strip().lower(), {}).get('reminderSent'))
+            ) if is_armed_row else False,
+            'reminder_email_sent_at': (r['reminder_email_sent_at'] if ('reminder_email_sent_at' in r.keys() and is_armed_row) else None),
             'thank_you_email_sent': bool(r['thank_you_email_sent']) if ('thank_you_email_sent' in r.keys() and r['thank_you_email_sent']) else bool(r['cert_id']),
             'thank_you_email_sent_at': (r['thank_you_email_sent_at'] if 'thank_you_email_sent_at' in r.keys() else r['cert_issued_at']),
             'cert_id': r['cert_id'],
@@ -1714,16 +1797,30 @@ def process_payment():
 
     if is_armed:
         target_id = student_id if student_id.lower().startswith('armed::') else f"armed::{email}"
+        chosen_range_date = (data.get('range_qualification_date') or data.get('class_date') or '').strip()
+        if not chosen_range_date and email:
+            try:
+                cal = load_calendar_data()
+                for r in cal.get('reservations', []):
+                    if (r.get('email') or '').strip().lower() == email and (r.get('courseId') or '') in ('armed-28', 'armed-40', 'requal-8', '28-Hour Armed Security Course', 'Online Armed Security Course'):
+                        chosen_range_date = (r.get('date') or '').strip()
+                        break
+            except Exception:
+                pass
         existing_armed = cur.execute('SELECT id FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
         if existing_armed:
-            cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?)', (now_str, target_id))
+            if chosen_range_date:
+                cur.execute('UPDATE students SET is_paid = 1, range_qualification_date = ?, last_active = ? WHERE LOWER(id) = LOWER(?)', (chosen_range_date, now_str, target_id))
+            else:
+                cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?)', (now_str, target_id))
         else:
             cur.execute('''
-                INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, created_at, last_active)
-                VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
-            ''', (target_id, data.get('name') or 'Student Officer', email, target_id, data.get('agency') or '', now_str, now_str))
+                INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, range_qualification_date, created_at, last_active)
+                VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?, ?)
+            ''', (target_id, data.get('name') or 'Student Officer', email, target_id, data.get('agency') or '', chosen_range_date, now_str, now_str))
         details_str = f"Online Armed Course Fee $200.00 verified (ref: {session_id})"
     else:
+        chosen_range_date = ''
         target_id = email or student_id
         cur.execute(
             "UPDATE students SET is_paid = 1, last_active = ? WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
@@ -1746,7 +1843,7 @@ def process_payment():
         try:
             c_title = "28-Hour Armed Security Course (Online + Range Qualification)" if is_armed else "20-Hour Online Unarmed Security Course (PERC)"
             c_price = "$200.00 (Paid)" if is_armed else "$50.00 (Paid)"
-            c_date = data.get('class_date') or ("Scheduled Range Qualification + 24/7 Online Portal" if is_armed else "24/7 Self-Paced Online Portal")
+            c_date = (data.get('class_date') or chosen_range_date or "Scheduled In-Person Range Qualification + 24/7 Online Portal") if is_armed else (data.get('class_date') or "24/7 Self-Paced Online Portal")
             c_time = data.get('class_time') or ("9:00 AM – 5:00 PM (Range) / 24/7 Online" if is_armed else "Self-Paced Online Access")
             c_loc = data.get('location') or ("Eagle Sports Range (5900 W 159th St, Oak Forest, IL) & Online Portal" if is_armed else "100% Online Portal (platformstraining.com)")
             subj, h_body, t_body = build_class_payment_confirmation_email(
@@ -2174,6 +2271,18 @@ def api_calendar_book():
 
         cal['reservations'].insert(0, reservation)
         save_calendar_data(cal)
+        try:
+            st_email_clean = (reservation.get('studentEmail') or '').strip().lower()
+            r_date_val = (reservation.get('date') or '').strip()
+            if st_email_clean and r_date_val:
+                db = get_db()
+                db.execute(
+                    "UPDATE students SET range_qualification_date = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                    (r_date_val, f"armed::{st_email_clean}", st_email_clean)
+                )
+                db.commit()
+        except Exception:
+            pass
         # Automatically dispatch Class Registration Confirmation Email with exact course location
         try:
             st_email = (reservation.get('studentEmail') or '').strip()
@@ -2305,8 +2414,10 @@ def check_and_send_upcoming_reminders(days_before=2):
         if 0 <= days_until <= 7:
             upcoming_within_7_days += 1
 
-        # 2. Auto-send 2-Day Reminder when course is within 2 days
-        if 0 <= days_until <= days_before and not r.get('reminderSent'):
+        # 2. Auto-send 2-Day Reminder when student's chosen in-person qualification / class date is within 2 days
+        #    (Online Unarmed Security Course does not use a reminder email)
+        is_unarmed_res = (str(cid).lower() == 'unarmed-20') or ('unarmed' in ctitle.lower())
+        if not is_unarmed_res and 0 <= days_until <= days_before and not r.get('reminderSent'):
             if st_email and '@' in st_email:
                 subj, h_body, t_body = build_class_reminder_email(
                     st_name, ctitle, r_date_str, r_time, exact_loc, course_id=cid
@@ -2315,6 +2426,15 @@ def check_and_send_upcoming_reminders(days_before=2):
                 r['reminderSent'] = True
                 r['reminderSentAt'] = now_str
                 changed = True
+                try:
+                    db_rem = get_db()
+                    db_rem.execute(
+                        "UPDATE students SET reminder_email_sent = 1, reminder_email_sent_at = ?, range_qualification_date = COALESCE(range_qualification_date, ?) WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                        (now_str, r_date_str, f"armed::{st_email.lower()}", st_email.lower())
+                    )
+                    db_rem.commit()
+                except Exception:
+                    pass
                 sent_list.append({
                     'type': 'reminder',
                     'id': r.get('id'),
@@ -2362,6 +2482,27 @@ def check_and_send_upcoming_reminders(days_before=2):
             is_armed = str(sid or '').lower().startswith('armed::')
             ctitle = '28-Hour Armed Security Course (IDFPR #102-000398)' if is_armed else '20-Hour Online Unarmed Security Course (IDFPR #102-000398)'
             cloc = resolve_course_location('armed-28' if is_armed else 'unarmed-20', ctitle, '')
+
+            # Auto-send 2-Day In-Person Range Qualification Reminder for Armed students based on their chosen qualification date
+            if is_armed and not s['reminder_email_sent']:
+                chosen_qdate = (s['range_qualification_date'] if 'range_qualification_date' in s.keys() else None) or ''
+                if chosen_qdate:
+                    try:
+                        q_dt = datetime.strptime(chosen_qdate[:10], '%Y-%m-%d').date()
+                        q_days = (q_dt - today).days
+                        if 0 <= q_days <= days_before:
+                            if semail and '@' in semail:
+                                subj, h_body, t_body = build_class_reminder_email(
+                                    sname, ctitle, chosen_qdate, '9:00 AM – 5:00 PM (In-Person Range Qualification)', cloc, course_id='armed-28'
+                                )
+                                send_email_smtp(semail, subj, h_body, t_body)
+                            cur.execute(
+                                "UPDATE students SET reminder_email_sent = 1, reminder_email_sent_at = ? WHERE id = ?",
+                                (now_str, sid)
+                            )
+                            db_changed = True
+                    except Exception:
+                        pass
 
             # Auto-confirm paid students
             if s['is_paid'] and not s['confirmation_email_sent']:

@@ -1357,13 +1357,19 @@ class SecurityCourseApp {
             } catch (e) {}
         }
         const armedId = this.getArmedStudentId(cleanEmail) || 'armed::student';
+        const savedRange = this.getSavedRangeDateRecord(cleanEmail);
         this.apiCall('/api/payment/checkout', 'POST', {
             student_id: armedId,
             email: cleanEmail,
+            name: (this.studentCertData && this.studentCertData.name) || (savedRange && savedRange.name) || '',
             course_type: 'armed',
             amount: 200,
             session_id: sessionIdOrSource,
-            payment_token: token
+            payment_token: token,
+            range_qualification_date: (savedRange && savedRange.date) || '',
+            class_date: (savedRange && (savedRange.dateFormatted || savedRange.date)) || '',
+            class_time: (savedRange && savedRange.time) || '9:00 AM – 5:00 PM (Range) / 24/7 Online',
+            location: (savedRange && savedRange.location) || 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
         });
     }
 

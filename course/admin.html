@@ -1145,8 +1145,9 @@
                             <div style="font-size:0.84rem; font-weight:700; color:#86efac; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
                                 <i class="fas fa-circle-check"></i> Automatic Email Dispatch Rules Active
                             </div>
-                            <div id="auto-reminder-status-text" style="font-size:0.8rem; color:#cbd5e1; line-height:1.45;">
-                                Confirmation, 2-Day Reminder, and Graduation Thank-You emails are dispatched automatically by the server. No manual buttons required.
+                            <div id="auto-reminder-status-text" style="font-size:0.8rem; color:#cbd5e1; line-height:1.5;">
+                                &bull; <strong>Online Unarmed Course ($50):</strong> Auto-sends <strong>Confirmation</strong> (on payment) &amp; <strong>Thank You + Review</strong> (on graduation). <em>No reminder email needed (100% self-paced online).</em><br>
+                                &bull; <strong>Online Armed Course ($200):</strong> Auto-sends <strong>Confirmation</strong>, <strong>2-Day Range Qualification Reminder</strong> (tied to the student's chosen in-person qualification date, emphasizing that the online portion must be completed before range day), &amp; <strong>Thank You + Review</strong>.
                             </div>
                         </div>
 
@@ -1159,8 +1160,8 @@
                                     <span class="badge badge-success" style="margin-left:auto; font-size:0.72rem;"><i class="fas fa-check"></i> Auto-Sends on Payment / Booking</span>
                                 </button>
                                 <button type="button" class="btn-action" id="tpl-btn-reminder" onclick="selectEmailStudioTemplate('reminder')" style="justify-content:flex-start; padding:9px 12px;">
-                                    <i class="fas fa-bell"></i> <strong>2. Course Reminder Email</strong>
-                                    <span class="badge badge-success" style="margin-left:auto; font-size:0.72rem;"><i class="fas fa-check"></i> Auto-Sends 2 Days Before Class</span>
+                                    <i class="fas fa-bell"></i> <strong>2. Armed Range / Class Reminder</strong>
+                                    <span class="badge badge-success" style="margin-left:auto; font-size:0.72rem;"><i class="fas fa-check"></i> Auto 2d Before Chosen Qual Date</span>
                                 </button>
                                 <button type="button" class="btn-action" id="tpl-btn-thank_you_review" onclick="selectEmailStudioTemplate('thank_you_review')" style="justify-content:flex-start; padding:9px 12px;">
                                     <i class="fas fa-star"></i> <strong>3. Thank You + Google Review</strong>
@@ -1177,11 +1178,11 @@
                             </select>
                             <input type="hidden" id="es-student-name" value="Tawanna Ivory">
                             <input type="hidden" id="es-student-email" value="tawannaivory43@gmail.com">
-                            <input type="hidden" id="es-course-title" value="20-Hour Basic Unarmed Security Course (IDFPR #102-000398)">
-                            <input type="hidden" id="es-class-date" value="24/7 Self-Paced Online Portal">
-                            <input type="hidden" id="es-class-time" value="Self-Paced Online">
-                            <input type="hidden" id="es-location" value="100% Online LMS Portal (Phone, Tablet, or PC — platformstraining.com)">
-                            <input type="hidden" id="es-price" value="$50.00 (Paid)">
+                            <input type="hidden" id="es-course-title" value="28-Hour Armed Security Course (IDFPR #102-000398)">
+                            <input type="hidden" id="es-class-date" value="Selected In-Person Range Qualification Date">
+                            <input type="hidden" id="es-class-time" value="9:00 AM – 5:00 PM (In-Person Range Qualification)">
+                            <input type="hidden" id="es-location" value="Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)">
+                            <input type="hidden" id="es-price" value="$200.00 (Paid)">
                         </div>
 
                         <!-- Live Automated Email Delivery Indicators Log -->
@@ -2666,8 +2667,15 @@ function ptaVerifyAdminCredential(inputVal) {
                 }
 
                 const confSent = Boolean(s.confirmation_email_sent || s.is_paid);
-                const remSent = Boolean(s.reminder_email_sent || (!isArmedRow && s.is_paid));
+                const chosenQualDate = (s.armed_range_session && (s.armed_range_session.dateFormatted || s.armed_range_session.date)) || s.range_qualification_date || '';
+                const remSent = Boolean(s.reminder_email_sent);
                 const tySent = Boolean(s.thank_you_email_sent || s.cert_id || (s.armed_cert_data && s.armed_cert_data.instructor_completed));
+
+                const armedReminderBadge = isArmedRow
+                    ? (remSent
+                        ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="In-Person Range Qualification Reminder Sent (${chosenQualDate || 'Scheduled Range Date'})"><i class="fas fa-check-circle"></i> Range Reminder Sent${chosenQualDate ? ' (' + chosenQualDate + ')' : ''}</span>`
+                        : `<span class="badge badge-info" style="font-size:0.7rem; padding:1px 6px;" title="Auto-sends 2 days before student's chosen in-person range qualification date"><i class="fas fa-clock"></i> Range Reminder: Auto 2d Prior${chosenQualDate ? ' (' + chosenQualDate + ')' : ''}</span>`)
+                    : '';
 
                 const autoEmailsIndicators = `
                     <div style="display:flex; flex-direction:column; gap:3px; margin-top:5px; align-items:flex-start;">
@@ -2675,10 +2683,7 @@ function ptaVerifyAdminCredential(inputVal) {
                             ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="Confirmation Email Auto-Sent"><i class="fas fa-check-circle"></i> Confirmation Sent</span>`
                             : `<span class="badge badge-warning" style="font-size:0.7rem; padding:1px 6px;"><i class="fas fa-clock"></i> Confirm: Auto on Pay</span>`
                         }
-                        ${remSent
-                            ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="Course Reminder / Portal Access Auto-Sent"><i class="fas fa-check-circle"></i> Reminder Sent</span>`
-                            : `<span class="badge badge-info" style="font-size:0.7rem; padding:1px 6px;"><i class="fas fa-clock"></i> Reminder: Auto 2d Prior</span>`
-                        }
+                        ${armedReminderBadge}
                         ${tySent
                             ? `<span class="badge badge-success" style="font-size:0.7rem; padding:1px 6px;" title="Thank You & Google Review Email Auto-Sent"><i class="fas fa-check-circle"></i> Thank You Sent</span>`
                             : `<span class="badge badge-info" style="font-size:0.7rem; padding:1px 6px;"><i class="fas fa-clock"></i> Thank You: Auto on Grad</span>`
@@ -3595,21 +3600,25 @@ function ptaVerifyAdminCredential(inputVal) {
             (allStudents || []).forEach(s => {
                 const isArmed = (s.course_type === 'armed') || String(s.id || '').toLowerCase().startsWith('armed::') || !!s.armed_cert_data;
                 const confSent = Boolean(s.confirmation_email_sent || s.is_paid);
-                const remSent = Boolean(s.reminder_email_sent || (!isArmed && s.is_paid));
+                const chosenQualDate = (s.armed_range_session && (s.armed_range_session.dateFormatted || s.armed_range_session.date)) || s.range_qualification_date || '';
+                const remSent = Boolean(s.reminder_email_sent);
                 const tySent = Boolean(s.thank_you_email_sent || s.cert_id || (s.armed_cert_data && s.armed_cert_data.instructor_completed));
+                const armedReminderPill = isArmed
+                    ? (remSent
+                        ? `<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Range Reminder Sent${chosenQualDate ? ' (' + chosenQualDate + ')' : ''}</span>`
+                        : `<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Range Reminder: Auto 2d Prior${chosenQualDate ? ' (' + chosenQualDate + ')' : ''}</span>`)
+                    : '';
                 rows.push(`
                     <div style="padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
                         <div>
                             <strong style="color:#fff; font-size:0.84rem;">${s.name}</strong>
-                            <div style="font-size:0.76rem; color:#94a3b8;">${s.email || ''} &bull; ${isArmed ? '28-Hr Armed' : '20-Hr Unarmed'}</div>
+                            <div style="font-size:0.76rem; color:#94a3b8;">${s.email || ''} &bull; ${isArmed ? '28-Hr Armed (Online + Range)' : '20-Hr Unarmed (100% Online)'}</div>
                         </div>
                         <div style="display:flex; gap:4px; flex-wrap:wrap;">
                             ${confSent
                                 ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Confirmation Sent</span>'
                                 : '<span class="badge badge-warning" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Confirm: Auto on Pay</span>'}
-                            ${remSent
-                                ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Reminder Sent</span>'
-                                : '<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Reminder: Auto 2d Prior</span>'}
+                            ${armedReminderPill}
                             ${tySent
                                 ? '<span class="badge badge-success" style="font-size:0.7rem;"><i class="fas fa-check-circle"></i> Thank You Sent</span>'
                                 : '<span class="badge badge-info" style="font-size:0.7rem;"><i class="fas fa-clock"></i> Thank You: Auto on Grad</span>'}
@@ -3852,13 +3861,38 @@ function ptaVerifyAdminCredential(inputVal) {
         function buildClientEmailPayload() {
             const studentName = (document.getElementById('es-student-name').value || 'Student Officer').trim();
             const toEmail = (document.getElementById('es-student-email').value || '').trim();
-            const courseTitle = (document.getElementById('es-course-title').value || '28-Hour Armed Security Course').trim();
-            const classDate = (document.getElementById('es-class-date').value || 'Upcoming Scheduled Session').trim();
-            const classTime = (document.getElementById('es-class-time').value || '9:00 AM – 5:00 PM').trim();
+            let courseTitle = (document.getElementById('es-course-title').value || '28-Hour Armed Security Course (IDFPR #102-000398)').trim();
+            let classDate = (document.getElementById('es-class-date').value || 'Selected In-Person Range Qualification Date').trim();
+            let classTime = (document.getElementById('es-class-time').value || '9:00 AM – 5:00 PM').trim();
             const rawLoc = (document.getElementById('es-location').value || '').trim();
-            const location = resolveCourseLocation('', courseTitle, rawLoc);
-            const price = (document.getElementById('es-price').value || 'Paid / Confirmed').trim();
+            const price = (document.getElementById('es-price').value || '$200.00 (Paid)').trim();
             const reviewUrl = ((document.getElementById('admin-google-review-url') || {}).value || DEFAULT_GOOGLE_PROFILE_REVIEW_URL).trim();
+
+            // If viewing the Reminder template and an Unarmed student was selected, preview the Armed Range Qualification Reminder (since Unarmed has no reminder email)
+            if (currentEmailStudioTemplate === 'reminder' && courseTitle.toLowerCase().includes('unarmed')) {
+                courseTitle = '28-Hour Armed Security Course — In-Person Range Qualification';
+                classDate = 'Student\'s Selected In-Person Qualification Date';
+                classTime = '9:00 AM – 5:00 PM (Arrive 15 mins early)';
+            }
+
+            const isArmed = courseTitle.toLowerCase().includes('armed') && !courseTitle.toLowerCase().includes('unarmed');
+            const isUnarmed = courseTitle.toLowerCase().includes('unarmed');
+            const location = resolveCourseLocation(isArmed ? 'armed-28' : (isUnarmed ? 'unarmed-20' : ''), courseTitle, rawLoc);
+
+            const armedMandatoryCalloutHtml = isArmed ? `
+                <div style="background:rgba(239,68,68,0.14); border:2px solid #ef4444; border-radius:8px; padding:14px 16px; margin:14px 0; font-size:13.5px; color:#ffffff; line-height:1.55;">
+                    <div style="font-size:12.5px; font-weight:800; color:#fca5a5; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px;">
+                        &#9888; MANDATORY: COMPLETE ONLINE PORTION BEFORE IN-PERSON RANGE QUALIFICATION
+                    </div>
+                    You <strong>MUST complete 100% of the online portion</strong> of the 28-Hour Armed Security Course <strong>BEFORE</strong> arriving at Eagle Sports Range for your chosen in-person range qualification date (<strong>${classDate}</strong>):
+                    <ul style="margin:6px 0; padding-left:18px; color:#f1f5f9;">
+                        <li>Complete all <strong>10 Online Armed Training Modules</strong> (20-Hour Classroom Portion)</li>
+                        <li>Pass the <strong>Untimed 50-Question Written Final Examination</strong> (75%+)</li>
+                        <li>Complete and save <strong>Part 1 (Trainee Section) of Official IDFPR Form IL486-1138</strong> in the portal</li>
+                    </ul>
+                    <span style="color:#fde68a; font-weight:700;">Students who have not completed the online portion prior to their chosen in-person qualification date will not be permitted on the firing line.</span>
+                </div>
+            ` : '';
 
             let subject = '';
             let html = '';
@@ -3883,40 +3917,28 @@ function ptaVerifyAdminCredential(inputVal) {
                         <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:14.5px;">
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course Enrolled:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Tuition / Status:</strong> <strong style="color:#4ade80;">${price}</strong></div>
-                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Scheduled Date:</strong> <strong style="color:#fff;">${classDate}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">${isArmed ? 'Chosen In-Person Range Date:' : 'Scheduled Date:'}</strong> <strong style="color:#fff;">${classDate}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Class / Range Hours:</strong> ${classTime}</div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Training Location:</strong> ${location}</div>
                             <div><strong style="color:#94a3b8;">Lead Instructor:</strong> Charles Young (License #263-000693)</div>
                         </div>
+                        ${armedMandatoryCalloutHtml}
                         <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:14.5px; color:#cbd5e1; line-height:1.55;">
-                            <strong style="color:#fff; display:block; margin-bottom:4px;">What to Bring &amp; Prepare:</strong>
-                            &bull; Valid Government Photo ID (and FOID card if attending an Illinois CCL session).<br>
-                            &bull; Close-toed shoes, crew-neck shirt, and a sturdy belt (ammo, targets, and range fees included).<br>
-                            &bull; 28-Hour Armed Security students: Complete your online modules &amp; untimed exam before range day.
+                            <strong style="color:#fff; display:block; margin-bottom:4px;">What to Know:</strong>
+                            ${isUnarmed
+                                ? '&bull; Complete all 10 self-paced online modules and the untimed final exam at your convenience.<br>&bull; Your official IDFPR Certificate is unlocked immediately upon passing (no reminder email needed).'
+                                : '&bull; Valid Government Photo ID (and FOID card if attending an Illinois CCL session).<br>&bull; Close-toed shoes, crew-neck shirt, and a sturdy belt (ammo, targets, and range fees included).<br>&bull; Complete 100% of the online portion before your chosen in-person range qualification date.'}
                         </div>
                     </div>
                 </div>`;
-                text = `Welcome ${studentName}!
-
-Your registration and payment with Platforms Training Academy (IDFPR Approved Curriculum #102-000398) are confirmed:
-
-Course: ${courseTitle}
-Tuition / Status: ${price}
-Date: ${classDate}
-Time: ${classTime}
-Location: ${location}
-Instructor: Charles Young (#263-000693)
-
-What to Bring: Valid Photo ID, close-toed shoes, crew-neck shirt, and a sturdy belt. Ammo, targets, and range fees are included.
-
-Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com`;
+                text = `Welcome ${studentName}! Your registration for ${courseTitle} is confirmed.`;
             } else if (currentEmailStudioTemplate === 'reminder') {
-                subject = `Upcoming Class Reminder (${classDate}): ${courseTitle} | Platforms Training Academy`;
+                subject = `In-Person Range Qualification Reminder (${classDate}): ${courseTitle} | Platforms Training Academy`;
                 html = `
                 <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:600px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:10px; overflow:hidden; border:1px solid #262c3a;">
                     <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:20px 24px; border-bottom:2px solid #d4af37; text-align:center;">
                         <div style="display:inline-block; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b; padding:3px 10px; border-radius:999px; font-size:13px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px;">
-                            Upcoming Training &amp; Range Qualification Reminder
+                            Upcoming In-Person Qualification Reminder (2 Days Prior)
                         </div>
                         <h2 style="color:#ffffff; font-size:20px; margin:4px 0 0 0;">PLATFORMS TRAINING ACADEMY</h2>
                         <p style="color:#cbd5e1; font-size:14.5px; margin:4px 0 0 0;">IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor: Charles Young</p>
@@ -3924,38 +3946,25 @@ Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com`;
                     <div style="padding:22px 24px;">
                         <p style="font-size:15px; color:#ffffff; margin-top:0;">Hello <strong>${studentName}</strong>,</p>
                         <p style="font-size:14.5px; color:#cbd5e1; line-height:1.55;">
-                            Friendly reminder regarding your upcoming scheduled training / range qualification session with <strong>Platforms Training Academy</strong>:
+                            This is your automated reminder for your chosen <strong>in-person range qualification date</strong> with <strong>Platforms Training Academy</strong>:
                         </p>
                         <div style="background:#141821; border:1px solid rgba(212,175,55,0.45); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:14.5px;">
-                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course / Session:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
-                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Scheduled Date:</strong> <strong style="color:#fbbf24;">${classDate}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course / Qualification:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Chosen Qualification Date:</strong> <strong style="color:#fbbf24;">${classDate}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Check-In &amp; Hours:</strong> ${classTime} (Arrive 15 mins early)</div>
-                            <div><strong style="color:#94a3b8;">Location:</strong> ${location}</div>
+                            <div><strong style="color:#94a3b8;">Range Location:</strong> ${location}</div>
                         </div>
+                        ${armedMandatoryCalloutHtml}
                         <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:12px 14px; font-size:14.5px; color:#cbd5e1; line-height:1.55;">
                             <strong style="color:#fff; display:block; margin-bottom:4px;">Mandatory Arrival &amp; Range Checklist:</strong>
+                            &bull; <strong>Online Portion Must Be Completed First:</strong> All 10 online modules, the untimed written exam, and Form IL486-1138 Part 1 must be completed before arriving at the range.<br>
                             &bull; Arrive 15 minutes early for sign-in and safety briefing.<br>
                             &bull; Bring your Government Photo ID (and FOID if applicable).<br>
-                            &bull; Wear close-toed shoes, crew-neck shirt, long pants, and a sturdy belt.<br>
-                            &bull; Ammunition, targets, and range fees are included.
+                            &bull; Wear close-toed shoes, crew-neck shirt, long pants, and a sturdy belt (ammo, targets, and range fees included).
                         </div>
                     </div>
                 </div>`;
-                text = `Hello ${studentName},
-
-This is a reminder for your upcoming training session at Platforms Training Academy (Curriculum #102-000398):
-
-Course: ${courseTitle}
-Date: ${classDate}
-Time: ${classTime} (Please arrive 15 minutes early)
-Location: ${location}
-
-Checklist:
-- Bring valid Photo ID (and FOID if applicable)
-- Wear close-toed shoes, crew-neck shirt, and a sturdy belt
-- Ammo, targets, and range fees are included
-
-Questions? Call (773) 873-2591`;
+                text = `Hello ${studentName}, reminder for your chosen in-person range qualification on ${classDate}. Remember: the online portion must be completed before your in-person range qualification.`;
             } else {
                 subject = `Congratulations & Thank You from Platforms Training Academy! (Leave a Quick Google Review)`;
                 html = `
@@ -3987,15 +3996,7 @@ Questions? Call (773) 873-2591`;
                         </p>
                     </div>
                 </div>`;
-                text = `Congratulations ${studentName} on completing your ${courseTitle} with Platforms Training Academy!
-
-Would you take 30 seconds to leave us a 5-star review on Google? Click the link below to post straight to our Google Business Profile:
-
-${reviewUrl}
-
-Thank you for training with us!
-Charles Young — Lead Instructor (#263-000693)
-Platforms Training Academy | (773) 873-2591`;
+                text = `Congratulations ${studentName} on completing your ${courseTitle} with Platforms Training Academy! Leave a review: ${reviewUrl}`;
             }
 
             return { studentName, toEmail, courseTitle, classDate, classTime, location, price, reviewUrl, subject, html, text };

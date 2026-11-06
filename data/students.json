@@ -51,10 +51,11 @@
       "attempts": [],
       "confirmation_email_sent": true,
       "confirmation_email_sent_at": "2026-11-06 11:11:43",
-      "reminder_email_sent": true,
-      "reminder_email_sent_at": "2026-11-06 11:11:43",
+      "reminder_email_sent": false,
+      "reminder_email_sent_at": null,
       "thank_you_email_sent": false,
-      "thank_you_email_sent_at": null
+      "thank_you_email_sent_at": null,
+      "reminder_not_applicable": true
     }
   ]
 }
