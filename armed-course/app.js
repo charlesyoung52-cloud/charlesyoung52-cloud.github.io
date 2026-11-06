@@ -3662,7 +3662,7 @@ class SecurityCourseApp {
 
         const baseUpdated = (loaded && loaded.last_updated) ? loaded.last_updated : '';
         try {
-            const localRaw = localStorage.getItem('platforms_calendar_data_v5');
+            const localRaw = (localStorage.removeItem('platforms_calendar_data_v6'), localStorage.getItem('platforms_calendar_data_v6'));
             if (localRaw) {
                 const parsed = JSON.parse(localRaw);
                 if (parsed && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
@@ -3686,7 +3686,7 @@ class SecurityCourseApp {
                 const apiData = await apiRes.json();
                 if (apiData && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
                     this.rangeCalendarData = apiData;
-                    localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(apiData));
+                    localStorage.setItem('platforms_calendar_data_v6', JSON.stringify(apiData));
                     this.renderPaymentGateRangeDates();
                     this.updatePaymentGateActionUI();
                 }
@@ -3881,7 +3881,7 @@ class SecurityCourseApp {
                 createdAt: new Date().toLocaleString()
             };
             this.rangeCalendarData.reservations.unshift(reservation);
-            localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(this.rangeCalendarData));
+            localStorage.setItem('platforms_calendar_data_v6', JSON.stringify(this.rangeCalendarData));
 
             const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
                 ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')

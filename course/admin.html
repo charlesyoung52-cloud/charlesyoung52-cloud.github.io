@@ -2236,7 +2236,7 @@ function ptaVerifyAdminCredential(inputVal) {
 
             try {
                 localStorage.removeItem('platforms_calendar_data');
-                const localRaw = localStorage.getItem('platforms_calendar_data_v5');
+                const localRaw = (localStorage.removeItem('platforms_calendar_data_v6'), localStorage.getItem('platforms_calendar_data_v6'));
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
                     if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
@@ -2533,7 +2533,7 @@ function ptaVerifyAdminCredential(inputVal) {
         }
 
         async function saveCalendarToCloud() {
-            localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(adminCalendarData));
+            localStorage.setItem('platforms_calendar_data_v6', JSON.stringify(adminCalendarData));
             const fb = document.getElementById('admin-cal-save-feedback');
             if (fb) {
                 fb.style.display = 'block';

@@ -917,7 +917,7 @@
             try {
                 localStorage.removeItem('platforms_calendar_data');
                 localStorage.removeItem('platforms_calendar_data_v2');
-                const localRaw = localStorage.getItem('platforms_calendar_data_v5');
+                const localRaw = (localStorage.removeItem('platforms_calendar_data_v6'), localStorage.getItem('platforms_calendar_data_v6'));
                 if (localRaw) {
                     const parsed = JSON.parse(localRaw);
                     if (parsed && parsed.courses && Array.isArray(parsed.sessions) && (parsed.last_updated || '') >= baseUpdated) {
@@ -940,7 +940,7 @@
                     if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
                         if (apiData.courses['unarmed-20']) apiData.courses['unarmed-20'].price = '$50';
                         calendarData = apiData;
-                        localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(calendarData));
+                        localStorage.setItem('platforms_calendar_data_v6', JSON.stringify(calendarData));
                         renderCourseSpotlight();
                         renderMonthlyCalendar();
                         renderSessionsList();
@@ -1511,7 +1511,7 @@
                 calendarData.reservations = [];
             }
             calendarData.reservations.unshift(reservation);
-            localStorage.setItem('platforms_calendar_data_v5', JSON.stringify(calendarData));
+            localStorage.setItem('platforms_calendar_data_v6', JSON.stringify(calendarData));
 
             if (session.courseId === 'armed-28') {
                 const rangeRecord = {

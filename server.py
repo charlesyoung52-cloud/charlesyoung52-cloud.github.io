@@ -2507,6 +2507,8 @@ def load_calendar_data():
             pass
     if db_cal and file_cal:
         if (file_cal.get('last_updated') or '') >= (db_cal.get('last_updated') or ''):
+            if db_cal.get('reservations') and not file_cal.get('reservations'):
+                file_cal['reservations'] = db_cal['reservations']
             return file_cal
         return db_cal
     return file_cal or db_cal or {'courses': {}, 'sessions': [], 'reservations': []}
