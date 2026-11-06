@@ -9,7 +9,7 @@ const COURSE_DATABASE = {
         title: "20 HR UNARMED SECURITY COURSE",
         category: "IDFPR State-Mandated Security Training (PERC Card)",
         price: "$50.00",
-        stripeUrl: "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00",
+        stripeUrl: "https://buy.stripe.com/6oU4gz8oQeaD1Moaqs9oc08",
         duration: "Self-Paced (20 Hours Online)",
         location: "100% Online LMS Portal (Phone, Tablet, or PC)",
         rangeNote: "No range session required. Study all 10 modules, interactive scenarios, and practice quizzes 100% online. You will receive your certificate immediately upon completion with no waiting period.",

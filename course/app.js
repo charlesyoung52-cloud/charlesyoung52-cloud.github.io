@@ -111,7 +111,7 @@ class SecurityCourseApp {
         // Temporary Paywall Bypass Flag
         // Set to true to allow all users to access course curriculum, exams, and certification immediately without payment
         this.temporaryPaywallDisabled = false;
-        this.stripePaymentUrl = "https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00";
+        this.stripePaymentUrl = "https://buy.stripe.com/6oU4gz8oQeaD1Moaqs9oc08";
 
         // Payment & Permanent Certificate Sealing (Scoped per authenticated student email)
         const initEmail = (localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
@@ -3493,7 +3493,7 @@ class SecurityCourseApp {
     }
 
     initiateCourseEnrollmentPayment() {
-        const base = this.stripePaymentUrl || 'https://buy.stripe.com/dRmdR948A7Mf8aMaqs9oc00';
+        const base = this.stripePaymentUrl || 'https://buy.stripe.com/6oU4gz8oQeaD1Moaqs9oc08';
         const emailParam = this.studentEmail ? ('?prefilled_email=' + encodeURIComponent(this.studentEmail)) : '';
         window.location.href = base + emailParam;
     }
