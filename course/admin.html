@@ -64,9 +64,10 @@
             min-width: 0;
         }
         .header-brand img {
-            height: 30px;
+            height: 92px;
             width: auto;
             flex-shrink: 0;
+            object-fit: contain;
         }
         .brand-title {
             font-family: 'Chakra Petch', sans-serif;
@@ -459,7 +460,7 @@
                 flex-wrap: wrap;
                 gap: 8px;
             }
-            .header-brand img { height: 24px; }
+            .header-brand img { height: 76px; }
             .brand-title { font-size: 0.85rem; }
             .brand-sub { display: none; }
             .header-actions {
@@ -532,7 +533,7 @@
     <div id="pin-modal" class="modal-overlay" style="display: flex;">
         <div class="modal-box">
             <a href="../index.html" title="Return to Homepage" style="display:inline-block; margin-bottom: 14px; text-decoration:none;">
-                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" style="height: 110px; max-width: 100%; width: auto; object-fit: contain;">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" style="height: 135px; max-width: 100%; width: auto; object-fit: contain;">
             </a>
             <div style="font-size: 2.0rem; color: var(--green); margin-bottom: 8px;">
                 <i class="fas fa-shield-halved"></i>
@@ -1997,6 +1998,10 @@ function ptaVerifyAdminCredential(inputVal) {
             'cadet.test@gmail.com',
             'madams@chicago-security.test',
             'marcus.test@platformstraining.com',
+            'charlesyoung52@gmail.com',
+            'armed::charlesyoung52@gmail.com',
+            'charlesyoung@platformstraining.com',
+            'armed::charlesyoung@platformstraining.com',
             'anonymous',
             ''
         ]);
@@ -2007,7 +2012,10 @@ function ptaVerifyAdminCredential(inputVal) {
             'student officer',
             'trainee officer',
             'test student',
-            'armed student officer'
+            'armed student officer',
+            'charles young',
+            'young, charles',
+            'charles'
         ]);
 
         function isRealStudentRecord(s) {
@@ -2017,7 +2025,7 @@ function ptaVerifyAdminCredential(inputVal) {
             const name = String(s.name || '').trim().toLowerCase();
             if (!email || !email.includes('@')) return false;
             if (FAKE_STUDENT_EMAILS.has(rawId) || FAKE_STUDENT_EMAILS.has(email)) return false;
-            if (email.endsWith('.test') || email.endsWith('@example.com') || email.includes('test@') || email.startsWith('cadet.test') || email.startsWith('marcus.test')) return false;
+            if (email.endsWith('.test') || email.endsWith('@example.com') || email.includes('test@') || email.startsWith('cadet.test') || email.startsWith('marcus.test') || email.includes('charlesyoung')) return false;
             if (!name || FAKE_STUDENT_NAMES.has(name)) return false;
             return true;
         }
@@ -2740,6 +2748,9 @@ function ptaVerifyAdminCredential(inputVal) {
                                     <button class="btn-action" style="padding:3px 6px; font-size:0.84rem; border-color:rgba(212,175,55,0.45); color:var(--green-bright);" onclick="openEmailStudioForStudent(${idx}, 'thank_you_review')" title="Send Graduation Thank You + 5-Star Google Review Email">
                                         <i class="fas fa-star"></i> Review
                                     </button>
+                                    <button class="btn-action" style="padding:3px 6px; font-size:0.84rem; color:#f87171; border-color:rgba(239,68,68,0.35);" onclick="deleteStudentRecord(${idx})" title="Remove Student from Roster">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                                 ${attemptsCount > 0 ? `
                                     <button class="btn-action" style="padding:4px 8px; font-size:0.86rem;" onclick="viewAttempts(${idx})" title="View Complete Exam History">
@@ -2751,6 +2762,53 @@ function ptaVerifyAdminCredential(inputVal) {
                     </tr>
                 `;
             }).join('');
+        }
+
+
+        async function deleteStudentRecord(filteredIndex) {
+            const filtered = getFilteredStudentsList();
+            const s = filtered[filteredIndex];
+            if (!s) return;
+            if (!confirm(`Remove "${s.name}" (${s.email || s.id}) from the student roster?`)) return;
+
+            const sid = String(s.id || '').toLowerCase();
+            const semail = String(s.email || '').toLowerCase();
+
+            allStudents = allStudents.filter(item => {
+                const iid = String(item.id || '').toLowerCase();
+                const iemail = String(item.email || '').toLowerCase();
+                return iid !== sid && (!semail || iemail !== semail);
+            });
+
+            try {
+                const regRaw = localStorage.getItem('platforms_student_registry');
+                if (regRaw) {
+                    const parsed = JSON.parse(regRaw);
+                    if (Array.isArray(parsed)) {
+                        const cleaned = parsed.filter(item => {
+                            const iid = String(item.id || '').toLowerCase();
+                            const iemail = String(item.email || '').toLowerCase();
+                            return iid !== sid && (!semail || iemail !== semail);
+                        });
+                        localStorage.setItem('platforms_student_registry', JSON.stringify(cleaned));
+                    }
+                }
+                if (semail) {
+                    localStorage.removeItem('platforms_armed_cert_intake_' + semail);
+                }
+            } catch (e) {}
+
+            recomputeMetricsFromRealStudents();
+            updateFilterCounts();
+            renderTable();
+
+            try {
+                await fetch(getApiBaseUrl() + '/api/admin/students/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: s.id, email: s.email })
+                });
+            } catch (e) {}
         }
 
         function viewAttempts(studentIndex) {

@@ -921,6 +921,10 @@ FAKE_TEST_EMAILS = {
     'cadet.test@gmail.com',
     'madams@chicago-security.test',
     'marcus.test@platformstraining.com',
+    'charlesyoung52@gmail.com',
+    'armed::charlesyoung52@gmail.com',
+    'charlesyoung@platformstraining.com',
+    'armed::charlesyoung@platformstraining.com',
     'anonymous',
     ''
 }
@@ -931,7 +935,10 @@ FAKE_TEST_NAMES = {
     'student officer',
     'trainee officer',
     'test student',
-    'armed student officer'
+    'armed student officer',
+    'charles young',
+    'young, charles',
+    'charles'
 }
 
 def is_fake_or_test_identity(email_or_id='', name=''):
@@ -959,16 +966,27 @@ def purge_test_and_fake_records(db):
         ]:
             cur.execute(f"""
                 DELETE FROM {tbl}
-                WHERE LOWER(TRIM(COALESCE({col}, ''))) IN ('student@platformstraining.com', 'armed::student@platformstraining.com', 'test@platformstraining.com', 'armed::test@platformstraining.com', 'anonymous')
+                WHERE LOWER(TRIM(COALESCE({col}, ''))) IN (
+                    'student@platformstraining.com', 'armed::student@platformstraining.com',
+                    'test@platformstraining.com', 'armed::test@platformstraining.com',
+                    'charlesyoung52@gmail.com', 'armed::charlesyoung52@gmail.com',
+                    'charlesyoung@platformstraining.com', 'armed::charlesyoung@platformstraining.com',
+                    'anonymous'
+                )
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%test@%'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%.test'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%@example.com'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE 'cadet.test%'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE 'marcus.test%'
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%charlesyoung%'
             """)
         cur.execute("""
             DELETE FROM students
-            WHERE LOWER(TRIM(COALESCE(name, ''))) IN ('doe, john a.', 'john a. doe', 'john doe', 'student officer', 'trainee officer', 'test student', 'armed student officer')
+            WHERE LOWER(TRIM(COALESCE(name, ''))) IN (
+                'doe, john a.', 'john a. doe', 'john doe',
+                'student officer', 'trainee officer', 'test student', 'armed student officer',
+                'charles young', 'young, charles', 'charles'
+            )
         """)
         cur.execute("DELETE FROM progress WHERE student_id NOT IN (SELECT id FROM students)")
         cur.execute("DELETE FROM exam_results WHERE student_id NOT IN (SELECT id FROM students)")
@@ -1449,6 +1467,28 @@ def list_students():
         sync_to_cloud_json()
     except Exception: pass
     return jsonify({'students': students})
+
+@app.route('/api/admin/students/delete', methods=['POST'])
+def admin_delete_student():
+    data = request.get_json() or {}
+    student_id = (data.get('student_id') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    if not student_id and not email:
+        return jsonify({'success': False, 'error': 'student_id or email required'}), 400
+    db = get_db()
+    cur = db.cursor()
+    for val in {v for v in [student_id, email, f"armed::{email}" if email else ""] if v}:
+        cur.execute('DELETE FROM students WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)', (val, val))
+        cur.execute('DELETE FROM progress WHERE LOWER(student_id) = LOWER(?)', (val,))
+        cur.execute('DELETE FROM exam_results WHERE LOWER(student_id) = LOWER(?)', (val,))
+        cur.execute('DELETE FROM certificates WHERE LOWER(student_id) = LOWER(?)', (val,))
+        cur.execute('DELETE FROM analytics_events WHERE LOWER(student_id) = LOWER(?)', (val,))
+    db.commit()
+    try:
+        sync_to_cloud_json()
+    except Exception:
+        pass
+    return jsonify({'success': True, 'deleted': student_id or email})
 
 # 4. Student Register / Login (Cross-Device Sync)
 @app.route('/api/students/login', methods=['POST'])

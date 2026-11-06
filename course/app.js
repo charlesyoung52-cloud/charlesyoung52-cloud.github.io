@@ -385,7 +385,7 @@ class SecurityCourseApp {
                 try { registry = JSON.parse(saved); } catch (e) { registry = []; }
             }
             const studentId = this.studentEmail || this.studentCertData.name;
-            if (!studentId || studentId === 'student@platformstraining.com' || studentId === 'DOE, JOHN A.') return;
+            if (!studentId || this.isAdmin || studentId === 'student@platformstraining.com' || studentId === 'DOE, JOHN A.' || String(studentId).toLowerCase().includes('charlesyoung') || String(this.studentName || '').toLowerCase() === 'charles young' || String(this.studentName || '').toLowerCase() === 'charles') return;
 
             const completedCount = this.getCompletedLessonsCount();
             const nowStr = this.getFormattedTodayDate() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
