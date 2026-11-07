@@ -904,6 +904,65 @@
                 : 'https://charlesyoung52-cloud-github-io.onrender.com';
         }
 
+        function getTodayIsoLocal() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        async function dispatchCalendarInstructorEmailJsFallback(dedupKey, opts) {
+            try {
+                const cleanStEmail = String((opts && opts.studentEmail) || '').trim().toLowerCase();
+                const stName = String((opts && opts.studentName) || 'Student Officer').trim();
+                const stPhone = String((opts && opts.studentPhone) || 'Not provided').trim();
+                const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
+                if (cleanStEmail && (skipList.includes(cleanStEmail) || cleanStEmail.endsWith('.test') || cleanStEmail.endsWith('@example.com') || cleanStEmail.includes('test@'))) {
+                    return;
+                }
+                if (dedupKey && localStorage.getItem(dedupKey) === '1') return;
+                const ejService = localStorage.getItem('platforms_emailjs_service_id') || 'service_bor93nt';
+                const ejTemplate = localStorage.getItem('platforms_emailjs_template_id') || 'template_0k00oka';
+                const ejPubKey = localStorage.getItem('platforms_emailjs_public_key') || 'qZROJMBteQvfuYHqG';
+                const ejCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                const ejTimer = ejCtrl ? setTimeout(() => ejCtrl.abort(), 3200) : null;
+                const ejResp = await fetch('https://api.emailjs.com/api/v1/email/send'.replace('/v1/', '/v1.0/'), {
+                    method: 'POST',
+                    keepalive: true,
+                    signal: ejCtrl ? ejCtrl.signal : undefined,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        service_id: ejService,
+                        template_id: ejTemplate,
+                        user_id: ejPubKey,
+                        template_params: {
+                            to_name: `Instructor Charles Young — ${opts.headline || 'New Course Signup'}: ${stName}${cleanStEmail ? ' (' + cleanStEmail + ')' : ''}`,
+                            name: `Instructor Charles Young — ${opts.headline || 'New Course Signup'}: ${stName}${cleanStEmail ? ' (' + cleanStEmail + ')' : ''}`,
+                            to_email: 'charlesyoung@platformstraining.com',
+                            user_email: 'charlesyoung@platformstraining.com',
+                            email: 'charlesyoung@platformstraining.com',
+                            reply_to: cleanStEmail || 'charlesyoung@platformstraining.com',
+                            passcode: opts.summaryBanner || `SIGNUP: ${stName}`,
+                            code: opts.summaryBanner || `SIGNUP: ${stName}`,
+                            otp: opts.summaryBanner || `SIGNUP: ${stName}`,
+                            verification_code: opts.summaryBanner || `SIGNUP: ${stName}`,
+                            subject: opts.subject || `New Course Signup: ${stName} — ${opts.courseTitle || 'Scheduled Course'}`,
+                            message: opts.message || '',
+                            course_name: `${opts.courseTitle || 'Scheduled Course'} | Student: ${stName} • ${stPhone}${cleanStEmail ? ' • ' + cleanStEmail : ''}`,
+                            company_name: 'Platforms Training Academy — Instructor Alert',
+                            company: 'Platforms Training Academy',
+                            from_name: 'Platforms Training Academy',
+                            academy_name: 'Platforms Training Academy',
+                            time: new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        }
+                    })
+                });
+                if (ejTimer) clearTimeout(ejTimer);
+                if (ejResp && ejResp.ok && dedupKey) localStorage.setItem(dedupKey, '1');
+            } catch (e) {}
+        }
+
         async function loadCalendarSchedule() {
             let loaded = null;
 
@@ -967,12 +1026,81 @@
                                 <p style="margin:0; font-size:0.96rem; color:#ffffff; line-height:1.5;">
                                     ${isArmedPaidFlow
                                         ? 'Your $200 Online Armed Security tuition covers your 8-hour live-fire qualification at Eagle Sports Range (ammo, targets &amp; range fees included). Click <strong>Select Date</strong> on any range session below to reserve your seat with <strong>$0 additional payment</strong>.'
-                                        : `Thank you for enrolling${cPaid.title ? ' in <strong>' + cPaid.title + '</strong>' : ''}! Your Stripe payment receipt has been sent to your email. Instructor Charles Young will contact you to confirm your class date, or you may call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> anytime.`}
+                                        : `Thank you for enrolling${cPaid.title ? ' in <strong>' + cPaid.title + '</strong>' : ''}! Your Stripe payment receipt has been sent to your email. Instructor Charles Young has been notified and will confirm your class details, or you may call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> anytime.`}
                                 </p>
                             </div>
                         </div>
                     `;
                 }
+
+                // Notify backend & Instructor Charles Young of completed Stripe payment for any scheduled/other course
+                (async () => {
+                    try {
+                        let savedBk = null;
+                        try {
+                            savedBk = JSON.parse(localStorage.getItem('platforms_last_calendar_booking') || 'null');
+                        } catch (e) {}
+                        const paidCourseId = (activeCourseFilter && activeCourseFilter !== 'all')
+                            ? activeCourseFilter
+                            : ((savedBk && savedBk.courseId) || 'armed-28');
+                        const stripeRef = params.get('session_id') || params.get('orderId') || ((savedBk && savedBk.reservationId) ? ('stripe_' + savedBk.reservationId) : ('stripe_' + paidCourseId));
+                        const paidDedupKey = `pta_instr_alert_paid:${paidCourseId}:${stripeRef}`;
+                        if (localStorage.getItem(paidDedupKey) === '1') return;
+
+                        const stEmail = (params.get('email') || (savedBk && savedBk.studentEmail) || '').trim().toLowerCase();
+                        const stName = ((savedBk && savedBk.studentName) || 'Enrolled Student').trim();
+                        const stPhone = ((savedBk && savedBk.studentPhone) || '').trim();
+                        const resId = (savedBk && savedBk.reservationId) || '';
+                        const clsDate = (savedBk && savedBk.date) || '';
+                        const clsLoc = (savedBk && savedBk.location) || cPaid.location || '';
+
+                        let payApiJson = null;
+                        try {
+                            const payResp = await fetch(getApiBaseUrl() + '/api/payment/checkout', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    course_type: paidCourseId,
+                                    student_id: stEmail || resId || stripeRef,
+                                    email: stEmail,
+                                    name: stName,
+                                    phone: stPhone,
+                                    reservation_id: resId,
+                                    class_date: clsDate,
+                                    location: clsLoc,
+                                    session_id: stripeRef
+                                })
+                            });
+                            if (payResp && payResp.ok) {
+                                payApiJson = await payResp.json();
+                                if (payApiJson && payApiJson.instructor_email_sent) {
+                                    localStorage.setItem(paidDedupKey, '1');
+                                }
+                            }
+                        } catch (e) {}
+
+                        if (!(payApiJson && (payApiJson.instructor_email_sent || payApiJson.instructor_alert_skipped))) {
+                            const cTitleFull = cPaid.title || (savedBk && savedBk.courseTitle) || paidCourseId;
+                            const cPriceStr = cPaid.price || (savedBk && savedBk.price) || 'Paid';
+                            await dispatchCalendarInstructorEmailJsFallback(paidDedupKey, {
+                                headline: 'Paid Course Enrollment',
+                                studentName: stName,
+                                studentEmail: stEmail,
+                                studentPhone: stPhone,
+                                courseTitle: `${cTitleFull} (${cPriceStr} Paid)`,
+                                subject: `Paid Course Signup: ${stName} — ${cTitleFull} (${cPriceStr})`,
+                                summaryBanner: `PAID ${cPriceStr} (${cTitleFull}): ${stName}${stPhone ? ' • ' + stPhone : ''}${stEmail ? ' • ' + stEmail : ''}`,
+                                message: `Stripe Tuition Payment Completed:
+Course: ${cTitleFull} (${cPriceStr})
+Student: ${stName}
+Email: ${stEmail || 'See Stripe receipt'}
+Phone: ${stPhone || 'Not provided'}
+Date: ${clsDate || 'Next Scheduled Session'}
+Location: ${clsLoc}`
+                            });
+                        }
+                    } catch (e) {}
+                })();
             }
 
             updateCourseTabsUI();
@@ -1053,6 +1181,12 @@
                         <i class="fas fa-credit-card"></i> Continue to Payment (${selectedSession.price || c.price})
                     </button>
                 `;
+            } else if (getFilteredSessions(false).length === 0) {
+                actionAreaHtml = `
+                    <a href="#direct-course-signup-card" class="btn-book-clean" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; padding:10px 20px; font-size:0.96rem; display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fas fa-user-plus"></i> Sign Up / Enroll Below (${c.price})
+                    </a>
+                `;
             } else {
                 actionAreaHtml = `
                     <span style="font-size:0.92rem; color:#d4af37; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.35); padding:8px 14px; border-radius:6px; display:inline-flex; align-items:center; gap:7px;">
@@ -1095,9 +1229,12 @@
         }
 
         function getFilteredSessions(applyDayFilter = true) {
+            const todayIso = getTodayIsoLocal();
             const list = (calendarData.sessions || []).slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             return list.filter(s => {
                 if (s.status === 'Cancelled') return false;
+                const endOrStart = s.endDate || s.date || '';
+                if (endOrStart && endOrStart < todayIso) return false;
                 if (activeCourseFilter !== 'all' && s.courseId !== activeCourseFilter) return false;
                 if (applyDayFilter && activeDayFilter) {
                     const start = s.date;
@@ -1280,6 +1417,56 @@
             }
 
             if (sessions.length === 0) {
+                const selectedCourseObj = (activeCourseFilter !== 'all' && calendarData.courses && calendarData.courses[activeCourseFilter])
+                    ? calendarData.courses[activeCourseFilter]
+                    : null;
+                if (selectedCourseObj && !activeDayFilter) {
+                    if (countBadge) countBadge.textContent = 'Sign Up Open';
+                    if (heading) heading.textContent = 'SIGN UP FOR NEXT AVAILABLE CLASS SESSION';
+                    container.innerHTML = `
+                        <div id="direct-course-signup-card" class="session-row" style="flex-direction:column; align-items:stretch; gap:14px; padding:24px; border-color:rgba(212,175,55,0.45);">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;">
+                                    <h4 style="font-family:'Rajdhani',sans-serif; font-size:1.35rem; color:#ffffff; margin:0;">
+                                        Enroll / Request Next Class Date — ${selectedCourseObj.title}
+                                    </h4>
+                                    <span style="font-family:'Rajdhani',sans-serif; font-size:1.35rem; font-weight:700; color:#d4af37;">${selectedCourseObj.price}</span>
+                                </div>
+                                <p style="color:#cbd5e1; font-size:0.95rem; margin:6px 0 0 0; line-height:1.55;">
+                                    Enter your contact details below to sign up for <strong>${selectedCourseObj.title}</strong>. Instructor Charles Young is emailed immediately upon signup to confirm your upcoming weekend class session.
+                                </p>
+                            </div>
+                            <form id="direct-course-signup-form" onsubmit="submitDirectCourseSignup(event, true)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                                <div>
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:4px; text-transform:uppercase;">Full Legal Name *</label>
+                                    <input type="text" id="direct-signup-name" required placeholder="First &amp; Last Name" style="width:100%; padding:10px 12px; background:#0d0f14; border:1px solid #2b3242; border-radius:6px; color:#fff; font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:4px; text-transform:uppercase;">Phone Number *</label>
+                                    <input type="tel" id="direct-signup-phone" required placeholder="(773) 555-0100" style="width:100%; padding:10px 12px; background:#0d0f14; border:1px solid #2b3242; border-radius:6px; color:#fff; font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:4px; text-transform:uppercase;">Email Address *</label>
+                                    <input type="email" id="direct-signup-email" required placeholder="you@example.com" style="width:100%; padding:10px 12px; background:#0d0f14; border:1px solid #2b3242; border-radius:6px; color:#fff; font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:4px; text-transform:uppercase;">Preferred Weekend / Notes</label>
+                                    <input type="text" id="direct-signup-notes" placeholder="e.g. Weekends in Dec / FOID ready" style="width:100%; padding:10px 12px; background:#0d0f14; border:1px solid #2b3242; border-radius:6px; color:#fff; font-size:0.95rem;">
+                                </div>
+                                <div style="grid-column:1 / -1; display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+                                    <button type="submit" id="direct-signup-pay-btn" class="btn-book-clean" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:700; padding:11px 20px; font-size:0.96rem; display:inline-flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-credit-card"></i> Sign Up &amp; Pay Tuition (${selectedCourseObj.price})
+                                    </button>
+                                    <button type="button" id="direct-signup-request-btn" onclick="submitDirectCourseSignup(null, false)" class="btn-book-clean" style="padding:11px 18px; font-size:0.95rem; display:inline-flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-calendar-plus" style="color:#d4af37;"></i> Sign Up &amp; Request Date First
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="direct-signup-feedback" style="display:none; padding:12px 14px; border-radius:6px; font-size:0.94rem; line-height:1.5;"></div>
+                        </div>
+                    `;
+                    return;
+                }
                 container.innerHTML = `
                     <div class="session-row" style="flex-direction:column; align-items:flex-start; gap:10px; padding:24px;">
                         <h4 style="font-family:'Rajdhani',sans-serif; font-size:1.25rem; color:#ffffff; margin:0;">
@@ -1512,6 +1699,19 @@
             }
             calendarData.reservations.unshift(reservation);
             localStorage.setItem('platforms_calendar_data_v6', JSON.stringify(calendarData));
+            localStorage.setItem('platforms_last_calendar_booking', JSON.stringify({
+                reservationId: reservation.id,
+                sessionId: session.id,
+                courseId: session.courseId,
+                courseTitle: session.title,
+                date: session.date,
+                time: session.time,
+                location: resolvedLocation,
+                price: reservation.price,
+                studentName: name,
+                studentPhone: phone,
+                studentEmail: email
+            }));
 
             if (session.courseId === 'armed-28') {
                 const rangeRecord = {
@@ -1552,55 +1752,30 @@
                 }
             } catch (err) {}
 
-            // Fallback browser EmailJS alert to Instructor Charles Young if backend SMTP is not configured
-            try {
-                const cleanStEmail = (email || '').trim().toLowerCase();
-                const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
-                const isTest = !cleanStEmail || skipList.includes(cleanStEmail) || cleanStEmail.endsWith('.test') || cleanStEmail.endsWith('@example.com') || cleanStEmail.includes('test@');
-                const dedupKey = 'pta_instr_alert_booking:' + reservation.id;
-                if (!isTest && !(bookApiRes && (bookApiRes.instructor_email_sent || bookApiRes.instructor_alert_skipped)) && localStorage.getItem(dedupKey) !== '1') {
-                    const ejService = localStorage.getItem('platforms_emailjs_service_id') || 'service_bor93nt';
-                    const ejTemplate = localStorage.getItem('platforms_emailjs_template_id') || 'template_0k00oka';
-                    const ejPubKey = localStorage.getItem('platforms_emailjs_public_key') || 'qZROJMBteQvfuYHqG';
-                    const dateLabel = formatDateSpan(session.date, session.endDate);
-                    const summaryBanner = `BOOKED ${session.date}: ${name} • ${phone} • ${cleanStEmail}`;
-                    const ejCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-                    const ejTimer = ejCtrl ? setTimeout(() => ejCtrl.abort(), 2800) : null;
-                    const ejResp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                        method: 'POST',
-                        keepalive: true,
-                        signal: ejCtrl ? ejCtrl.signal : undefined,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            service_id: ejService,
-                            template_id: ejTemplate,
-                            user_id: ejPubKey,
-                            template_params: {
-                                to_name: `Instructor Charles Young — New Class Signup: ${name} (${cleanStEmail})`,
-                                name: `Instructor Charles Young — New Class Signup: ${name} (${cleanStEmail})`,
-                                to_email: 'charlesyoung@platformstraining.com',
-                                user_email: 'charlesyoung@platformstraining.com',
-                                email: 'charlesyoung@platformstraining.com',
-                                reply_to: cleanStEmail,
-                                passcode: summaryBanner,
-                                code: summaryBanner,
-                                otp: summaryBanner,
-                                verification_code: summaryBanner,
-                                subject: `New Course Signup: ${name} — ${session.title} (${dateLabel})`,
-                                message: `New Class/Range Reservation:\nStudent: ${name}\nEmail: ${cleanStEmail}\nPhone: ${phone}\nCourse: ${session.title}\nDate: ${dateLabel} (${session.time})\nLocation: ${resolvedLocation}\nPrice: ${reservation.price}`,
-                                course_name: `${session.title} (${dateLabel}) | Student: ${name} • ${phone} • ${cleanStEmail}`,
-                                company_name: 'Platforms Training Academy — Instructor Alert',
-                                company: 'Platforms Training Academy',
-                                from_name: 'Platforms Training Academy',
-                                academy_name: 'Platforms Training Academy',
-                                time: new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                            }
-                        })
-                    });
-                    if (ejTimer) clearTimeout(ejTimer);
-                    if (ejResp && ejResp.ok) localStorage.setItem(dedupKey, '1');
-                }
-            } catch (ejErr) {}
+            // Fallback browser EmailJS alert to Instructor Charles Young if backend did not already send
+            const dedupKey = 'pta_instr_alert_booking:' + reservation.id;
+            if (bookApiRes && bookApiRes.instructor_email_sent) {
+                localStorage.setItem(dedupKey, '1');
+            } else if (!(bookApiRes && bookApiRes.instructor_alert_skipped)) {
+                const dateLabel = formatDateSpan(session.date, session.endDate);
+                await dispatchCalendarInstructorEmailJsFallback(dedupKey, {
+                    headline: 'New Class Signup',
+                    studentName: name,
+                    studentEmail: email,
+                    studentPhone: phone,
+                    courseTitle: `${session.title} (${dateLabel})`,
+                    subject: `New Course Signup: ${name} — ${session.title} (${dateLabel})`,
+                    summaryBanner: `BOOKED ${session.date} (${session.title}): ${name} • ${phone} • ${email}`,
+                    message: `New Class/Range Reservation:
+Student: ${name}
+Email: ${email}
+Phone: ${phone}
+Course: ${session.title}
+Date: ${dateLabel} (${session.time})
+Location: ${resolvedLocation}
+Price: ${reservation.price}`
+                });
+            }
 
             renderMonthlyCalendar();
             renderSessionsList();
@@ -1633,9 +1808,130 @@
                 `;
             }
 
+            const finalStripeUrl = email
+                ? stripeUrl + (stripeUrl.includes('?') ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(email)
+                : stripeUrl;
             setTimeout(() => {
-                window.location.href = stripeUrl;
+                window.location.href = finalStripeUrl;
             }, 400);
+        }
+
+        async function submitDirectCourseSignup(e, proceedToPayment) {
+            if (e) e.preventDefault();
+            const form = document.getElementById('direct-course-signup-form');
+            if (form && !form.reportValidity()) return;
+
+            const cObj = (calendarData.courses && calendarData.courses[activeCourseFilter]) || null;
+            if (!cObj) return;
+
+            const name = (document.getElementById('direct-signup-name').value || '').trim();
+            const phone = (document.getElementById('direct-signup-phone').value || '').trim();
+            const email = (document.getElementById('direct-signup-email').value || '').trim();
+            const notes = (document.getElementById('direct-signup-notes').value || '').trim();
+            const fb = document.getElementById('direct-signup-feedback');
+            const payBtn = document.getElementById('direct-signup-pay-btn');
+            const reqBtn = document.getElementById('direct-signup-request-btn');
+
+            if (payBtn) payBtn.disabled = true;
+            if (reqBtn) reqBtn.disabled = true;
+
+            const reservation = {
+                id: 'RES-' + Date.now(),
+                sessionId: 'DIRECT-' + activeCourseFilter.toUpperCase(),
+                courseId: activeCourseFilter,
+                courseTitle: cObj.title,
+                date: 'Next Available Session',
+                endDate: 'Next Available Session',
+                time: cObj.duration || '9:00 AM – 5:00 PM',
+                location: cObj.location || 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+                price: proceedToPayment ? `${cObj.price} (Proceeding to Stripe)` : `${cObj.price} (Date Request — Tuition Pending)`,
+                studentName: name,
+                studentPhone: phone,
+                studentEmail: email,
+                notes: notes || (proceedToPayment ? 'Direct online course enrollment & Stripe checkout' : 'Requested next available class date'),
+                reminderSent: false,
+                createdAt: new Date().toLocaleString()
+            };
+
+            localStorage.setItem('platforms_last_calendar_booking', JSON.stringify({
+                reservationId: reservation.id,
+                sessionId: reservation.sessionId,
+                courseId: reservation.courseId,
+                courseTitle: reservation.courseTitle,
+                date: reservation.date,
+                time: reservation.time,
+                location: reservation.location,
+                price: cObj.price,
+                studentName: name,
+                studentPhone: phone,
+                studentEmail: email
+            }));
+
+            let bookApiRes = null;
+            try {
+                const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 5000) : null;
+                const bkResp = await fetch(getApiBaseUrl() + '/api/calendar/book', {
+                    method: 'POST',
+                    keepalive: true,
+                    signal: bkCtrl ? bkCtrl.signal : undefined,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reservation, calendarData })
+                });
+                if (bkTimer) clearTimeout(bkTimer);
+                if (bkResp && bkResp.ok) {
+                    bookApiRes = await bkResp.json();
+                }
+            } catch (err) {}
+
+            const dedupKey = 'pta_instr_alert_booking:' + reservation.id;
+            if (bookApiRes && bookApiRes.instructor_email_sent) {
+                localStorage.setItem(dedupKey, '1');
+            } else if (!(bookApiRes && bookApiRes.instructor_alert_skipped)) {
+                await dispatchCalendarInstructorEmailJsFallback(dedupKey, {
+                    headline: 'New Course Signup',
+                    studentName: name,
+                    studentEmail: email,
+                    studentPhone: phone,
+                    courseTitle: cObj.title,
+                    subject: `New Course Signup: ${name} — ${cObj.title}`,
+                    summaryBanner: `SIGNUP (${cObj.title}): ${name} • ${phone} • ${email}`,
+                    message: `New Course Signup:
+Course: ${cObj.title} (${cObj.price})
+Student: ${name}
+Email: ${email}
+Phone: ${phone}
+Notes: ${reservation.notes}
+Location: ${reservation.location}`
+                });
+            }
+
+            if (proceedToPayment) {
+                const stripeUrl = getCourseStripeUrl(activeCourseFilter);
+                const finalStripeUrl = email
+                    ? stripeUrl + (stripeUrl.includes('?') ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(email)
+                    : stripeUrl;
+                if (fb) {
+                    fb.style.display = 'block';
+                    fb.style.background = '#181c24';
+                    fb.style.border = '1px solid #d4af37';
+                    fb.style.color = '#ffffff';
+                    fb.innerHTML = `<strong><i class="fas fa-check-circle" style="color:#d4af37;"></i> Signup Recorded (${reservation.id})!</strong> Redirecting you to Stripe Checkout (${cObj.price})...`;
+                }
+                setTimeout(() => { window.location.href = finalStripeUrl; }, 400);
+                return;
+            }
+
+            if (payBtn) payBtn.disabled = false;
+            if (reqBtn) reqBtn.disabled = false;
+            if (fb) {
+                fb.style.display = 'block';
+                fb.style.background = 'rgba(16, 185, 129, 0.14)';
+                fb.style.border = '1px solid #10b981';
+                fb.style.color = '#ffffff';
+                fb.innerHTML = `<strong><i class="fas fa-check-circle" style="color:#34d399;"></i> You're Signed Up (${reservation.id})!</strong> Instructor Charles Young has been emailed your registration for <strong>${cObj.title}</strong> and will reach out to <strong>${phone}</strong> / <strong>${email}</strong> to confirm your weekend class date.`;
+            }
+            if (form) form.reset();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

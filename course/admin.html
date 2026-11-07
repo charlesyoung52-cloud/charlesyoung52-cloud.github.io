@@ -793,10 +793,13 @@
                         </button>
                     </div>
 
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="email" id="admin-emailjs-test-email" placeholder="your_email@gmail.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem; width:220px;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <input type="email" id="admin-emailjs-test-email" placeholder="charlesyoung@platformstraining.com" style="padding:8px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.94rem; width:240px;">
                         <button type="button" class="btn-action" style="background:#1e293b; color:#fff;" onclick="sendTestEmail()">
-                            <i class="fas fa-paper-plane"></i> Send Test Verification Email
+                            <i class="fas fa-paper-plane"></i> Test MFA Code
+                        </button>
+                        <button type="button" class="btn-action" style="background:rgba(212,175,55,0.16); border:1px solid #d4af37; color:#e5c158;" onclick="sendSampleInstructorAlerts()">
+                            <i class="fas fa-bell"></i> Send Sample Signup &amp; Completion Alerts
                         </button>
                     </div>
                 </div>
@@ -2606,10 +2609,95 @@ function ptaVerifyAdminCredential(inputVal) {
                 adminCalendarData.sessions.push(sessionObj);
             }
 
+            ensureCompanionRangeSessionsForArmedDate(sessionObj);
             adminCalendarData.sessions.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             resetAddSessionForm();
             renderAdminCalendarTable();
             saveCalendarToCloud();
+        }
+
+        function ensureCompanionRangeSessionsForArmedDate(baseSession) {
+            if (!baseSession || baseSession.courseId !== 'armed-28' || baseSession.status === 'Cancelled' || !baseSession.date) return;
+            if (!Array.isArray(adminCalendarData.sessions)) adminCalendarData.sessions = [];
+            const dt = baseSession.date;
+            const endDt = baseSession.endDate || dt;
+            const ymd = dt.replace(/-/g, '');
+            const loc = baseSession.location || 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)';
+            const instr = baseSession.instructor || 'Charles Young';
+
+            const hasRequal = adminCalendarData.sessions.some(s => s.courseId === 'firearm-requal' && s.date === dt);
+            if (!hasRequal) {
+                adminCalendarData.sessions.push({
+                    id: `SES-${ymd}-REQUAL`,
+                    courseId: 'firearm-requal',
+                    title: 'Security Firearm Requalification — In-Person Range Session',
+                    date: dt,
+                    endDate: endDt,
+                    time: '9:00 AM – 5:00 PM (Range Qualification)',
+                    price: '$125',
+                    location: loc,
+                    instructor: instr,
+                    seatsTotal: 10,
+                    seatsAvailable: 10,
+                    status: 'Open'
+                });
+            }
+
+            const hasUpgrade = adminCalendarData.sessions.some(s => s.courseId === 'firearm-upgrade' && s.date === dt);
+            if (!hasUpgrade) {
+                adminCalendarData.sessions.push({
+                    id: `SES-${ymd}-UPGRADE`,
+                    courseId: 'firearm-upgrade',
+                    title: 'Security Firearm Upgrade Qualification — In-Person Range Session',
+                    date: dt,
+                    endDate: endDt,
+                    time: '9:00 AM – 5:00 PM (Concurrent Range Session)',
+                    price: '$125',
+                    location: loc,
+                    instructor: instr,
+                    seatsTotal: 10,
+                    seatsAvailable: 10,
+                    status: 'Open'
+                });
+            }
+        }
+
+        async function sendSampleInstructorAlerts() {
+            const targetInp = document.getElementById('admin-emailjs-test-email');
+            const targetEmail = (targetInp && targetInp.value.trim()) || 'charlesyoung@platformstraining.com';
+            const fb = document.getElementById('emailjs-feedback');
+            if (fb) {
+                fb.style.display = 'block';
+                fb.style.background = 'rgba(56, 189, 248, 0.14)';
+                fb.style.border = '1px solid rgba(56, 189, 248, 0.45)';
+                fb.style.color = '#bae6fd';
+                fb.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending 4 sample signup &amp; completion alert emails to <strong>${targetEmail}</strong>...`;
+            }
+            try {
+                const resp = await fetch(getApiBaseUrl() + '/api/admin/send-test-instructor-emails', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail })
+                });
+                const data = await resp.json();
+                if (resp.ok && data && data.success) {
+                    if (fb) {
+                        fb.style.background = 'rgba(16, 185, 129, 0.16)';
+                        fb.style.border = '1px solid rgba(16, 185, 129, 0.5)';
+                        fb.style.color = '#86efac';
+                        fb.innerHTML = `<i class="fas fa-check-circle"></i> Sent <strong>${data.sent_count} of ${data.total_samples}</strong> sample instructor alerts to <strong>${targetEmail}</strong>! Check your inbox for Online Signup, Range Requal/Upgrade Signup, CCL Signup, and Online Course Completion test emails.`;
+                    }
+                } else {
+                    throw new Error((data && data.error) || 'Failed to dispatch sample alerts');
+                }
+            } catch (err) {
+                if (fb) {
+                    fb.style.background = 'rgba(239, 68, 68, 0.16)';
+                    fb.style.border = '1px solid rgba(239, 68, 68, 0.5)';
+                    fb.style.color = '#fca5a5';
+                    fb.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error sending sample alerts: ${err.message}`;
+                }
+            }
         }
 
         function editAdminSession(sessionId) {
@@ -2652,6 +2740,7 @@ function ptaVerifyAdminCredential(inputVal) {
                 status: 'Open'
             };
             adminCalendarData.sessions.push(copy);
+            ensureCompanionRangeSessionsForArmedDate(copy);
             adminCalendarData.sessions.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             renderAdminCalendarTable();
             saveCalendarToCloud();

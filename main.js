@@ -376,8 +376,9 @@ async function handleContactSubmit(e) {
         ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
         : 'https://charlesyoung52-cloud-github-io.onrender.com';
 
+    let contactServerSent = false;
     try {
-        await fetch(apiBase + '/api/contact', {
+        const contactResp = await fetch(apiBase + '/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -389,7 +390,60 @@ async function handleContactSubmit(e) {
                 to: 'charlesyoung@platformstraining.com'
             })
         });
+        if (contactResp && contactResp.ok) {
+            const cJson = await contactResp.json();
+            contactServerSent = Boolean(cJson && cJson.email_sent);
+        }
     } catch (err) {}
+
+    if (!contactServerSent) {
+        try {
+            const cleanEm = (email || '').trim().toLowerCase();
+            const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
+            const isTest = cleanEm && (skipList.includes(cleanEm) || cleanEm.endsWith('.test') || cleanEm.endsWith('@example.com') || cleanEm.includes('test@'));
+            if (!isTest) {
+                const ejService = localStorage.getItem('platforms_emailjs_service_id') || 'service_bor93nt';
+                const ejTemplate = localStorage.getItem('platforms_emailjs_template_id') || 'template_0k00oka';
+                const ejPubKey = localStorage.getItem('platforms_emailjs_public_key') || 'qZROJMBteQvfuYHqG';
+                const summaryBanner = `INQUIRY (${course}): ${name} • ${phone} • ${email}`;
+                await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                    method: 'POST',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        service_id: ejService,
+                        template_id: ejTemplate,
+                        user_id: ejPubKey,
+                        template_params: {
+                            to_name: `Instructor Charles Young — Course Inquiry: ${name} (${email})`,
+                            name: `Instructor Charles Young — Course Inquiry: ${name} (${email})`,
+                            to_email: 'charlesyoung@platformstraining.com',
+                            user_email: 'charlesyoung@platformstraining.com',
+                            email: 'charlesyoung@platformstraining.com',
+                            reply_to: email || 'charlesyoung@platformstraining.com',
+                            passcode: summaryBanner,
+                            code: summaryBanner,
+                            otp: summaryBanner,
+                            verification_code: summaryBanner,
+                            subject: `Website Course Inquiry: ${name} — ${course}`,
+                            message: `Course Inquiry:
+Name: ${name}
+Phone: ${phone}
+Email: ${email}
+Course: ${course}
+Message: ${message}`,
+                            course_name: `${course} | Prospective Student: ${name} • ${phone} • ${email}`,
+                            company_name: 'Platforms Training Academy — Course Inquiry',
+                            company: 'Platforms Training Academy',
+                            from_name: 'Platforms Training Academy',
+                            academy_name: 'Platforms Training Academy',
+                            time: new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        }
+                    })
+                });
+            }
+        } catch (ejErr) {}
+    }
 
     if (submitBtn) {
         submitBtn.disabled = false;

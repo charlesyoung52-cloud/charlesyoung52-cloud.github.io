@@ -498,6 +498,216 @@ def send_email_smtp_with_pdf(to_emails, subject, html_body, text_body="", pdf_by
 
 DEFAULT_INSTRUCTOR_EMAIL = "charlesyoung@platformstraining.com"
 
+COURSE_CATALOG_META = {
+    'unarmed-20': {
+        'id': 'unarmed-20',
+        'short_code': 'UNARMED 20-HR',
+        'title': '20-Hour Online Unarmed Security Course (PERC)',
+        'price': '$50.00',
+        'short_price': '$50',
+        'online': True,
+        'location': '100% Online LMS Portal (platformstraining.com)',
+        'stripe_link': '6oU4gz8oQeaD1Moaqs9oc08',
+    },
+    'armed-28': {
+        'id': 'armed-28',
+        'short_code': 'ARMED 28-HR',
+        'title': '28-Hour Online Armed Security Course (Online + Range Qualification)',
+        'price': '$200.00',
+        'short_price': '$200',
+        'online': True,
+        'location': 'Online LMS + Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': '4gMaEXdJa9Un3Uw4249oc01',
+    },
+    'firearm-requal': {
+        'id': 'firearm-requal',
+        'short_code': 'FIREARM REQUAL',
+        'title': 'Security Firearm Requalification (Annual Tan Card Qual)',
+        'price': '$125.00',
+        'short_price': '$125',
+        'online': False,
+        'location': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': '9B6cN5bB28QjbmYgOQ9oc02',
+    },
+    'firearm-upgrade': {
+        'id': 'firearm-upgrade',
+        'short_code': 'FIREARM UPGRADE',
+        'title': 'Security Firearm Upgrade Qualification (Multi-Weapon)',
+        'price': '$125.00',
+        'short_price': '$125',
+        'online': False,
+        'location': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': 'cNidR9gVm5E71Mo8ik9oc03',
+    },
+    'ccl-16': {
+        'id': 'ccl-16',
+        'short_code': '16-HR IL CCL',
+        'title': '16-Hour Illinois Concealed Carry Course (Full CCL)',
+        'price': '$200.00',
+        'short_price': '$200',
+        'online': False,
+        'location': 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': 'dRmeVdcF65E776I8ik9oc04',
+    },
+    'ccl-8': {
+        'id': 'ccl-8',
+        'short_code': '8-HR IL CCL',
+        'title': '8-Hour Illinois Concealed Carry Course (Prior Credit)',
+        'price': '$150.00',
+        'short_price': '$150',
+        'online': False,
+        'location': 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': '14AbJ148A2rVaiU0PS9oc05',
+    },
+    'ccl-military': {
+        'id': 'ccl-military',
+        'short_code': '8-HR CCL MIL/LEO',
+        'title': '8-Hour Illinois CCL – Military & Law Enforcement',
+        'price': '$125.00',
+        'short_price': '$125',
+        'online': False,
+        'location': 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': 'aFa00jeNe0jN2QseGI9oc06',
+    },
+    'ccl-refresher': {
+        'id': 'ccl-refresher',
+        'short_code': '3-HR CCL RENEWAL',
+        'title': '3-Hour Illinois CCL Refresher Course (5-Yr Renewal)',
+        'price': '$125.00',
+        'short_price': '$125',
+        'online': False,
+        'location': 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)',
+        'stripe_link': 'cNicN58oQd6z3Uw9mo9oc07',
+    },
+}
+
+def resolve_course_meta(course_key="", student_id="", payment_token=""):
+    ck = str(course_key or '').strip().lower()
+    sid = str(student_id or '').strip().lower()
+    ptok = str(payment_token or '').strip().upper()
+    alias_map = {
+        'unarmed': 'unarmed-20',
+        'unarmed-20': 'unarmed-20',
+        'armed': 'armed-28',
+        'armed-28': 'armed-28',
+        'armed-40': 'armed-28',
+        'requal': 'firearm-requal',
+        'requal-8': 'firearm-requal',
+        'firearm-requal': 'firearm-requal',
+        'upgrade': 'firearm-upgrade',
+        'firearm-upgrade': 'firearm-upgrade',
+        'ccl-16': 'ccl-16',
+        'ccl-8': 'ccl-8',
+        'ccl-military': 'ccl-military',
+        'ccl-refresher': 'ccl-refresher',
+    }
+    if ck in alias_map:
+        return COURSE_CATALOG_META[alias_map[ck]]
+    for meta in COURSE_CATALOG_META.values():
+        if meta['stripe_link'].lower() in ck or meta['title'].lower() == ck:
+            return meta
+    if 'requal' in ck:
+        return COURSE_CATALOG_META['firearm-requal']
+    if 'upgrade' in ck:
+        return COURSE_CATALOG_META['firearm-upgrade']
+    if 'refresher' in ck or '3 hr' in ck or '3-hr' in ck:
+        return COURSE_CATALOG_META['ccl-refresher']
+    if 'military' in ck or 'leo' in ck:
+        return COURSE_CATALOG_META['ccl-military']
+    if '16' in ck and ('ccl' in ck or 'concealed' in ck):
+        return COURSE_CATALOG_META['ccl-16']
+    if '8' in ck and ('ccl' in ck or 'concealed' in ck):
+        return COURSE_CATALOG_META['ccl-8']
+    if sid.startswith('armed::') or ptok.startswith('PTA-ARMED-') or ('armed' in ck and 'unarmed' not in ck):
+        return COURSE_CATALOG_META['armed-28']
+    return COURSE_CATALOG_META['unarmed-20']
+
+
+def get_emailjs_config():
+    cfg = {
+        'service_id': os.environ.get('EMAILJS_SERVICE_ID', 'service_bor93nt'),
+        'template_id': os.environ.get('EMAILJS_TEMPLATE_ID', 'template_0k00oka'),
+        'public_key': os.environ.get('EMAILJS_PUBLIC_KEY', 'qZROJMBteQvfuYHqG'),
+    }
+    try:
+        db = get_db()
+        rows = dict(db.execute("SELECT key, value FROM app_settings WHERE key LIKE 'emailjs_%'").fetchall())
+        if rows.get('emailjs_service_id'):
+            cfg['service_id'] = rows['emailjs_service_id']
+        if rows.get('emailjs_instructor_template_id'):
+            cfg['template_id'] = rows['emailjs_instructor_template_id']
+        elif rows.get('emailjs_template_id'):
+            cfg['template_id'] = rows['emailjs_template_id']
+        if rows.get('emailjs_public_key'):
+            cfg['public_key'] = rows['emailjs_public_key']
+    except Exception:
+        pass
+    return cfg
+
+
+def send_email_via_emailjs(to_email, subject, headline, student_name, student_email, course_title, summary_code, text_body="", html_body=""):
+    if os.environ.get('PTA_DISABLE_LIVE_EMAILJS') == '1':
+        return False, "EmailJS disabled in local test mode"
+    cfg = get_emailjs_config()
+    if not cfg.get('service_id') or not cfg.get('template_id') or not cfg.get('public_key'):
+        return False, "EmailJS configuration missing"
+    import urllib.request
+    now_label = datetime.now().strftime('%b %d, %Y %I:%M %p')
+    greeting_label = (
+        f"Instructor Charles Young — {headline}: {student_name} ({student_email})"
+        if student_email and student_email != 'Not provided'
+        else f"Instructor Charles Young — {headline}: {student_name}"
+    )
+    payload = {
+        'service_id': cfg['service_id'],
+        'template_id': cfg['template_id'],
+        'user_id': cfg['public_key'],
+        'template_params': {
+            'to_name': greeting_label,
+            'name': greeting_label,
+            'to_email': to_email,
+            'user_email': to_email,
+            'email': to_email,
+            'reply_to': student_email if '@' in str(student_email or '') else to_email,
+            'passcode': summary_code,
+            'code': summary_code,
+            'otp': summary_code,
+            'verification_code': summary_code,
+            'subject': subject,
+            'message': text_body,
+            'html_message': html_body,
+            'course_name': f"{course_title} | Student: {student_name}" + (f" ({student_email})" if student_email else ""),
+            'company_name': 'Platforms Training Academy — Instructor Alert',
+            'company': 'Platforms Training Academy',
+            'from_name': 'Platforms Training Academy',
+            'academy_name': 'Platforms Training Academy',
+            'time': now_label,
+        }
+    }
+    try:
+        req = urllib.request.Request(
+            'https://api.emailjs.com/api/v1.0/email/send',
+            data=json.dumps(payload).encode('utf-8'),
+            headers={
+                'Content-Type': 'application/json',
+                'Origin': 'https://platformstraining.com',
+                'Referer': 'https://platformstraining.com/',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            },
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            status = resp.getcode()
+            body_txt = resp.read().decode('utf-8', errors='replace')
+            if 200 <= status < 300:
+                print(f"[EMAILJS SERVER SUCCESS] Dispatched to {to_email}: {subject}")
+                return True, f"Sent via EmailJS ({body_txt})"
+            return False, f"EmailJS HTTP {status}: {body_txt}"
+    except Exception as e:
+        print(f"[EMAILJS SERVER NOTE] {e}")
+        return False, str(e)
+
+
 def get_instructor_notification_emails():
     raw = os.environ.get('INSTRUCTOR_EMAIL', DEFAULT_INSTRUCTOR_EMAIL)
     try:
@@ -624,14 +834,31 @@ def notify_instructor_event(category, event_key, event_label, student_name, stud
         action_note=action_note
     )
 
+    compact_code = summary_code or f"{event_label.upper()}: {clean_name or clean_email} ({clean_email})"
     any_sent = False
+    delivery_via = 'queued_client_fallback'
     reply_addr = clean_email if '@' in clean_email else ''
     for rcpt in recipients:
         ok, _ = send_email_smtp(rcpt, subject, html_body, text_body, reply_to=reply_addr)
         if ok:
             any_sent = True
+            delivery_via = 'smtp'
+        else:
+            ej_ok, _ = send_email_via_emailjs(
+                to_email=rcpt,
+                subject=subject,
+                headline=highlight_badge or event_label,
+                student_name=clean_name or 'Student Officer',
+                student_email=clean_email,
+                course_title=course_title,
+                summary_code=compact_code,
+                text_body=text_body,
+                html_body=html_body
+            )
+            if ej_ok:
+                any_sent = True
+                delivery_via = 'emailjs_server'
 
-    compact_code = summary_code or f"{event_label.upper()}: {clean_name or clean_email} ({clean_email})"
     alert_payload = {
         'category': category,
         'event_key': event_key,
@@ -642,14 +869,15 @@ def notify_instructor_event(category, event_key, event_label, student_name, stud
         'student_email': clean_email,
         'course_title': course_title,
         'summary_code': compact_code,
-        'text_body': text_body
+        'text_body': text_body,
+        'delivery_via': delivery_via
     }
 
     try:
         db = get_db()
         db.execute(
             'INSERT INTO analytics_events (event_type, student_id, details, timestamp) VALUES (?, ?, ?, ?)',
-            ('instructor_notification', clean_email or clean_name or 'student', f"[{category}] {event_label} — {course_title} (SMTP sent: {any_sent})", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            ('instructor_notification', clean_email or clean_name or 'student', f"[{category}] {event_label} — {course_title} (sent: {any_sent} via {delivery_via})", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         )
         db.commit()
     except Exception:
@@ -1787,6 +2015,20 @@ Message:
 """
 
     ok, msg = send_email_smtp(target_email, subject, html_body, text_body, reply_to=email if '@' in email else '')
+    if not ok and not is_fake_or_test_identity(email, name):
+        ej_ok, ej_msg = send_email_via_emailjs(
+            to_email=target_email,
+            subject=subject,
+            headline='Course Inquiry / Contact Form',
+            student_name=name,
+            student_email=email or phone,
+            course_title=course,
+            summary_code=f"INQUIRY ({course}): {name} • {phone} • {email}",
+            text_body=text_body,
+            html_body=html_body
+        )
+        if ej_ok:
+            ok, msg = True, ej_msg
     try:
         db = get_db()
         db.execute('''
@@ -2745,33 +2987,41 @@ def submit_exam():
         'instructor_alert_skipped': instr_skipped
     })
 
-# 7. Process & Verify Course Payment ($50.00 Unarmed / $200.00 Armed — Strictly Isolated)
+# 7. Process & Verify Course Payment (All 8 Courses — Online LMS Strictly Isolated + Range & CCL Supported)
 @app.route('/api/payment/checkout', methods=['POST'])
 def process_payment():
     data = request.get_json() or {}
     student_id = (data.get('student_id') or '').strip()
     raw_email = (data.get('email') or '').strip().lower()
-    email = raw_email or (student_id[7:].lower() if student_id.lower().startswith('armed::') else student_id.lower())
-    course_type = (data.get('course_type') or '').strip().lower()
+    email = raw_email or (student_id[7:].lower() if student_id.lower().startswith('armed::') else (student_id.lower() if '@' in student_id else ''))
+    course_type = (data.get('course_type') or data.get('course_id') or '').strip().lower()
+    reservation_id = (data.get('reservation_id') or '').strip()
+    phone = (data.get('phone') or '').strip()
     session_id = (data.get('session_id') or 'stripe_verified').strip()
     payment_token = (data.get('payment_token') or '').strip()
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    if not student_id and not email:
-        return jsonify({'error': 'Missing student_id'}), 400
+    meta = resolve_course_meta(course_type, student_id=student_id, payment_token=payment_token)
+    cid = meta['id']
+    is_armed = (cid == 'armed-28')
+    is_unarmed = (cid == 'unarmed-20')
+    is_other_course = not (is_armed or is_unarmed)
 
-    is_armed = student_id.lower().startswith('armed::') or course_type == 'armed' or payment_token.upper().startswith('PTA-ARMED-')
+    if not student_id and not email and not reservation_id:
+        return jsonify({'error': 'Missing student_id or reservation reference'}), 400
+
     db = get_db()
     cur = db.cursor()
+    chosen_range_date = (data.get('range_qualification_date') or data.get('class_date') or '').strip()
 
     if is_armed:
-        target_id = student_id if student_id.lower().startswith('armed::') else f"armed::{email}"
-        chosen_range_date = (data.get('range_qualification_date') or data.get('class_date') or '').strip()
+        target_id = student_id if student_id.lower().startswith('armed::') else f"armed::{email or student_id}"
         if not chosen_range_date and email:
             try:
                 cal = load_calendar_data()
                 for r in cal.get('reservations', []):
-                    if (r.get('email') or '').strip().lower() == email and (r.get('courseId') or '') in ('armed-28', 'armed-40', 'requal-8', '28-Hour Armed Security Course', 'Online Armed Security Course'):
+                    r_em = (r.get('studentEmail') or r.get('email') or '').strip().lower()
+                    if r_em == email and (r.get('courseId') or '') in ('armed-28', 'armed-40', 'requal-8', '28-Hour Armed Security Course', 'Online Armed Security Course'):
                         chosen_range_date = (r.get('date') or '').strip()
                         break
             except Exception:
@@ -2788,8 +3038,7 @@ def process_payment():
                 VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?, ?)
             ''', (target_id, data.get('name') or 'Student Officer', email, target_id, data.get('agency') or '', chosen_range_date, now_str, now_str))
         details_str = f"Online Armed Course Fee $200.00 verified (ref: {session_id})"
-    else:
-        chosen_range_date = ''
+    elif is_unarmed:
         target_id = email or student_id
         existing_unarmed = cur.execute(
             "SELECT id FROM students WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
@@ -2804,6 +3053,37 @@ def process_payment():
                 VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
             ''', (target_id, data.get('name') or 'Student Officer', email, target_id, data.get('agency') or '', now_str, now_str))
         details_str = f"Online Unarmed Course Fee $50.00 verified (ref: {session_id})"
+    else:
+        target_id = f"{cid}::{email or reservation_id or student_id}"
+        details_str = f"{meta['title']} Fee {meta['price']} verified (ref: {session_id})"
+        try:
+            if reservation_id:
+                res_row = cur.execute('SELECT id, raw_json, date FROM calendar_reservations WHERE id = ?', (reservation_id,)).fetchone()
+            elif email:
+                res_row = cur.execute(
+                    'SELECT id, raw_json, date FROM calendar_reservations WHERE LOWER(student_email) = LOWER(?) AND course_id = ? ORDER BY created_at DESC LIMIT 1',
+                    (email, cid)
+                ).fetchone()
+            else:
+                res_row = None
+            if res_row:
+                reservation_id = res_row['id']
+                if not chosen_range_date and res_row['date']:
+                    chosen_range_date = res_row['date']
+                raw_obj = {}
+                if res_row['raw_json']:
+                    try:
+                        raw_obj = json.loads(decrypt_sensitive(res_row['raw_json']))
+                    except Exception:
+                        raw_obj = {}
+                raw_obj['paymentStatus'] = 'Paid'
+                raw_obj['price'] = f"{meta['short_price']} (Paid)"
+                cur.execute(
+                    "UPDATE calendar_reservations SET payment_status = 'Paid', price = ?, raw_json = ? WHERE id = ?",
+                    (f"{meta['short_price']} (Paid)", encrypt_sensitive(json.dumps(raw_obj)), reservation_id)
+                )
+        except Exception as cal_pay_err:
+            print("Calendar reservation paid update note:", cal_pay_err)
 
     if payment_token:
         details_str += f" [{payment_token}]"
@@ -2812,65 +3092,79 @@ def process_payment():
         INSERT INTO analytics_events (event_type, student_id, details, timestamp)
         VALUES ('payment_received', ?, ?, ?)
     ''', (target_id, details_str, now_str))
-    
     db.commit()
 
     # Automatically send Class & Payment Confirmation Email if student email is valid
     if email and '@' in email:
         try:
-            c_title = "28-Hour Armed Security Course (Online + Range Qualification)" if is_armed else "20-Hour Online Unarmed Security Course (PERC)"
-            c_price = "$200.00 (Paid)" if is_armed else "$50.00 (Paid)"
-            c_date = (data.get('class_date') or chosen_range_date or "Scheduled In-Person Range Qualification + 24/7 Online Portal") if is_armed else (data.get('class_date') or "24/7 Self-Paced Online Portal")
-            c_time = data.get('class_time') or ("9:00 AM – 5:00 PM (Range) / 24/7 Online" if is_armed else "Self-Paced Online Access")
-            c_loc = data.get('location') or ("Eagle Sports Range (5900 W 159th St, Oak Forest, IL) & Online Portal" if is_armed else "100% Online Portal (platformstraining.com)")
+            c_title = meta['title']
+            c_price = f"{meta['price']} (Paid)"
+            c_date = chosen_range_date or ("Scheduled In-Person Range Qualification + 24/7 Online Portal" if is_armed else ("24/7 Self-Paced Online Portal" if is_unarmed else "Scheduled Class Session"))
+            c_time = data.get('class_time') or ("Self-Paced Online Access" if is_unarmed else "9:00 AM – 5:00 PM")
+            c_loc = data.get('location') or meta['location']
             subj, h_body, t_body = build_class_payment_confirmation_email(
-                data.get('name') or 'Student Officer', c_title, c_date, c_time, c_loc, c_price, session_id
+                data.get('name') or 'Student Officer', c_title, c_date, c_time, c_loc, c_price, reservation_id or session_id, course_id=cid
             )
             send_email_smtp(email, subj, h_body, t_body)
-            cur.execute(
-                "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
-                (now_str, target_id, email)
-            )
-            db.commit()
+            if not is_other_course:
+                cur.execute(
+                    "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                    (now_str, target_id, email)
+                )
+                db.commit()
         except Exception as e:
             print("Payment confirmation email note:", e)
 
-    # Notify Instructor Charles Young of paid course enrollment (deduplicated per student + course)
+    # Notify Instructor Charles Young of paid course enrollment (deduplicated per student/reservation + course)
     instr_sent, instr_alert, instr_skipped = False, None, True
     try:
-        paid_row = cur.execute('SELECT name, email, range_qualification_date, instructor_paid_notified FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
-        already_paid_notified = bool(paid_row and paid_row['instructor_paid_notified'])
-        st_name_val = (data.get('name') or (paid_row['name'] if paid_row and paid_row['name'] else '') or 'Student Officer').strip()
-        st_email_val = (email or (paid_row['email'] if paid_row and paid_row['email'] else '')).strip().lower()
-        r_date_info = chosen_range_date or (paid_row['range_qualification_date'] if paid_row and paid_row['range_qualification_date'] else '') or data.get('class_date') or ''
+        if is_other_course:
+            dedup_setting_key = f"instr_paid_alert::{cid}::{(reservation_id or email or session_id).lower()}"
+            dedup_row = cur.execute('SELECT value FROM app_settings WHERE key = ?', (dedup_setting_key,)).fetchone()
+            already_paid_notified = bool(dedup_row and dedup_row['value'] == '1')
+            st_name_val = (data.get('name') or 'Student Officer').strip()
+            st_email_val = email
+            r_date_info = chosen_range_date
+        else:
+            paid_row = cur.execute('SELECT name, email, range_qualification_date, instructor_paid_notified FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
+            already_paid_notified = bool(paid_row and paid_row['instructor_paid_notified'])
+            st_name_val = (data.get('name') or (paid_row['name'] if paid_row and paid_row['name'] else '') or 'Student Officer').strip()
+            st_email_val = (email or (paid_row['email'] if paid_row and paid_row['email'] else '')).strip().lower()
+            r_date_info = chosen_range_date or (paid_row['range_qualification_date'] if paid_row and paid_row['range_qualification_date'] else '')
+            dedup_setting_key = None
 
         if not already_paid_notified:
-            c_title_paid = "28-Hour Online Armed Security Course ($200.00 Paid)" if is_armed else "20-Hour Online Unarmed Security Course ($50.00 Paid)"
+            c_title_paid = f"{meta['title']} ({meta['price']} Paid)"
             p_details = [
-                ("Tuition / Status", "$200.00 Paid / Verified" if is_armed else "$50.00 Paid / Verified"),
-                ("Payment Reference", session_id),
+                ("Tuition / Status", f"{meta['price']} Paid / Verified"),
+                ("Training Location", data.get('location') or meta['location']),
+                ("Payment Reference", reservation_id or session_id),
             ]
-            if is_armed and r_date_info:
-                p_details.append(("Chosen Range Date", r_date_info))
+            if phone:
+                p_details.insert(0, ("Student Phone", phone))
+            if r_date_info:
+                p_details.insert(1 if phone else 0, ("Scheduled Date", r_date_info))
             instr_sent, instr_alert, instr_skipped = notify_instructor_event(
                 category='signup',
-                event_key=f"paid:{'armed' if is_armed else 'unarmed'}:{st_email_val or target_id.lower()}",
+                event_key=f"paid:{cid}:{(reservation_id or st_email_val or target_id).lower()}",
                 event_label="Course Tuition Paid & Student Enrolled",
                 student_name=st_name_val,
                 student_email=st_email_val,
                 course_title=c_title_paid,
                 details_rows=p_details,
                 highlight_badge="Paid Course Enrollment",
-                summary_code=f"PAID {'$200 ARMED' if is_armed else '$50 UNARMED'}: {st_name_val} • {st_email_val}",
+                summary_code=f"PAID {meta['short_price']} {meta['short_code']}: {st_name_val} • {st_email_val or phone or reservation_id}",
                 action_note=(
-                    f"Student paid $200.00 Armed Course tuition{(' and selected range date ' + r_date_info) if r_date_info else ''}."
-                    if is_armed else
-                    "Student paid $50.00 Unarmed Course tuition and has full certificate access."
+                    f"Student paid {meta['price']} tuition for {meta['title']}"
+                    + (f" (Scheduled Date: {r_date_info})." if r_date_info else ".")
                 ),
                 is_admin_mode=bool(data.get('is_admin_mode'))
             )
             if not instr_skipped:
-                cur.execute('UPDATE students SET instructor_paid_notified = 1 WHERE LOWER(id) = LOWER(?)', (target_id,))
+                if is_other_course and dedup_setting_key:
+                    cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_setting_key, '1'))
+                else:
+                    cur.execute('UPDATE students SET instructor_paid_notified = 1 WHERE LOWER(id) = LOWER(?)', (target_id,))
                 db.commit()
     except Exception as e:
         print("Instructor payment notification note:", e)
@@ -2879,12 +3173,216 @@ def process_payment():
         'success': True,
         'is_paid': True,
         'payment_verified': True,
+        'course_id': cid,
         'student_id': target_id,
         'session_id': session_id,
         'instructor_email_sent': instr_sent,
         'instructor_alert': instr_alert,
         'instructor_alert_skipped': instr_skipped,
         'message': 'Payment authorized and verified successfully!'
+    })
+
+
+@app.route('/api/stripe/webhook', methods=['POST'])
+def stripe_checkout_webhook():
+    payload = request.get_json(silent=True) or {}
+    event_type = str(payload.get('type') or '').strip()
+    if event_type != 'checkout.session.completed':
+        return jsonify({'received': True, 'ignored_event': event_type})
+
+    obj = (payload.get('data') or {}).get('object') or {}
+    sess_id = str(obj.get('id') or '').strip()
+    cust = obj.get('customer_details') or {}
+    st_email = str(cust.get('email') or obj.get('customer_email') or '').strip().lower()
+    st_name = str(cust.get('name') or 'Student Officer').strip()
+    st_phone = str(cust.get('phone') or '').strip()
+    amount_cents = int(obj.get('amount_total') or 0)
+    amount_str = f"${amount_cents / 100:.2f}" if amount_cents else ""
+    plink = str(obj.get('payment_link') or '')
+    success_url = str(obj.get('success_url') or '')
+    meta_dict = obj.get('metadata') or {}
+    hint = " ".join([
+        str(meta_dict.get('course_id') or ''),
+        str(meta_dict.get('course') or ''),
+        plink,
+        success_url,
+    ]).lower()
+
+    matched_meta = None
+    for cid_key, c_meta in COURSE_CATALOG_META.items():
+        if cid_key in hint or c_meta['stripe_link'].lower() in hint:
+            matched_meta = c_meta
+            break
+    if not matched_meta:
+        if 'armed-course' in hint:
+            matched_meta = COURSE_CATALOG_META['armed-28']
+        elif '/course/' in hint or amount_cents == 5000:
+            matched_meta = COURSE_CATALOG_META['unarmed-20']
+        elif amount_cents == 15000:
+            matched_meta = COURSE_CATALOG_META['ccl-8']
+        elif amount_cents == 12500:
+            matched_meta = COURSE_CATALOG_META['firearm-requal']
+        else:
+            matched_meta = COURSE_CATALOG_META['armed-28']
+
+    db = get_db()
+    dedup_key = f"stripe_wh_notified::{sess_id}"
+    if sess_id:
+        existing_wh = db.execute('SELECT value FROM app_settings WHERE key = ?', (dedup_key,)).fetchone()
+        if existing_wh and existing_wh['value'] == '1':
+            return jsonify({'received': True, 'duplicate': True})
+
+    sent, _, skipped = notify_instructor_event(
+        category='signup',
+        event_key=f"stripe_wh:{sess_id or st_email}",
+        event_label="Stripe Checkout Tuition Completed",
+        student_name=st_name,
+        student_email=st_email,
+        course_title=f"{matched_meta['title']} ({amount_str or matched_meta['price']} Paid)",
+        details_rows=[
+            ("Student Phone", st_phone or "Not provided"),
+            ("Tuition Paid", amount_str or matched_meta['price']),
+            ("Training Location", matched_meta['location']),
+            ("Stripe Session ID", sess_id or "Stripe Live"),
+        ],
+        highlight_badge="Stripe Tuition Payment Confirmed",
+        summary_code=f"STRIPE PAID {amount_str or matched_meta['short_price']} ({matched_meta['short_code']}): {st_name} • {st_email}",
+        action_note=f"Stripe Checkout completed for {matched_meta['title']}."
+    )
+    if sess_id and not skipped:
+        db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_key, '1'))
+        db.commit()
+    return jsonify({'received': True, 'instructor_email_sent': sent})
+
+
+@app.route('/api/admin/send-test-instructor-emails', methods=['POST'])
+def send_test_instructor_emails():
+    if not is_admin_request():
+        return jsonify({'success': False, 'error': 'Admin authorization required'}), 401
+    data = request.get_json(silent=True) or {}
+    target_email = str(data.get('email') or '').strip()
+    recipients = [target_email] if (target_email and '@' in target_email) else get_instructor_notification_emails()
+
+    samples = [
+        {
+            'category': 'signup',
+            'event_label': '[TEST] Online Course Registration & Enrollment',
+            'highlight_badge': '[TEST] New Online Course Signup',
+            'student_name': 'Marcus Vance (Sample Student)',
+            'student_email': 'mvance.sample@chicagosecurity.org',
+            'course_title': '28-Hour Online Armed Security Course ($200.00 Paid)',
+            'summary_code': '[TEST] SIGNUP $200 ARMED 28-HR: Marcus Vance • Sun, Nov 29, 2026 Range Date',
+            'details_rows': [
+                ('Student Phone', '(312) 555-0148'),
+                ('Tuition / Status', '$200.00 Paid / Verified'),
+                ('Chosen Range Date', 'Sunday, November 29, 2026 (9:00 AM – 5:00 PM)'),
+                ('Training Location', 'Online LMS + Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'),
+            ],
+            'action_note': 'TEST SAMPLE 1 of 4: Sent automatically whenever a student registers or pays for the 20-Hr Unarmed ($50) or 28-Hr Online Armed ($200) course.'
+        },
+        {
+            'category': 'signup',
+            'event_label': '[TEST] In-Person Range Course Seat Reservation',
+            'highlight_badge': '[TEST] Requal / Upgrade Course Signup',
+            'student_name': 'Derrick Holloway (Sample Officer)',
+            'student_email': 'dholloway.sample@metroguard-il.org',
+            'course_title': 'Security Firearm Requalification — In-Person Range Session ($125.00)',
+            'summary_code': '[TEST] BOOKED REQUAL ($125) Nov 29, 2026: Derrick Holloway • (773) 555-0192',
+            'details_rows': [
+                ('Student Phone', '(773) 555-0192'),
+                ('Scheduled Date', 'Sunday, November 29, 2026 (Same Day as Armed Range Qual)'),
+                ('Session Hours', '9:00 AM – 5:00 PM (Range Qualification)'),
+                ('Training Location', 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'),
+                ('Tuition / Status', '$125.00 — Security Firearm Requalification'),
+            ],
+            'action_note': 'TEST SAMPLE 2 of 4: Sent automatically whenever a student signs up for Security Firearm Requalification ($125) or Security Firearm Upgrade ($125).'
+        },
+        {
+            'category': 'signup',
+            'event_label': '[TEST] Illinois Concealed Carry (CCL) Course Signup',
+            'highlight_badge': '[TEST] Concealed Carry Course Signup',
+            'student_name': 'brianna Carter (Sample Applicant)'.title(),
+            'student_email': 'bcarter.sample@illinoisresident.org',
+            'course_title': '16-Hour Illinois Concealed Carry Course — Full CCL ($200.00)',
+            'summary_code': '[TEST] SIGNUP 16-HR IL CCL ($200): Brianna Carter • (708) 555-0164',
+            'details_rows': [
+                ('Student Phone', '(708) 555-0164'),
+                ('Course Selected', '16-HR IL Concealed Carry Course ($200) — Also covers 8-HR CCL, Military/LEO & 3-HR Refresher'),
+                ('Training Location', 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'),
+                ('Preferred Schedule', 'Next Available Weekend Session'),
+            ],
+            'action_note': 'TEST SAMPLE 3 of 4: Sent automatically whenever a student signs up for any Concealed Carry course (16-Hr CCL, 8-Hr CCL, Military/LEO CCL, or 3-Hr CCL Refresher).'
+        },
+        {
+            'category': 'completion',
+            'event_label': '[TEST] Online Course Completed & Official Certificate Saved',
+            'highlight_badge': '[TEST] Online Course Completed',
+            'student_name': 'Alicia Morales (Sample Graduate)',
+            'student_email': 'amorales.sample@chicagosecurity.org',
+            'course_title': '20-Hour Online Unarmed Security Course (Form IL486-0486) & 28-Hr Armed Online Portion',
+            'summary_code': '[TEST] COMPLETED ONLINE COURSE (94% EXAM): Alicia Morales • Cert PTA-IL-SAMPLE',
+            'details_rows': [
+                ('Final Exam Score', '47/50 (94% — Passed)'),
+                ('Certificate / Form Status', 'Official IDFPR Form IL486-0486 Issued (Unarmed) / Form IL486-1138 Part 1 Saved (Armed)'),
+                ('Certificate ID', 'PTA-IL-20261107-SAMPLE'),
+            ],
+            'action_note': 'TEST SAMPLE 4 of 4: Sent automatically whenever a student finishes the 20-Hr Unarmed Online Course or finishes the 28-Hr Armed Online Portion & Form IL486-1138 Part 1.'
+        },
+    ]
+
+    results = []
+    for item in samples:
+        subject, html_body, text_body = build_instructor_notification_email(
+            category=item['category'],
+            event_label=item['event_label'],
+            student_name=item['student_name'],
+            student_email=item['student_email'],
+            course_title=item['course_title'],
+            details_rows=item['details_rows'],
+            highlight_badge=item['highlight_badge'],
+            action_note=item['action_note']
+        )
+        subject = f"[TEST] {subject}"
+        delivered = False
+        channel = 'none'
+        err_msg = ''
+        for rcpt in recipients:
+            ok_smtp, msg_smtp = send_email_smtp(rcpt, subject, html_body, text_body, reply_to=item['student_email'])
+            if ok_smtp:
+                delivered = True
+                channel = 'smtp'
+            else:
+                ok_ej, msg_ej = send_email_via_emailjs(
+                    to_email=rcpt,
+                    subject=subject,
+                    headline=item['highlight_badge'],
+                    student_name=item['student_name'],
+                    student_email=item['student_email'],
+                    course_title=item['course_title'],
+                    summary_code=item['summary_code'],
+                    text_body=text_body,
+                    html_body=html_body
+                )
+                if ok_ej:
+                    delivered = True
+                    channel = 'emailjs'
+                else:
+                    err_msg = msg_ej or msg_smtp
+        results.append({
+            'subject': subject,
+            'recipients': recipients,
+            'delivered': delivered,
+            'channel': channel,
+            'error': err_msg
+        })
+
+    sent_count = sum(1 for r in results if r['delivered'])
+    return jsonify({
+        'success': sent_count > 0,
+        'sent_count': sent_count,
+        'total_samples': len(results),
+        'recipients': recipients,
+        'results': results
     })
 
 # 8. Issue Certificate & Save to Instructor Certificate Database (Armed Part 1 & Unarmed Completed PDF)

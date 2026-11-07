@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-06 23:59:59",
+  "last_updated": "2026-11-07 08:00:00",
   "courses": {
     "unarmed-20": {
       "id": "unarmed-20",
@@ -232,6 +232,34 @@
       "status": "Open"
     },
     {
+      "id": "SES-20261101-REQUAL",
+      "courseId": "firearm-requal",
+      "title": "Security Firearm Requalification \u2014 In-Person Range Session",
+      "date": "2026-11-01",
+      "endDate": "2026-11-01",
+      "time": "9:00 AM \u2013 5:00 PM (Range Qualification)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261101-UPGRADE",
+      "courseId": "firearm-upgrade",
+      "title": "Security Firearm Upgrade Qualification \u2014 In-Person Range Session",
+      "date": "2026-11-01",
+      "endDate": "2026-11-01",
+      "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
       "id": "SES-20261129-ARMED",
       "courseId": "armed-28",
       "title": "Online Armed Security \u2014 In-Person Range Qualification",
@@ -241,6 +269,34 @@
       "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
       "instructor": "Charles Young",
       "price": "$200",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261129-REQUAL",
+      "courseId": "firearm-requal",
+      "title": "Security Firearm Requalification \u2014 In-Person Range Session",
+      "date": "2026-11-29",
+      "endDate": "2026-11-29",
+      "time": "9:00 AM \u2013 5:00 PM (Range Qualification)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261129-UPGRADE",
+      "courseId": "firearm-upgrade",
+      "title": "Security Firearm Upgrade Qualification \u2014 In-Person Range Session",
+      "date": "2026-11-29",
+      "endDate": "2026-11-29",
+      "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
       "seatsTotal": 10,
       "seatsAvailable": 10,
       "status": "Open"
@@ -260,6 +316,34 @@
       "status": "Open"
     },
     {
+      "id": "SES-20261206-REQUAL",
+      "courseId": "firearm-requal",
+      "title": "Security Firearm Requalification \u2014 In-Person Range Session",
+      "date": "2026-12-06",
+      "endDate": "2026-12-06",
+      "time": "9:00 AM \u2013 5:00 PM (Range Qualification)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261206-UPGRADE",
+      "courseId": "firearm-upgrade",
+      "title": "Security Firearm Upgrade Qualification \u2014 In-Person Range Session",
+      "date": "2026-12-06",
+      "endDate": "2026-12-06",
+      "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
       "id": "SES-20261227-ARMED",
       "courseId": "armed-28",
       "title": "Online Armed Security \u2014 In-Person Range Qualification",
@@ -269,6 +353,34 @@
       "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
       "instructor": "Charles Young",
       "price": "$200",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261227-REQUAL",
+      "courseId": "firearm-requal",
+      "title": "Security Firearm Requalification \u2014 In-Person Range Session",
+      "date": "2026-12-27",
+      "endDate": "2026-12-27",
+      "time": "9:00 AM \u2013 5:00 PM (Range Qualification)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261227-UPGRADE",
+      "courseId": "firearm-upgrade",
+      "title": "Security Firearm Upgrade Qualification \u2014 In-Person Range Session",
+      "date": "2026-12-27",
+      "endDate": "2026-12-27",
+      "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
       "seatsTotal": 10,
       "seatsAvailable": 10,
       "status": "Open"
@@ -288,6 +400,34 @@
       "status": "Open"
     },
     {
+      "id": "SES-20270103-REQUAL",
+      "courseId": "firearm-requal",
+      "title": "Security Firearm Requalification \u2014 In-Person Range Session",
+      "date": "2027-01-03",
+      "endDate": "2027-01-03",
+      "time": "9:00 AM \u2013 5:00 PM (Range Qualification)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20270103-UPGRADE",
+      "courseId": "firearm-upgrade",
+      "title": "Security Firearm Upgrade Qualification \u2014 In-Person Range Session",
+      "date": "2027-01-03",
+      "endDate": "2027-01-03",
+      "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
       "id": "SES-20270131-ARMED",
       "courseId": "armed-28",
       "title": "Online Armed Security \u2014 In-Person Range Qualification",
@@ -297,6 +437,34 @@
       "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
       "instructor": "Charles Young",
       "price": "$200",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20270131-REQUAL",
+      "courseId": "firearm-requal",
+      "title": "Security Firearm Requalification \u2014 In-Person Range Session",
+      "date": "2027-01-31",
+      "endDate": "2027-01-31",
+      "time": "9:00 AM \u2013 5:00 PM (Range Qualification)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20270131-UPGRADE",
+      "courseId": "firearm-upgrade",
+      "title": "Security Firearm Upgrade Qualification \u2014 In-Person Range Session",
+      "date": "2027-01-31",
+      "endDate": "2027-01-31",
+      "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
       "seatsTotal": 10,
       "seatsAvailable": 10,
       "status": "Open"

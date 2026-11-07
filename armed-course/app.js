@@ -3849,8 +3849,10 @@ class SecurityCourseApp {
         const grid = document.getElementById('armed-gate-range-dates-grid');
         if (!grid) return;
 
+        const nowDt = new Date();
+        const todayIso = `${nowDt.getFullYear()}-${String(nowDt.getMonth() + 1).padStart(2, '0')}-${String(nowDt.getDate()).padStart(2, '0')}`;
         const armedSessions = ((this.rangeCalendarData && this.rangeCalendarData.sessions) || [])
-            .filter(s => s.courseId === 'armed-28' && s.status !== 'Cancelled')
+            .filter(s => s.courseId === 'armed-28' && s.status !== 'Cancelled' && ((s.endDate || s.date || '') >= todayIso))
             .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
         if (armedSessions.length === 0) {
