@@ -496,6 +496,168 @@ def send_email_smtp_with_pdf(to_emails, subject, html_body, text_body="", pdf_by
         print(f"[SMTP PDF ERROR] Failed to send PDF email to {recipient_list}: {e}")
         return False, str(e)
 
+DEFAULT_INSTRUCTOR_EMAIL = "charlesyoung@platformstraining.com"
+
+def get_instructor_notification_emails():
+    raw = os.environ.get('INSTRUCTOR_EMAIL', DEFAULT_INSTRUCTOR_EMAIL)
+    try:
+        db = get_db()
+        row = db.execute("SELECT value FROM app_settings WHERE key = 'instructor_notification_email'").fetchone()
+        if row and row['value']:
+            raw = row['value']
+    except Exception:
+        pass
+    emails = [e.strip() for e in str(raw or '').split(',') if e.strip() and '@' in e]
+    return emails or [DEFAULT_INSTRUCTOR_EMAIL]
+
+
+def build_instructor_notification_email(category, event_label, student_name, student_email, course_title, details_rows=None, highlight_badge="", action_note=""):
+    student_name = (student_name or "Student Officer").strip()
+    student_email = (student_email or "Not provided").strip()
+    course_title = (course_title or "Platforms Training Academy Course").strip()
+    submitted_at = datetime.now().strftime('%B %d, %Y at %I:%M %p')
+    is_completion = str(category).lower() == 'completion'
+
+    badge_text = highlight_badge or ("Online Course Completed" if is_completion else "New Student Course Signup")
+    badge_bg = "rgba(74,222,128,0.16)" if is_completion else "rgba(212,175,55,0.16)"
+    badge_border = "#4ade80" if is_completion else "#d4af37"
+    badge_color = "#4ade80" if is_completion else "#e5c158"
+
+    if is_completion:
+        subject = f"Online Course Completed: {student_name} — {course_title} | Platforms Training Academy"
+    else:
+        subject = f"New Course Signup: {student_name} — {course_title} | Platforms Training Academy"
+
+    rows = [
+        ("Notification Type", event_label),
+        ("Student Name", student_name),
+        ("Student Email", student_email),
+        ("Course", course_title),
+    ]
+    if details_rows:
+        for k, v in details_rows:
+            if v is not None and str(v).strip() != "":
+                rows.append((k, str(v).strip()))
+    rows.append(("Timestamp", submitted_at))
+
+    html_rows = ""
+    text_lines = []
+    for k, v in rows:
+        val_html = v
+        if k == "Student Email" and "@" in v:
+            val_html = f'<a href="mailto:{v}" style="color:#e5c158; text-decoration:none; font-weight:700;">{v}</a>'
+        elif "Phone" in k and v and v != "Not provided":
+            val_html = f'<a href="tel:{v}" style="color:#e5c158; text-decoration:none; font-weight:700;">{v}</a>'
+        elif k in ("Course", "Exam Score", "Tuition / Status"):
+            val_html = f'<span style="color:#4ade80; font-weight:700;">{v}</span>'
+        else:
+            val_html = f'<span style="color:#ffffff; font-weight:600;">{v}</span>'
+        html_rows += f'<tr><td style="padding:6px 0; color:#94a3b8; width:38%; vertical-align:top;">{k}:</td><td style="padding:6px 0;">{val_html}</td></tr>'
+        text_lines.append(f"- {k}: {v}")
+
+    note_block_html = ""
+    note_block_text = ""
+    if action_note:
+        note_block_html = f"""
+            <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:14px 16px; margin-bottom:20px;">
+                <div style="font-size:12px; font-weight:700; color:#d4af37; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:5px;">Instructor Notes / Next Step:</div>
+                <div style="font-size:13.5px; color:#cbd5e1; line-height:1.6;">{action_note}</div>
+            </div>
+        """
+        note_block_text = f"\nInstructor Note: {action_note}\n"
+
+    reply_btn_html = ""
+    if "@" in student_email:
+        reply_btn_html = f'<a href="mailto:{student_email}?subject=Platforms%20Training%20Academy%20-%20{course_title.replace(" ", "%20")}" style="display:inline-block; background:linear-gradient(135deg,#d4af37 0%,#b89225 100%); color:#07090e; font-weight:800; font-size:13.5px; text-decoration:none; padding:11px 20px; border-radius:6px; margin:4px 6px;">Reply to {student_name}</a>'
+
+    html_body = f"""
+    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
+        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 26px; border-bottom:2px solid #d4af37; text-align:center;">
+            <div style="display:inline-block; background:{badge_bg}; color:{badge_color}; border:1px solid {badge_border}; padding:4px 12px; border-radius:999px; font-size:11.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
+                {badge_text}
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">Automated Instructor Notification &bull; {submitted_at}</p>
+        </div>
+        <div style="padding:24px 26px;">
+            <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+                <table style="width:100%; border-collapse:collapse; font-size:14px; color:#f8fafc;">
+                    {html_rows}
+                </table>
+            </div>
+            {note_block_html}
+            <div style="text-align:center; margin-top:16px;">
+                {reply_btn_html}
+                <a href="https://platformstraining.com/course/admin.html" style="display:inline-block; background:#1e293b; color:#f8fafc; border:1px solid #475569; font-weight:700; font-size:13.5px; text-decoration:none; padding:11px 20px; border-radius:6px; margin:4px 6px;">Open Instructor Admin Portal</a>
+            </div>
+        </div>
+        <div style="background:#060709; padding:12px 24px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #1e2430;">
+            Platforms Training Academy &bull; Lead Instructor Charles Young &bull; platformstraining.com
+        </div>
+    </div>
+    """
+
+    text_body = (
+        f"PLATFORMS TRAINING ACADEMY — {badge_text.upper()}\n"
+        + "\n".join(text_lines)
+        + note_block_text
+        + "\nAdmin Portal: https://platformstraining.com/course/admin.html\n"
+    )
+    return subject, html_body, text_body
+
+
+def notify_instructor_event(category, event_key, event_label, student_name, student_email, course_title, details_rows=None, highlight_badge="", summary_code="", action_note="", is_admin_mode=False):
+    clean_email = (student_email or '').strip().lower()
+    clean_name = (student_name or '').strip()
+    if is_admin_mode or is_fake_or_test_identity(clean_email, clean_name):
+        return False, None, True
+
+    recipients = get_instructor_notification_emails()
+    subject, html_body, text_body = build_instructor_notification_email(
+        category=category,
+        event_label=event_label,
+        student_name=clean_name or 'Student Officer',
+        student_email=clean_email or 'Not provided',
+        course_title=course_title,
+        details_rows=details_rows,
+        highlight_badge=highlight_badge,
+        action_note=action_note
+    )
+
+    any_sent = False
+    reply_addr = clean_email if '@' in clean_email else ''
+    for rcpt in recipients:
+        ok, _ = send_email_smtp(rcpt, subject, html_body, text_body, reply_to=reply_addr)
+        if ok:
+            any_sent = True
+
+    compact_code = summary_code or f"{event_label.upper()}: {clean_name or clean_email} ({clean_email})"
+    alert_payload = {
+        'category': category,
+        'event_key': event_key,
+        'to_email': recipients[0],
+        'subject': subject,
+        'headline': highlight_badge or event_label,
+        'student_name': clean_name or 'Student Officer',
+        'student_email': clean_email,
+        'course_title': course_title,
+        'summary_code': compact_code,
+        'text_body': text_body
+    }
+
+    try:
+        db = get_db()
+        db.execute(
+            'INSERT INTO analytics_events (event_type, student_id, details, timestamp) VALUES (?, ?, ?, ?)',
+            ('instructor_notification', clean_email or clean_name or 'student', f"[{category}] {event_label} — {course_title} (SMTP sent: {any_sent})", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        )
+        db.commit()
+    except Exception:
+        pass
+
+    return any_sent, alert_payload, False
+
+
 DEFAULT_GOOGLE_REVIEW_URL = "https://www.google.com/maps/search/?api=1&query=Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619"
 
 def get_google_review_url():
@@ -1279,7 +1441,10 @@ def init_db():
         'reminder_email_sent_at TEXT',
         'thank_you_email_sent INTEGER DEFAULT 0',
         'thank_you_email_sent_at TEXT',
-        'range_qualification_date TEXT'
+        'range_qualification_date TEXT',
+        'instructor_signup_notified INTEGER DEFAULT 0',
+        'instructor_paid_notified INTEGER DEFAULT 0',
+        'instructor_exam_pass_notified INTEGER DEFAULT 0'
     ]:
         try:
             cur.execute(f'ALTER TABLE students ADD COLUMN {col_def}')
@@ -1320,6 +1485,7 @@ def init_db():
         'instructor_completed INTEGER DEFAULT 0',
         'emailed_to_student INTEGER DEFAULT 0',
         'emailed_to_idfpr INTEGER DEFAULT 0',
+        'instructor_cert_notified INTEGER DEFAULT 0',
         'updated_at TEXT'
     ]:
         try:
@@ -1368,9 +1534,14 @@ def init_db():
             thank_you_sent INTEGER DEFAULT 0,
             thank_you_sent_at TEXT,
             raw_json TEXT,
+            instructor_booking_notified INTEGER DEFAULT 0,
             created_at TEXT
         )
     ''')
+    try:
+        cur.execute('ALTER TABLE calendar_reservations ADD COLUMN instructor_booking_notified INTEGER DEFAULT 0')
+    except Exception:
+        pass
 
     # Persistent MFA Verification Codes Table (Synced to MongoDB mfa_codes, Salted SHA-256 OTP Hash)
     cur.execute('''
@@ -1783,7 +1954,7 @@ def verify_password(password, stored_hash, stored_salt):
     check_hash, _ = hash_password(password, stored_salt)
     return check_hash == stored_hash
 
-def send_mfa_internal(email, name):
+def send_mfa_internal(email, name, extra_fields=None):
     import random
     code = f"{random.randint(100000, 999999)}"
     now = datetime.now()
@@ -1855,14 +2026,17 @@ Chicago, IL
     except Exception:
         pass
 
-    return jsonify({
+    resp = {
         'success': True,
         'email': email,
         'name': name,
         'code': code,
         'smtp_sent': sent,
         'message': f"Verification code dispatched to {email}"
-    })
+    }
+    if isinstance(extra_fields, dict):
+        resp.update(extra_fields)
+    return jsonify(resp)
 
 # Student Registration (With Secure Password Creation)
 @app.route('/api/auth/register', methods=['POST'])
@@ -1890,6 +2064,10 @@ def register_student():
 
     pwd_hash, salt = hash_password(password)
 
+    course_type = (data.get('course_type') or 'unarmed').strip().lower()
+    is_armed_reg = (course_type == 'armed')
+    already_notified = bool(existing and existing['instructor_signup_notified']) if existing and 'instructor_signup_notified' in existing.keys() else False
+
     if existing:
         cur.execute('''
             UPDATE students SET name = ?, password_hash = ?, password_salt = ?, last_active = ?
@@ -1901,9 +2079,52 @@ def register_student():
             VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
         ''', (email, name, email, email, agency, pwd_hash, salt, now_str, now_str))
 
+    if is_armed_reg:
+        armed_id = f"armed::{email}"
+        existing_armed = cur.execute("SELECT id, instructor_signup_notified FROM students WHERE LOWER(id) = LOWER(?)", (armed_id,)).fetchone()
+        if existing_armed:
+            already_notified = bool(existing_armed['instructor_signup_notified'])
+            cur.execute("UPDATE students SET name = ?, last_active = ? WHERE LOWER(id) = LOWER(?)", (name, now_str, armed_id))
+        else:
+            already_notified = False
+            cur.execute('''
+                INSERT INTO students (id, name, email, student_id, agency, password_hash, password_salt, is_paid, is_admin, created_at, last_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
+            ''', (armed_id, name, email, armed_id, agency, pwd_hash, salt, now_str, now_str))
+
     db.commit()
+
+    instr_sent, instr_alert, instr_skipped = False, None, True
+    if not already_notified:
+        c_label = "28-Hour Online Armed Security Course ($200)" if is_armed_reg else "20-Hour Online Unarmed Security Course ($50)"
+        portal_name = "Online Armed Portal (/armed-course/)" if is_armed_reg else "Online Unarmed Portal (/course/)"
+        instr_sent, instr_alert, instr_skipped = notify_instructor_event(
+            category='signup',
+            event_key=f"signup:{'armed' if is_armed_reg else 'unarmed'}:{email}",
+            event_label="New Student Account Registered",
+            student_name=name,
+            student_email=email,
+            course_title=c_label,
+            details_rows=[
+                ("Portal", portal_name),
+                ("Enrollment Status", "Account Created (Pending Tuition Checkout / Course Progress)"),
+            ],
+            highlight_badge="New Student Course Signup",
+            summary_code=f"NEW SIGNUP ({'ARMED' if is_armed_reg else 'UNARMED'}): {name} • {email}",
+            action_note="A new student created an online course account. You will receive another notification when tuition is paid and when the student completes the course.",
+            is_admin_mode=bool(data.get('is_admin_mode'))
+        )
+        if not instr_skipped:
+            target_row_id = f"armed::{email}" if is_armed_reg else email
+            cur.execute("UPDATE students SET instructor_signup_notified = 1 WHERE LOWER(id) = LOWER(?)", (target_row_id,))
+            db.commit()
+
     # Enforce MFA immediately upon registration
-    return send_mfa_internal(email, name)
+    return send_mfa_internal(email, name, extra_fields={
+        'instructor_email_sent': instr_sent,
+        'instructor_alert': instr_alert,
+        'instructor_alert_skipped': instr_skipped
+    })
 
 # Student Login (Password Verification + Enforced MFA Every Time)
 @app.route('/api/auth/login', methods=['POST'])
@@ -2462,16 +2683,66 @@ def submit_exam():
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (student_id, attempt_num, score, total, percentage, passed, time_taken, answers_json, now_str))
     
+    exam_row_id = cur.lastrowid
     cur.execute('UPDATE students SET last_active = ? WHERE id = ?', (now_str, student_id))
     db.commit()
 
+    instr_sent, instr_alert, instr_skipped = False, None, True
+    if passed == 1:
+        is_armed_exam = student_id.lower().startswith('armed::') or str(data.get('course_type') or '').lower() == 'armed'
+        st_row = cur.execute('SELECT name, email, range_qualification_date, instructor_exam_pass_notified FROM students WHERE LOWER(id) = LOWER(?)', (student_id,)).fetchone()
+        raw_email_fallback = (data.get('email') or (student_id[7:] if student_id.lower().startswith('armed::') else (student_id if '@' in student_id else ''))).strip().lower()
+        st_name = (data.get('name') or (st_row['name'] if st_row and st_row['name'] else '') or 'Student Officer').strip()
+        st_email = ((st_row['email'] if st_row and st_row['email'] else '') or raw_email_fallback).strip().lower()
+        range_dt = (st_row['range_qualification_date'] if st_row and st_row['range_qualification_date'] else '') or ''
+        already_exam_notified = bool(st_row and st_row['instructor_exam_pass_notified'])
+
+        if not already_exam_notified:
+            c_title = "28-Hour Online Armed Security Course (20-Hr Online Portion)" if is_armed_exam else "20-Hour Online Unarmed Security Course (PERC)"
+            detail_list = [
+                ("Final Exam Score", f"{score}/{total} ({percentage}%) — PASSED"),
+                ("Attempt Number", f"Attempt #{attempt_num}"),
+            ]
+            if is_armed_exam and range_dt:
+                detail_list.append(("Scheduled Range Date", range_dt))
+            next_note = (
+                "Student passed the 50-question Armed Online Written Exam and can now submit IDFPR Form IL486-1138 Part 1 for your in-person range qualification sign-off."
+                if is_armed_exam else
+                "Student passed the 50-question Unarmed Final Exam and unlocked official IDFPR Form IL486-0486 certificate issuance."
+            )
+            instr_sent, instr_alert, instr_skipped = notify_instructor_event(
+                category='completion',
+                event_key=f"exam_pass:{'armed' if is_armed_exam else 'unarmed'}:{st_email or student_id.lower()}",
+                event_label="Online Course Final Exam Passed",
+                student_name=st_name,
+                student_email=st_email,
+                course_title=c_title,
+                details_rows=detail_list,
+                highlight_badge="Online Course Exam Passed",
+                summary_code=f"PASSED {percentage}% ({'ARMED' if is_armed_exam else 'UNARMED'}): {st_name} • {st_email}",
+                action_note=next_note,
+                is_admin_mode=bool(data.get('is_admin_mode'))
+            )
+            if not instr_skipped:
+                if st_row:
+                    cur.execute('UPDATE students SET instructor_exam_pass_notified = 1 WHERE LOWER(id) = LOWER(?)', (student_id,))
+                else:
+                    cur.execute('''
+                        INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, instructor_exam_pass_notified, created_at, last_active)
+                        VALUES (?, ?, ?, ?, '', 0, 0, 1, ?, ?)
+                    ''', (student_id, st_name, st_email, student_id, now_str, now_str))
+                db.commit()
+
     return jsonify({
         'success': True,
-        'exam_id': cur.lastrowid,
+        'exam_id': exam_row_id,
         'attempt_number': attempt_num,
         'total_attempts': attempt_num,
         'percentage': percentage,
-        'passed': bool(passed)
+        'passed': bool(passed),
+        'instructor_email_sent': instr_sent,
+        'instructor_alert': instr_alert,
+        'instructor_alert_skipped': instr_skipped
     })
 
 # 7. Process & Verify Course Payment ($50.00 Unarmed / $200.00 Armed — Strictly Isolated)
@@ -2520,10 +2791,18 @@ def process_payment():
     else:
         chosen_range_date = ''
         target_id = email or student_id
-        cur.execute(
-            "UPDATE students SET is_paid = 1, last_active = ? WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
-            (now_str, target_id, email)
-        )
+        existing_unarmed = cur.execute(
+            "SELECT id FROM students WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
+            (target_id, email)
+        ).fetchone()
+        if existing_unarmed:
+            target_id = existing_unarmed['id']
+            cur.execute("UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?)", (now_str, target_id))
+        else:
+            cur.execute('''
+                INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, created_at, last_active)
+                VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
+            ''', (target_id, data.get('name') or 'Student Officer', email, target_id, data.get('agency') or '', now_str, now_str))
         details_str = f"Online Unarmed Course Fee $50.00 verified (ref: {session_id})"
 
     if payment_token:
@@ -2556,12 +2835,55 @@ def process_payment():
         except Exception as e:
             print("Payment confirmation email note:", e)
 
+    # Notify Instructor Charles Young of paid course enrollment (deduplicated per student + course)
+    instr_sent, instr_alert, instr_skipped = False, None, True
+    try:
+        paid_row = cur.execute('SELECT name, email, range_qualification_date, instructor_paid_notified FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
+        already_paid_notified = bool(paid_row and paid_row['instructor_paid_notified'])
+        st_name_val = (data.get('name') or (paid_row['name'] if paid_row and paid_row['name'] else '') or 'Student Officer').strip()
+        st_email_val = (email or (paid_row['email'] if paid_row and paid_row['email'] else '')).strip().lower()
+        r_date_info = chosen_range_date or (paid_row['range_qualification_date'] if paid_row and paid_row['range_qualification_date'] else '') or data.get('class_date') or ''
+
+        if not already_paid_notified:
+            c_title_paid = "28-Hour Online Armed Security Course ($200.00 Paid)" if is_armed else "20-Hour Online Unarmed Security Course ($50.00 Paid)"
+            p_details = [
+                ("Tuition / Status", "$200.00 Paid / Verified" if is_armed else "$50.00 Paid / Verified"),
+                ("Payment Reference", session_id),
+            ]
+            if is_armed and r_date_info:
+                p_details.append(("Chosen Range Date", r_date_info))
+            instr_sent, instr_alert, instr_skipped = notify_instructor_event(
+                category='signup',
+                event_key=f"paid:{'armed' if is_armed else 'unarmed'}:{st_email_val or target_id.lower()}",
+                event_label="Course Tuition Paid & Student Enrolled",
+                student_name=st_name_val,
+                student_email=st_email_val,
+                course_title=c_title_paid,
+                details_rows=p_details,
+                highlight_badge="Paid Course Enrollment",
+                summary_code=f"PAID {'$200 ARMED' if is_armed else '$50 UNARMED'}: {st_name_val} • {st_email_val}",
+                action_note=(
+                    f"Student paid $200.00 Armed Course tuition{(' and selected range date ' + r_date_info) if r_date_info else ''}."
+                    if is_armed else
+                    "Student paid $50.00 Unarmed Course tuition and has full certificate access."
+                ),
+                is_admin_mode=bool(data.get('is_admin_mode'))
+            )
+            if not instr_skipped:
+                cur.execute('UPDATE students SET instructor_paid_notified = 1 WHERE LOWER(id) = LOWER(?)', (target_id,))
+                db.commit()
+    except Exception as e:
+        print("Instructor payment notification note:", e)
+
     return jsonify({
         'success': True,
         'is_paid': True,
         'payment_verified': True,
         'student_id': target_id,
         'session_id': session_id,
+        'instructor_email_sent': instr_sent,
+        'instructor_alert': instr_alert,
+        'instructor_alert_skipped': instr_skipped,
         'message': 'Payment authorized and verified successfully!'
     })
 
@@ -2609,6 +2931,9 @@ def issue_certificate():
             'cert_id': existing['id'],
             'issued_at': existing['issued_at'],
             'saved_to_instructor_db': True,
+            'instructor_email_sent': False,
+            'instructor_alert': None,
+            'instructor_alert_skipped': True,
             'message': 'Certificate was previously issued and sealed under IDFPR regulations.'
         })
 
@@ -2691,11 +3016,67 @@ def issue_certificate():
         except Exception as e:
             print("Unarmed thank-you review email note:", e)
 
+    # Notify Instructor Charles Young that the student completed the online course & saved/issued their certificate
+    instr_sent, instr_alert, instr_skipped = False, None, True
+    try:
+        already_cert_notified = bool(existing and existing['instructor_cert_notified']) if existing and 'instructor_cert_notified' in existing.keys() else False
+        if not already_cert_notified:
+            trainee_full_name = (data.get('name') or 'Graduate Officer').strip()
+            range_sess = data.get('range_session') if isinstance(data.get('range_session'), dict) else {}
+            range_date_str = (range_sess.get('dateFormatted') or range_sess.get('date') or '').strip()
+            written_raw = (data.get('written_exam_raw') or '').strip()
+            written_pct = data.get('written_exam_score')
+
+            if is_armed_req:
+                c_comp_title = "28-Hour Online Armed Security Course — Online Portion Completed (Form IL486-1138 Part 1 Saved)"
+                c_details = [
+                    ("Certificate Serial", cert_id),
+                    ("Written Exam Score", f"{written_raw} ({written_pct}%)" if written_raw and written_pct is not None else (f"{written_pct}%" if written_pct is not None else "Passed")),
+                    ("Trainee Signed Date", data.get('trainee_date') or now_str[:10]),
+                ]
+                if range_date_str:
+                    c_details.append(("Scheduled Range Date", range_date_str))
+                if data.get('perc'):
+                    c_details.append(("PERC / License #", str(data.get('perc'))))
+                c_note = "Student finished all 10 online Armed modules, passed the written exam, and submitted Part 1 of IDFPR Form IL486-1138. Ready for your in-person range qualification sign-off in the Admin Portal."
+                c_summary = f"ARMED ONLINE COMPLETED: {trainee_full_name} • {student_email_val} • {cert_id}"
+            else:
+                c_comp_title = "20-Hour Online Unarmed Security Course — GRADUATED (Form IL486-0486 Issued)"
+                c_details = [
+                    ("Certificate Serial", cert_id),
+                    ("Completion Date", data.get('date_completed') or now_str[:10]),
+                    ("City / State", f"{data.get('city', '')}, {data.get('state', 'IL')}".strip(', ')),
+                ]
+                c_note = "Student completed the 20-Hour Online Unarmed Security Course and generated Official IDFPR Form IL486-0486. Certificate record is archived in the Admin Portal."
+                c_summary = f"UNARMED COURSE COMPLETED: {trainee_full_name} • {student_email_val} • {cert_id}"
+
+            instr_sent, instr_alert, instr_skipped = notify_instructor_event(
+                category='completion',
+                event_key=f"cert_done:{course_type_val}:{student_email_val or student_id.lower()}",
+                event_label="Online Course Completed & Certificate Submitted",
+                student_name=trainee_full_name,
+                student_email=student_email_val,
+                course_title=c_comp_title,
+                details_rows=c_details,
+                highlight_badge="Online Course Completed",
+                summary_code=c_summary,
+                action_note=c_note,
+                is_admin_mode=bool(data.get('is_admin_mode'))
+            )
+            if not instr_skipped:
+                cur.execute('UPDATE certificates SET instructor_cert_notified = 1 WHERE LOWER(student_id) = LOWER(?)', (student_id,))
+                db.commit()
+    except Exception as e:
+        print("Instructor certificate completion notification note:", e)
+
     return jsonify({
         'success': True,
         'cert_id': cert_id,
         'is_locked': True,
         'saved_to_instructor_db': True,
+        'instructor_email_sent': instr_sent,
+        'instructor_alert': instr_alert,
+        'instructor_alert_skipped': instr_skipped,
         'message': 'Certificate issued and saved in Instructor Database.'
     })
 
@@ -3244,13 +3625,15 @@ def save_calendar_data(cal_data):
     for r in (cal_data.get('reservations') or []):
         rid = str(r.get('id') or ('PTA-RES-' + secrets.token_hex(4)))
         r['id'] = rid
+        prev_bk = cur.execute('SELECT instructor_booking_notified FROM calendar_reservations WHERE id = ?', (rid,)).fetchone()
+        prev_notified_val = int(prev_bk['instructor_booking_notified']) if prev_bk and prev_bk['instructor_booking_notified'] else (1 if r.get('instructorBookingNotified') else 0)
         cur.execute('''
             INSERT OR REPLACE INTO calendar_reservations (
                 id, session_id, course_id, course_title, student_name, student_email,
                 student_phone, date, time, location, price, payment_status,
                 confirmation_sent, confirmation_sent_at, reminder_sent, reminder_sent_at,
-                thank_you_sent, thank_you_sent_at, raw_json, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                thank_you_sent, thank_you_sent_at, raw_json, instructor_booking_notified, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             rid,
             r.get('sessionId', ''),
@@ -3271,6 +3654,7 @@ def save_calendar_data(cal_data):
             1 if r.get('thankYouSent') else 0,
             r.get('thankYouSentAt', ''),
             encrypt_sensitive(json.dumps(r)),
+            prev_notified_val,
             r.get('createdAt') or now_str
         ))
     cur.execute(
@@ -3371,7 +3755,57 @@ def api_calendar_book():
                 send_email_smtp(st_email, subj, h_body, t_body)
         except Exception as e:
             print("Calendar booking confirmation email note:", e)
-    return jsonify({'success': True, 'calendar': cal})
+
+        # Notify Instructor Charles Young of the new class / range seat signup
+        instr_sent, instr_alert, instr_skipped = False, None, True
+        try:
+            res_id_val = str(reservation.get('id') or '')
+            db_bk = get_db()
+            bk_row = db_bk.execute('SELECT instructor_booking_notified FROM calendar_reservations WHERE id = ?', (res_id_val,)).fetchone() if res_id_val else None
+            already_bk_notified = bool(bk_row and bk_row['instructor_booking_notified'])
+            if not already_bk_notified:
+                st_name_bk = (reservation.get('studentName') or 'Student Officer').strip()
+                st_email_bk = (reservation.get('studentEmail') or '').strip().lower()
+                st_phone_bk = (reservation.get('studentPhone') or 'Not provided').strip()
+                bk_date = (reservation.get('date') or 'Scheduled Session').strip()
+                bk_time = (reservation.get('time') or '9:00 AM – 5:00 PM').strip()
+                bk_price = (reservation.get('price') or 'Seat Reserved').strip()
+                bk_notes = (reservation.get('notes') or '').strip()
+                bk_details = [
+                    ("Student Phone", st_phone_bk),
+                    ("Scheduled Date", bk_date),
+                    ("Session Hours", bk_time),
+                    ("Training Location", resolved_loc),
+                    ("Tuition / Status", bk_price),
+                    ("Reservation ID", res_id_val or 'PTA-RES'),
+                ]
+                if bk_notes:
+                    bk_details.append(("Student Notes", bk_notes))
+                instr_sent, instr_alert, instr_skipped = notify_instructor_event(
+                    category='signup',
+                    event_key=f"booking:{res_id_val or (st_email_bk + ':' + bk_date)}",
+                    event_label="New Class / Range Seat Reservation",
+                    student_name=st_name_bk,
+                    student_email=st_email_bk,
+                    course_title=ctitle,
+                    details_rows=bk_details,
+                    highlight_badge="New Class / Range Signup",
+                    summary_code=f"BOOKED {bk_date}: {st_name_bk} • {st_phone_bk} • {st_email_bk}",
+                    action_note=f"Student reserved a seat for {ctitle} on {bk_date} ({bk_time})."
+                )
+                if not instr_skipped and res_id_val:
+                    db_bk.execute('UPDATE calendar_reservations SET instructor_booking_notified = 1 WHERE id = ?', (res_id_val,))
+                    db_bk.commit()
+        except Exception as e:
+            print("Instructor calendar booking notification note:", e)
+        return jsonify({
+            'success': True,
+            'calendar': cal,
+            'instructor_email_sent': instr_sent,
+            'instructor_alert': instr_alert,
+            'instructor_alert_skipped': instr_skipped
+        })
+    return jsonify({'success': True, 'calendar': cal, 'instructor_email_sent': False, 'instructor_alert': None, 'instructor_alert_skipped': True})
 
 # 11. Google Business Profile Review Link Configuration & Automated Student Emails API
 @app.route('/api/admin/google-review-config', methods=['GET', 'POST'])

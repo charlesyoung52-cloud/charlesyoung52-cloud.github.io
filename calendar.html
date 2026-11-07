@@ -1535,13 +1535,72 @@
                 localStorage.setItem('platforms_armed_pending_range_session', JSON.stringify(rangeRecord));
             }
 
+            let bookApiRes = null;
             try {
-                await fetch(getApiBaseUrl() + '/api/calendar/book', {
+                const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 4500) : null;
+                const bkResp = await fetch(getApiBaseUrl() + '/api/calendar/book', {
                     method: 'POST',
+                    keepalive: true,
+                    signal: bkCtrl ? bkCtrl.signal : undefined,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ reservation, calendarData })
                 });
+                if (bkTimer) clearTimeout(bkTimer);
+                if (bkResp && bkResp.ok) {
+                    bookApiRes = await bkResp.json();
+                }
             } catch (err) {}
+
+            // Fallback browser EmailJS alert to Instructor Charles Young if backend SMTP is not configured
+            try {
+                const cleanStEmail = (email || '').trim().toLowerCase();
+                const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
+                const isTest = !cleanStEmail || skipList.includes(cleanStEmail) || cleanStEmail.endsWith('.test') || cleanStEmail.endsWith('@example.com') || cleanStEmail.includes('test@');
+                const dedupKey = 'pta_instr_alert_booking:' + reservation.id;
+                if (!isTest && !(bookApiRes && (bookApiRes.instructor_email_sent || bookApiRes.instructor_alert_skipped)) && localStorage.getItem(dedupKey) !== '1') {
+                    const ejService = localStorage.getItem('platforms_emailjs_service_id') || 'service_bor93nt';
+                    const ejTemplate = localStorage.getItem('platforms_emailjs_template_id') || 'template_0k00oka';
+                    const ejPubKey = localStorage.getItem('platforms_emailjs_public_key') || 'qZROJMBteQvfuYHqG';
+                    const dateLabel = formatDateSpan(session.date, session.endDate);
+                    const summaryBanner = `BOOKED ${session.date}: ${name} • ${phone} • ${cleanStEmail}`;
+                    const ejCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                    const ejTimer = ejCtrl ? setTimeout(() => ejCtrl.abort(), 2800) : null;
+                    const ejResp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                        method: 'POST',
+                        keepalive: true,
+                        signal: ejCtrl ? ejCtrl.signal : undefined,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            service_id: ejService,
+                            template_id: ejTemplate,
+                            user_id: ejPubKey,
+                            template_params: {
+                                to_name: `Instructor Charles Young — New Class Signup: ${name} (${cleanStEmail})`,
+                                name: `Instructor Charles Young — New Class Signup: ${name} (${cleanStEmail})`,
+                                to_email: 'charlesyoung@platformstraining.com',
+                                user_email: 'charlesyoung@platformstraining.com',
+                                email: 'charlesyoung@platformstraining.com',
+                                reply_to: cleanStEmail,
+                                passcode: summaryBanner,
+                                code: summaryBanner,
+                                otp: summaryBanner,
+                                verification_code: summaryBanner,
+                                subject: `New Course Signup: ${name} — ${session.title} (${dateLabel})`,
+                                message: `New Class/Range Reservation:\nStudent: ${name}\nEmail: ${cleanStEmail}\nPhone: ${phone}\nCourse: ${session.title}\nDate: ${dateLabel} (${session.time})\nLocation: ${resolvedLocation}\nPrice: ${reservation.price}`,
+                                course_name: `${session.title} (${dateLabel}) | Student: ${name} • ${phone} • ${cleanStEmail}`,
+                                company_name: 'Platforms Training Academy — Instructor Alert',
+                                company: 'Platforms Training Academy',
+                                from_name: 'Platforms Training Academy',
+                                academy_name: 'Platforms Training Academy',
+                                time: new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                            }
+                        })
+                    });
+                    if (ejTimer) clearTimeout(ejTimer);
+                    if (ejResp && ejResp.ok) localStorage.setItem(dedupKey, '1');
+                }
+            } catch (ejErr) {}
 
             renderMonthlyCalendar();
             renderSessionsList();

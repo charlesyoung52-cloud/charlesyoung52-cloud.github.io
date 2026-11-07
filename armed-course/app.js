@@ -793,11 +793,21 @@ class SecurityCourseApp {
             const res = await this.apiCall('/api/auth/register', 'POST', {
                 name: rawName,
                 email: rawEmail,
-                password: rawPassword
+                password: rawPassword,
+                course_type: 'armed',
+                is_admin_mode: Boolean(this.isAdminMode)
             });
 
             if (res) {
                 if (res.success) {
+                    this.notifyInstructorIfNeeded(res, {
+                        eventKey: 'signup:armed:' + rawEmail,
+                        headline: 'New Student Course Signup',
+                        studentName: rawName,
+                        studentEmail: rawEmail,
+                        courseTitle: '28-Hour Online Armed Security Course ($200)',
+                        summaryCode: `NEW SIGNUP (ARMED): ${rawName} • ${rawEmail}`
+                    });
                     await this.officerSignIn(rawName, rawEmail);
                     return;
                 } else if (res.error) {
@@ -849,6 +859,14 @@ class SecurityCourseApp {
             localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
         } catch (e) {}
 
+        this.notifyInstructorIfNeeded(null, {
+            eventKey: 'signup:armed:' + rawEmail,
+            headline: 'New Student Course Signup',
+            studentName: rawName,
+            studentEmail: rawEmail,
+            courseTitle: '28-Hour Online Armed Security Course ($200)',
+            summaryCode: `NEW SIGNUP (ARMED): ${rawName} • ${rawEmail}`
+        });
         await this.officerSignIn(rawName, rawEmail);
     }
 
@@ -988,6 +1006,102 @@ class SecurityCourseApp {
         if (!serverHandled) {
             await this.sendMfaEmail(this.pendingAuthEmail, this.pendingAuthName, this.mfaCode);
         }
+    }
+
+    isInstructorOrTestIdentity(email, name) {
+        const e = String(email || '').trim().toLowerCase();
+        const n = String(name || '').trim().toLowerCase();
+        if (!e && !n) return true;
+        const skipEmails = [
+            'student@platformstraining.com',
+            'test@platformstraining.com',
+            'charlesyoung52@gmail.com',
+            'charlesyoung@platformstraining.com',
+            'anonymous'
+        ];
+        if (skipEmails.includes(e) || e.endsWith('.test') || e.endsWith('@example.com') || e.includes('test@') || e.includes('charlesyoung')) {
+            return true;
+        }
+        if (['doe, john a.', 'john a. doe', 'john doe', 'test student', 'charles young', 'young, charles'].includes(n)) {
+            return true;
+        }
+        return false;
+    }
+
+    async notifyInstructorIfNeeded(apiRes, fallbackMeta = {}) {
+        try {
+            if (this.isAdminMode) return false;
+            const alertObj = (apiRes && apiRes.instructor_alert) || null;
+            const eventKey = (alertObj && alertObj.event_key) || fallbackMeta.eventKey || '';
+            const dedupStorageKey = eventKey ? ('pta_instr_alert_' + eventKey) : '';
+
+            if (apiRes && (apiRes.instructor_email_sent === true || apiRes.instructor_alert_skipped === true)) {
+                if (dedupStorageKey) localStorage.setItem(dedupStorageKey, '1');
+                return true;
+            }
+            if (dedupStorageKey && localStorage.getItem(dedupStorageKey) === '1') {
+                return false;
+            }
+
+            const studentName = (alertObj && alertObj.student_name) || fallbackMeta.studentName || (this.studentCertData && this.studentCertData.name) || this.pendingAuthName || 'Student Officer';
+            const studentEmail = ((alertObj && alertObj.student_email) || fallbackMeta.studentEmail || this.studentEmail || this.pendingAuthEmail || '').trim().toLowerCase();
+            if (this.isInstructorOrTestIdentity(studentEmail, studentName)) {
+                return false;
+            }
+
+            const serviceId = (this.emailJsConfig && this.emailJsConfig.serviceId) || (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.serviceId) || localStorage.getItem('platforms_emailjs_service_id');
+            const templateId = (this.emailJsConfig && this.emailJsConfig.templateId) || (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.templateId) || localStorage.getItem('platforms_emailjs_template_id');
+            const publicKey = (this.emailJsConfig && this.emailJsConfig.publicKey) || (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.emailjs && window.PLATFORMS_CONFIG.emailjs.publicKey) || localStorage.getItem('platforms_emailjs_public_key');
+            if (!serviceId || !templateId || !publicKey) return false;
+
+            const targetEmail = (alertObj && alertObj.to_email) || 'charlesyoung@platformstraining.com';
+            const headline = (alertObj && alertObj.headline) || fallbackMeta.headline || 'Student Course Activity';
+            const courseTitle = (alertObj && alertObj.course_title) || fallbackMeta.courseTitle || '28-Hour Online Armed Security Course';
+            const summaryCode = (alertObj && alertObj.summary_code) || fallbackMeta.summaryCode || `${headline}: ${studentName} (${studentEmail})`;
+            const subjectLine = (alertObj && alertObj.subject) || `${headline}: ${studentName} — ${courseTitle}`;
+            const messageBody = (alertObj && alertObj.text_body) || `${headline}\nStudent: ${studentName} (${studentEmail})\nCourse: ${courseTitle}`;
+            const nowLabel = new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const timer = ctrl ? setTimeout(() => ctrl.abort(), 3000) : null;
+            const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                keepalive: true,
+                signal: ctrl ? ctrl.signal : undefined,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    service_id: serviceId,
+                    template_id: templateId,
+                    user_id: publicKey,
+                    template_params: {
+                        to_name: `Instructor Charles Young — ${headline}: ${studentName} (${studentEmail})`,
+                        name: `Instructor Charles Young — ${headline}: ${studentName} (${studentEmail})`,
+                        to_email: targetEmail,
+                        user_email: targetEmail,
+                        email: targetEmail,
+                        reply_to: studentEmail,
+                        passcode: summaryCode,
+                        code: summaryCode,
+                        otp: summaryCode,
+                        verification_code: summaryCode,
+                        subject: subjectLine,
+                        message: messageBody,
+                        course_name: `${courseTitle} | Student: ${studentName} (${studentEmail})`,
+                        company_name: 'Platforms Training Academy — Instructor Alert',
+                        company: 'Platforms Training Academy',
+                        from_name: 'Platforms Training Academy',
+                        academy_name: 'Platforms Training Academy',
+                        time: nowLabel
+                    }
+                })
+            });
+            if (timer) clearTimeout(timer);
+            if (response && response.ok && dedupStorageKey) {
+                localStorage.setItem(dedupStorageKey, '1');
+                return true;
+            }
+        } catch (err) {}
+        return false;
     }
 
     async sendMfaEmail(email, name, code) {
@@ -1358,18 +1472,30 @@ class SecurityCourseApp {
         }
         const armedId = this.getArmedStudentId(cleanEmail) || 'armed::student';
         const savedRange = this.getSavedRangeDateRecord(cleanEmail);
+        const studentNameVal = (this.studentCertData && this.studentCertData.name) || (savedRange && (savedRange.studentName || savedRange.name)) || this.pendingAuthName || '';
+        const rangeDateStr = (savedRange && (savedRange.dateFormatted || savedRange.date)) || '';
         this.apiCall('/api/payment/checkout', 'POST', {
             student_id: armedId,
             email: cleanEmail,
-            name: (this.studentCertData && this.studentCertData.name) || (savedRange && savedRange.name) || '',
+            name: studentNameVal,
             course_type: 'armed',
+            is_admin_mode: Boolean(this.isAdminMode),
             amount: 200,
             session_id: sessionIdOrSource,
             payment_token: token,
             range_qualification_date: (savedRange && savedRange.date) || '',
-            class_date: (savedRange && (savedRange.dateFormatted || savedRange.date)) || '',
+            class_date: rangeDateStr,
             class_time: (savedRange && savedRange.time) || '9:00 AM – 5:00 PM (Range) / 24/7 Online',
             location: (savedRange && savedRange.location) || 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
+        }).then(res => {
+            this.notifyInstructorIfNeeded(res, {
+                eventKey: 'paid:armed:' + (cleanEmail || 'student'),
+                headline: 'Paid Course Enrollment ($200 Armed)',
+                studentName: studentNameVal || cleanEmail,
+                studentEmail: cleanEmail,
+                courseTitle: '28-Hour Online Armed Security Course ($200.00 Paid)' + (rangeDateStr ? ` — Range: ${rangeDateStr}` : ''),
+                summaryCode: `PAID $200 ARMED: ${studentNameVal || cleanEmail} • ${cleanEmail}`
+            });
         });
     }
 
@@ -2765,9 +2891,14 @@ class SecurityCourseApp {
         this.syncToLocalRegistry();
 
         const armedId = this.getArmedStudentId() || this.studentCertData.name;
+        const armedExamName = (this.studentCertData && this.studentCertData.name) || this.pendingAuthName || '';
+        const armedExamEmail = (this.studentEmail || '').trim().toLowerCase();
         this.apiCall('/api/exam/submit', 'POST', {
             student_id: armedId,
+            email: armedExamEmail,
+            name: armedExamName,
             course_type: 'armed',
+            is_admin_mode: Boolean(this.isAdminMode),
             score: this.examScore,
             total: EXAM_QUESTIONS.length,
             percentage: this.examPercentage,
@@ -2775,6 +2906,17 @@ class SecurityCourseApp {
             time_taken_seconds: this.timerSeconds,
             attempt_number: this.examAttempts,
             answers: this.userAnswers
+        }).then(res => {
+            if (this.examPassed && !this.isAdminMode) {
+                this.notifyInstructorIfNeeded(res, {
+                    eventKey: 'exam_pass:armed:' + (armedExamEmail || armedExamName.toLowerCase()),
+                    headline: 'Armed Online Exam Passed',
+                    studentName: armedExamName || armedExamEmail,
+                    studentEmail: armedExamEmail,
+                    courseTitle: `28-Hour Online Armed Security Course — Written Exam Passed ${this.examScore}/${EXAM_QUESTIONS.length} (${this.examPercentage}%)`,
+                    summaryCode: `PASSED ${this.examPercentage}% (ARMED): ${armedExamName || armedExamEmail} • ${armedExamEmail}`
+                });
+            }
         });
 
         this.showView('results');
@@ -3227,6 +3369,7 @@ class SecurityCourseApp {
             written_exam_raw: `${effectiveScore}/50`,
             range_session: this.getSavedRangeDateRecord(emailKey) || null,
             trainee_submitted: true,
+            is_admin_mode: Boolean(this.isAdminMode),
             submitted_at: new Date().toISOString(),
             instructor_completed: false
         };
@@ -3242,7 +3385,15 @@ class SecurityCourseApp {
         this.saveState();
         this.syncToLocalRegistry();
 
-        await this.apiCall('/api/certificate/issue', 'POST', armedCertRecord);
+        const certRes = await this.apiCall('/api/certificate/issue', 'POST', armedCertRecord);
+        await this.notifyInstructorIfNeeded(certRes, {
+            eventKey: 'cert_done:armed:' + (emailKey || name.toLowerCase()),
+            headline: 'Armed Online Portion Completed',
+            studentName: name,
+            studentEmail: emailVal || emailKey,
+            courseTitle: `28-Hour Online Armed Security Course — Online Portion & Form IL486-1138 Part 1 Saved (${certSerial})`,
+            summaryCode: `ARMED ONLINE COMPLETED: ${name} • ${emailVal || emailKey} • ${certSerial}`
+        });
 
         this.renderResults();
         this.manualSaveProgress("Trainee Firearms Certification Record (Form IL486-1138) saved to your profile for Instructor range sign-off!");
@@ -3886,11 +4037,28 @@ class SecurityCourseApp {
             const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
                 ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
                 : 'https://charlesyoung52-cloud-github-io.onrender.com';
-            fetch(apiBase + '/api/calendar/book', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reservation, calendarData: this.rangeCalendarData })
-            }).catch(() => {});
+            let bookJson = null;
+            try {
+                const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 4500) : null;
+                const bkResp = await fetch(apiBase + '/api/calendar/book', {
+                    method: 'POST',
+                    keepalive: true,
+                    signal: bkCtrl ? bkCtrl.signal : undefined,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reservation, calendarData: this.rangeCalendarData })
+                });
+                if (bkTimer) clearTimeout(bkTimer);
+                if (bkResp && bkResp.ok) bookJson = await bkResp.json();
+            } catch (e) {}
+            await this.notifyInstructorIfNeeded(bookJson, {
+                eventKey: 'booking:' + reservationId,
+                headline: 'New Armed Range Signup',
+                studentName: studentName,
+                studentEmail: cleanEmail,
+                courseTitle: `${sessionObj.title} (${sessionObj.date})`,
+                summaryCode: `BOOKED ${sessionObj.date}: ${studentName} • ${phoneVal || 'No phone'} • ${cleanEmail}`
+            });
         }
 
         this.syncToLocalRegistry();
