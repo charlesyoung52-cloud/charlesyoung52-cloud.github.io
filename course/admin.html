@@ -1584,6 +1584,7 @@
     </div>
 
     <script src="assets/pdf-lib.min.js"></script>
+    <script src="assets/cert_template_base64.js"></script>
     <script src="assets/armed_cert_template_base64.js"></script>
     <script src="config.js?v=2.0"></script>
     <script>
@@ -3513,14 +3514,10 @@ function ptaVerifyAdminCredential(inputVal) {
             updateFilterCounts();
             renderTable();
 
-            // Generate & save PDF copy to Instructor Certificate Database
-            let base64Pdf = '';
-            let filename = '';
+            const safeName = (certData.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_');
+            const filename = `IDFPR_Armed_Certificate_IL486-1138_${safeName}.pdf`;
             try {
-                const gen = await generateFilledArmedCertPdfBytes(certData);
-                base64Pdf = gen.base64Pdf || '';
-                filename = gen.filename || '';
-                if (emailLower && base64Pdf) {
+                if (emailLower) {
                     localStorage.setItem('platforms_saved_armed_cert_' + emailLower, JSON.stringify({
                         cert_id: certData.cert_id,
                         student_id: certData.student_id,
@@ -3528,15 +3525,15 @@ function ptaVerifyAdminCredential(inputVal) {
                         student_email: emailLower,
                         idfpr_email: 'FPR.SafetyUnit@illinois.gov',
                         course_type: 'armed',
-                        pdf_base64: base64Pdf,
                         pdf_filename: filename,
+                        cert_data: certData,
                         instructor_completed: 1,
                         issued_at: new Date().toLocaleDateString('en-US')
                     }));
                 }
             } catch (e) {}
 
-            // Save to Cloud Backend Instructor Certificate Database
+            // Save lightweight regenerable record to Cloud Backend Instructor Certificate Database
             try {
                 await fetch(getApiBaseUrl() + '/api/admin/armed-certificate/save', {
                     method: 'POST',
@@ -3545,7 +3542,6 @@ function ptaVerifyAdminCredential(inputVal) {
                         student_id: certData.student_id,
                         email: certData.email,
                         cert_id: certData.cert_id,
-                        pdf_base64: base64Pdf,
                         pdf_filename: filename,
                         armed_cert_data: certData
                     })
@@ -3803,8 +3799,8 @@ function ptaVerifyAdminCredential(inputVal) {
                         student_email: studentEmail || emailLower,
                         idfpr_email: idfprEmail,
                         course_type: 'armed',
-                        pdf_base64: base64Pdf,
                         pdf_filename: filename,
+                        cert_data: certData,
                         instructor_completed: 1,
                         emailed_to_student: 1,
                         emailed_to_idfpr: 1,
@@ -3903,23 +3899,29 @@ function ptaVerifyAdminCredential(inputVal) {
                     const k = localStorage.key(i);
                     if (k && (k.startsWith('platforms_saved_armed_cert_') || k.startsWith('platforms_saved_unarmed_cert_'))) {
                         const obj = JSON.parse(localStorage.getItem(k) || 'null');
-                        if (obj && (obj.cert_id || obj.student_email)) {
+                        if (obj && obj.pdf_base64) {
+                            // Automatically strip legacy pdf_base64 blobs from localStorage to free up 5MB quota
+                            delete obj.pdf_base64;
+                            try { localStorage.setItem(k, JSON.stringify(obj)); } catch (ce) {}
+                        }
+                        if (obj && (obj.cert_id || obj.student_email || obj.email)) {
+                            const objEmail = obj.student_email || obj.email || '';
                             const exists = records.some(r =>
-                                (obj.cert_id && r.cert_id === obj.cert_id) ||
-                                (obj.student_email && String(r.student_email || '').toLowerCase() === String(obj.student_email || '').toLowerCase() && r.course_type === obj.course_type)
+                                (obj.cert_id && (r.cert_id === obj.cert_id || r.id === obj.cert_id)) ||
+                                (objEmail && String(r.student_email || '').toLowerCase() === String(objEmail).toLowerCase() && r.course_type === obj.course_type)
                             );
                             if (!exists) {
                                 records.unshift({
                                     cert_id: obj.cert_id || ('CERT-' + Date.now()),
                                     student_id: obj.student_id || '',
-                                    student_name: obj.student_name || 'Student',
-                                    student_email: obj.student_email || '',
+                                    student_name: obj.student_name || obj.name || (obj.cert_data && obj.cert_data.name) || 'Student',
+                                    student_email: objEmail,
                                     idfpr_email: obj.idfpr_email || '',
                                     course_type: obj.course_type || (k.includes('_armed_') ? 'armed' : 'unarmed'),
-                                    issued_at: obj.issued_at || 'Saved',
+                                    issued_at: obj.issued_at || obj.date_completed || 'Saved',
                                     pdf_filename: obj.pdf_filename || 'IDFPR_Certificate.pdf',
-                                    has_pdf: !!obj.pdf_base64,
-                                    pdf_base64: obj.pdf_base64 || '',
+                                    has_pdf: true,
+                                    cert_data: obj.cert_data || obj,
                                     instructor_completed: obj.instructor_completed !== undefined ? obj.instructor_completed : 1,
                                     emailed_to_student: obj.emailed_to_student || 0,
                                     emailed_to_idfpr: obj.emailed_to_idfpr || 0
@@ -3955,7 +3957,7 @@ function ptaVerifyAdminCredential(inputVal) {
                 const deliveryParts = [];
                 if (r.emailed_to_student) deliveryParts.push(`<span class="badge badge-success" style="font-size:0.68rem;"><i class="fas fa-envelope-circle-check"></i> Sent to Student</span>`);
                 if (r.emailed_to_idfpr) deliveryParts.push(`<span class="badge badge-gold" style="font-size:0.68rem;"><i class="fas fa-building-columns"></i> Sent to IDFPR</span>`);
-                if (r.has_pdf) deliveryParts.push(`<span class="badge" style="background:rgba(16,185,129,0.14); color:#6ee7b7; border:1px solid rgba(16,185,129,0.35); font-size:0.68rem;"><i class="fas fa-database"></i> PDF Stored</span>`);
+                if (r.has_pdf || r.cert_data) deliveryParts.push(`<span class="badge" style="background:rgba(16,185,129,0.14); color:#6ee7b7; border:1px solid rgba(16,185,129,0.35); font-size:0.68rem;"><i class="fas fa-cloud-check"></i> Saved (On-Demand PDF)</span>`);
                 return `
                     <tr>
                         <td>
@@ -3997,15 +3999,118 @@ function ptaVerifyAdminCredential(inputVal) {
             setTimeout(() => URL.revokeObjectURL(url), 5000);
         }
 
-        async function downloadSavedCertByIndex(idx) {
-            const rec = cachedInstructorCertDb[idx];
+        async function generateFilledUnarmedCertPdfBytes(certData) {
+            if (typeof PDFLib === 'undefined' || typeof UNARMED_CERT_TEMPLATE_BASE64 === 'undefined') {
+                throw new Error('PDF library or Official IL486-0486 template asset not loaded.');
+            }
+            const binaryString = atob(UNARMED_CERT_TEMPLATE_BASE64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+            const page = pdfDoc.getPages()[0];
+            const { height } = page.getSize();
+            const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+            const helveticaBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+            const timesItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
+
+            const name = String(certData.name || certData.trainee_name || '').trim().toUpperCase();
+            const address = String(certData.address || '');
+            const city = String(certData.city || 'Chicago');
+            const state = String(certData.state || 'IL').toUpperCase();
+            const zip = String(certData.zip || '');
+            const dob = String(certData.dob || '');
+            const ssn = String(certData.ssn || '');
+            const weight = String(certData.weight || '');
+            const heightVal = String(certData.height || '');
+            const hair = String(certData.hair || '');
+            const eyes = String(certData.eyes || '');
+            const traineeSig = String(certData.signature || name);
+            const compDate = String(certData.date_completed || new Date().toLocaleDateString('en-US'));
+
+            page.drawText(name, { x: 35, y: height - 137, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(address, { x: 35, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(city, { x: 294, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(state, { x: 395, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(zip, { x: 490, y: height - 175, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+            page.drawText(dob, { x: 35, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(ssn, { x: 150, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(weight, { x: 294, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(heightVal, { x: 342, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(hair, { x: 392, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(eyes, { x: 490, y: height - 212, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+            const sigPngUrl = renderSignatureToPngDataUrl(traineeSig);
+            let sigDrawn = false;
+            if (sigPngUrl) {
+                try {
+                    const sigImage = await pdfDoc.embedPng(sigPngUrl);
+                    page.drawImage(sigImage, { x: 136, y: height - 290, width: 225, height: 40 });
+                    sigDrawn = true;
+                } catch (e) {}
+            }
+            if (!sigDrawn) {
+                page.drawText(traineeSig, { x: 140, y: height - 273, size: 13, font: timesItalic, color: PDFLib.rgb(0.05, 0.08, 0.15) });
+            }
+            page.drawText(compDate, { x: 432, y: height - 273, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(compDate, { x: 35, y: height - 672, size: 11, font: helveticaBold, color: PDFLib.rgb(0, 0, 0) });
+            page.drawText(compDate, { x: 435, y: height - 739, size: 10, font: helvetica, color: PDFLib.rgb(0, 0, 0) });
+
+            const pdfBytes = await pdfDoc.save();
+            const cleanName = (name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_');
+            const filename = `Illinois_20Hr_Unarmed_Certificate_${cleanName}.pdf`;
+            return { pdfBytes, filename };
+        }
+
+        async function downloadOrRegenerateCertRecord(rec) {
             if (!rec) return;
             if (rec.pdf_base64) {
                 triggerBase64PdfDownload(rec.pdf_base64, rec.pdf_filename || `${rec.cert_id || 'Certificate'}.pdf`);
                 return;
             }
-            const lookup = encodeURIComponent(rec.cert_id || rec.student_id || rec.student_email || '');
-            window.open(getApiBaseUrl() + '/api/admin/certificates/download/' + lookup, '_blank');
+            const isArmed = String(rec.course_type || '').toLowerCase() === 'armed' || String(rec.student_id || '').toLowerCase().startsWith('armed::');
+            const cData = Object.assign({
+                name: rec.student_name || rec.trainee_name || '',
+                email: rec.student_email || '',
+                date_completed: rec.date_completed || rec.issued_at || ''
+            }, rec.cert_data || {});
+            const gen = isArmed
+                ? await generateFilledArmedCertPdfBytes(cData)
+                : await generateFilledUnarmedCertPdfBytes(cData);
+            const blob = new Blob([gen.pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = rec.pdf_filename || gen.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+        }
+
+        async function downloadSavedCertByIndex(idx) {
+            const rec = cachedInstructorCertDb[idx];
+            if (!rec) return;
+            try {
+                if (rec.cert_data && Object.keys(rec.cert_data).length > 0) {
+                    await downloadOrRegenerateCertRecord(rec);
+                    return;
+                }
+                const lookup = encodeURIComponent(rec.cert_id || rec.id || rec.student_id || rec.student_email || '');
+                const res = await fetch(getApiBaseUrl() + '/api/admin/certificates/download/' + lookup);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.success) {
+                        await downloadOrRegenerateCertRecord(data);
+                        return;
+                    }
+                }
+                await downloadOrRegenerateCertRecord(rec);
+            } catch (err) {
+                alert('Error generating certificate PDF: ' + err.message);
+            }
         }
 
         async function downloadSavedStudentCert(filteredIndex) {
@@ -4014,19 +4119,39 @@ function ptaVerifyAdminCredential(inputVal) {
             if (!s) return;
             const emailLower = String(s.email || '').toLowerCase().trim();
             try {
-                const localUnarmed = emailLower ? JSON.parse(localStorage.getItem('platforms_saved_unarmed_cert_' + emailLower) || 'null') : null;
-                if (localUnarmed && localUnarmed.pdf_base64) {
-                    triggerBase64PdfDownload(localUnarmed.pdf_base64, localUnarmed.pdf_filename || `Unarmed_Certificate_${s.name || 'Student'}.pdf`);
-                    return;
-                }
-                const localArmed = emailLower ? JSON.parse(localStorage.getItem('platforms_saved_armed_cert_' + emailLower) || 'null') : null;
-                if (localArmed && localArmed.pdf_base64) {
-                    triggerBase64PdfDownload(localArmed.pdf_base64, localArmed.pdf_filename || `Armed_Certificate_${s.name || 'Student'}.pdf`);
-                    return;
+                const lookup = encodeURIComponent(s.cert_id || s.id || s.email || '');
+                const res = await fetch(getApiBaseUrl() + '/api/admin/certificates/download/' + lookup);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.success) {
+                        await downloadOrRegenerateCertRecord(data);
+                        return;
+                    }
                 }
             } catch (e) {}
-            const lookup = encodeURIComponent(s.cert_id || s.id || s.email || '');
-            window.open(getApiBaseUrl() + '/api/admin/certificates/download/' + lookup, '_blank');
+            try {
+                const localArmed = emailLower ? JSON.parse(localStorage.getItem('platforms_saved_armed_cert_' + emailLower) || 'null') : null;
+                if (localArmed) {
+                    await downloadOrRegenerateCertRecord(Object.assign({ course_type: 'armed', cert_data: localArmed.cert_data || localArmed }, localArmed));
+                    return;
+                }
+                const localUnarmed = emailLower ? JSON.parse(localStorage.getItem('platforms_saved_unarmed_cert_' + emailLower) || 'null') : null;
+                if (localUnarmed) {
+                    await downloadOrRegenerateCertRecord(Object.assign({ course_type: 'unarmed', cert_data: localUnarmed.cert_data || localUnarmed }, localUnarmed));
+                    return;
+                }
+                if (s.armed_cert_data) {
+                    await downloadOrRegenerateCertRecord({ course_type: 'armed', student_name: s.name, student_email: s.email, cert_data: s.armed_cert_data });
+                    return;
+                }
+                if (s.unarmed_cert_data) {
+                    await downloadOrRegenerateCertRecord({ course_type: 'unarmed', student_name: s.name, student_email: s.email, cert_data: s.unarmed_cert_data });
+                    return;
+                }
+                alert('Certificate record not found yet for this student.');
+            } catch (err) {
+                alert('Error generating certificate PDF: ' + err.message);
+            }
         }
 
         // =========================================================================

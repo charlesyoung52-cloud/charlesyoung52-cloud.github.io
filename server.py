@@ -191,7 +191,7 @@ def sync_to_cloud_json():
                 'has_password': bool(r['password_hash']) if 'password_hash' in r.keys() else False,
                 'cert_id': cert['id'] if cert else None,
                 'cert_issued_at': cert['issued_at'] if cert else None,
-                'has_saved_cert_pdf': bool(cert and 'pdf_base64' in cert.keys() and cert['pdf_base64']),
+                'has_saved_cert_pdf': bool(cert and (('pdf_base64' in cert.keys() and cert['pdf_base64']) or ('cert_data_json' in cert.keys() and cert['cert_data_json']) or cert['trainee_name'])),
                 'created_at': r['created_at'],
                 'last_active': r['last_active'],
                 'attempts': attempts
@@ -967,6 +967,97 @@ def get_mongo_db(force_reconnect=False):
         _MONGO_LAST_ERROR = str(e)
         return None, str(e)
 
+def _prepare_mongo_doc(table_name, doc):
+    if table_name == 'app_settings':
+        if doc.get('key') == 'mongodb_uri':
+            return None
+        if doc.get('key') in SENSITIVE_SETTINGS_KEYS and doc.get('value'):
+            doc['value'] = encrypt_sensitive(doc['value'])
+    elif table_name == 'certificates':
+        # Omit duplicate multi-hundred-KB pdf_base64 blobs; PDFs regenerate on demand from encrypted cert_data_json
+        doc['pdf_base64'] = None
+        for scol in SENSITIVE_CERTIFICATE_COLS:
+            if doc.get(scol):
+                doc[scol] = encrypt_sensitive(doc[scol])
+    return doc
+
+def sync_dirty_rows_to_mongodb(conn=None):
+    """O(1) incremental sync: pushes only the exact rows modified since the last sync."""
+    global _MONGO_LAST_SYNCED
+    mdb, err = get_mongo_db()
+    if mdb is None:
+        return False, err
+    close_after = False
+    try:
+        if conn is None:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            close_after = True
+        cur = conn.cursor()
+        try:
+            dirty_rows = cur.execute("SELECT table_name, pk1, pk2, op FROM _sync_dirty").fetchall()
+        except Exception:
+            return False, 'dirty_queue_not_initialized'
+        if not dirty_rows:
+            return True, _MONGO_LAST_SYNCED
+
+        pk_lookup = {
+            'students': ("SELECT * FROM students WHERE id = ?", lambda p1, p2: (p1,), lambda d: {'id': d['id']}, lambda p1, p2: {'id': p1}),
+            'progress': ("SELECT * FROM progress WHERE student_id = ? AND lesson_id = ?", lambda p1, p2: (p1, int(p2)), lambda d: {'student_id': d['student_id'], 'lesson_id': d['lesson_id']}, lambda p1, p2: {'student_id': p1, 'lesson_id': int(p2)}),
+            'exam_results': ("SELECT * FROM exam_results WHERE student_id = ? AND attempt_number = ?", lambda p1, p2: (p1, int(p2 or 1)), lambda d: {'student_id': d['student_id'], 'attempt_number': d.get('attempt_number', 1)}, lambda p1, p2: {'student_id': p1, 'attempt_number': int(p2 or 1)}),
+            'certificates': ("SELECT * FROM certificates WHERE id = ?", lambda p1, p2: (p1,), lambda d: {'id': d['id']}, lambda p1, p2: {'id': p1}),
+            'calendar_reservations': ("SELECT * FROM calendar_reservations WHERE id = ?", lambda p1, p2: (p1,), lambda d: {'id': d['id']}, lambda p1, p2: {'id': p1}),
+            'mfa_codes': ("SELECT * FROM mfa_codes WHERE email = ?", lambda p1, p2: (p1,), lambda d: {'email': d['email']}, lambda p1, p2: {'email': p1}),
+            'contact_inquiries': ("SELECT * FROM contact_inquiries WHERE id = ?", lambda p1, p2: (int(p1),), lambda d: {'id': d['id']}, lambda p1, p2: {'id': int(p1)}),
+            'analytics_events': ("SELECT * FROM analytics_events WHERE id = ?", lambda p1, p2: (int(p1),), lambda d: {'id': d['id']}, lambda p1, p2: {'id': int(p1)}),
+            'app_settings': ("SELECT * FROM app_settings WHERE key = ?", lambda p1, p2: (p1,), lambda d: {'key': d['key']}, lambda p1, p2: {'key': p1}),
+        }
+
+        ops_by_table = {}
+        deletes_by_table = {}
+        processed = []
+
+        for dr in dirty_rows:
+            tname, pk1, pk2, op = dr[0], dr[1], dr[2], dr[3]
+            spec = pk_lookup.get(tname)
+            if not spec:
+                processed.append((tname, pk1, pk2))
+                continue
+            sql_q, param_fn, key_fn, del_filter_fn = spec
+            if op == 'delete':
+                deletes_by_table.setdefault(tname, []).append(del_filter_fn(pk1, pk2))
+                processed.append((tname, pk1, pk2))
+                continue
+            row = cur.execute(sql_q, param_fn(pk1, pk2)).fetchone()
+            if row is not None:
+                col_names = [desc[0] for desc in cur.description] if cur.description else []
+                raw_doc = {col_names[i]: row[i] for i in range(len(col_names))}
+                doc = _prepare_mongo_doc(tname, raw_doc)
+                if doc is not None:
+                    ops_by_table.setdefault(tname, []).append(UpdateOne(key_fn(doc), {'$set': doc}, upsert=True))
+            processed.append((tname, pk1, pk2))
+
+        for tname, del_filters in deletes_by_table.items():
+            for flt in del_filters:
+                mdb[tname].delete_many(flt)
+
+        for tname, ops in ops_by_table.items():
+            if ops:
+                mdb[tname].bulk_write(ops, ordered=False)
+
+        if processed:
+            cur.executemany("DELETE FROM _sync_dirty WHERE table_name = ? AND pk1 = ? AND pk2 = ?", processed)
+            sqlite3.Connection.commit(conn)
+
+        _MONGO_LAST_SYNCED = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return True, _MONGO_LAST_SYNCED
+    except Exception as e:
+        print(f"[MONGODB INCREMENTAL SYNC WARNING] {e}")
+        return False, str(e)
+    finally:
+        if close_after and conn is not None:
+            conn.close()
+
 def sync_sqlite_to_mongodb(conn=None):
     global _MONGO_LAST_SYNCED
     mdb, err = get_mongo_db()
@@ -997,19 +1088,19 @@ def sync_sqlite_to_mongodb(conn=None):
             col_names = [desc[0] for desc in cur.description] if cur.description else []
             ops = []
             for r in rows:
-                doc = {col_names[i]: r[i] for i in range(len(col_names))}
-                if table_name == 'app_settings':
-                    if doc.get('key') == 'mongodb_uri':
-                        continue
-                    if doc.get('key') in SENSITIVE_SETTINGS_KEYS and doc.get('value'):
-                        doc['value'] = encrypt_sensitive(doc['value'])
-                elif table_name == 'certificates':
-                    for scol in SENSITIVE_CERTIFICATE_COLS:
-                        if doc.get(scol):
-                            doc[scol] = encrypt_sensitive(doc[scol])
+                raw_doc = {col_names[i]: r[i] for i in range(len(col_names))}
+                doc = _prepare_mongo_doc(table_name, raw_doc)
+                if doc is None:
+                    continue
                 ops.append(UpdateOne(key_fn(doc), {'$set': doc}, upsert=True))
             if ops:
                 mdb[table_name].bulk_write(ops, ordered=False)
+
+        try:
+            cur.execute("DELETE FROM _sync_dirty")
+            sqlite3.Connection.commit(conn)
+        except Exception:
+            pass
 
         _MONGO_LAST_SYNCED = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         return True, _MONGO_LAST_SYNCED
@@ -1040,6 +1131,7 @@ def seed_from_mongodb():
                 if not filtered:
                     continue
                 if table_name == 'certificates':
+                    filtered['pdf_base64'] = None
                     for scol in SENSITIVE_CERTIFICATE_COLS:
                         if filtered.get(scol):
                             filtered[scol] = encrypt_sensitive(filtered[scol])
@@ -1052,6 +1144,10 @@ def seed_from_mongodb():
                     tuple(filtered.values())
                 )
 
+        try:
+            cur.execute("DELETE FROM _sync_dirty")
+        except Exception:
+            pass
         conn.commit()
         conn.close()
         _MONGO_LAST_SYNCED = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1084,7 +1180,7 @@ class MongoSyncedConnection(sqlite3.Connection):
     def commit(self):
         super().commit()
         try:
-            sync_sqlite_to_mongodb(conn=self)
+            sync_dirty_rows_to_mongodb(conn=self)
         except Exception:
             pass
 
@@ -1326,6 +1422,93 @@ def init_db():
                 cur.execute("UPDATE app_settings SET value = ? WHERE key = ?", (encrypt_sensitive(sv), sk))
     except Exception as enc_err:
         print(f"[VAULT MIGRATION NOTE] {enc_err}")
+
+    # Prune legacy multi-hundred-KB pdf_base64 blobs after ensuring cert_data_json retains all regenerable fields
+    try:
+        legacy_pdf_rows = cur.execute(
+            "SELECT id, trainee_name, address, city, state, zip, dob, ssn, weight, height, hair, eyes, signature, date_completed, course_type, student_email, cert_data_json FROM certificates WHERE pdf_base64 IS NOT NULL"
+        ).fetchall()
+        for lr in legacy_pdf_rows:
+            lid, lname, laddr, lcity, lstate, lzip, ldob, lssn, lwt, lht, lhair, leyes, lsig, ldate, lctype, lemail, lcjson = lr
+            c_dict = {}
+            if lcjson:
+                try:
+                    c_dict = json.loads(decrypt_sensitive(lcjson))
+                except Exception:
+                    c_dict = {}
+            if not c_dict:
+                c_dict = {
+                    'cert_id': lid,
+                    'name': lname or '',
+                    'address': decrypt_sensitive(laddr) if laddr else '',
+                    'city': lcity or '',
+                    'state': lstate or 'IL',
+                    'zip': lzip or '',
+                    'dob': decrypt_sensitive(ldob) if ldob else '',
+                    'ssn': decrypt_sensitive(lssn) if lssn else '',
+                    'weight': lwt or '',
+                    'height': lht or '',
+                    'hair': lhair or '',
+                    'eyes': leyes or '',
+                    'signature': decrypt_sensitive(lsig) if lsig else '',
+                    'date_completed': ldate or '',
+                    'course_type': lctype or 'unarmed',
+                    'email': lemail or ''
+                }
+            cur.execute(
+                "UPDATE certificates SET cert_data_json = ?, pdf_base64 = NULL WHERE id = ?",
+                (encrypt_sensitive(json.dumps(c_dict)), lid)
+            )
+    except Exception as prune_err:
+        print(f"[CERT PRUNE NOTE] {prune_err}")
+
+    # Dirty-row change queue & SQLite triggers for O(1) single-row MongoDB sync
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS _sync_dirty (
+            table_name TEXT NOT NULL,
+            pk1 TEXT NOT NULL,
+            pk2 TEXT NOT NULL DEFAULT '',
+            op TEXT NOT NULL DEFAULT 'upsert',
+            PRIMARY KEY (table_name, pk1, pk2)
+        )
+    ''')
+
+    trigger_defs = [
+        ("students", "CAST(NEW.id AS TEXT)", "''"),
+        ("progress", "CAST(NEW.student_id AS TEXT)", "CAST(NEW.lesson_id AS TEXT)"),
+        ("exam_results", "CAST(NEW.student_id AS TEXT)", "CAST(COALESCE(NEW.attempt_number, 1) AS TEXT)"),
+        ("certificates", "CAST(NEW.id AS TEXT)", "''"),
+        ("calendar_reservations", "CAST(NEW.id AS TEXT)", "''"),
+        ("mfa_codes", "CAST(NEW.email AS TEXT)", "''"),
+        ("contact_inquiries", "CAST(NEW.id AS TEXT)", "''"),
+        ("analytics_events", "CAST(NEW.id AS TEXT)", "''"),
+        ("app_settings", "CAST(NEW.key AS TEXT)", "''"),
+    ]
+    for tname, pk1_expr, pk2_expr in trigger_defs:
+        cur.execute(f'''
+            CREATE TRIGGER IF NOT EXISTS trg_sync_ins_{tname}
+            AFTER INSERT ON {tname}
+            BEGIN
+                INSERT OR REPLACE INTO _sync_dirty (table_name, pk1, pk2, op)
+                VALUES ('{tname}', {pk1_expr}, {pk2_expr}, 'upsert');
+            END;
+        ''')
+        cur.execute(f'''
+            CREATE TRIGGER IF NOT EXISTS trg_sync_upd_{tname}
+            AFTER UPDATE ON {tname}
+            BEGIN
+                INSERT OR REPLACE INTO _sync_dirty (table_name, pk1, pk2, op)
+                VALUES ('{tname}', {pk1_expr}, {pk2_expr}, 'upsert');
+            END;
+        ''')
+    cur.execute('''
+        CREATE TRIGGER IF NOT EXISTS trg_sync_del_mfa_codes
+        AFTER DELETE ON mfa_codes
+        BEGIN
+            INSERT OR REPLACE INTO _sync_dirty (table_name, pk1, pk2, op)
+            VALUES ('mfa_codes', CAST(OLD.email AS TEXT), '', 'delete');
+        END;
+    ''')
 
     conn.commit()
     conn.close()
@@ -2412,13 +2595,12 @@ def issue_certificate():
     student_email_val = (data.get('email') or (student_id[7:] if str(student_id).lower().startswith('armed::') else (student_id if '@' in str(student_id) else ''))).strip().lower()
 
     if existing and existing['is_locked'] == 1 and not is_armed_req:
-        # Still allow saving the PDF copy into the instructor database if it wasn't saved yet
-        if pdf_base64:
+        if pdf_filename:
             cur.execute('''
                 UPDATE certificates
-                SET pdf_base64 = ?, pdf_filename = COALESCE(NULLIF(?, ''), pdf_filename), updated_at = ?
+                SET pdf_base64 = NULL, pdf_filename = COALESCE(NULLIF(?, ''), pdf_filename), updated_at = ?
                 WHERE LOWER(student_id) = LOWER(?)
-            ''', (pdf_base64, pdf_filename, now_str, student_id))
+            ''', (pdf_filename, now_str, student_id))
             db.commit()
         return jsonify({
             'success': True,
@@ -2456,7 +2638,7 @@ def issue_certificate():
             encrypt_sensitive(data.get('ssn', '')), data.get('weight', ''), data.get('height', ''),
             data.get('hair', ''), data.get('eyes', ''), encrypt_sensitive(data.get('signature', '')),
             data.get('date_completed', ''), encrypt_sensitive(json.dumps(merged_data)),
-            student_email_val, instr_done, pdf_base64, pdf_filename, now_str, student_id
+            student_email_val, instr_done, None, pdf_filename, now_str, student_id
         ))
     else:
         # Insert new certificate (Unarmed completed certificate or Armed Part 1 Trainee submission)
@@ -2475,7 +2657,7 @@ def issue_certificate():
             encrypt_sensitive(data.get('dob', '')), encrypt_sensitive(data.get('ssn', '')), data.get('weight', ''),
             data.get('height', ''), data.get('hair', ''), data.get('eyes', ''),
             encrypt_sensitive(data.get('signature', '')), data.get('date_completed', ''), now_str, encrypt_sensitive(cert_json_str),
-            course_type_val, student_email_val, pdf_base64 or None, pdf_filename or None,
+            course_type_val, student_email_val, None, pdf_filename or None,
             instr_done, now_str
         ))
 
@@ -2555,9 +2737,9 @@ def email_unarmed_certificate():
         if existing:
             cur.execute('''
                 UPDATE certificates
-                SET pdf_base64 = ?, pdf_filename = ?, student_email = ?, emailed_to_student = 1, instructor_completed = 1, updated_at = ?
+                SET pdf_base64 = NULL, pdf_filename = ?, student_email = ?, emailed_to_student = 1, instructor_completed = 1, updated_at = ?
                 WHERE LOWER(student_id) = LOWER(?)
-            ''', (pdf_base64, filename, student_email, now_str, target_sid))
+            ''', (filename, student_email, now_str, target_sid))
         else:
             cur.execute('''
                 INSERT INTO certificates (
@@ -2566,14 +2748,14 @@ def email_unarmed_certificate():
                     date_completed, issued_at, is_locked, cert_data_json,
                     course_type, student_email, pdf_base64, pdf_filename,
                     instructor_completed, emailed_to_student, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'unarmed', ?, ?, ?, 1, 1, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'unarmed', ?, NULL, ?, 1, 1, ?)
             ''', (
                 cert_id, target_sid, student_name, encrypt_sensitive(data.get('address', '')),
                 data.get('city', ''), data.get('state', 'IL'), data.get('zip', ''),
                 encrypt_sensitive(data.get('dob', '')), encrypt_sensitive(data.get('ssn', '')), data.get('weight', ''),
                 data.get('height', ''), data.get('hair', ''), data.get('eyes', ''),
                 encrypt_sensitive(data.get('signature', '')), date_completed, now_str, encrypt_sensitive(json.dumps(meta_dict)),
-                student_email, pdf_base64, filename, now_str
+                student_email, filename, now_str
             ))
         db.commit()
         sync_to_cloud_json()
@@ -2725,7 +2907,7 @@ def admin_save_armed_certificate():
             encrypt_sensitive(cert_data.get('ssn', '')), cert_data.get('weight', ''), cert_data.get('height', ''),
             cert_data.get('hair', ''), cert_data.get('eyes', ''), encrypt_sensitive(cert_data.get('signature', '')),
             cert_data.get('date_training_completed', '') or cert_data.get('trainee_date', ''),
-            cert_json_str, clean_email, instr_done, pdf_base64, pdf_filename, now_str, student_id
+            cert_json_str, clean_email, instr_done, None, pdf_filename, now_str, student_id
         ))
     else:
         cur.execute('''
@@ -2742,7 +2924,7 @@ def admin_save_armed_certificate():
             encrypt_sensitive(cert_data.get('dob', '')), encrypt_sensitive(cert_data.get('ssn', '')), cert_data.get('weight', ''),
             cert_data.get('height', ''), cert_data.get('hair', ''), cert_data.get('eyes', ''),
             encrypt_sensitive(cert_data.get('signature', '')), cert_data.get('date_training_completed', '') or now_str,
-            now_str, cert_json_str, clean_email, pdf_base64 or None, pdf_filename or None, instr_done, now_str
+            now_str, cert_json_str, clean_email, None, pdf_filename or None, instr_done, now_str
         ))
 
     db.commit()
@@ -2815,13 +2997,13 @@ def admin_send_armed_certificate_email():
                 UPDATE certificates SET
                     trainee_name = ?, date_completed = ?, cert_data_json = ?,
                     course_type = 'armed', student_email = ?, idfpr_email = ?,
-                    pdf_base64 = ?, pdf_filename = ?,
+                    pdf_base64 = NULL, pdf_filename = ?,
                     instructor_completed = 1, emailed_to_student = 1, emailed_to_idfpr = 1,
                     updated_at = ?
                 WHERE LOWER(student_id) = LOWER(?)
             ''', (
                 student_name, date_completed, encrypt_sensitive(json.dumps(cert_data)),
-                student_email, idfpr_email, pdf_base64, filename, now_str, student_id
+                student_email, idfpr_email, filename, now_str, student_id
             ))
         else:
             cur.execute('''
@@ -2831,14 +3013,14 @@ def admin_send_armed_certificate_email():
                     date_completed, issued_at, is_locked, cert_data_json,
                     course_type, student_email, idfpr_email, pdf_base64, pdf_filename,
                     instructor_completed, emailed_to_student, emailed_to_idfpr, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'armed', ?, ?, ?, ?, 1, 1, 1, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 'armed', ?, ?, NULL, ?, 1, 1, 1, ?)
             ''', (
                 cert_id, student_id, student_name, encrypt_sensitive(cert_data.get('address', '')),
                 cert_data.get('city', ''), cert_data.get('state', 'IL'), cert_data.get('zip', ''),
                 encrypt_sensitive(cert_data.get('dob', '')), encrypt_sensitive(cert_data.get('ssn', '')), cert_data.get('weight', ''),
                 cert_data.get('height', ''), cert_data.get('hair', ''), cert_data.get('eyes', ''),
                 encrypt_sensitive(cert_data.get('signature', '')), date_completed, now_str, encrypt_sensitive(json.dumps(cert_data)),
-                student_email, idfpr_email, pdf_base64, filename, now_str
+                student_email, idfpr_email, filename, now_str
             ))
         db.commit()
         sync_to_cloud_json()
@@ -2905,13 +3087,46 @@ Recipients: {', '.join(recipients)}
 
 
 # 9D. Instructor Certificate Database Endpoints (List & Download Saved Armed/Unarmed Certificates)
+def _hydrate_cert_data_from_row(r):
+    c_obj = {}
+    if r['cert_data_json']:
+        try:
+            c_obj = json.loads(decrypt_sensitive(r['cert_data_json']))
+        except Exception:
+            c_obj = {}
+    if not isinstance(c_obj, dict):
+        c_obj = {}
+    col_fallbacks = {
+        'cert_id': r['id'] or '',
+        'name': r['trainee_name'] or '',
+        'address': decrypt_sensitive(r['address']) if r['address'] else '',
+        'city': r['city'] or '',
+        'state': r['state'] or 'IL',
+        'zip': r['zip'] or '',
+        'dob': decrypt_sensitive(r['dob']) if r['dob'] else '',
+        'ssn': decrypt_sensitive(r['ssn']) if ('ssn' in r.keys() and r['ssn']) else '',
+        'weight': r['weight'] if 'weight' in r.keys() and r['weight'] else '',
+        'height': r['height'] if 'height' in r.keys() and r['height'] else '',
+        'hair': r['hair'] if 'hair' in r.keys() and r['hair'] else '',
+        'eyes': r['eyes'] if 'eyes' in r.keys() and r['eyes'] else '',
+        'signature': decrypt_sensitive(r['signature']) if ('signature' in r.keys() and r['signature']) else '',
+        'date_completed': r['date_completed'] or '',
+        'email': r['student_email'] or ''
+    }
+    for fk, fv in col_fallbacks.items():
+        if not c_obj.get(fk) and fv:
+            c_obj[fk] = fv
+    return c_obj
+
+
 @app.route('/api/admin/certificates', methods=['GET'])
 def admin_list_saved_certificates():
     if not is_admin_request():
         return jsonify({'success': False, 'error': 'Admin authorization required', 'certificates': []}), 401
     db = get_db()
     rows = db.execute('''
-        SELECT id, student_id, trainee_name, address, city, state, zip, dob,
+        SELECT id, student_id, trainee_name, address, city, state, zip, dob, ssn,
+               weight, height, hair, eyes, signature,
                date_completed, issued_at, updated_at, course_type, student_email,
                idfpr_email, pdf_filename, instructor_completed, emailed_to_student,
                emailed_to_idfpr, cert_data_json,
@@ -2921,26 +3136,26 @@ def admin_list_saved_certificates():
     ''').fetchall()
     certs = []
     for r in rows:
-        c_obj = {}
-        if r['cert_data_json']:
-            try:
-                c_obj = json.loads(decrypt_sensitive(r['cert_data_json']))
-            except Exception:
-                c_obj = {}
+        c_obj = _hydrate_cert_data_from_row(r)
         is_armed = (r['course_type'] == 'armed') or str(r['student_id'] or '').lower().startswith('armed::')
+        t_name = r['trainee_name'] or c_obj.get('name') or 'Student'
         certs.append({
             'id': r['id'],
+            'cert_id': r['id'],
             'student_id': r['student_id'],
-            'trainee_name': r['trainee_name'],
+            'trainee_name': t_name,
+            'student_name': t_name,
             'course_type': 'armed' if is_armed else 'unarmed',
             'form_code': 'IL486-1138 (28-Hr Armed)' if is_armed else 'IL486-0486 (20-Hr Unarmed)',
             'student_email': r['student_email'] or c_obj.get('email') or '',
             'idfpr_email': r['idfpr_email'] or ('FPR.SafetyUnit@illinois.gov' if is_armed else ''),
-            'date_completed': r['date_completed'] or '',
+            'date_completed': r['date_completed'] or c_obj.get('date_completed') or '',
             'issued_at': r['issued_at'] or '',
             'updated_at': r['updated_at'] or r['issued_at'] or '',
-            'has_pdf': bool(r['has_pdf']),
-            'pdf_filename': r['pdf_filename'] or (f"IDFPR_Armed_Certificate_IL486-1138_{(r['trainee_name'] or 'Student').replace(' ', '_')}.pdf" if is_armed else f"Illinois_20Hr_Unarmed_Certificate_{(r['trainee_name'] or 'Student').replace(' ', '_')}.pdf"),
+            'has_pdf': True,
+            'has_legacy_pdf_blob': bool(r['has_pdf']),
+            'storage_mode': 'on_demand_pdf',
+            'pdf_filename': r['pdf_filename'] or (f"IDFPR_Armed_Certificate_IL486-1138_{t_name.replace(' ', '_')}.pdf" if is_armed else f"Illinois_20Hr_Unarmed_Certificate_{t_name.replace(' ', '_')}.pdf"),
             'instructor_completed': bool(r['instructor_completed']) if is_armed else True,
             'emailed_to_student': bool(r['emailed_to_student']),
             'emailed_to_idfpr': bool(r['emailed_to_idfpr']),
@@ -2961,20 +3176,19 @@ def admin_download_saved_certificate(lookup_id):
     ''', (lookup_id, lookup_id, lookup_id)).fetchone()
     if not row:
         return jsonify({'success': False, 'error': 'Certificate not found in Instructor Database'}), 404
-    c_obj = {}
-    if row['cert_data_json']:
-        try:
-            c_obj = json.loads(decrypt_sensitive(row['cert_data_json']))
-        except Exception:
-            c_obj = {}
+    c_obj = _hydrate_cert_data_from_row(row)
+    is_armed = (row['course_type'] == 'armed') or str(row['student_id'] or '').lower().startswith('armed::')
+    t_name = row['trainee_name'] or c_obj.get('name') or 'Student'
     return jsonify({
         'success': True,
+        'id': row['id'],
         'cert_id': row['id'],
         'student_id': row['student_id'],
-        'trainee_name': row['trainee_name'],
-        'course_type': row['course_type'],
+        'trainee_name': t_name,
+        'student_name': t_name,
+        'course_type': 'armed' if is_armed else 'unarmed',
         'pdf_base64': row['pdf_base64'] or '',
-        'pdf_filename': row['pdf_filename'] or f"Official_Certificate_{(row['trainee_name'] or 'Student').replace(' ', '_')}.pdf",
+        'pdf_filename': row['pdf_filename'] or (f"IDFPR_Armed_Certificate_IL486-1138_{t_name.replace(' ', '_')}.pdf" if is_armed else f"Illinois_20Hr_Unarmed_Certificate_{t_name.replace(' ', '_')}.pdf"),
         'cert_data': c_obj
     })
 
@@ -3451,6 +3665,8 @@ def _get_mongodb_status_payload():
         'connected': connected,
         'encryption_active': True,
         'encryption_scheme': 'ENCv1 (PBKDF2-HMAC-SHA256 + CTR + HMAC-SHA256)',
+        'sync_mode': 'Incremental Single-Row Dirty Sync (On-Demand PDF Engine)',
+        'estimated_certificate_capacity': '25,000+ permanent certificates (512 MB Free Tier)',
         'last_synced': _MONGO_LAST_SYNCED,
         'error': err if not connected else None,
         'collections': counts

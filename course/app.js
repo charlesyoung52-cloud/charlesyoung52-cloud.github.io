@@ -3075,7 +3075,6 @@ class SecurityCourseApp {
             email: emailKey,
             cert_id: certPayload.certId,
             course_type: 'unarmed',
-            pdf_base64: certPayload.base64Pdf,
             pdf_filename: certPayload.filename,
             ...certPayload.fields
         };
@@ -3083,6 +3082,7 @@ class SecurityCourseApp {
             if (emailKey) {
                 localStorage.setItem('platforms_saved_unarmed_cert_' + emailKey, JSON.stringify({
                     ...record,
+                    cert_data: certPayload.fields,
                     saved_at: new Date().toISOString()
                 }));
             }
