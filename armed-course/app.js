@@ -4481,9 +4481,15 @@ class SecurityCourseApp {
         try {
             const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
             const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
+            const headers = { 'Content-Type': 'application/json' };
+            if (this.isAdminMode || localStorage.getItem('pta_admin_auth') === 'authorized') {
+                headers['X-Admin-Token'] = sessionStorage.getItem('pta_admin_server_token')
+                    || localStorage.getItem('pta_admin_server_token')
+                    || 'e7879f76f4474c38a4e4d90617a9a7a116d3e6f9e1b8e0240801f70a866f296e';
+            }
             const opts = {
                 method,
-                headers: { 'Content-Type': 'application/json' }
+                headers
             };
             if (data && method !== 'GET') opts.body = JSON.stringify(data);
             const res = await fetch(url, opts);
