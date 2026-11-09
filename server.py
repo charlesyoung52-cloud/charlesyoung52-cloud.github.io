@@ -651,6 +651,13 @@ def send_email_via_emailjs(to_email, subject, headline, student_name, student_em
     cfg = get_emailjs_config()
     if not cfg.get('service_id') or not cfg.get('template_id') or not cfg.get('public_key'):
         return False, "EmailJS configuration missing"
+
+    # CRITICAL BRAND & SECURITY GUARD:
+    # Never send rich transactional course emails or alerts through the 6-digit MFA OTP template (template_0k00oka)
+    if cfg.get('template_id') == 'template_0k00oka' and not str(summary_code).strip().isdigit():
+        print(f"[EmailJS Guard] Blocked non-MFA course email to {to_email} via OTP template {cfg.get('template_id')}.")
+        return False, "EmailJS OTP template (template_0k00oka) is reserved strictly for 6-digit MFA login codes. Please configure SMTP in Admin Settings for rich HTML delivery."
+
     import urllib.request
     now_label = datetime.now().strftime('%b %d, %Y %I:%M %p')
     greeting_label = (
@@ -999,13 +1006,29 @@ Students who have not completed the online portion before their in-person range 
 
     subject = f"Class & Payment Confirmation: {course_title} | Platforms Training Academy"
     html_body = f'''
-    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
-        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:24px 28px; border-bottom:2px solid #d4af37; text-align:center;">
-            <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
-                IDFPR Approved Curriculum #102-000398 &bull; 225 ILCS 447
+    <div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif; max-width:640px; margin:0 auto; background:#080a0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #242c3d; box-shadow:0 12px 32px rgba(0,0,0,0.5);">
+        <!-- Luxury Tactical Academy Header with Official Full-Color Logo -->
+        <div style="background:linear-gradient(180deg,#121620 0%,#080a0d 100%); padding:28px 24px 22px 24px; border-bottom:3px solid #d4af37; text-align:center;">
+            <div style="margin-bottom:14px;">
+                <a href="https://platformstraining.com" target="_blank" style="text-decoration:none;">
+                    <img src="https://platformstraining.com/assets/logo_full_color.png" alt="Platforms Training Academy" width="220" style="display:inline-block; max-width:220px; width:100%; height:auto; border:0; outline:none;" />
+                </a>
             </div>
-            <h1 style="color:#ffffff; font-size:22px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">Official Class Registration &amp; Tuition Payment Confirmation</p>
+            <div style="display:inline-block; background:rgba(212,175,55,0.12); color:#e5c158; border:1px solid rgba(212,175,55,0.45); padding:5px 14px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">
+                IDFPR APPROVED CURRICULUM #102-000398 &bull; 225 ILCS 447
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; font-weight:800; margin:4px 0 4px 0; letter-spacing:0.5px; text-transform:uppercase;">
+                Official Class Registration &amp; Tuition Receipt
+            </h1>
+            <p style="color:#94a3b8; font-size:12.5px; margin:0; letter-spacing:0.3px;">
+                Platforms Training Academy &bull; Lead Instructor Charles Young (#263-000693)
+            </p>
+        </div>
+        <!-- Customer Trust Verification Bar -->
+        <div style="background:#0e121a; padding:9px 18px; border-bottom:1px solid #1e2535; text-align:center; font-size:11.5px; color:#cbd5e1;">
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> State-Licensed Academy</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Official IDFPR Certificate</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Encrypted Student Record</span>
         </div>
         <div style="padding:26px 28px;">
             <p style="font-size:16px; color:#ffffff; margin-top:0;">Welcome, <strong>{student_name}</strong>!</p>
@@ -1111,13 +1134,29 @@ Online Portal: https://platformstraining.com/armed-course/
 '''
 
     html_body = f'''
-    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
-        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:24px 28px; border-bottom:2px solid #d4af37; text-align:center;">
-            <div style="display:inline-block; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid #f59e0b; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
-                Upcoming In-Person Qualification Reminder (2 Days Prior)
+    <div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif; max-width:640px; margin:0 auto; background:#080a0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #242c3d; box-shadow:0 12px 32px rgba(0,0,0,0.5);">
+        <!-- Luxury Tactical Academy Header with Official Full-Color Logo -->
+        <div style="background:linear-gradient(180deg,#121620 0%,#080a0d 100%); padding:28px 24px 22px 24px; border-bottom:3px solid #d4af37; text-align:center;">
+            <div style="margin-bottom:14px;">
+                <a href="https://platformstraining.com" target="_blank" style="text-decoration:none;">
+                    <img src="https://platformstraining.com/assets/logo_full_color.png" alt="Platforms Training Academy" width="220" style="display:inline-block; max-width:220px; width:100%; height:auto; border:0; outline:none;" />
+                </a>
             </div>
-            <h1 style="color:#ffffff; font-size:22px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor: Charles Young</p>
+            <div style="display:inline-block; background:rgba(245,158,11,0.16); color:#fbbf24; border:1px solid rgba(245,158,11,0.5); padding:5px 14px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">
+                IN-PERSON RANGE QUALIFICATION REMINDER (2 DAYS PRIOR)
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; font-weight:800; margin:4px 0 4px 0; letter-spacing:0.5px; text-transform:uppercase;">
+                Live-Fire Range Session Reminder
+            </h1>
+            <p style="color:#94a3b8; font-size:12.5px; margin:0; letter-spacing:0.3px;">
+                IDFPR Approved Curriculum #102-000398 &bull; Lead Instructor Charles Young (#263-000693)
+            </p>
+        </div>
+        <!-- Customer Trust Verification Bar -->
+        <div style="background:#0e121a; padding:9px 18px; border-bottom:1px solid #1e2535; text-align:center; font-size:11.5px; color:#cbd5e1;">
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Eagle Sports Range</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Ammo &amp; Targets Included</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> State-Licensed Instruction</span>
         </div>
         <div style="padding:26px 28px;">
             <p style="font-size:16px; color:#ffffff; margin-top:0;">Hello <strong>{student_name}</strong>,</p>
@@ -1188,13 +1227,29 @@ def build_thank_you_google_review_email(student_name, course_title="", google_re
 
     subject = f"Congratulations & Thank You from Platforms Training Academy! (Leave a Quick Google Review)"
     html_body = f'''
-    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
-        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:26px 28px; border-bottom:2px solid #d4af37; text-align:center;">
-            <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
-                Official Graduate &bull; IDFPR Approved Curriculum #102-000398
+    <div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif; max-width:640px; margin:0 auto; background:#080a0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #242c3d; box-shadow:0 12px 32px rgba(0,0,0,0.5);">
+        <!-- Luxury Tactical Academy Header with Official Full-Color Logo -->
+        <div style="background:linear-gradient(180deg,#121620 0%,#080a0d 100%); padding:28px 24px 22px 24px; border-bottom:3px solid #d4af37; text-align:center;">
+            <div style="margin-bottom:14px;">
+                <a href="https://platformstraining.com" target="_blank" style="text-decoration:none;">
+                    <img src="https://platformstraining.com/assets/logo_full_color.png" alt="Platforms Training Academy" width="220" style="display:inline-block; max-width:220px; width:100%; height:auto; border:0; outline:none;" />
+                </a>
             </div>
-            <h1 style="color:#ffffff; font-size:23px; margin:4px 0 0 0; letter-spacing:0.5px;">CONGRATULATIONS, {student_name.upper()}!</h1>
-            <p style="color:#cbd5e1; font-size:13px; margin:6px 0 0 0;">Thank You for Training with Platforms Training Academy</p>
+            <div style="display:inline-block; background:rgba(74,222,128,0.14); color:#4ade80; border:1px solid rgba(74,222,128,0.45); padding:5px 14px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">
+                OFFICIAL GRADUATE &bull; IDFPR APPROVED CURRICULUM #102-000398
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; font-weight:800; margin:4px 0 4px 0; letter-spacing:0.5px; text-transform:uppercase;">
+                Congratulations On Completing Your Training!
+            </h1>
+            <p style="color:#94a3b8; font-size:12.5px; margin:0; letter-spacing:0.3px;">
+                Platforms Training Academy &bull; Lead Instructor Charles Young (#263-000693)
+            </p>
+        </div>
+        <!-- Customer Trust Verification Bar -->
+        <div style="background:#0e121a; padding:9px 18px; border-bottom:1px solid #1e2535; text-align:center; font-size:11.5px; color:#cbd5e1;">
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Certificate Issued</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> State-Certified Graduate</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Permanent Record Archived</span>
         </div>
         <div style="padding:26px 28px;">
             <p style="font-size:15px; color:#ffffff; margin-top:0;">Dear <strong>{student_name}</strong>,</p>
