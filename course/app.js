@@ -152,7 +152,10 @@ class SecurityCourseApp {
         this.colAnswers = {}; // { [lessonId]: { [qIdx]: bool } }
         this.scenarioSelections = {}; // { [lessonId]: optionIndex }
 
-        // Trainee certificate form data (clean defaults requiring valid student sign-in)
+        // Purge any legacy plaintext SSN from browser localStorage
+        try { localStorage.removeItem('platforms_student_ssn'); } catch (e) {}
+
+        // Trainee certificate form data (clean defaults requiring valid student sign-in; SSN is kept in memory only, never persisted in localStorage)
         this.studentCertData = {
             name: localStorage.getItem('platforms_student_name') || '',
             address: localStorage.getItem('platforms_student_address') || '',
@@ -160,7 +163,7 @@ class SecurityCourseApp {
             state: localStorage.getItem('platforms_student_state') || 'IL',
             zip: localStorage.getItem('platforms_student_zip') || '',
             dob: localStorage.getItem('platforms_student_dob') || '',
-            ssn: localStorage.getItem('platforms_student_ssn') || '',
+            ssn: '',
             weight: localStorage.getItem('platforms_student_weight') || '',
             height: localStorage.getItem('platforms_student_height') || '',
             hair: localStorage.getItem('platforms_student_hair') || '',
@@ -304,7 +307,7 @@ class SecurityCourseApp {
             moduleSections: this.moduleSections,
             colAnswers: this.colAnswers,
             scenarioSelections: this.scenarioSelections,
-            studentCertData: this.studentCertData,
+            studentCertData: { ...this.studentCertData, ssn: '' },
             studentEmail: this.studentEmail,
             studentAgency: this.studentAgency,
             lastSavedTimestamp: this.lastSavedTimestamp,
@@ -359,7 +362,8 @@ class SecurityCourseApp {
                     if (state.studentCertData.name === 'DOE, JOHN A.') {
                         state.studentCertData.name = '';
                     }
-                    this.studentCertData = { ...this.studentCertData, ...state.studentCertData };
+                    // Never restore plaintext SSN from localStorage
+                    this.studentCertData = { ...this.studentCertData, ...state.studentCertData, ssn: this.studentCertData.ssn || '' };
                 }
                 this.studentEmail = state.studentEmail || this.studentEmail;
                 this.studentAgency = state.studentAgency || this.studentAgency;
@@ -1661,6 +1665,9 @@ class SecurityCourseApp {
             } catch (err) {
                 console.warn("Sign-out save warning:", err);
             }
+            if (this.studentCertData) this.studentCertData.ssn = '';
+            const ssnEl = document.getElementById('cert-input-ssn');
+            if (ssnEl) ssnEl.value = '';
             sessionStorage.removeItem('platforms_officer_logged_in');
             localStorage.removeItem('platforms_officer_logged_in');
             this.closeLoginModal();
@@ -3224,14 +3231,18 @@ class SecurityCourseApp {
             ...certPayload.fields
         };
         try {
+            const rawSsnDigits = String(certPayload.fields.ssn || '').replace(/\D/g, '');
+            const maskedSsn = rawSsnDigits.length >= 4 ? ('***-**-' + rawSsnDigits.slice(-4)) : '';
+            const sanitizedLocalFields = { ...certPayload.fields, ssn: maskedSsn };
             if (emailKey) {
                 localStorage.setItem('platforms_saved_unarmed_cert_' + emailKey, JSON.stringify({
                     ...record,
-                    cert_data: certPayload.fields,
+                    ssn: maskedSsn,
+                    cert_data: sanitizedLocalFields,
                     saved_at: new Date().toISOString()
                 }));
             }
-            // Update local registry so Admin Portal sees the saved Unarmed certificate even offline
+            // Update local registry so Admin Portal sees the saved Unarmed certificate even offline (with SSN masked locally)
             const regRaw = localStorage.getItem('platforms_student_registry');
             if (regRaw) {
                 const reg = JSON.parse(regRaw);
@@ -3241,7 +3252,7 @@ class SecurityCourseApp {
                         reg[idx].cert_id = certPayload.certId;
                         reg[idx].has_saved_cert_pdf = true;
                         reg[idx].cert_filename = certPayload.filename;
-                        reg[idx].unarmed_cert_data = certPayload.fields;
+                        reg[idx].unarmed_cert_data = sanitizedLocalFields;
                         localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
                     }
                 }

@@ -1,0 +1,32 @@
+ANTIGRAVITY MULTI-PC GITHUB SYNC — OTHER PC SETUP GUIDE
+=========================================================
+
+STEP 1: Install Antigravity & Python
+1. Install Antigravity from https://antigravity.google/download and sign in with your Google account.
+2. Make sure Python 3 is installed (you do NOT need to install Git manually — the sync script automatically downloads portable MinGit on the first run if Git is missing).
+
+STEP 2: Run the Sync Script Once (--pull)
+- If OneDrive is signed in on the other PC:
+  sync_all_projects.py and Sync_All_Antigravity_Projects.bat are already on your Desktop inside:
+  Desktop\Platforms Desktop\Antigravity\Online Course\
+  Simply double-click Sync_All_Antigravity_Projects.bat!
+- If OneDrive is not on the other PC:
+  Download sync_all_projects.py from https://github.com/charlesyoung52-cloud/personal-workspace and run in PowerShell:
+    python sync_all_projects.py --pull
+
+What happens on first run:
+- Automatically downloads & configures portable MinGit if Git is missing.
+- Prompts once for your two GitHub Personal Access Tokens (charlesyoung52-cloud and acbcharles) and saves them locally to ~/.gemini/antigravity_sync_tokens.json.
+- Clones and syncs all 14 private repositories:
+  * Uses D:\... paths if the other PC has a D: drive.
+  * Automatically falls back to C:\Users\<your-user>\AntigravityProjects\... if it only has a C: drive.
+
+STEP 3: Copy Your Local .env Secret Files (One-Time)
+Copy your local .env files (e.g., D:\ACB\Website\.env and Online Course\env\.env), credentials.json, and cargowise_config.json once via USB or password manager into the matching project folders on the other PC.
+
+STEP 4: Open Your Projects in Antigravity
+Click Projects in the left sidebar of Antigravity and open the synced project folders (starting with Personal).
+
+DAILY ROUTINE WHEN SWITCHING PCS:
+- Starting work on a PC: Double-click Sync_All_Antigravity_Projects.bat (or run: python sync_all_projects.py --pull)
+- Finishing work on a PC: Double-click Sync_All_Antigravity_Projects.bat (or run: python sync_all_projects.py --push)
