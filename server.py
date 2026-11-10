@@ -789,12 +789,17 @@ def build_instructor_notification_email(category, event_label, student_name, stu
 
     html_body = f"""
     <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
-        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 26px; border-bottom:2px solid #d4af37; text-align:center;">
+        <div style="background:linear-gradient(180deg,#121620 0%,#080a0d 100%); padding:24px 24px 18px 24px; border-bottom:2px solid #d4af37; text-align:center;">
+            <div style="margin-bottom:12px;">
+                <a href="https://platformstraining.com" target="_blank" style="text-decoration:none;">
+                    <img src="https://platformstraining.com/assets/logo_full_color.png" alt="Platforms Training Academy" width="180" style="display:inline-block; max-width:180px; width:100%; height:auto; border:0; outline:none;" />
+                </a>
+            </div>
             <div style="display:inline-block; background:{badge_bg}; color:{badge_color}; border:1px solid {badge_border}; padding:4px 12px; border-radius:999px; font-size:11.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
                 {badge_text}
             </div>
-            <h1 style="color:#ffffff; font-size:21px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">Automated Instructor Notification &bull; {submitted_at}</p>
+            <h1 style="color:#ffffff; font-size:20px; font-weight:800; margin:4px 0 0 0; letter-spacing:0.5px; text-transform:uppercase;">NEW STUDENT ENROLLMENT ALERT</h1>
+            <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">Platforms Training Academy &bull; {submitted_at}</p>
         </div>
         <div style="padding:24px 26px;">
             <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:16px 18px; margin-bottom:18px;">
