@@ -955,54 +955,177 @@ def resolve_course_location(course_id="", course_title="", raw_location=""):
 def build_class_payment_confirmation_email(student_name, course_title, class_date="", class_time="", location="", price="", confirmation_id="", course_id=""):
     student_name = student_name or "Student Officer"
     course_title = course_title or "IDFPR Security / Firearms Training Course"
-    is_armed = ("armed" in course_title.lower() and "unarmed" not in course_title.lower()) or str(course_id).lower() == "armed-28"
-    is_unarmed = "unarmed" in course_title.lower() or str(course_id).lower() == "unarmed-20"
+    cid = str(course_id or "").strip().lower()
+    ctitle_lower = course_title.lower()
 
-    if is_armed:
-        class_date = class_date or "Selected In-Person Range Qualification Date"
-        class_time = class_time or "9:00 AM – 5:00 PM (In-Person Range Qualification)"
-    elif is_unarmed:
+    is_unarmed = "unarmed" in ctitle_lower or cid == "unarmed-20"
+    is_armed = ("armed" in ctitle_lower and not is_unarmed) or cid == "armed-28"
+    is_requal = "requal" in ctitle_lower or "upgrade" in ctitle_lower or cid in ("firearm-requal", "firearm-upgrade")
+    is_ccl = "ccl" in ctitle_lower or "concealed" in ctitle_lower or cid.startswith("ccl-")
+
+    # Set default dates and times per course type
+    if is_unarmed:
         class_date = class_date or "24/7 Self-Paced Online Portal"
         class_time = class_time or "Self-Paced Online Access"
+        date_row_label = "Class Format:"
+    elif is_armed:
+        class_date = class_date or "Selected In-Person Range Qualification Date"
+        class_time = class_time or "9:00 AM – 5:00 PM (In-Person Range Qualification)"
+        date_row_label = "Chosen Range Date:"
+    elif is_requal:
+        class_date = class_date or "Selected In-Person Range Date"
+        class_time = class_time or "9:00 AM – 5:00 PM (Live-Fire Range Qualification)"
+        date_row_label = "Scheduled Range Date:"
+    elif is_ccl:
+        class_date = class_date or "Scheduled Class & Range Date"
+        class_time = class_time or "9:00 AM – 5:00 PM"
+        date_row_label = "Scheduled Session Date:"
     else:
         class_date = class_date or "Scheduled Session Date"
         class_time = class_time or "9:00 AM – 5:00 PM"
+        date_row_label = "Scheduled Date:"
 
     location = resolve_course_location(course_id=course_id, course_title=course_title, raw_location=location)
     price = price or "Paid / Confirmed"
     confirmation_id = confirmation_id or ("PTA-" + datetime.now().strftime("%Y%m%d%H%M"))
 
-    portal_url = "https://platformstraining.com/armed-course/" if is_armed else ("https://platformstraining.com/course/" if is_unarmed else "https://platformstraining.com/calendar.html")
-    portal_btn_text = "Launch 28-Hour Online Armed Portal Now" if is_armed else ("Launch 20-Hour Online Unarmed Portal" if is_unarmed else "View Class Schedule & Details")
-    date_row_label = "Chosen In-Person Range Date:" if is_armed else "Scheduled Date:"
+    # Google Maps URL resolution
+    if "75th" in location.lower():
+        maps_query = "Platforms+Training+Academy+200+E+75th+St+Chicago+IL+60619"
+    elif "eagle" in location.lower() or "159th" in location.lower():
+        maps_query = "Eagle+Sports+Range+5900+W+159th+St+Oak+Forest+IL+60452"
+    else:
+        maps_query = location.replace(" ", "+")
+    maps_url = "https://www.google.com/maps/search/?api=1&query=" + maps_query
 
-    armed_mandatory_online_callout = ""
-    armed_mandatory_text_block = ""
-    if is_armed:
-        armed_mandatory_online_callout = f'''
-            <div style="background:rgba(239,68,68,0.14); border:2px solid #ef4444; border-radius:8px; padding:16px 18px; margin:18px 0;">
-                <div style="font-size:13px; font-weight:800; color:#fca5a5; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
-                    &#9888; MANDATORY: COMPLETE ONLINE PORTION BEFORE YOUR IN-PERSON RANGE QUALIFICATION
+    # Tailor Portal URLs, Buttons, Accreditation, Trust Bars, and Callouts per Course
+    if is_unarmed:
+        accreditation_badge = "IDFPR APPROVED CURRICULUM #102-000398 &bull; 225 ILCS 447"
+        trust_badges_html = """
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> 100% Online &amp; Self-Paced</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Official IDFPR Form IL486-0486</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Instant Certificate Issuance</span>
+        """
+        callout_html = f"""
+            <div style="background:rgba(74,222,128,0.12); border:2px solid #4ade80; border-radius:8px; padding:16px 18px; margin:18px 0;">
+                <div style="font-size:13px; font-weight:800; color:#86efac; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+                    &#10003; 100% ONLINE COURSE &bull; STUDY 24/7 FROM ANY DEVICE &bull; NO RANGE REQUIRED
                 </div>
                 <div style="font-size:13.5px; color:#ffffff; line-height:1.6;">
-                    You <strong>MUST complete 100% of the online portion</strong> of the 28-Hour Armed Security Course <strong>BEFORE</strong> arriving at Eagle Sports Range for your chosen in-person range qualification date (<strong>{class_date}</strong>):
+                    Welcome to the <strong>20-Hour Online Unarmed Security Officer Course</strong>! You have immediate 24/7 access to all 10 interactive modules and the untimed 50-question final exam. Your progress saves automatically, and your official <strong>IDFPR Certificate of Completion (Form IL486-0486)</strong> is issued immediately upon passing.
+                </div>
+            </div>
+        """
+        checklist_html = """
+            <li><strong>Self-Paced 24/7 Online Access:</strong> Study from any smartphone, tablet, laptop, or desktop computer. You can log out anytime and resume right where you left off.</li>
+            <li><strong>10 Comprehensive Interactive Modules:</strong> Covers Illinois Security Law (225 ILCS 447), Use of Force, Patrol Tactics, Arrest &amp; Search, Fire Safety, and Conflict De-escalation.</li>
+            <li><strong>Untimed Final Examination:</strong> 50 multiple-choice questions with unlimited free retakes.</li>
+            <li><strong>Official IDFPR Certificate:</strong> Upon passing (75%+), your official certificate is stamped with Lead Instructor Charles Young's credentials (#263-000693) and is immediately available to download and email.</li>
+        """
+        portal_btn_text = "Launch 20-Hour Online Unarmed Portal Now"
+        portal_url = "https://platformstraining.com/course/"
+
+    elif is_armed:
+        accreditation_badge = "IDFPR APPROVED CURRICULUM #102-000398 &bull; 225 ILCS 447"
+        trust_badges_html = """
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> 20-Hr Online + Range Qual</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Ammo &amp; Targets Included</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Official IDFPR Form IL486-1138</span>
+        """
+        callout_html = f"""
+            <div style="background:rgba(239,68,68,0.14); border:2px solid #ef4444; border-radius:8px; padding:16px 18px; margin:18px 0;">
+                <div style="font-size:13px; font-weight:800; color:#fca5a5; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+                    &#9888; MANDATORY REQUIREMENT: COMPLETE ONLINE CLASSROOM BEFORE RANGE DAY ({class_date})
+                </div>
+                <div style="font-size:13.5px; color:#ffffff; line-height:1.6;">
+                    Illinois state regulations require you to <strong>complete 100% of the online classroom coursework BEFORE arriving at Eagle Sports Range</strong> for your chosen in-person range qualification date:
                     <ul style="margin:8px 0 8px 0; padding-left:18px; color:#f1f5f9;">
                         <li>Complete all <strong>10 Online Armed Training Modules</strong> (20-Hour Classroom Portion)</li>
                         <li>Pass the <strong>Untimed 50-Question Written Final Examination</strong> (75% or higher)</li>
-                        <li>Complete and save <strong>Part 1 (Trainee Section) of Official IDFPR Form IL486-1138</strong> inside the portal</li>
+                        <li>Complete and save <strong>Part 1 (Trainee Section) of Official IDFPR Form IL486-1138</strong> inside your online portal</li>
                     </ul>
-                    <span style="color:#fde68a; font-weight:700;">Important: Students who have not completed the online portion prior to their chosen in-person range qualification date will not be permitted on the firing line.</span>
+                    <span style="color:#fde68a; font-weight:700;">Important: Trainees who have not completed the online portion prior to range day will not be permitted on the firing line.</span>
                 </div>
             </div>
-        '''
-        armed_mandatory_text_block = f'''
-IMPORTANT - MANDATORY REQUIREMENT BEFORE IN-PERSON RANGE QUALIFICATION ({class_date}):
-You MUST complete 100% of the online portion of the 28-Hour Armed Security Course BEFORE arriving at Eagle Sports Range for your chosen in-person range qualification date:
-1. Complete all 10 Online Armed Training Modules.
-2. Pass the Untimed 50-Question Written Final Exam (75%+).
-3. Complete and save Part 1 (Trainee Section) of Official IDFPR Form IL486-1138 in the portal.
-Students who have not completed the online portion before their in-person range qualification will not be permitted on the firing line.
-'''
+        """
+        checklist_html = """
+            <li><strong>Online Portion Must Be Completed First:</strong> Ensure all 10 modules, the 50-question exam, and Form IL486-1138 Part 1 are submitted in the portal prior to range day.</li>
+            <li><strong>Bring Valid Government Photo ID:</strong> Driver's License or State ID (and FOID card if applicable).</li>
+            <li><strong>Range Dress Code:</strong> Close-toed shoes, crew-neck shirt, long pants, and a sturdy belt.</li>
+            <li><strong>Ammunition &amp; Range Fees Included:</strong> Range time, targets, ammunition, and eye/ear protection at Eagle Sports Range are 100% included in your $200.00 tuition.</li>
+            <li><strong>Instructor Sign-Off &amp; Filing:</strong> Lead Instructor Charles Young conducts live-fire scoring, signs Part 2 of Form IL486-1138, and emails your completed certificate to you and IDFPR.</li>
+        """
+        portal_btn_text = "Launch 28-Hour Online Armed Portal Now"
+        portal_url = "https://platformstraining.com/armed-course/"
+
+    elif is_requal:
+        accreditation_badge = "IDFPR LICENSED FIREARM REQUALIFICATION &bull; 68 ILL. ADM. CODE 1240.510"
+        trust_badges_html = """
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Annual Tan Card Requal</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Multi-Weapon Upgrade</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Eagle Sports Range</span>
+        """
+        callout_html = f"""
+            <div style="background:rgba(212,175,55,0.14); border:2px solid #d4af37; border-radius:8px; padding:16px 18px; margin:18px 0;">
+                <div style="font-size:13px; font-weight:800; color:#fbbf24; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+                    &#127919; LIVE-FIRE RANGE QUALIFICATION &bull; EAGLE SPORTS RANGE ({class_date})
+                </div>
+                <div style="font-size:13.5px; color:#ffffff; line-height:1.6;">
+                    Your seat is officially reserved for <strong>{course_title}</strong> at Eagle Sports Range. Please arrive 15 minutes early for mandatory range check-in and instructor safety briefing.
+                </div>
+            </div>
+        """
+        checklist_html = """
+            <li><strong>Required Cards:</strong> Bring your current Illinois PERC Card and Firearm Control Card (Tan Card).</li>
+            <li><strong>Duty Weapon &amp; Gear:</strong> Bring your clean, unloaded duty firearm (in a locked case or box), duty holster, and minimum 50 rounds of factory ammunition.</li>
+            <li><strong>Attire:</strong> Duty uniform or range attire (close-toed shoes, crew-neck shirt, long pants, sturdy belt).</li>
+            <li><strong>State Verification:</strong> Lead Instructor Charles Young (#263-000693) will score your 50-round live-fire qualification and sign your official IDFPR Form IL486-1138 requalification document on site.</li>
+        """
+        portal_btn_text = "Get Driving Directions to Eagle Sports Range"
+        portal_url = maps_url
+
+    elif is_ccl:
+        accreditation_badge = "ILLINOIS STATE POLICE (ISP) APPROVED CCL &bull; 430 ILCS 66"
+        trust_badges_html = """
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> ISP Approved Curriculum</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> 30-Round Live-Fire Qual</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Official ISP Certificate</span>
+        """
+        callout_html = f"""
+            <div style="background:rgba(59,130,246,0.14); border:2px solid #3b82f6; border-radius:8px; padding:16px 18px; margin:18px 0;">
+                <div style="font-size:13px; font-weight:800; color:#93c5fd; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">
+                    &#128737; ILLINOIS CONCEALED CARRY LICENSE (CCL) &bull; ISP CERTIFIED INSTRUCTION
+                </div>
+                <div style="font-size:13.5px; color:#ffffff; line-height:1.6;">
+                    Your enrollment in the <strong>{course_title}</strong> is confirmed. Training includes comprehensive Illinois CCL legal instruction, situational awareness, and the mandatory 30-round live-fire qualification.
+                </div>
+            </div>
+        """
+        checklist_html = """
+            <li><strong>Required Credentials:</strong> Valid Illinois Driver's License or State ID and FOID Card (or proof of application).</li>
+            <li><strong>Firearm &amp; Ammo:</strong> Bring your concealable handgun (unloaded and in a secure case) and at least 30 rounds of factory ammunition (50 rounds recommended).</li>
+            <li><strong>Holster &amp; Attire:</strong> A suitable concealment holster that securely covers the trigger guard. Wear close-toed shoes, crew-neck shirt, and long pants.</li>
+            <li><strong>30-Round Course of Fire:</strong> 10 rounds at 5 yards, 10 rounds at 7 yards, 10 rounds at 10 yards on a B-27 silhouette target (70% passing score).</li>
+            <li><strong>ISP Certificate:</strong> Upon passing, you receive your official Illinois State Police Concealed Carry Training Certificate required to submit your state license application.</li>
+        """
+        portal_btn_text = "View Academy Location & Driving Directions"
+        portal_url = maps_url
+
+    else:
+        accreditation_badge = "IDFPR APPROVED CURRICULUM #102-000398 &bull; 225 ILCS 447"
+        trust_badges_html = """
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> State-Licensed Academy</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Official IDFPR Certificate</span>
+            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Encrypted Student Record</span>
+        """
+        callout_html = ""
+        checklist_html = """
+            <li><strong>Government Photo ID:</strong> Bring your valid Driver's License or State ID.</li>
+            <li><strong>Prompt Arrival:</strong> Arrive 15 minutes before your scheduled start time.</li>
+            <li><strong>Instructor Contact:</strong> Contact Lead Instructor Charles Young at (773) 873-2591 with any questions.</li>
+        """
+        portal_btn_text = "View Class Schedule & Details"
+        portal_url = "https://platformstraining.com/calendar.html"
 
     subject = f"Class & Payment Confirmation: {course_title} | Platforms Training Academy"
     html_body = f'''
@@ -1015,7 +1138,7 @@ Students who have not completed the online portion before their in-person range 
                 </a>
             </div>
             <div style="display:inline-block; background:rgba(212,175,55,0.12); color:#e5c158; border:1px solid rgba(212,175,55,0.45); padding:5px 14px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">
-                IDFPR APPROVED CURRICULUM #102-000398 &bull; 225 ILCS 447
+                {accreditation_badge}
             </div>
             <h1 style="color:#ffffff; font-size:21px; font-weight:800; margin:4px 0 4px 0; letter-spacing:0.5px; text-transform:uppercase;">
                 Official Class Registration &amp; Tuition Receipt
@@ -1026,9 +1149,7 @@ Students who have not completed the online portion before their in-person range 
         </div>
         <!-- Customer Trust Verification Bar -->
         <div style="background:#0e121a; padding:9px 18px; border-bottom:1px solid #1e2535; text-align:center; font-size:11.5px; color:#cbd5e1;">
-            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> State-Licensed Academy</span>
-            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Official IDFPR Certificate</span>
-            <span style="display:inline-block; margin:0 8px;"><strong style="color:#d4af37;">&#10003;</strong> Encrypted Student Record</span>
+            {trust_badges_html}
         </div>
         <div style="padding:26px 28px;">
             <p style="font-size:16px; color:#ffffff; margin-top:0;">Welcome, <strong>{student_name}</strong>!</p>
@@ -1049,13 +1170,11 @@ Students who have not completed the online portion before their in-person range 
                     <tr><td style="padding:5px 0; color:#94a3b8;">Lead Instructor:</td><td style="padding:5px 0; color:#e2e8f0;">Charles Young (State License #263-000693)</td></tr>
                 </table>
             </div>
-            {armed_mandatory_online_callout}
+            {callout_html}
             <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:16px 18px; margin-bottom:22px;">
                 <div style="font-size:13px; font-weight:700; color:#ffffff; margin-bottom:8px;">What You Need to Know:</div>
                 <ul style="margin:0; padding-left:18px; font-size:13px; color:#cbd5e1; line-height:1.65;">
-                    {'''<li><strong>Self-Paced 20-Hour Online Course:</strong> Complete all 10 online modules, interactive scenarios, and the untimed final examination at your own pace from any phone, tablet, or computer. Your official IDFPR Certificate of Completion is issued immediately upon passing!</li>''' if is_unarmed else '''<li><strong>Valid Government Photo ID:</strong> Bring your Driver's License or State ID (and FOID card if attending an Illinois CCL session).</li>
-                    <li><strong>Range Attire (For Live-Fire Qualification):</strong> Wear close-toed shoes, crew-neck shirt, long pants, and a sturdy belt. Ammunition, targets, eye/ear protection, and range fees at Eagle Sports Range are included!</li>
-                    <li><strong>Online Portion Must Be Completed First:</strong> Ensure all online modules, the untimed written exam, and Form IL486-1138 Part 1 are completed in the portal before your chosen in-person range qualification date.</li>'''}
+                    {checklist_html}
                 </ul>
             </div>
             <div style="text-align:center; margin:24px 0;">
@@ -1073,7 +1192,7 @@ Students who have not completed the online portion before their in-person range 
     </div>
     '''
     text_body = f'''PLATFORMS TRAINING ACADEMY - CLASS & PAYMENT CONFIRMATION
-IDFPR Approved Curriculum #102-000398
+{accreditation_badge}
 
 Welcome, {student_name}!
 Your registration and tuition status are confirmed:
@@ -1084,8 +1203,8 @@ Your registration and tuition status are confirmed:
 - Time: {class_time}
 - Location: {location}
 - Lead Instructor: Charles Young (#263-000693)
-{armed_mandatory_text_block}
-Access Portal: {portal_url}
+
+Access Link: {portal_url}
 Questions? Call (773) 873-2591 or email charlesyoung@platformstraining.com
 '''
     return subject, html_body, text_body
