@@ -1680,12 +1680,103 @@ def sync_sqlite_to_mongodb(conn=None):
         if close_after and conn is not None:
             conn.close()
 
+FAKE_TEST_EMAILS = {
+    'student@platformstraining.com',
+    'armed::student@platformstraining.com',
+    'test@platformstraining.com',
+    'armed::test@platformstraining.com',
+    'cadet.test@gmail.com',
+    'madams@chicago-security.test',
+    'marcus.test@platformstraining.com',
+    'charlesyoung52@gmail.com',
+    'armed::charlesyoung52@gmail.com',
+    'charlesyoung@platformstraining.com',
+    'armed::charlesyoung@platformstraining.com',
+    'anonymous',
+    ''
+}
+FAKE_TEST_NAMES = {
+    'doe, john a.',
+    'john a. doe',
+    'john doe',
+    'doe, john',
+    'student officer',
+    'trainee officer',
+    'test student',
+    'armed student officer',
+    'charles young',
+    'young, charles',
+    'charles'
+}
+FAKE_TEST_CERT_IDS = {
+    'pta-il-2026-217004'
+}
+
+def is_fake_or_test_identity(email_or_id='', name='', cert_id=''):
+    cid = str(cert_id or '').strip().lower()
+    if cid in FAKE_TEST_CERT_IDS:
+        return True
+    e = str(email_or_id or '').strip().lower()
+    raw_e = e[7:] if e.startswith('armed::') else e
+    n = str(name or '').strip().lower()
+    if e in FAKE_TEST_EMAILS or raw_e in FAKE_TEST_EMAILS:
+        return True
+    if raw_e.endswith('.test') or raw_e.endswith('@example.com') or 'test@' in raw_e or raw_e.startswith('cadet.test') or raw_e.startswith('marcus.test'):
+        return True
+    if n in FAKE_TEST_NAMES or 'john doe' in n or 'doe, john' in n or 'john a. doe' in n:
+        return True
+    return False
+
+def purge_fake_records_from_mongodb(mdb=None):
+    if mdb is None:
+        mdb, _ = get_mongo_db()
+    if mdb is None:
+        return
+    try:
+        import re
+        john_doe_re = re.compile(r'(john\s+a?\.?\s*doe|doe,\s*john)', re.IGNORECASE)
+        fake_email_re = re.compile(r'^(armed::)?(student@platformstraining\.com|test@platformstraining\.com|cadet\.test@gmail\.com|madams@chicago-security\.test|marcus\.test@platformstraining\.com|charlesyoung52@gmail\.com|charlesyoung@platformstraining\.com|anonymous)$', re.IGNORECASE)
+        mdb['certificates'].delete_many({
+            '$or': [
+                {'id': re.compile(r'^PTA-IL-2026-217004$', re.IGNORECASE)},
+                {'trainee_name': john_doe_re},
+                {'student_id': fake_email_re},
+                {'student_email': fake_email_re},
+            ]
+        })
+        mdb['students'].delete_many({
+            '$or': [
+                {'name': john_doe_re},
+                {'id': fake_email_re},
+                {'email': fake_email_re},
+            ]
+        })
+    except Exception as e:
+        print(f"[MONGODB FAKE PURGE NOTE] {e}")
+
+def delete_certificate_from_mongodb(cert_id='', student_id='', student_email=''):
+    mdb, _ = get_mongo_db()
+    if mdb is None:
+        return
+    try:
+        import re
+        or_clauses = []
+        for field, val in [('id', cert_id), ('student_id', student_id), ('student_email', student_email)]:
+            v = str(val or '').strip()
+            if v:
+                or_clauses.append({field: re.compile(f"^{re.escape(v)}$", re.IGNORECASE)})
+        if or_clauses:
+            mdb['certificates'].delete_many({'$or': or_clauses})
+    except Exception as e:
+        print(f"[MONGODB CERT DELETE NOTE] {e}")
+
 def seed_from_mongodb():
     global _MONGO_LAST_SYNCED
     mdb, err = get_mongo_db()
     if mdb is None:
         return False, err
     try:
+        purge_fake_records_from_mongodb(mdb)
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
@@ -1696,6 +1787,12 @@ def seed_from_mongodb():
             col_info = cur.execute(f"PRAGMA table_info({table_name})").fetchall()
             valid_cols = [c[1] for c in col_info]
             for doc in docs:
+                if table_name == 'certificates':
+                    if is_fake_or_test_identity(doc.get('student_id') or doc.get('student_email'), doc.get('trainee_name'), doc.get('id')):
+                        continue
+                elif table_name == 'students':
+                    if is_fake_or_test_identity(doc.get('id') or doc.get('email'), doc.get('name')):
+                        continue
                 filtered = {k: v for k, v in doc.items() if k in valid_cols}
                 if not filtered:
                     continue
@@ -2052,17 +2149,17 @@ def init_db():
     ''')
 
     trigger_defs = [
-        ("students", "CAST(NEW.id AS TEXT)", "''"),
-        ("progress", "CAST(NEW.student_id AS TEXT)", "CAST(NEW.lesson_id AS TEXT)"),
-        ("exam_results", "CAST(NEW.student_id AS TEXT)", "CAST(COALESCE(NEW.attempt_number, 1) AS TEXT)"),
-        ("certificates", "CAST(NEW.id AS TEXT)", "''"),
-        ("calendar_reservations", "CAST(NEW.id AS TEXT)", "''"),
-        ("mfa_codes", "CAST(NEW.email AS TEXT)", "''"),
-        ("contact_inquiries", "CAST(NEW.id AS TEXT)", "''"),
-        ("analytics_events", "CAST(NEW.id AS TEXT)", "''"),
-        ("app_settings", "CAST(NEW.key AS TEXT)", "''"),
+        ("students", "CAST(NEW.id AS TEXT)", "''", "CAST(OLD.id AS TEXT)", "''"),
+        ("progress", "CAST(NEW.student_id AS TEXT)", "CAST(NEW.lesson_id AS TEXT)", "CAST(OLD.student_id AS TEXT)", "CAST(OLD.lesson_id AS TEXT)"),
+        ("exam_results", "CAST(NEW.student_id AS TEXT)", "CAST(COALESCE(NEW.attempt_number, 1) AS TEXT)", "CAST(OLD.student_id AS TEXT)", "CAST(COALESCE(OLD.attempt_number, 1) AS TEXT)"),
+        ("certificates", "CAST(NEW.id AS TEXT)", "''", "CAST(OLD.id AS TEXT)", "''"),
+        ("calendar_reservations", "CAST(NEW.id AS TEXT)", "''", "CAST(OLD.id AS TEXT)", "''"),
+        ("mfa_codes", "CAST(NEW.email AS TEXT)", "''", "CAST(OLD.email AS TEXT)", "''"),
+        ("contact_inquiries", "CAST(NEW.id AS TEXT)", "''", "CAST(OLD.id AS TEXT)", "''"),
+        ("analytics_events", "CAST(NEW.id AS TEXT)", "''", "CAST(OLD.id AS TEXT)", "''"),
+        ("app_settings", "CAST(NEW.key AS TEXT)", "''", "CAST(OLD.key AS TEXT)", "''"),
     ]
-    for tname, pk1_expr, pk2_expr in trigger_defs:
+    for tname, pk1_expr, pk2_expr, old_pk1_expr, old_pk2_expr in trigger_defs:
         cur.execute(f'''
             CREATE TRIGGER IF NOT EXISTS trg_sync_ins_{tname}
             AFTER INSERT ON {tname}
@@ -2079,14 +2176,14 @@ def init_db():
                 VALUES ('{tname}', {pk1_expr}, {pk2_expr}, 'upsert');
             END;
         ''')
-    cur.execute('''
-        CREATE TRIGGER IF NOT EXISTS trg_sync_del_mfa_codes
-        AFTER DELETE ON mfa_codes
-        BEGIN
-            INSERT OR REPLACE INTO _sync_dirty (table_name, pk1, pk2, op)
-            VALUES ('mfa_codes', CAST(OLD.email AS TEXT), '', 'delete');
-        END;
-    ''')
+        cur.execute(f'''
+            CREATE TRIGGER IF NOT EXISTS trg_sync_del_{tname}
+            AFTER DELETE ON {tname}
+            BEGIN
+                INSERT OR REPLACE INTO _sync_dirty (table_name, pk1, pk2, op)
+                VALUES ('{tname}', {old_pk1_expr}, {old_pk2_expr}, 'delete');
+            END;
+        ''')
 
     conn.commit()
     conn.close()
@@ -2220,46 +2317,6 @@ Message:
     return jsonify({'success': True, 'email_sent': ok, 'recipient': target_email, 'message': msg})
 
 
-FAKE_TEST_EMAILS = {
-    'student@platformstraining.com',
-    'armed::student@platformstraining.com',
-    'test@platformstraining.com',
-    'armed::test@platformstraining.com',
-    'cadet.test@gmail.com',
-    'madams@chicago-security.test',
-    'marcus.test@platformstraining.com',
-    'charlesyoung52@gmail.com',
-    'armed::charlesyoung52@gmail.com',
-    'charlesyoung@platformstraining.com',
-    'armed::charlesyoung@platformstraining.com',
-    'anonymous',
-    ''
-}
-FAKE_TEST_NAMES = {
-    'doe, john a.',
-    'john a. doe',
-    'john doe',
-    'student officer',
-    'trainee officer',
-    'test student',
-    'armed student officer',
-    'charles young',
-    'young, charles',
-    'charles'
-}
-
-def is_fake_or_test_identity(email_or_id='', name=''):
-    e = str(email_or_id or '').strip().lower()
-    raw_e = e[7:] if e.startswith('armed::') else e
-    n = str(name or '').strip().lower()
-    if e in FAKE_TEST_EMAILS or raw_e in FAKE_TEST_EMAILS:
-        return True
-    if raw_e.endswith('.test') or raw_e.endswith('@example.com') or 'test@' in raw_e or raw_e.startswith('cadet.test') or raw_e.startswith('marcus.test'):
-        return True
-    if n in FAKE_TEST_NAMES:
-        return True
-    return False
-
 def purge_test_and_fake_records(db):
     try:
         cur = db.cursor()
@@ -2269,6 +2326,7 @@ def purge_test_and_fake_records(db):
             ('progress', 'student_id'),
             ('exam_results', 'student_id'),
             ('certificates', 'student_id'),
+            ('certificates', 'student_email'),
             ('analytics_events', 'student_id'),
         ]:
             cur.execute(f"""
@@ -2290,17 +2348,38 @@ def purge_test_and_fake_records(db):
         cur.execute("""
             DELETE FROM students
             WHERE LOWER(TRIM(COALESCE(name, ''))) IN (
-                'doe, john a.', 'john a. doe', 'john doe',
+                'doe, john a.', 'john a. doe', 'john doe', 'doe, john',
                 'student officer', 'trainee officer', 'test student', 'armed student officer',
                 'charles young', 'young, charles', 'charles'
             )
+               OR LOWER(TRIM(COALESCE(name, ''))) LIKE '%john doe%'
+               OR LOWER(TRIM(COALESCE(name, ''))) LIKE '%doe, john%'
+        """)
+        cur.execute("""
+            DELETE FROM certificates
+            WHERE LOWER(TRIM(COALESCE(trainee_name, ''))) IN (
+                'doe, john a.', 'john a. doe', 'john doe', 'doe, john',
+                'student officer', 'trainee officer', 'test student', 'armed student officer',
+                'charles young', 'young, charles', 'charles'
+            )
+               OR LOWER(TRIM(COALESCE(trainee_name, ''))) LIKE '%john doe%'
+               OR LOWER(TRIM(COALESCE(trainee_name, ''))) LIKE '%doe, john%'
+               OR LOWER(TRIM(COALESCE(id, ''))) = 'pta-il-2026-217004'
         """)
         cur.execute("DELETE FROM progress WHERE student_id NOT IN (SELECT id FROM students)")
         cur.execute("DELETE FROM exam_results WHERE student_id NOT IN (SELECT id FROM students)")
         cur.execute("DELETE FROM certificates WHERE student_id NOT IN (SELECT id FROM students)")
         db.commit()
+        purge_fake_records_from_mongodb()
     except Exception as e:
         print("Purge test records note:", e)
+
+try:
+    _boot_conn = sqlite3.connect(DB_PATH, factory=MongoSyncedConnection)
+    purge_test_and_fake_records(_boot_conn)
+    _boot_conn.close()
+except Exception:
+    pass
 
 # 2. Metrics & Analytics Dashboard Data
 @app.route('/api/metrics', methods=['GET'])
@@ -4182,6 +4261,7 @@ def admin_list_saved_certificates():
     if not is_admin_request():
         return jsonify({'success': False, 'error': 'Admin authorization required', 'certificates': []}), 401
     db = get_db()
+    purge_test_and_fake_records(db)
     rows = db.execute('''
         SELECT id, student_id, trainee_name, address, city, state, zip, dob, ssn,
                weight, height, hair, eyes, signature,
@@ -4197,6 +4277,9 @@ def admin_list_saved_certificates():
         c_obj = _hydrate_cert_data_from_row(r)
         is_armed = (r['course_type'] == 'armed') or str(r['student_id'] or '').lower().startswith('armed::')
         t_name = r['trainee_name'] or c_obj.get('name') or 'Student'
+        s_email = r['student_email'] or c_obj.get('email') or ''
+        if is_fake_or_test_identity(r['student_id'] or s_email, t_name, r['id']):
+            continue
         certs.append({
             'id': r['id'],
             'cert_id': r['id'],
@@ -4205,7 +4288,7 @@ def admin_list_saved_certificates():
             'student_name': t_name,
             'course_type': 'armed' if is_armed else 'unarmed',
             'form_code': 'IL486-1138 (28-Hr Armed)' if is_armed else 'IL486-0486 (20-Hr Unarmed)',
-            'student_email': r['student_email'] or c_obj.get('email') or '',
+            'student_email': s_email,
             'idfpr_email': r['idfpr_email'] or ('FPR.SafetyUnit@illinois.gov' if is_armed else ''),
             'date_completed': r['date_completed'] or c_obj.get('date_completed') or '',
             'issued_at': r['issued_at'] or '',
@@ -4220,6 +4303,39 @@ def admin_list_saved_certificates():
             'cert_data': c_obj
         })
     return jsonify({'success': True, 'certificates': certs})
+
+
+@app.route('/api/admin/certificates/<path:lookup_id>', methods=['DELETE'])
+@app.route('/api/admin/certificates/delete', methods=['POST', 'DELETE'])
+def admin_delete_saved_certificate(lookup_id=''):
+    if not is_admin_request():
+        return jsonify({'success': False, 'error': 'Admin authorization required'}), 401
+    data = request.get_json(silent=True) or {}
+    target_id = str(lookup_id or data.get('cert_id') or data.get('id') or '').strip()
+    target_student_id = str(data.get('student_id') or '').strip()
+    target_email = str(data.get('student_email') or '').strip()
+    if not target_id and not target_student_id and not target_email:
+        return jsonify({'success': False, 'error': 'Certificate ID or student email is required'}), 400
+    db = get_db()
+    rows = db.execute('''
+        SELECT id, student_id, student_email FROM certificates
+        WHERE (? != '' AND (LOWER(id) = LOWER(?) OR LOWER(student_id) = LOWER(?) OR LOWER(student_email) = LOWER(?)))
+           OR (? != '' AND LOWER(student_id) = LOWER(?))
+           OR (? != '' AND LOWER(student_email) = LOWER(?))
+    ''', (
+        target_id, target_id, target_id, target_id,
+        target_student_id, target_student_id,
+        target_email, target_email
+    )).fetchall()
+    deleted_ids = [r['id'] for r in rows]
+    for r in rows:
+        db.execute('DELETE FROM certificates WHERE id = ?', (r['id'],))
+        delete_certificate_from_mongodb(r['id'], r['student_id'], r['student_email'])
+    if target_id:
+        db.execute('DELETE FROM certificates WHERE LOWER(id) = LOWER(?)', (target_id,))
+        delete_certificate_from_mongodb(target_id, target_student_id, target_email)
+    db.commit()
+    return jsonify({'success': True, 'deleted_ids': deleted_ids, 'lookup_id': target_id or target_student_id or target_email})
 
 
 @app.route('/api/admin/certificates/download/<path:lookup_id>', methods=['GET'])

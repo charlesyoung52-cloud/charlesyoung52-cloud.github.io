@@ -3967,6 +3967,17 @@ function ptaVerifyAdminCredential(inputVal) {
         // =========================================================================
         let cachedInstructorCertDb = [];
 
+        function isFakeOrTestCertRecord(obj) {
+            if (!obj) return true;
+            const cid = String(obj.cert_id || obj.id || '').trim().toLowerCase();
+            if (cid === 'pta-il-2026-217004') return true;
+            const name = String(obj.student_name || obj.trainee_name || obj.name || (obj.cert_data && obj.cert_data.name) || '').trim().toLowerCase();
+            const email = String(obj.student_email || obj.email || obj.student_id || (obj.cert_data && obj.cert_data.email) || '').trim().toLowerCase().replace(/^armed::/, '');
+            if (FAKE_STUDENT_NAMES.includes(name) || name.includes('john doe') || name.includes('doe, john') || name.includes('john a. doe')) return true;
+            if (FAKE_STUDENT_EMAILS.includes(email) || email.includes('student@platformstraining.com')) return true;
+            return false;
+        }
+
         async function loadInstructorCertificateDatabase() {
             const tbody = document.getElementById('instructor-cert-db-tbody');
             const badge = document.getElementById('cert-db-count-badge');
@@ -3977,17 +3988,23 @@ function ptaVerifyAdminCredential(inputVal) {
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data.certificates)) {
-                        records = data.certificates;
+                        records = data.certificates.filter(r => !isFakeOrTestCertRecord(r));
                     }
                 }
             } catch (e) {}
 
-            // Merge any browser-saved Armed or Unarmed certificates from localStorage
+            // Purge any fake/test certificates from browser localStorage and merge real ones
             try {
+                const keysToDelete = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const k = localStorage.key(i);
-                    if (k && (k.startsWith('platforms_saved_armed_cert_') || k.startsWith('platforms_saved_unarmed_cert_'))) {
+                    if (k && (k.startsWith('platforms_saved_armed_cert_') || k.startsWith('platforms_saved_unarmed_cert_') || k.startsWith('platforms_armed_cert_intake_'))) {
                         const obj = JSON.parse(localStorage.getItem(k) || 'null');
+                        if (isFakeOrTestCertRecord(obj) || k.toLowerCase().includes('student@platformstraining.com')) {
+                            keysToDelete.push(k);
+                            continue;
+                        }
+                        if (k.startsWith('platforms_armed_cert_intake_')) continue;
                         if (obj && obj.pdf_base64) {
                             // Automatically strip legacy pdf_base64 blobs from localStorage to free up 5MB quota
                             delete obj.pdf_base64;
@@ -4019,6 +4036,9 @@ function ptaVerifyAdminCredential(inputVal) {
                         }
                     }
                 }
+                keysToDelete.forEach(k => {
+                    try { localStorage.removeItem(k); } catch (e) {}
+                });
             } catch (e) {}
 
             cachedInstructorCertDb = records;
@@ -4059,14 +4079,55 @@ function ptaVerifyAdminCredential(inputVal) {
                             <div style="display:flex; flex-wrap:wrap; gap:4px;">${deliveryParts.join(' ') || '<span style="color:var(--slate); font-size:0.78rem;">Saved in DB</span>'}</div>
                         </td>
                         <td style="font-size:0.8rem; color:var(--slate-light);">${r.updated_at || r.issued_at || '—'}</td>
-                        <td>
+                        <td style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
                             <button class="btn-action btn-primary" onclick="downloadSavedCertByIndex(${idx})" style="padding:5px 10px; font-size:0.76rem;">
                                 <i class="fas fa-file-arrow-down"></i> Download Saved PDF
+                            </button>
+                            <button class="btn-action btn-danger" onclick="deleteSavedCertByIndex(${idx})" style="padding:5px 10px; font-size:0.76rem; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.35);">
+                                <i class="fas fa-trash"></i> Delete
                             </button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        async function deleteSavedCertByIndex(idx) {
+            const rec = cachedInstructorCertDb[idx];
+            if (!rec) return;
+            const certId = rec.cert_id || rec.id || '';
+            const studentName = rec.student_name || rec.trainee_name || 'this student';
+            if (!confirm(`Permanently delete the certificate for ${studentName} (${certId || rec.student_email || ''}) from the database?`)) {
+                return;
+            }
+            try {
+                await fetch(getApiBaseUrl() + '/api/admin/certificates/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cert_id: certId,
+                        student_id: rec.student_id || '',
+                        student_email: rec.student_email || ''
+                    })
+                });
+            } catch (e) {}
+            try {
+                const emailKey = String(rec.student_email || '').trim().toLowerCase();
+                if (emailKey) {
+                    localStorage.removeItem('platforms_saved_armed_cert_' + emailKey);
+                    localStorage.removeItem('platforms_saved_unarmed_cert_' + emailKey);
+                }
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const k = localStorage.key(i);
+                    if (k && (k.startsWith('platforms_saved_armed_cert_') || k.startsWith('platforms_saved_unarmed_cert_'))) {
+                        const obj = JSON.parse(localStorage.getItem(k) || 'null');
+                        if (obj && ((certId && (obj.cert_id === certId || obj.id === certId)) || (emailKey && String(obj.student_email || obj.email || '').toLowerCase() === emailKey))) {
+                            localStorage.removeItem(k);
+                        }
+                    }
+                }
+            } catch (e) {}
+            await loadInstructorCertificateDatabase();
         }
 
         function triggerBase64PdfDownload(base64Str, filename) {

@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-07 08:00:00",
+  "last_updated": "2026-11-23 15:15:00",
   "courses": {
     "unarmed-20": {
       "id": "unarmed-20",
@@ -252,6 +252,20 @@
       "date": "2026-11-01",
       "endDate": "2026-11-01",
       "time": "9:00 AM \u2013 5:00 PM (Concurrent Range Session)",
+      "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
+      "instructor": "Charles Young",
+      "price": "$125",
+      "seatsTotal": 10,
+      "seatsAvailable": 10,
+      "status": "Open"
+    },
+    {
+      "id": "SES-20261128-REFRESHER",
+      "courseId": "ccl-refresher",
+      "title": "3-Hour IL CCL Refresher Course \u2014 Classroom & Range Qualification",
+      "date": "2026-11-28",
+      "endDate": "2026-11-28",
+      "time": "9:00 AM \u2013 12:00 PM (3-Hr Renewal)",
       "location": "Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)",
       "instructor": "Charles Young",
       "price": "$125",

@@ -162,10 +162,7 @@ class SecurityCourseApp {
         this.colAnswers = {}; // { [lessonId]: { [qIdx]: bool } }
         this.scenarioSelections = {}; // { [lessonId]: optionIndex }
 
-        // Purge any legacy plaintext SSN from browser localStorage
-        try { localStorage.removeItem('platforms_student_ssn'); } catch (e) {}
-
-        // Trainee certificate form data (Form IL486-1138 10/24 DE; SSN is kept in memory only, never persisted in localStorage)
+        // Trainee certificate form data (Form IL486-1138 10/24 DE)
         this.studentCertData = {
             name: localStorage.getItem('platforms_student_name') || '',
             address: localStorage.getItem('platforms_student_address') || '',
@@ -177,7 +174,7 @@ class SecurityCourseApp {
             dob: localStorage.getItem('platforms_student_dob') || '',
             sex: localStorage.getItem('platforms_student_sex') || '',
             race: localStorage.getItem('platforms_student_race') || '',
-            ssn: '',
+            ssn: localStorage.getItem('platforms_student_ssn') || '',
             weight: localStorage.getItem('platforms_student_weight') || '',
             height: localStorage.getItem('platforms_student_height') || '',
             hair: localStorage.getItem('platforms_student_hair') || '',
@@ -339,7 +336,7 @@ class SecurityCourseApp {
             moduleSections: this.moduleSections,
             colAnswers: this.colAnswers,
             scenarioSelections: this.scenarioSelections,
-            studentCertData: { ...this.studentCertData, ssn: '' },
+            studentCertData: this.studentCertData,
             studentEmail: this.studentEmail,
             studentAgency: this.studentAgency,
             lastSavedTimestamp: this.lastSavedTimestamp,
@@ -397,8 +394,7 @@ class SecurityCourseApp {
                     if (state.studentCertData.name === 'DOE, JOHN A.') {
                         state.studentCertData.name = '';
                     }
-                    // Never restore plaintext SSN from localStorage
-                    this.studentCertData = { ...this.studentCertData, ...state.studentCertData, ssn: this.studentCertData.ssn || '' };
+                    this.studentCertData = { ...this.studentCertData, ...state.studentCertData };
                 }
                 this.studentEmail = state.studentEmail || this.studentEmail;
                 this.studentAgency = state.studentAgency || this.studentAgency;
@@ -463,7 +459,6 @@ class SecurityCourseApp {
                 armed_is_cert_locked: Boolean(this.isCertLocked),
                 armed_cert_data: savedCertIntake || (existingIdx >= 0 ? registry[existingIdx].armed_cert_data : null) || {
                     ...this.studentCertData,
-                    ssn: '',
                     email: this.studentEmail || this.studentCertData.email || '',
                     written_exam_score: this.examPercentage || null
                 },
@@ -1716,9 +1711,6 @@ class SecurityCourseApp {
             } catch (err) {
                 console.warn("Sign-out save warning:", err);
             }
-            if (this.studentCertData) this.studentCertData.ssn = '';
-            const ssnEl = document.getElementById('cert-input-ssn');
-            if (ssnEl) ssnEl.value = '';
             sessionStorage.removeItem('platforms_officer_logged_in');
             localStorage.removeItem('platforms_officer_logged_in');
             this.closeLoginModal();
@@ -3231,9 +3223,7 @@ class SecurityCourseApp {
                     }
 
                     this.studentCertData[item.key] = val;
-                    if (item.key !== 'ssn') {
-                        localStorage.setItem('platforms_student_' + item.key, val);
-                    }
+                    localStorage.setItem('platforms_student_' + item.key, val);
                     this.saveState();
                 });
             }
@@ -3386,15 +3376,12 @@ class SecurityCourseApp {
 
         this.isCertLocked = true;
         this.issuedCertId = certSerial;
-        const rawSsnDigits = String(ssn || '').replace(/\D/g, '');
-        const maskedSsn = rawSsnDigits.length >= 4 ? ('***-**-' + rawSsnDigits.slice(-4)) : '';
-        const localSafeRecord = { ...armedCertRecord, ssn: maskedSsn };
         if (emailKey) {
             localStorage.setItem('platforms_armed_cert_locked_' + emailKey, 'true');
             localStorage.setItem('platforms_armed_cert_id_' + emailKey, this.issuedCertId);
-            localStorage.setItem('platforms_armed_cert_intake_' + emailKey, JSON.stringify(localSafeRecord));
+            localStorage.setItem('platforms_armed_cert_intake_' + emailKey, JSON.stringify(armedCertRecord));
         }
-        localStorage.setItem('platforms_armed_cert_intake_latest', JSON.stringify(localSafeRecord));
+        localStorage.setItem('platforms_armed_cert_intake_latest', JSON.stringify(armedCertRecord));
         this.saveState();
         this.syncToLocalRegistry();
 
