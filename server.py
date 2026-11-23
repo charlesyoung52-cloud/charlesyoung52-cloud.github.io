@@ -214,7 +214,7 @@ app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY') or secrets.token_h
 # Strictly block direct HTTP access to env/, dotfiles, databases, or server code
 BLOCKED_PATH_PREFIXES = ('env/', '.env', '.git', '__pycache__', '.system_generated', 'scratch/')
 BLOCKED_EXTENSIONS = ('.db', '.db-journal', '.sqlite', '.sqlite3', '.py', '.pyc', '.pem', '.key', '.log', '.env')
-BLOCKED_FILENAMES = {'procfile', 'render.yaml', 'requirements.txt', 'lms_data.db', 'mcp_config.json'}
+BLOCKED_FILENAMES = {'procfile', 'requirements.txt', 'lms_data.db', 'mcp_config.json'}
 
 def is_sensitive_path(req_path):
     norm = (req_path or '').lstrip('/').replace('\\', '/').lower()
@@ -413,9 +413,84 @@ def get_smtp_config():
         pass
     return config
 
+def get_gmail_webhook_config():
+    cfg = {
+        'url': os.environ.get('GMAIL_WEBHOOK_URL', '').strip(),
+        'secret': os.environ.get('GMAIL_WEBHOOK_SECRET', '').strip(),
+    }
+    try:
+        db = get_db()
+        rows = dict(db.execute("SELECT key, value FROM app_settings WHERE key IN ('gmail_webhook_url', 'gmail_webhook_secret')").fetchall())
+        if rows.get('gmail_webhook_url'):
+            cfg['url'] = rows['gmail_webhook_url'].strip()
+        if rows.get('gmail_webhook_secret'):
+            cfg['secret'] = decrypt_sensitive(rows['gmail_webhook_secret']).strip()
+    except Exception:
+        pass
+    return cfg
+
+def send_email_via_gmail_webhook(to_emails, subject, html_body, text_body="", reply_to="", pdf_bytes=None, pdf_filename=None):
+    cfg = get_gmail_webhook_config()
+    if not cfg['url']:
+        return False, "Gmail webhook URL not configured"
+
+    if isinstance(to_emails, str):
+        recipient_list = [e.strip() for e in to_emails.split(',') if e.strip() and '@' in e]
+    else:
+        recipient_list = [str(e).strip() for e in (to_emails or []) if str(e).strip() and '@' in str(e)]
+
+    if not recipient_list:
+        return False, "No valid recipient email addresses provided"
+
+    import urllib.request
+    payload = {
+        'secret': cfg['secret'],
+        'to': ", ".join(recipient_list),
+        'subject': subject,
+        'htmlBody': html_body or '',
+        'textBody': text_body or '',
+        'replyTo': reply_to or '',
+        'fromName': 'Platforms Training Academy',
+    }
+    if pdf_bytes:
+        payload['pdfBase64'] = base64.b64encode(pdf_bytes).decode('ascii')
+        payload['pdfFilename'] = pdf_filename or 'attachment.pdf'
+
+    try:
+        req = urllib.request.Request(
+            cfg['url'],
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            body_txt = resp.read().decode('utf-8', errors='replace')
+            try:
+                res_json = json.loads(body_txt)
+                if res_json.get('ok'):
+                    print(f"[GMAIL WEBHOOK SUCCESS] Email sent to {recipient_list}")
+                    return True, f"Email sent via Gmail to {', '.join(recipient_list)}"
+                return False, res_json.get('error') or f"Gmail webhook error: {body_txt}"
+            except Exception:
+                if 200 <= resp.getcode() < 300:
+                    print(f"[GMAIL WEBHOOK SUCCESS] Email sent to {recipient_list}")
+                    return True, f"Email sent via Gmail to {', '.join(recipient_list)}"
+                return False, f"Gmail webhook HTTP {resp.getcode()}: {body_txt[:200]}"
+    except Exception as e:
+        print(f"[GMAIL WEBHOOK ERROR] Failed to send email to {recipient_list}: {e}")
+        return False, str(e)
+
 def send_email_smtp(to_email, subject, html_body, text_body="", reply_to=""):
+    gmail_cfg = get_gmail_webhook_config()
+    if gmail_cfg['url']:
+        ok, msg_str = send_email_via_gmail_webhook(to_email, subject, html_body, text_body, reply_to=reply_to)
+        if ok:
+            return True, msg_str
+
     cfg = get_smtp_config()
     if not cfg['host'] or not cfg['user'] or not cfg['password']:
+        if gmail_cfg['url']:
+            return False, msg_str
         print(f"[SMTP Notice] Host/credentials not yet configured. Email dispatch queued for {to_email}.")
         return False, "SMTP credentials not configured"
 
@@ -449,8 +524,19 @@ def send_email_smtp(to_email, subject, html_body, text_body="", reply_to=""):
         return False, str(e)
 
 def send_email_smtp_with_pdf(to_emails, subject, html_body, text_body="", pdf_bytes=None, pdf_filename="IDFPR_Armed_Certificate_IL486-1138.pdf"):
+    gmail_cfg = get_gmail_webhook_config()
+    if gmail_cfg['url']:
+        ok, msg_str = send_email_via_gmail_webhook(
+            to_emails, subject, html_body, text_body,
+            pdf_bytes=pdf_bytes, pdf_filename=pdf_filename
+        )
+        if ok:
+            return True, msg_str
+
     cfg = get_smtp_config()
     if not cfg['host'] or not cfg['user'] or not cfg['password']:
+        if gmail_cfg['url']:
+            return False, msg_str
         print(f"[SMTP Notice] Host/credentials not yet configured. PDF email dispatch queued for {to_emails}.")
         return False, "SMTP credentials not configured in Cloud MFA & Email Delivery tab"
 
@@ -1853,8 +1939,13 @@ class MongoSyncedConnection(sqlite3.Connection):
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DB_PATH, factory=MongoSyncedConnection)
+        db = g._database = sqlite3.connect(DB_PATH, timeout=30.0, factory=MongoSyncedConnection)
         db.row_factory = sqlite3.Row
+        try:
+            db.execute('PRAGMA journal_mode=WAL;')
+            db.execute('PRAGMA busy_timeout=15000;')
+        except Exception:
+            pass
     return db
 
 @app.teardown_appcontext
@@ -1864,7 +1955,12 @@ def close_connection(exception):
         db.close()
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
+    try:
+        conn.execute('PRAGMA journal_mode=WAL;')
+        conn.execute('PRAGMA busy_timeout=15000;')
+    except Exception:
+        pass
     cur = conn.cursor()
     
     # Students Table
@@ -2831,10 +2927,17 @@ def smtp_config_route():
             db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', ('smtp_pass', encrypt_sensitive(password)))
         db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', ('smtp_from', from_email))
         db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', ('smtp_tls', use_tls))
+        if 'gmail_webhook_url' in data:
+            db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', ('gmail_webhook_url', str(data.get('gmail_webhook_url') or '').strip()))
+        if 'gmail_webhook_secret' in data:
+            gw_secret = str(data.get('gmail_webhook_secret') or '').strip()
+            if gw_secret and '••••' not in gw_secret:
+                db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', ('gmail_webhook_secret', encrypt_sensitive(gw_secret)))
         db.commit()
-        return jsonify({'success': True, 'message': 'SMTP configuration saved successfully'})
+        return jsonify({'success': True, 'message': 'Email delivery configuration saved successfully'})
     else:
         cfg = get_smtp_config()
+        gmail_cfg = get_gmail_webhook_config()
         return jsonify({
             'success': True,
             'host': cfg.get('host', ''),
@@ -2842,7 +2945,9 @@ def smtp_config_route():
             'user': cfg.get('user', ''),
             'has_password': bool(cfg.get('password')),
             'from_email': cfg.get('from_email', 'charlesyoung@platformstraining.com'),
-            'use_tls': cfg.get('use_tls', True)
+            'use_tls': cfg.get('use_tls', True),
+            'gmail_webhook_url': gmail_cfg.get('url', ''),
+            'has_gmail_secret': bool(gmail_cfg.get('secret'))
         })
 
 @app.route('/api/admin/test-smtp', methods=['POST'])
@@ -3346,29 +3451,46 @@ def process_payment():
     if payment_token:
         details_str += f" [{payment_token}]"
 
-    cur.execute('''
-        INSERT INTO analytics_events (event_type, student_id, details, timestamp)
-        VALUES ('payment_received', ?, ?, ?)
-    ''', (target_id, details_str, now_str))
-    db.commit()
+    existing_pay_evt = cur.execute(
+        "SELECT id FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) AND details LIKE ? LIMIT 1",
+        (target_id, f"%{session_id}%")
+    ).fetchone() if session_id else None
+    if not existing_pay_evt:
+        cur.execute('''
+            INSERT INTO analytics_events (event_type, student_id, details, timestamp)
+            VALUES ('payment_received', ?, ?, ?)
+        ''', (target_id, details_str, now_str))
+        db.commit()
 
-    # Automatically send Class & Payment Confirmation Email if student email is valid
+    # Automatically send Class & Payment Confirmation Email if student email is valid (deduplicated)
     if email and '@' in email:
         try:
-            c_title = meta['title']
-            c_price = f"{meta['price']} (Paid)"
-            c_date = chosen_range_date or ("Scheduled In-Person Range Qualification + 24/7 Online Portal" if is_armed else ("24/7 Self-Paced Online Portal" if is_unarmed else "Scheduled Class Session"))
-            c_time = data.get('class_time') or ("Self-Paced Online Access" if is_unarmed else "9:00 AM – 5:00 PM")
-            c_loc = data.get('location') or meta['location']
-            subj, h_body, t_body = build_class_payment_confirmation_email(
-                data.get('name') or 'Student Officer', c_title, c_date, c_time, c_loc, c_price, reservation_id or session_id, course_id=cid
-            )
-            send_email_smtp(email, subj, h_body, t_body)
+            already_emailed = False
             if not is_other_course:
-                cur.execute(
-                    "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
-                    (now_str, target_id, email)
+                em_row = cur.execute("SELECT confirmation_email_sent FROM students WHERE LOWER(id) = LOWER(?)", (target_id,)).fetchone()
+                already_emailed = bool(em_row and em_row['confirmation_email_sent'])
+            else:
+                em_key = f"student_paid_email::{cid}::{(reservation_id or email or session_id).lower()}"
+                em_row = cur.execute("SELECT value FROM app_settings WHERE key = ?", (em_key,)).fetchone()
+                already_emailed = bool(em_row and em_row['value'] == '1')
+
+            if not already_emailed:
+                c_title = meta['title']
+                c_price = f"{meta['price']} (Paid)"
+                c_date = chosen_range_date or ("Scheduled In-Person Range Qualification + 24/7 Online Portal" if is_armed else ("24/7 Self-Paced Online Portal" if is_unarmed else "Scheduled Class Session"))
+                c_time = data.get('class_time') or ("Self-Paced Online Access" if is_unarmed else "9:00 AM – 5:00 PM")
+                c_loc = data.get('location') or meta['location']
+                subj, h_body, t_body = build_class_payment_confirmation_email(
+                    data.get('name') or 'Student Officer', c_title, c_date, c_time, c_loc, c_price, reservation_id or session_id, course_id=cid
                 )
+                send_email_smtp(email, subj, h_body, t_body)
+                if not is_other_course:
+                    cur.execute(
+                        "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                        (now_str, target_id, email)
+                    )
+                else:
+                    cur.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, '1')", (f"student_paid_email::{cid}::{(reservation_id or email or session_id).lower()}",))
                 db.commit()
         except Exception as e:
             print("Payment confirmation email note:", e)
@@ -3443,12 +3565,42 @@ def process_payment():
 
 @app.route('/api/stripe/webhook', methods=['POST'])
 def stripe_checkout_webhook():
-    payload = request.get_json(silent=True) or {}
+    raw_body = request.get_data() or b''
+    sig_header = request.headers.get('Stripe-Signature', '')
+    wh_secret = (os.environ.get('STRIPE_WEBHOOK_SECRET') or '').strip()
+
+    payload = None
+    if wh_secret:
+        try:
+            import stripe
+            payload = stripe.Webhook.construct_event(raw_body, sig_header, wh_secret)
+        except ImportError:
+            # Fallback HMAC-SHA256 verification if stripe package is not installed locally
+            try:
+                parts = dict(item.split('=', 1) for item in sig_header.split(',') if '=' in item)
+                ts = parts.get('t', '')
+                v1 = parts.get('v1', '')
+                signed_payload = f"{ts}.".encode('utf-8') + raw_body
+                expected_sig = hmac.new(wh_secret.encode('utf-8'), signed_payload, hashlib.sha256).hexdigest()
+                if not ts or not v1 or not hmac.compare_digest(expected_sig, v1):
+                    return jsonify({'error': 'Invalid Stripe signature'}), 400
+                payload = json.loads(raw_body.decode('utf-8'))
+            except Exception as sig_err:
+                return jsonify({'error': f'Webhook signature error: {sig_err}'}), 400
+        except Exception as sig_err:
+            return jsonify({'error': f'Webhook signature verification failed: {sig_err}'}), 400
+    else:
+        payload = request.get_json(silent=True) or {}
+
     event_type = str(payload.get('type') or '').strip()
     if event_type != 'checkout.session.completed':
         return jsonify({'received': True, 'ignored_event': event_type})
 
     obj = (payload.get('data') or {}).get('object') or {}
+    payment_status = str(obj.get('payment_status') or '').strip().lower()
+    if payment_status and payment_status not in ('paid', 'no_payment_required'):
+        return jsonify({'received': True, 'ignored_payment_status': payment_status})
+
     sess_id = str(obj.get('id') or '').strip()
     cust = obj.get('customer_details') or {}
     st_email = str(cust.get('email') or obj.get('customer_email') or '').strip().lower()
@@ -3459,11 +3611,13 @@ def stripe_checkout_webhook():
     plink = str(obj.get('payment_link') or '')
     success_url = str(obj.get('success_url') or '')
     meta_dict = obj.get('metadata') or {}
+    client_ref = str(obj.get('client_reference_id') or '').strip()
     hint = " ".join([
         str(meta_dict.get('course_id') or ''),
         str(meta_dict.get('course') or ''),
         plink,
         success_url,
+        client_ref,
     ]).lower()
 
     matched_meta = None
@@ -3484,11 +3638,118 @@ def stripe_checkout_webhook():
             matched_meta = COURSE_CATALOG_META['armed-28']
 
     db = get_db()
+    cur = db.cursor()
     dedup_key = f"stripe_wh_notified::{sess_id}"
     if sess_id:
-        existing_wh = db.execute('SELECT value FROM app_settings WHERE key = ?', (dedup_key,)).fetchone()
+        existing_wh = cur.execute('SELECT value FROM app_settings WHERE key = ?', (dedup_key,)).fetchone()
         if existing_wh and existing_wh['value'] == '1':
             return jsonify({'received': True, 'duplicate': True})
+
+    cid = matched_meta['id']
+    is_armed = (cid == 'armed-28')
+    is_unarmed = (cid == 'unarmed-20')
+    is_other_course = not (is_armed or is_unarmed)
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    reservation_id = str(meta_dict.get('reservation_id') or '').strip()
+    chosen_range_date = str(meta_dict.get('class_date') or '').strip()
+
+    # Fulfill payment in database so student gets access even if they closed the browser before redirect
+    target_id = st_email or sess_id or 'stripe_student'
+    try:
+        if is_armed:
+            target_id = f"armed::{st_email or sess_id}"
+            existing_armed = cur.execute('SELECT id FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
+            if existing_armed:
+                cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?)', (now_str, target_id))
+            elif st_email:
+                cur.execute('''
+                    INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, range_qualification_date, created_at, last_active)
+                    VALUES (?, ?, ?, ?, '', 1, 0, ?, ?, ?)
+                ''', (target_id, st_name, st_email, target_id, chosen_range_date, now_str, now_str))
+        elif is_unarmed:
+            target_id = st_email or sess_id
+            existing_unarmed = cur.execute(
+                "SELECT id FROM students WHERE (LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)) AND LOWER(id) NOT LIKE 'armed::%'",
+                (target_id, st_email)
+            ).fetchone()
+            if existing_unarmed:
+                target_id = existing_unarmed['id']
+                cur.execute('UPDATE students SET is_paid = 1, last_active = ? WHERE LOWER(id) = LOWER(?)', (now_str, target_id))
+            elif st_email:
+                cur.execute('''
+                    INSERT INTO students (id, name, email, student_id, agency, is_paid, is_admin, created_at, last_active)
+                    VALUES (?, ?, ?, ?, '', 1, 0, ?, ?)
+                ''', (target_id, st_name, st_email, target_id, now_str, now_str))
+        else:
+            target_id = f"{cid}::{st_email or reservation_id or sess_id}"
+            res_row = None
+            if reservation_id:
+                res_row = cur.execute('SELECT id, raw_json, date FROM calendar_reservations WHERE id = ?', (reservation_id,)).fetchone()
+            elif st_email:
+                res_row = cur.execute(
+                    'SELECT id, raw_json, date FROM calendar_reservations WHERE LOWER(student_email) = LOWER(?) AND course_id = ? ORDER BY created_at DESC LIMIT 1',
+                    (st_email, cid)
+                ).fetchone()
+            if res_row:
+                reservation_id = res_row['id']
+                if not chosen_range_date and res_row['date']:
+                    chosen_range_date = res_row['date']
+                raw_obj = {}
+                if res_row['raw_json']:
+                    try:
+                        raw_obj = json.loads(decrypt_sensitive(res_row['raw_json']))
+                    except Exception:
+                        raw_obj = {}
+                raw_obj['paymentStatus'] = 'Paid'
+                raw_obj['price'] = f"{matched_meta['short_price']} (Paid)"
+                cur.execute(
+                    "UPDATE calendar_reservations SET payment_status = 'Paid', price = ?, raw_json = ? WHERE id = ?",
+                    (f"{matched_meta['short_price']} (Paid)", encrypt_sensitive(json.dumps(raw_obj)), reservation_id)
+                )
+
+        details_str = f"{matched_meta['title']} Fee {amount_str or matched_meta['price']} verified via Stripe Webhook (ref: {sess_id})"
+        existing_evt = cur.execute(
+            "SELECT id FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) AND details LIKE ? LIMIT 1",
+            (target_id, f"%{sess_id}%")
+        ).fetchone() if sess_id else None
+        if not existing_evt:
+            cur.execute('''
+                INSERT INTO analytics_events (event_type, student_id, details, timestamp)
+                VALUES ('payment_received', ?, ?, ?)
+            ''', (target_id, details_str, now_str))
+        db.commit()
+    except Exception as wh_db_err:
+        print("[STRIPE WEBHOOK DB NOTE]", wh_db_err)
+
+    # Send Student Confirmation Email if not already sent
+    if st_email and '@' in st_email:
+        try:
+            already_emailed = False
+            if not is_other_course:
+                em_row = cur.execute("SELECT confirmation_email_sent FROM students WHERE LOWER(id) = LOWER(?)", (target_id,)).fetchone()
+                already_emailed = bool(em_row and em_row['confirmation_email_sent'])
+            else:
+                em_key = f"student_paid_email::{cid}::{(reservation_id or st_email or sess_id).lower()}"
+                em_row = cur.execute("SELECT value FROM app_settings WHERE key = ?", (em_key,)).fetchone()
+                already_emailed = bool(em_row and em_row['value'] == '1')
+
+            if not already_emailed:
+                c_date = chosen_range_date or ("Scheduled In-Person Range Qualification + 24/7 Online Portal" if is_armed else ("24/7 Self-Paced Online Portal" if is_unarmed else "Scheduled Class Session"))
+                c_time = "Self-Paced Online Access" if is_unarmed else "9:00 AM – 5:00 PM"
+                subj, h_body, t_body = build_class_payment_confirmation_email(
+                    st_name, matched_meta['title'], c_date, c_time, matched_meta['location'], f"{amount_str or matched_meta['price']} (Paid)", reservation_id or sess_id, course_id=cid
+                )
+                send_email_smtp(st_email, subj, h_body, t_body)
+                if not is_other_course:
+                    cur.execute(
+                        "UPDATE students SET confirmation_email_sent = 1, confirmation_email_sent_at = ? WHERE LOWER(id) = LOWER(?) OR LOWER(email) = LOWER(?)",
+                        (now_str, target_id, st_email)
+                    )
+                else:
+                    cur.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, '1')", (f"student_paid_email::{cid}::{(reservation_id or st_email or sess_id).lower()}",))
+                db.commit()
+        except Exception as wh_email_err:
+            print("[STRIPE WEBHOOK STUDENT EMAIL NOTE]", wh_email_err)
 
     sent, _, skipped = notify_instructor_event(
         category='signup',
@@ -3508,9 +3769,9 @@ def stripe_checkout_webhook():
         action_note=f"Stripe Checkout completed for {matched_meta['title']}."
     )
     if sess_id and not skipped:
-        db.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_key, '1'))
+        cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_key, '1'))
         db.commit()
-    return jsonify({'received': True, 'instructor_email_sent': sent})
+    return jsonify({'received': True, 'fulfilled': True, 'course_id': cid, 'instructor_email_sent': sent})
 
 
 @app.route('/api/admin/send-test-instructor-emails', methods=['POST'])

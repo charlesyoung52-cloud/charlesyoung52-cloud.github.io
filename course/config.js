@@ -11,7 +11,12 @@ window.PLATFORMS_CONFIG = {
         publicKey: "qZROJMBteQvfuYHqG"
     },
 
-    // 2. Central Backend API URL for Cross-Device Student Progress & Admin Roster
-    // When connected to a cloud backend (e.g. Render/Railway), all devices sync here in real time.
-    apiBaseUrl: "https://charlesyoung52-cloud-github-io.onrender.com"
+    // 2. Google Apps Script Gmail Webhook (Strict Gmail-Only Email Delivery)
+    gmailWebhook: {
+        url: "https://script.google.com/macros/s/AKfycbxzEpjDZ07wPASas7X4hNyR0ThhuXYg4G2aigLE4_L_XzVBnP7-u1Z0e0dQXmdOC7lT/exec",
+        secret: "pta-7Kq2x9Lm4Rv8"
+    },
+
+    // 3. Optional Local/Self-Hosted Backend API URL (Render.com removed)
+    apiBaseUrl: ""
 };

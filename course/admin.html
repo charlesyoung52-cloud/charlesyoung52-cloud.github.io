@@ -938,6 +938,26 @@
                     </div>
                 </div>
 
+                <div style="background:#0f141c; border:1px solid rgba(212,175,55,0.35); border-radius:6px; padding:14px 16px; margin-bottom:16px;">
+                    <div style="font-size:0.9rem; font-weight:700; color:#e5c158; margin-bottom:8px;">
+                        <i class="fas fa-envelope-open-text"></i> Gmail Apps Script Webhook (Recommended for Render Free — Sends Rich HTML &amp; PDFs Directly via Gmail)
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:14px;">
+                        <div>
+                            <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                                Gmail Webhook Web App URL:
+                            </label>
+                            <input type="url" id="admin-gmail-webhook-url" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.92rem;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:6px; text-transform:uppercase;">
+                                Gmail Webhook Secret:
+                            </label>
+                            <input type="password" id="admin-gmail-webhook-secret" placeholder="pta-gmail-2026-secret" style="width:100%; padding:10px 12px; background:#0b0d10; border:1px solid var(--border); border-radius:4px; color:#fff; font-family:monospace; font-size:0.92rem;">
+                        </div>
+                    </div>
+                </div>
+
                 <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
                     <div style="display:flex; gap:10px;">
                         <button type="button" class="btn-action btn-primary" onclick="saveSmtpConfig()">
@@ -2098,9 +2118,11 @@ function ptaVerifyAdminCredential(inputVal) {
             let user = '';
             let fromEmail = 'charlesyoung@platformstraining.com';
             let hasPassword = false;
+            let gmailWebhookUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url) || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            let hasGmailSecret = Boolean((window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret) || localStorage.getItem('platforms_gmail_webhook_secret'));
 
             const baseUrl = getApiBaseUrl();
-            try {
+            if (baseUrl) try {
                 const res = await fetch(baseUrl + '/api/auth/smtp-config');
                 if (res.ok) {
                     const data = await res.json();
@@ -2109,6 +2131,8 @@ function ptaVerifyAdminCredential(inputVal) {
                     user = data.user || '';
                     fromEmail = data.from_email || fromEmail;
                     hasPassword = data.has_password || false;
+                    if (data.gmail_webhook_url) gmailWebhookUrl = data.gmail_webhook_url;
+                    if (data.has_gmail_secret) hasGmailSecret = true;
                 }
             } catch (e) {}
 
@@ -2117,16 +2141,23 @@ function ptaVerifyAdminCredential(inputVal) {
             const uInp = document.getElementById('admin-smtp-user');
             const fInp = document.getElementById('admin-smtp-from');
             const pwdInp = document.getElementById('admin-smtp-pass');
+            const gwUrlInp = document.getElementById('admin-gmail-webhook-url');
+            const gwSecInp = document.getElementById('admin-gmail-webhook-secret');
 
             if (hInp) hInp.value = host;
             if (pInp) pInp.value = port;
             if (uInp) uInp.value = user;
             if (fInp) fInp.value = fromEmail;
             if (pwdInp && hasPassword) pwdInp.placeholder = '•••••••••••••••• (Saved)';
+            if (gwUrlInp) gwUrlInp.value = gmailWebhookUrl;
+            if (gwSecInp && hasGmailSecret) gwSecInp.placeholder = '•••••••••••••••• (Saved)';
 
             const badge = document.getElementById('smtp-status-badge');
             if (badge) {
-                if (host && user && (hasPassword || (pwdInp && pwdInp.value))) {
+                if (gmailWebhookUrl) {
+                    badge.className = 'badge badge-success';
+                    badge.innerHTML = '<i class="fas fa-check-circle"></i> Gmail Webhook Active';
+                } else if (host && user && (hasPassword || (pwdInp && pwdInp.value))) {
                     badge.className = 'badge badge-success';
                     badge.innerHTML = '<i class="fas fa-check-circle"></i> Configured & Ready';
                 } else {
@@ -2142,9 +2173,28 @@ function ptaVerifyAdminCredential(inputVal) {
             const user = (document.getElementById('admin-smtp-user').value || '').trim();
             const password = (document.getElementById('admin-smtp-pass').value || '').trim();
             const fromEmail = (document.getElementById('admin-smtp-from').value || '').trim();
+            const gmailWebhookUrl = (document.getElementById('admin-gmail-webhook-url')?.value || '').trim();
+            const gmailWebhookSecret = (document.getElementById('admin-gmail-webhook-secret')?.value || '').trim();
             const feedback = document.getElementById('smtp-feedback');
 
+            localStorage.setItem('platforms_gmail_webhook_url', gmailWebhookUrl);
+            if (gmailWebhookSecret && !gmailWebhookSecret.includes('••••')) {
+                localStorage.setItem('platforms_gmail_webhook_secret', gmailWebhookSecret);
+            }
+
             const baseUrl = getApiBaseUrl();
+            if (!baseUrl) {
+                if (feedback) {
+                    feedback.style.display = 'block';
+                    feedback.style.background = 'rgba(16,185,129,0.15)';
+                    feedback.style.color = '#86efac';
+                    feedback.style.border = '1px solid rgba(16,185,129,0.4)';
+                    feedback.innerHTML = '<i class="fas fa-check-circle"></i> Gmail Webhook settings saved!';
+                    setTimeout(() => { feedback.style.display = 'none'; }, 4000);
+                }
+                loadSmtpConfig();
+                return;
+            }
             try {
                 const res = await fetch(baseUrl + '/api/auth/smtp-config', {
                     method: 'POST',
@@ -2154,7 +2204,9 @@ function ptaVerifyAdminCredential(inputVal) {
                         port: port,
                         user: user,
                         password: password,
-                        from_email: fromEmail
+                        from_email: fromEmail,
+                        gmail_webhook_url: gmailWebhookUrl,
+                        gmail_webhook_secret: gmailWebhookSecret
                     })
                 });
                 if (res.ok) {
@@ -2163,25 +2215,25 @@ function ptaVerifyAdminCredential(inputVal) {
                         feedback.style.background = 'rgba(16,185,129,0.15)';
                         feedback.style.color = '#86efac';
                         feedback.style.border = '1px solid rgba(16,185,129,0.4)';
-                        feedback.innerHTML = '<i class="fas fa-check-circle"></i> SMTP settings saved successfully!';
+                        feedback.innerHTML = '<i class="fas fa-check-circle"></i> Email delivery settings saved successfully!';
                         setTimeout(() => { feedback.style.display = 'none'; }, 4000);
                     }
                     loadSmtpConfig();
                 } else {
                     const err = await res.json();
-                    alert(err.error || 'Failed to save SMTP configuration');
+                    alert(err.error || 'Failed to save email delivery configuration');
                 }
             } catch (err) {
-                alert('Network error saving SMTP configuration: ' + err.message);
+                alert('Network error saving email delivery configuration: ' + err.message);
             }
         }
 
         async function sendTestSmtpEmail() {
-            const testEmail = (document.getElementById('admin-smtp-test-email').value || '').trim();
+            const testEmail = (document.getElementById('admin-smtp-test-email').value || '').trim() || 'charlesyoung@platformstraining.com';
             const feedback = document.getElementById('smtp-feedback');
 
             if (!testEmail || !testEmail.includes('@')) {
-                alert('Please enter a valid email address to send the test SMTP verification code.');
+                alert('Please enter a valid email address to send the test email.');
                 return;
             }
 
@@ -2190,7 +2242,62 @@ function ptaVerifyAdminCredential(inputVal) {
                 feedback.style.background = 'rgba(212, 175, 55,0.15)';
                 feedback.style.color = '#d4af37';
                 feedback.style.border = '1px solid rgba(212, 175, 55,0.4)';
-                feedback.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Dispatching test email via server SMTP to ${testEmail}...`;
+                feedback.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Dispatching rich HTML test email via Gmail to ${testEmail}...`;
+            }
+
+            const gmailUrl = (document.getElementById('admin-gmail-webhook-url')?.value || '').trim()
+                || (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gmailSecret = (document.getElementById('admin-gmail-webhook-secret')?.value || '').trim()
+                || (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+
+            if (gmailUrl) {
+                try {
+                    const submittedAt = new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const htmlBody = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
+        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 26px; border-bottom:2px solid #d4af37; text-align:center;">
+            <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:4px 12px; border-radius:999px; font-size:11.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
+                [TEST] Gmail Direct Delivery Verified
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">Live Rich HTML Email Test &bull; ${submittedAt}</p>
+        </div>
+        <div style="padding:24px 26px;">
+            <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+                <table style="width:100%; border-collapse:collapse; font-size:14px; color:#f8fafc;">
+                    <tr><td style="padding:6px 0; color:#94a3b8; width:36%;">Delivery Method:</td><td style="padding:6px 0; font-weight:700; color:#4ade80;">Google Apps Script (Gmail Direct)</td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Recipient:</td><td style="padding:6px 0; font-weight:700; color:#e5c158;">${testEmail}</td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Status:</td><td style="padding:6px 0; font-weight:700; color:#ffffff;">Rich Dark &amp; Gold HTML Active</td></tr>
+                </table>
+            </div>
+        </div>
+        <div style="background:#060709; padding:12px 24px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #1e2430;">
+            Platforms Training Academy &bull; Lead Instructor Charles Young &bull; platformstraining.com
+        </div>
+    </div>`;
+                    await fetch(gmailUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            secret: gmailSecret,
+                            to: testEmail,
+                            subject: 'Platforms Training Academy — Live Gmail Rich HTML Test',
+                            htmlBody: htmlBody,
+                            textBody: `Platforms Training Academy — Live Gmail Rich HTML Test sent to ${testEmail} at ${submittedAt}.`,
+                            fromName: 'Platforms Training Academy'
+                        })
+                    });
+                    if (feedback) {
+                        feedback.style.background = 'rgba(16,185,129,0.15)';
+                        feedback.style.color = '#86efac';
+                        feedback.style.border = '1px solid rgba(16,185,129,0.4)';
+                        feedback.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Dispatched via Gmail!</strong> Check <strong>${testEmail}</strong> for your rich HTML test email.`;
+                    }
+                    return;
+                } catch (err) {}
             }
 
             const baseUrl = getApiBaseUrl();
@@ -2375,28 +2482,58 @@ function ptaVerifyAdminCredential(inputVal) {
                 console.log("Static cloud mirror notice:", e);
             }
 
-            // Step 2: Fetch live data from Render cloud server (filtered to real students only)
-            try {
-                if (cloudBadge) {
-                    cloudBadge.className = 'badge badge-info';
-                    cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
-                }
+            // Step 2: Fetch live permanent database from Google Sheets Apps Script (or optional backend)
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
 
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-                const studentsRes = await fetch(baseUrl + '/api/students', { signal: controller.signal });
-                clearTimeout(timeoutId);
-
-                if (studentsRes.ok) {
-                    const data = await studentsRes.json();
-                    if (Array.isArray(data.students)) {
-                        allStudents = data.students.filter(isRealStudentRecord);
+            if (gwUrl) {
+                try {
+                    if (cloudBadge) {
+                        cloudBadge.className = 'badge badge-info';
+                        cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing Google Sheets...';
                     }
-                    cloudServerOnline = true;
+                    const gsRes = await fetch(`${gwUrl}?action=students&secret=${encodeURIComponent(gwSecret)}`);
+                    if (gsRes.ok) {
+                        const gsData = await gsRes.json();
+                        if (gsData && gsData.ok && Array.isArray(gsData.students)) {
+                            const byKey = new Map();
+                            allStudents.forEach(s => byKey.set(String(s.email || s.id || '').toLowerCase(), s));
+                            gsData.students.filter(isRealStudentRecord).forEach(s => {
+                                const k = String(s.email || s.id || '').toLowerCase();
+                                if (k) byKey.set(k, { ...(byKey.get(k) || {}), ...s });
+                            });
+                            allStudents = Array.from(byKey.values());
+                            cloudServerOnline = true;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Google Sheets fetch note:', err);
                 }
-            } catch (err) {
-                console.warn('Live cloud server fetch note (using cloud mirror):', err);
+            } else if (baseUrl) {
+                try {
+                    if (cloudBadge) {
+                        cloudBadge.className = 'badge badge-info';
+                        cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
+                    }
+
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                    const studentsRes = await fetch(baseUrl + '/api/students', { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (studentsRes.ok) {
+                        const data = await studentsRes.json();
+                        if (Array.isArray(data.students)) {
+                            allStudents = data.students.filter(isRealStudentRecord);
+                        }
+                        cloudServerOnline = true;
+                    }
+                } catch (err) {
+                    console.warn('Live cloud server fetch note (using cloud mirror):', err);
+                }
             }
 
             // Merge any real local student records
@@ -2406,7 +2543,9 @@ function ptaVerifyAdminCredential(inputVal) {
             if (cloudServerOnline) {
                 if (cloudBadge) {
                     cloudBadge.className = 'badge badge-success';
-                    cloudBadge.innerHTML = '<i class="fas fa-cloud-check"></i> Cloud Online';
+                    cloudBadge.innerHTML = gwUrl
+                        ? '<i class="fas fa-table"></i> Google Sheets Online'
+                        : '<i class="fas fa-cloud-check"></i> Cloud Online';
                 }
             } else {
                 if (cloudBadge) {
@@ -2507,15 +2646,32 @@ function ptaVerifyAdminCredential(inputVal) {
                 }
             } catch (e) {}
 
-            try {
-                const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
-                if (apiRes.ok) {
-                    const apiData = await apiRes.json();
-                    if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') >= baseUpdated) {
-                        loaded = apiData;
+            const gwUrlCal = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecretCal = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+
+            if (gwUrlCal && loaded) {
+                try {
+                    const gsRes = await fetch(`${gwUrlCal}?action=reservations&secret=${encodeURIComponent(gwSecretCal)}`);
+                    if (gsRes.ok) {
+                        const gsData = await gsRes.json();
+                        if (gsData && gsData.ok && Array.isArray(gsData.reservations)) {
+                            loaded.reservations = gsData.reservations;
+                        }
                     }
-                }
-            } catch (e) {}
+                } catch (e) {}
+            } else if (getApiBaseUrl()) {
+                try {
+                    const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
+                    if (apiRes.ok) {
+                        const apiData = await apiRes.json();
+                        if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') >= baseUpdated) {
+                            loaded = apiData;
+                        }
+                    }
+                } catch (e) {}
+            }
 
             if (loaded) {
                 if (Array.isArray(loaded.reservations)) {
@@ -3208,13 +3364,28 @@ function ptaVerifyAdminCredential(inputVal) {
             updateFilterCounts();
             renderTable();
 
-            try {
-                await fetch(getApiBaseUrl() + '/api/admin/students/delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ student_id: s.id, email: s.email })
-                });
-            } catch (e) {}
+            const gwUrlDel = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecretDel = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrlDel) {
+                try {
+                    await fetch(gwUrlDel, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'delete_student', secret: gwSecretDel, student_id: s.id, email: s.email })
+                    });
+                } catch (e) {}
+            } else if (getApiBaseUrl()) {
+                try {
+                    await fetch(getApiBaseUrl() + '/api/admin/students/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ student_id: s.id, email: s.email })
+                    });
+                } catch (e) {}
+            }
         }
 
         function viewAttempts(studentIndex) {
@@ -4667,17 +4838,30 @@ function ptaVerifyAdminCredential(inputVal) {
             const armedMandatoryCalloutHtml = isArmed ? `
                 <div style="background:rgba(239,68,68,0.14); border:2px solid #ef4444; border-radius:8px; padding:14px 16px; margin:14px 0; font-size:13.5px; color:#ffffff; line-height:1.55;">
                     <div style="font-size:12.5px; font-weight:800; color:#fca5a5; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px;">
-                        &#9888; MANDATORY: COMPLETE ONLINE PORTION BEFORE IN-PERSON RANGE QUALIFICATION
+                        &#9888; REQUIRED IN-PERSON RANGE QUALIFICATION (SCHEDULE AT END OF ONLINE COURSE)
                     </div>
-                    You <strong>MUST complete 100% of the online portion</strong> of the 28-Hour Armed Security Course <strong>BEFORE</strong> arriving at Eagle Sports Range for your chosen in-person range qualification date (<strong>${classDate}</strong>):
+                    To complete your <strong>28-Hour Armed Security Officer certification (IDFPR Form IL486-1138)</strong>, there is a <strong>required in-person live-fire range qualification</strong> at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong> that you must schedule at the end of the online course.<br><br>
+                    You <strong>MUST complete 100% of the online portion BEFORE</strong> attending your scheduled in-person range qualification:
                     <ul style="margin:6px 0; padding-left:18px; color:#f1f5f9;">
                         <li>Complete all <strong>10 Online Armed Training Modules</strong> (20-Hour Classroom Portion)</li>
                         <li>Pass the <strong>Untimed 50-Question Written Final Examination</strong> (75%+)</li>
                         <li>Complete and save <strong>Part 1 (Trainee Section) of Official IDFPR Form IL486-1138</strong> in the portal</li>
+                        <li><strong>Schedule your required in-person range qualification date</strong> at the end of the online course (<a href="https://platformstraining.com/calendar.html" style="color:#e5c158; font-weight:700;">platformstraining.com/calendar.html</a>)</li>
                     </ul>
-                    <span style="color:#fde68a; font-weight:700;">Students who have not completed the online portion prior to their chosen in-person qualification date will not be permitted on the firing line.</span>
+                    <span style="color:#fde68a; font-weight:700;">Students who have not completed the online portion prior to their scheduled in-person qualification date will not be permitted on the firing line.</span>
                 </div>
             ` : '';
+
+            const _dNow = new Date();
+            const _pad2 = (n) => String(n).padStart(2, '0');
+            const _stamp = `${_dNow.getFullYear()}${_pad2(_dNow.getMonth() + 1)}${_pad2(_dNow.getDate())}${_pad2(_dNow.getHours())}${_pad2(_dNow.getMinutes())}`;
+            const _existingRec = (typeof allStudents !== 'undefined' && Array.isArray(allStudents) && toEmail)
+                ? allStudents.find(s => String(s.email || s.id || '').trim().toLowerCase() === toEmail.trim().toLowerCase())
+                : null;
+            const confirmationId = (isArmed
+                ? (_existingRec && (_existingRec.armed_confirmation_id || _existingRec.confirmation_id))
+                : (_existingRec && _existingRec.confirmation_id))
+                || `${isArmed ? 'PTA-ARMED' : 'PTA'}-${_stamp}`;
 
             let subject = '';
             let html = '';
@@ -4700,6 +4884,7 @@ function ptaVerifyAdminCredential(inputVal) {
                             Thank you for enrolling with <strong>Platforms Training Academy</strong>. Your registration and tuition status have been confirmed:
                         </p>
                         <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:14px 16px; margin:16px 0; font-size:14.5px;">
+                            <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Confirmation ID:</strong> <strong style="color:#e5c158; font-family:monospace;">${confirmationId}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Course Enrolled:</strong> <strong style="color:#fff;">${courseTitle}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">Tuition / Status:</strong> <strong style="color:#4ade80;">${price}</strong></div>
                             <div style="margin-bottom:4px;"><strong style="color:#94a3b8;">${isArmed ? 'Chosen In-Person Range Date:' : 'Scheduled Date:'}</strong> <strong style="color:#fff;">${classDate}</strong></div>
@@ -4716,7 +4901,7 @@ function ptaVerifyAdminCredential(inputVal) {
                         </div>
                     </div>
                 </div>`;
-                text = `Welcome ${studentName}! Your registration for ${courseTitle} is confirmed.`;
+                text = `Welcome ${studentName}! Your registration for ${courseTitle} is confirmed. Confirmation ID: ${confirmationId}`;
             } else if (currentEmailStudioTemplate === 'reminder') {
                 subject = `In-Person Range Qualification Reminder (${classDate}): ${courseTitle} | Platforms Training Academy`;
                 html = `
@@ -4784,7 +4969,7 @@ function ptaVerifyAdminCredential(inputVal) {
                 text = `Congratulations ${studentName} on completing your ${courseTitle} with Platforms Training Academy! Leave a review: ${reviewUrl}`;
             }
 
-            return { studentName, toEmail, courseTitle, classDate, classTime, location, price, reviewUrl, subject, html, text };
+            return { studentName, toEmail, courseTitle, classDate, classTime, location, price, reviewUrl, subject, html, text, confirmationId, isArmed, isUnarmed };
         }
 
         function renderEmailStudioPreview() {
@@ -4815,31 +5000,89 @@ function ptaVerifyAdminCredential(inputVal) {
             let sentOk = false;
             let statusMsg = '';
 
-            try {
-                const res = await fetch(getApiBaseUrl() + '/api/emails/send-automated', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email_type: currentEmailStudioTemplate,
-                        to_email: payload.toEmail,
-                        student_name: payload.studentName,
-                        course_title: payload.courseTitle,
-                        class_date: payload.classDate,
-                        class_time: payload.classTime,
-                        location: payload.location,
-                        price: payload.price,
-                        google_review_url: payload.reviewUrl
-                    })
-                });
-                const data = await res.json();
-                if (res.ok && data.success) {
+            const gwUrlEs = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecretEs = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+
+            if (gwUrlEs) {
+                try {
+                    await fetch(gwUrlEs, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'send_email',
+                            secret: gwSecretEs,
+                            to: payload.toEmail,
+                            subject: payload.subject,
+                            htmlBody: payload.html,
+                            textBody: payload.text,
+                            replyTo: 'charlesyoung@platformstraining.com',
+                            fromName: 'Platforms Training Academy'
+                        })
+                    });
+                    if (currentEmailStudioTemplate === 'confirmation' && payload.confirmationId) {
+                        const cleanEm = payload.toEmail.trim().toLowerCase();
+                        const existingStudent = (typeof allStudents !== 'undefined' && Array.isArray(allStudents))
+                            ? allStudents.find(s => String(s.email || s.id || '').trim().toLowerCase() === cleanEm)
+                            : null;
+                        const paidPatch = {
+                            ...(existingStudent || {}),
+                            id: (existingStudent && existingStudent.id) || cleanEm,
+                            name: payload.studentName || (existingStudent && existingStudent.name) || 'Student Officer',
+                            email: cleanEm,
+                            confirmation_id: payload.confirmationId,
+                            confirmation_email_sent: true
+                        };
+                        if (payload.isArmed) {
+                            paidPatch.course_type = 'armed';
+                            paidPatch.armed_is_paid = true;
+                            paidPatch.armed_payment_verified = true;
+                            paidPatch.armed_confirmation_id = payload.confirmationId;
+                        } else if (payload.isUnarmed) {
+                            paidPatch.is_paid = true;
+                            paidPatch.payment_verified = true;
+                        }
+                        fetch(gwUrlEs, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'upsert_student', secret: gwSecretEs, student: paidPatch })
+                        }).catch(() => {});
+                    }
                     sentOk = true;
-                    statusMsg = data.message || `Email sent to ${payload.toEmail}`;
-                } else {
-                    statusMsg = data.error || 'Server SMTP not yet configured';
+                    statusMsg = `Rich HTML email dispatched via Gmail to ${payload.toEmail} (ID: ${payload.confirmationId})`;
+                } catch (e) {
+                    statusMsg = e.message;
                 }
-            } catch (e) {
-                statusMsg = e.message;
+            } else if (getApiBaseUrl()) {
+                try {
+                    const res = await fetch(getApiBaseUrl() + '/api/emails/send-automated', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email_type: currentEmailStudioTemplate,
+                            to_email: payload.toEmail,
+                            student_name: payload.studentName,
+                            course_title: payload.courseTitle,
+                            class_date: payload.classDate,
+                            class_time: payload.classTime,
+                            location: payload.location,
+                            price: payload.price,
+                            google_review_url: payload.reviewUrl
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        sentOk = true;
+                        statusMsg = data.message || `Email sent to ${payload.toEmail}`;
+                    } else {
+                        statusMsg = data.error || 'Server SMTP not yet configured';
+                    }
+                } catch (e) {
+                    statusMsg = e.message;
+                }
             }
 
             if (fb) {

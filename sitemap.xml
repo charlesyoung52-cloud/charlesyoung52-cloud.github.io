@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://platformstraining.com/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://platformstraining.com/assets/logo_full_color.png</image:loc>
+      <image:title>Platforms Training Academy - Chicago Concealed Carry &amp; Security Guard Training</image:title>
+      <image:caption>Platforms Training Academy IDFPR Approved Security and Illinois Concealed Carry Training in Chicago, IL</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://platformstraining.com/assets/logo_circle_icon.png</image:loc>
+      <image:title>Platforms Training Academy Official Emblem - Concealed Carry &amp; Armed Security</image:title>
+      <image:caption>Platforms Training Academy emblem for Illinois PERC, Tan Card, and Concealed Carry certification</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://platformstraining.com/courses.html</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://platformstraining.com/course/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://platformstraining.com/armed-course/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://platformstraining.com/calendar.html</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://platformstraining.com/resources.html</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+    <image:image>
+      <image:loc>https://platformstraining.com/assets/reciprocity_map.png</image:loc>
+      <image:title>Platforms Training Academy Illinois Concealed Carry Reciprocity Map</image:title>
+      <image:caption>Illinois Concealed Carry License (CCL) state reciprocity map from Platforms Training Academy Chicago</image:caption>
+    </image:image>
+  </url>
+</urlset>

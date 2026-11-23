@@ -274,24 +274,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterButtons = document.querySelectorAll(".filter-tab-btn");
     const courseCards = document.querySelectorAll(".course-card");
 
+    const applyCourseFilter = (filterValue) => {
+        filterButtons.forEach(b => {
+            if (b.getAttribute("data-filter") === filterValue) {
+                b.classList.add("active");
+            } else {
+                b.classList.remove("active");
+            }
+        });
+        courseCards.forEach(card => {
+            const cardCategory = card.getAttribute("data-category") || "";
+            const categories = cardCategory.split(" ");
+            if (filterValue === "all" || categories.includes(filterValue)) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    };
+
     filterButtons.forEach(btn => {
         btn.addEventListener("click", () => {
-            filterButtons.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-
             const filterValue = btn.getAttribute("data-filter");
-
-            courseCards.forEach(card => {
-                const cardCategory = card.getAttribute("data-category") || "";
-                const categories = cardCategory.split(" ");
-                if (filterValue === "all" || categories.includes(filterValue)) {
-                    card.style.display = "flex";
-                } else {
-                    card.style.display = "none";
-                }
-            });
+            applyCourseFilter(filterValue);
         });
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialFilter = urlParams.get("filter") || (window.location.hash ? window.location.hash.replace("#", "") : "");
+    if (initialFilter && Array.from(filterButtons).some(b => b.getAttribute("data-filter") === initialFilter)) {
+        applyCourseFilter(initialFilter);
+    }
 
     // Mobile Navigation Drawer Toggle
     const mobileToggleBtn = document.getElementById("mobile-toggle-btn");
@@ -372,77 +385,63 @@ async function handleContactSubmit(e) {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Message...';
     }
 
-    const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
-        ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
-        : 'https://charlesyoung52-cloud-github-io.onrender.com';
+    const gmailUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+        || localStorage.getItem('platforms_gmail_webhook_url')
+        || 'https://script.google.com/macros/s/AKfycbxzEpjDZ07wPASas7X4hNyR0ThhuXYg4G2aigLE4_L_XzVBnP7-u1Z0e0dQXmdOC7lT/exec';
+    const gmailSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+        || localStorage.getItem('platforms_gmail_webhook_secret')
+        || 'pta-7Kq2x9Lm4Rv8';
 
-    let contactServerSent = false;
-    try {
-        const contactResp = await fetch(apiBase + '/api/contact', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                phone,
-                email,
-                course,
-                message,
-                to: 'charlesyoung@platformstraining.com'
-            })
-        });
-        if (contactResp && contactResp.ok) {
-            const cJson = await contactResp.json();
-            contactServerSent = Boolean(cJson && cJson.email_sent);
-        }
-    } catch (err) {}
+    const cleanEm = (email || '').trim().toLowerCase();
+    const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
+    const isTest = cleanEm && (skipList.includes(cleanEm) || cleanEm.endsWith('.test') || cleanEm.endsWith('@example.com') || cleanEm.includes('test@'));
 
-    if (!contactServerSent) {
+    if (gmailUrl && !isTest) {
         try {
-            const cleanEm = (email || '').trim().toLowerCase();
-            const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
-            const isTest = cleanEm && (skipList.includes(cleanEm) || cleanEm.endsWith('.test') || cleanEm.endsWith('@example.com') || cleanEm.includes('test@'));
-            if (!isTest) {
-                const ejService = localStorage.getItem('platforms_emailjs_service_id') || 'service_bor93nt';
-                const ejTemplate = localStorage.getItem('platforms_emailjs_template_id') || 'template_0k00oka';
-                const ejPubKey = localStorage.getItem('platforms_emailjs_public_key') || 'qZROJMBteQvfuYHqG';
-                const summaryBanner = `INQUIRY (${course}): ${name} • ${phone} • ${email}`;
-                await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                    method: 'POST',
-                    keepalive: true,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        service_id: ejService,
-                        template_id: ejTemplate,
-                        user_id: ejPubKey,
-                        template_params: {
-                            to_name: `Instructor Charles Young — Course Inquiry: ${name} (${email})`,
-                            name: `Instructor Charles Young — Course Inquiry: ${name} (${email})`,
-                            to_email: 'charlesyoung@platformstraining.com',
-                            user_email: 'charlesyoung@platformstraining.com',
-                            email: 'charlesyoung@platformstraining.com',
-                            reply_to: email || 'charlesyoung@platformstraining.com',
-                            passcode: summaryBanner,
-                            code: summaryBanner,
-                            otp: summaryBanner,
-                            verification_code: summaryBanner,
-                            subject: `Website Course Inquiry: ${name} — ${course}`,
-                            message: `Course Inquiry:
-Name: ${name}
-Phone: ${phone}
-Email: ${email}
-Course: ${course}
-Message: ${message}`,
-                            course_name: `${course} | Prospective Student: ${name} • ${phone} • ${email}`,
-                            company_name: 'Platforms Training Academy — Course Inquiry',
-                            company: 'Platforms Training Academy',
-                            from_name: 'Platforms Training Academy',
-                            academy_name: 'Platforms Training Academy',
-                            time: new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                        }
-                    })
-                });
-            }
-        } catch (ejErr) {}
+            const escHtml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const submittedAt = new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const htmlMessage = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
+        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 26px; border-bottom:2px solid #d4af37; text-align:center;">
+            <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
+                New Website Contact Us Message
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">Submitted ${escHtml(submittedAt)}</p>
+        </div>
+        <div style="padding:24px 26px;">
+            <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+                <table style="width:100%; border-collapse:collapse; font-size:14px; color:#f8fafc;">
+                    <tr><td style="padding:6px 0; color:#94a3b8; width:36%;">Sender Name:</td><td style="padding:6px 0; font-weight:700; color:#ffffff;">${escHtml(name)}</td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Phone Number:</td><td style="padding:6px 0; font-weight:700;"><a href="tel:${escHtml(phone)}" style="color:#e5c158; text-decoration:none;">${escHtml(phone)}</a></td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Email Address:</td><td style="padding:6px 0; font-weight:700;"><a href="mailto:${escHtml(email)}" style="color:#e5c158; text-decoration:none;">${escHtml(email)}</a></td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Course of Interest:</td><td style="padding:6px 0; font-weight:700; color:#4ade80;">${escHtml(course)}</td></tr>
+                </table>
+            </div>
+            <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:16px 18px; margin-bottom:20px;">
+                <div style="font-size:12px; font-weight:700; color:#d4af37; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">Message / Question:</div>
+                <div style="font-size:14.5px; color:#ffffff; line-height:1.6; white-space:pre-wrap;">${escHtml(message)}</div>
+            </div>
+        </div>
+    </div>`;
+            await fetch(gmailUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                keepalive: true,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'add_inquiry',
+                    secret: gmailSecret,
+                    inquiry: { name, phone, email, course, message, submitted_at: submittedAt },
+                    to: 'charlesyoung@platformstraining.com',
+                    subject: `Website Course Inquiry: ${name} — ${course}`,
+                    htmlBody: htmlMessage,
+                    textBody: `Course Inquiry:\nName: ${name}\nPhone: ${phone}\nEmail: ${email}\nCourse: ${course}\nMessage: ${message}`,
+                    replyTo: email || 'charlesyoung@platformstraining.com',
+                    fromName: 'Platforms Training Academy'
+                })
+            });
+        } catch (err) {}
     }
 
     if (submitBtn) {

@@ -6,9 +6,17 @@
     <title>Course Schedule | Platforms Training Academy Chicago</title>
     
     <!-- Meta & SEO Tags -->
-    <meta name="description" content="Select a class date and reserve your seat at Platforms Training Academy in Chicago.">
+    <meta name="description" content="Select a class date and reserve your seat for Illinois Concealed Carry (CCL), Armed Security Range Qualification, or Firearm Requalification at Platforms Training Academy in Chicago.">
     <meta name="author" content="Platforms Training Academy - Charles Young">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#0a0b0d">
+    <link rel="canonical" href="https://platformstraining.com/calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Course Schedule &amp; Booking | Platforms Training Academy Chicago">
+    <meta property="og:description" content="Book your Illinois Concealed Carry (CCL) or Armed Security range qualification class date in Chicago.">
+    <meta property="og:url" content="https://platformstraining.com/calendar.html">
+    <meta property="og:image" content="https://platformstraining.com/assets/logo_full_color.png">
+    <meta property="og:image:alt" content="Platforms Training Academy — Concealed Carry and Security Class Schedule">
 
     <!-- Favicon & Touch Icons -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -631,7 +639,7 @@
     <header class="main-header" id="main-header">
         <div class="site-container header-inner">
             <a href="index.html" class="brand-link" title="Platforms Training Academy - Home" aria-label="Platforms Training Academy Home">
-                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="brand-logo-img">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy — Concealed Carry &amp; Security Class Schedule" title="Platforms Training Academy — Concealed Carry &amp; Security Training" class="brand-logo-img">
             </a>
 
             <nav class="desktop-nav" aria-label="Main Navigation">
@@ -662,7 +670,7 @@
     <div class="mobile-drawer" id="mobile-drawer">
         <div class="mobile-drawer-header">
             <div class="drawer-brand">
-                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="drawer-logo">
+                <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy — Concealed Carry &amp; Security Class Schedule" title="Platforms Training Academy — Concealed Carry &amp; Security Training" class="drawer-logo">
             </div>
             <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close Menu">
                 <i class="fas fa-times"></i>
@@ -818,7 +826,7 @@
             <div class="footer-grid">
                 <div class="footer-brand-col">
                     <div class="footer-brand">
-                        <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy" class="footer-logo">
+                        <img src="assets/logo_wordmark_light.png" alt="Platforms Training Academy — Chicago Concealed Carry &amp; Security Training" title="Platforms Training Academy — Concealed Carry &amp; Security Training" class="footer-logo">
                     </div>
                     <p class="footer-tagline">
                         Chicago's trusted provider of professional security officer licensing, tactical defense, and Illinois concealed carry training.
@@ -901,7 +909,7 @@
         function getApiBaseUrl() {
             return (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
                 ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
-                : 'https://charlesyoung52-cloud-github-io.onrender.com';
+                : '';
         }
 
         function getTodayIsoLocal() {
@@ -922,44 +930,68 @@
                     return;
                 }
                 if (dedupKey && localStorage.getItem(dedupKey) === '1') return;
-                const ejService = localStorage.getItem('platforms_emailjs_service_id') || 'service_bor93nt';
-                const ejTemplate = localStorage.getItem('platforms_emailjs_template_id') || 'template_0k00oka';
-                const ejPubKey = localStorage.getItem('platforms_emailjs_public_key') || 'qZROJMBteQvfuYHqG';
-                const ejCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-                const ejTimer = ejCtrl ? setTimeout(() => ejCtrl.abort(), 3200) : null;
-                const ejResp = await fetch('https://api.emailjs.com/api/v1/email/send'.replace('/v1/', '/v1.0/'), {
+                const gmailUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                    || localStorage.getItem('platforms_gmail_webhook_url')
+                    || 'https://script.google.com/macros/s/AKfycbxzEpjDZ07wPASas7X4hNyR0ThhuXYg4G2aigLE4_L_XzVBnP7-u1Z0e0dQXmdOC7lT/exec';
+                const gmailSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                    || localStorage.getItem('platforms_gmail_webhook_secret')
+                    || 'pta-7Kq2x9Lm4Rv8';
+                if (!gmailUrl) return;
+                const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const submittedAt = new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const htmlBody = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:640px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
+        <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 26px; border-bottom:2px solid #d4af37; text-align:center;">
+            <div style="display:inline-block; background:rgba(212,175,55,0.16); color:#e5c158; border:1px solid #d4af37; padding:4px 12px; border-radius:999px; font-size:11.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
+                ${esc(opts.headline || 'New Course Signup')}
+            </div>
+            <h1 style="color:#ffffff; font-size:21px; margin:4px 0 0 0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0 0 0;">Automated Instructor Notification &bull; ${esc(submittedAt)}</p>
+        </div>
+        <div style="padding:24px 26px;">
+            <div style="background:#141821; border:1px solid rgba(212,175,55,0.4); border-left:4px solid #d4af37; border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+                <table style="width:100%; border-collapse:collapse; font-size:14px; color:#f8fafc;">
+                    <tr><td style="padding:6px 0; color:#94a3b8; width:36%;">Student Name:</td><td style="padding:6px 0; font-weight:700; color:#ffffff;">${esc(stName)}</td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Student Phone:</td><td style="padding:6px 0; font-weight:700;"><a href="tel:${esc(stPhone)}" style="color:#e5c158; text-decoration:none;">${esc(stPhone)}</a></td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Student Email:</td><td style="padding:6px 0; font-weight:700;"><a href="mailto:${esc(cleanStEmail)}" style="color:#e5c158; text-decoration:none;">${esc(cleanStEmail || 'Not provided')}</a></td></tr>
+                    <tr><td style="padding:6px 0; color:#94a3b8;">Course:</td><td style="padding:6px 0; font-weight:700; color:#4ade80;">${esc(opts.courseTitle || 'Scheduled Course')}</td></tr>
+                </table>
+            </div>
+            <div style="background:#11141c; border:1px solid #262c3a; border-radius:8px; padding:14px 16px;">
+                <div style="font-size:13.5px; color:#cbd5e1; line-height:1.6; white-space:pre-wrap;">${esc(opts.message || '')}</div>
+            </div>
+        </div>
+        <div style="background:#060709; padding:12px 24px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #1e2430;">
+            Platforms Training Academy &bull; Lead Instructor Charles Young &bull; platformstraining.com
+        </div>
+    </div>`;
+                await fetch(gmailUrl, {
                     method: 'POST',
+                    mode: 'no-cors',
                     keepalive: true,
-                    signal: ejCtrl ? ejCtrl.signal : undefined,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
-                        service_id: ejService,
-                        template_id: ejTemplate,
-                        user_id: ejPubKey,
-                        template_params: {
-                            to_name: `Instructor Charles Young — ${opts.headline || 'New Course Signup'}: ${stName}${cleanStEmail ? ' (' + cleanStEmail + ')' : ''}`,
-                            name: `Instructor Charles Young — ${opts.headline || 'New Course Signup'}: ${stName}${cleanStEmail ? ' (' + cleanStEmail + ')' : ''}`,
-                            to_email: 'charlesyoung@platformstraining.com',
-                            user_email: 'charlesyoung@platformstraining.com',
-                            email: 'charlesyoung@platformstraining.com',
-                            reply_to: cleanStEmail || 'charlesyoung@platformstraining.com',
-                            passcode: opts.summaryBanner || `SIGNUP: ${stName}`,
-                            code: opts.summaryBanner || `SIGNUP: ${stName}`,
-                            otp: opts.summaryBanner || `SIGNUP: ${stName}`,
-                            verification_code: opts.summaryBanner || `SIGNUP: ${stName}`,
-                            subject: opts.subject || `New Course Signup: ${stName} — ${opts.courseTitle || 'Scheduled Course'}`,
+                        action: 'add_reservation',
+                        secret: gmailSecret,
+                        reservation: {
+                            id: dedupKey || ('res-' + Date.now()),
+                            courseTitle: opts.courseTitle || 'Scheduled Course',
+                            headline: opts.headline || 'New Course Signup',
+                            studentName: stName,
+                            studentPhone: stPhone,
+                            studentEmail: cleanStEmail,
                             message: opts.message || '',
-                            course_name: `${opts.courseTitle || 'Scheduled Course'} | Student: ${stName} • ${stPhone}${cleanStEmail ? ' • ' + cleanStEmail : ''}`,
-                            company_name: 'Platforms Training Academy — Instructor Alert',
-                            company: 'Platforms Training Academy',
-                            from_name: 'Platforms Training Academy',
-                            academy_name: 'Platforms Training Academy',
-                            time: new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                        }
+                            createdAt: submittedAt
+                        },
+                        to: 'charlesyoung@platformstraining.com',
+                        subject: opts.subject || `New Course Signup: ${stName} — ${opts.courseTitle || 'Scheduled Course'}`,
+                        htmlBody: htmlBody,
+                        textBody: opts.message || '',
+                        replyTo: cleanStEmail || 'charlesyoung@platformstraining.com',
+                        fromName: 'Platforms Training Academy'
                     })
                 });
-                if (ejTimer) clearTimeout(ejTimer);
-                if (ejResp && ejResp.ok && dedupKey) localStorage.setItem(dedupKey, '1');
+                if (dedupKey) localStorage.setItem(dedupKey, '1');
             } catch (e) {}
         }
 

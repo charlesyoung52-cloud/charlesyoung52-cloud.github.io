@@ -440,6 +440,10 @@ class SecurityCourseApp {
                 }
             } catch (e) {}
 
+            const savedArmedConfId = (cleanEmail ? localStorage.getItem('platforms_armed_confirmation_id_' + cleanEmail) : '')
+                || (existingIdx >= 0 ? (registry[existingIdx].armed_confirmation_id || registry[existingIdx].confirmation_id) : '')
+                || null;
+
             const armedPatch = {
                 id: (existingIdx >= 0 && registry[existingIdx].id) || studentId,
                 name: this.studentCertData.name || 'Student Officer',
@@ -448,6 +452,8 @@ class SecurityCourseApp {
                 course_type: 'armed',
                 armed_is_paid: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 armed_payment_verified: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
+                armed_confirmation_id: savedArmedConfId,
+                confirmation_id: savedArmedConfId || (existingIdx >= 0 ? registry[existingIdx].confirmation_id : null) || null,
                 armed_range_session: this.getSavedRangeDateRecord(cleanEmail) || (existingIdx >= 0 ? registry[existingIdx].armed_range_session : null) || null,
                 armed_completed_modules: completedCount,
                 armed_total_modules: LESSONS_DATA.length,
@@ -476,6 +482,25 @@ class SecurityCourseApp {
             }
 
             localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
+
+            // Sync permanently to Google Sheets database (debounced to avoid spam)
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrl) {
+                const mergedRec = existingIdx >= 0 ? registry[existingIdx] : armedPatch;
+                clearTimeout(this._gsheetSyncTimer);
+                this._gsheetSyncTimer = setTimeout(() => {
+                    fetch(gwUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        keepalive: true,
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'upsert_student', secret: gwSecret, student: mergedRec })
+                    }).catch(() => {});
+                }, 800);
+            }
         } catch (err) {
             console.warn("Local student registry sync warning:", err);
         }
@@ -1107,12 +1132,73 @@ class SecurityCourseApp {
     async sendMfaEmail(email, name, code) {
         const statusEl = document.getElementById('mfa-email-dispatch-status');
 
+        // 1. Primary: Send rich dark-and-gold 6-digit MFA email directly via Google Apps Script Gmail webhook
+        const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+            || localStorage.getItem('platforms_gmail_webhook_url') || '';
+        const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+            || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+
+        if (gwUrl && email && email.includes('@')) {
+            if (statusEl) {
+                statusEl.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--brand-green-bright);"></i> Dispatching 6-digit verification email to <strong>${email}</strong>...`;
+            }
+            try {
+                const safeName = String(name || 'Trainee Officer').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const htmlBody = `
+<div style="font-family:'Segoe UI',Arial,sans-serif; max-width:560px; margin:0 auto; background:#0a0b0d; color:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid #262c3a;">
+    <div style="background:linear-gradient(135deg,#161a22 0%,#0a0b0d 100%); padding:22px 26px; border-bottom:2px solid #d4af37; text-align:center;">
+        <h1 style="color:#ffffff; font-size:20px; margin:0; letter-spacing:0.5px;">PLATFORMS TRAINING ACADEMY</h1>
+        <p style="color:#cbd5e1; font-size:13px; margin:6px 0 0 0;">28-Hour Online Armed Security Portal &bull; Login Verification</p>
+    </div>
+    <div style="padding:26px; text-align:center;">
+        <p style="font-size:15px; color:#ffffff; margin-top:0;">Hello <strong>${safeName}</strong>,</p>
+        <p style="font-size:14px; color:#cbd5e1; line-height:1.6;">Enter this 6-digit verification code to sign in to your 28-Hour Online Armed Security Course:</p>
+        <div style="background:#141821; border:2px solid #d4af37; border-radius:8px; padding:18px; margin:20px auto; max-width:260px;">
+            <div style="font-size:32px; font-weight:800; letter-spacing:8px; color:#e5c158; font-family:monospace;">${code}</div>
+        </div>
+        <p style="font-size:12.5px; color:#94a3b8; margin-bottom:0;">Need help? Call or text Lead Instructor Charles Young at (773) 873-2591.</p>
+    </div>
+</div>`;
+                await fetch(gwUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'send_email',
+                        secret: gwSecret,
+                        to: email,
+                        subject: `Your Verification Code: ${code} | Platforms Training Academy`,
+                        htmlBody: htmlBody,
+                        textBody: `Platforms Training Academy\n\nHello ${name || 'Trainee Officer'},\nYour 6-digit login verification code is: ${code}\n\nEnter this code in the 28-Hour Online Armed Security Portal to continue.`,
+                        replyTo: 'charlesyoung@platformstraining.com',
+                        fromName: 'Platforms Training Academy'
+                    })
+                });
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#4ade80; font-weight:700;">
+                            <i class="fas fa-envelope-circle-check"></i> Verification Code Sent Via Email
+                        </div>
+                        <div>
+                            A 6-digit identity code has been sent to:
+                            <strong style="color:var(--brand-green-bright); display:inline-block;">${email}</strong>
+                        </div>
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-top:6px;">
+                            Please check your inbox (and Spam/Junk folder if not seen within 1 minute). Enter the code below to access your course.
+                        </div>
+                    `;
+                }
+                return true;
+            } catch (err) {
+                console.warn('Gmail webhook MFA dispatch note:', err);
+            }
+        }
+
         const serviceId = this.emailJsConfig.serviceId || localStorage.getItem('platforms_emailjs_service_id');
         const templateId = this.emailJsConfig.templateId || localStorage.getItem('platforms_emailjs_template_id');
         const publicKey = this.emailJsConfig.publicKey || localStorage.getItem('platforms_emailjs_public_key');
 
         if (!publicKey || !serviceId || !templateId) {
-            // EmailJS not configured yet on client: Keep instructions clean without showing code on screen
             if (statusEl) {
                 statusEl.innerHTML = `
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; color:#ffffff; font-weight:600;">
@@ -1442,17 +1528,165 @@ class SecurityCourseApp {
         this.setAuthTab('signin');
     }
 
+    generatePtaConfirmationId(prefix = 'PTA-ARMED') {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${prefix}-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}`;
+    }
+
+    async verifyArmedPaymentInGoogleSheets(email, ptaCode = '') {
+        const cleanEmail = (email || this.studentEmail || '').trim().toLowerCase();
+        const cleanCode = (ptaCode || '').trim().toUpperCase();
+        const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+            || localStorage.getItem('platforms_gmail_webhook_url') || '';
+        const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+            || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+
+        if (!gwUrl) {
+            return { verified: false, reason: 'no_webhook' };
+        }
+
+        const isRowArmedPaid = (s) => {
+            if (!s) return false;
+            const ctype = String(s.course_type || s.courseId || s.courseTitle || '').toLowerCase();
+            const pstat = String(s.payment_status || s.paymentStatus || '').toLowerCase();
+            return (
+                s.armed_is_paid === true ||
+                s.armed_is_paid === 'true' ||
+                s.armed_payment_verified === true ||
+                s.armed_payment_verified === 'true' ||
+                ((ctype === 'armed' || ctype === 'armed-28' || (ctype.includes('armed') && !ctype.includes('unarmed'))) &&
+                    (s.is_paid === true || s.is_paid === 'true' || pstat.includes('paid')))
+            );
+        };
+
+        const getRowCodes = (s) => [
+            s.armed_confirmation_id,
+            s.confirmation_id,
+            s.confirmationId,
+            s.pta_id,
+            s.armed_pta_id,
+            s.pta_number,
+            s.order_id,
+            s.orderId,
+            s.reservation_id,
+            s.reservationId,
+            s.armed_payment_source,
+            s.payment_source,
+            s.armed_cert_id,
+            s.cert_id,
+            s.id
+        ].map(v => String(v || '').trim().toUpperCase()).filter(Boolean);
+
+        const armedStudentId = cleanEmail ? this.getArmedStudentId(cleanEmail).toLowerCase() : '';
+        let students = [];
+        let reservations = [];
+
+        try {
+            const gsRes = await fetch(`${gwUrl}?action=students&secret=${encodeURIComponent(gwSecret)}`);
+            if (gsRes.ok) {
+                const gsData = await gsRes.json();
+                if (gsData && gsData.ok && Array.isArray(gsData.students)) {
+                    students = gsData.students;
+                }
+            }
+        } catch (err) {
+            console.warn("Google Sheets armed students lookup note:", err);
+        }
+
+        // 1. Check by logged-in student's email first (seamless auto-unlock & also unlocks if PTA column wasn't backfilled yet)
+        if (cleanEmail) {
+            const emailMatch = students.find(s => {
+                const em = String(s.email || '').trim().toLowerCase();
+                const sid = String(s.id || '').trim().toLowerCase();
+                return (em === cleanEmail || sid === cleanEmail || (armedStudentId && sid === armedStudentId)) && isRowArmedPaid(s);
+            });
+            if (emailMatch) {
+                const existingCode = emailMatch.armed_confirmation_id || emailMatch.confirmation_id || cleanCode || '';
+                const certId = emailMatch.armed_cert_id || (String(emailMatch.course_type || '').toLowerCase() === 'armed' ? emailMatch.cert_id : '') || '';
+                return {
+                    verified: true,
+                    source: 'email_match',
+                    match: emailMatch,
+                    confirmationId: existingCode,
+                    certLocked: Boolean(certId),
+                    certId: certId || null
+                };
+            }
+        }
+
+        // 2. Also check Reservations sheet (for students who paid via Calendar/Stripe booking)
+        try {
+            const resResp = await fetch(`${gwUrl}?action=reservations&secret=${encodeURIComponent(gwSecret)}`);
+            if (resResp.ok) {
+                const resData = await resResp.json();
+                if (resData && resData.ok && Array.isArray(resData.reservations)) {
+                    reservations = resData.reservations;
+                }
+            }
+        } catch (err) {
+            console.warn("Google Sheets armed reservations lookup note:", err);
+        }
+
+        if (cleanEmail && reservations.length > 0) {
+            const resEmailMatch = reservations.find(r => {
+                const em = String(r.studentEmail || r.email || '').trim().toLowerCase();
+                return em === cleanEmail && isRowArmedPaid(r);
+            });
+            if (resEmailMatch) {
+                return {
+                    verified: true,
+                    source: 'reservation_email_match',
+                    match: resEmailMatch,
+                    confirmationId: resEmailMatch.confirmationId || resEmailMatch.id || cleanCode || '',
+                    certLocked: false,
+                    certId: null
+                };
+            }
+        }
+
+        // 3. If a PTA Confirmation Number was entered, verify it against paid Google Sheets records with strict email-binding (anti-sharing)
+        if (cleanCode) {
+            const allRecords = [...students, ...reservations];
+            const codeMatch = allRecords.find(r => isRowArmedPaid(r) && getRowCodes(r).includes(cleanCode));
+            if (codeMatch) {
+                const ownerEmail = String(codeMatch.email || codeMatch.studentEmail || '').trim().toLowerCase();
+                if (ownerEmail && cleanEmail && ownerEmail !== cleanEmail) {
+                    return { verified: false, reason: 'email_mismatch', ownerEmail };
+                }
+                const certId = codeMatch.armed_cert_id || (String(codeMatch.course_type || '').toLowerCase() === 'armed' ? codeMatch.cert_id : '') || '';
+                return {
+                    verified: true,
+                    source: 'pta_code_match',
+                    match: codeMatch,
+                    confirmationId: cleanCode,
+                    certLocked: Boolean(certId),
+                    certId: certId || null
+                };
+            }
+        }
+
+        return { verified: false, reason: 'not_found' };
+    }
+
     recordVerifiedPayment(email, sessionIdOrSource = 'stripe_live_armed') {
         const cleanEmail = (email || this.studentEmail || '').trim().toLowerCase();
+        const existingConfId = cleanEmail ? localStorage.getItem('platforms_armed_confirmation_id_' + cleanEmail) : '';
+        const providedUpper = String(sessionIdOrSource || '').trim().toUpperCase();
+        const confirmationId = providedUpper.startsWith('PTA-')
+            ? providedUpper
+            : (existingConfId || this.generatePtaConfirmationId('PTA-ARMED'));
         const token = 'PTA-ARMED-PAID-' + btoa(unescape(encodeURIComponent((cleanEmail || 'student') + '::' + sessionIdOrSource)));
         this.isPaid = true;
         if (cleanEmail) {
             localStorage.setItem('platforms_armed_stripe_paid_v1_' + cleanEmail, 'true');
+            localStorage.setItem('platforms_armed_confirmation_id_' + cleanEmail, confirmationId);
             const receipt = {
                 email: cleanEmail,
                 course: 'armed-28',
                 verified: true,
                 token: token,
+                confirmationId: confirmationId,
                 source: sessionIdOrSource,
                 amount: 200,
                 paidAt: new Date().toISOString()
@@ -1464,6 +1698,8 @@ class SecurityCourseApp {
                 if (idx >= 0) {
                     reg[idx].armed_is_paid = true;
                     reg[idx].armed_payment_verified = true;
+                    reg[idx].armed_confirmation_id = confirmationId;
+                    reg[idx].confirmation_id = confirmationId;
                     reg[idx].armed_payment_token = token;
                     reg[idx].armed_payment_source = sessionIdOrSource;
                     localStorage.setItem('platforms_student_registry', JSON.stringify(reg));
@@ -1606,6 +1842,40 @@ class SecurityCourseApp {
         localStorage.setItem('platforms_student_name', this.studentCertData.name);
         localStorage.setItem('platforms_student_email', this.studentEmail);
         localStorage.setItem('platforms_student_signature', this.studentCertData.signature);
+
+        // Check Google Sheets permanent Students database for verified Armed payment
+        try {
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrl && rawEmail) {
+                const gsRes = await fetch(`${gwUrl}?action=students&secret=${encodeURIComponent(gwSecret)}`);
+                if (gsRes.ok) {
+                    const gsData = await gsRes.json();
+                    if (gsData && gsData.ok && Array.isArray(gsData.students)) {
+                        const match = gsData.students.find(s => {
+                            const em = String(s.email || '').trim().toLowerCase();
+                            const sid = String(s.id || '').trim().toLowerCase();
+                            return em === rawEmail || sid === rawEmail || sid === armedStudentId.toLowerCase();
+                        });
+                        if (match) {
+                            const isArmedPaid = match.armed_is_paid === true || match.armed_payment_verified === true ||
+                                (String(match.course_type || '').toLowerCase() === 'armed' && match.is_paid === true);
+                            if (isArmedPaid) {
+                                backendVerifiedPaid = true;
+                            }
+                            if (match.armed_cert_id || (String(match.course_type || '').toLowerCase() === 'armed' && match.cert_id)) {
+                                certLockedForUser = true;
+                                certIdForUser = match.armed_cert_id || match.cert_id || certIdForUser || 'PTA-IL-ARMED-SEALED';
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (gsErr) {
+            console.warn("Google Sheets armed login sync note:", gsErr);
+        }
 
         try {
             const loginRes = await this.apiCall('/api/students/login', 'POST', {
@@ -1771,9 +2041,9 @@ class SecurityCourseApp {
     isAuthorized() {
         if (this.isAdminMode) return true;
         if (this.temporaryPaywallDisabled) {
-            return this.isAuthenticated() && this.hasSelectedRangeDate();
+            return this.isAuthenticated();
         }
-        return this.isAuthenticated() && this.isPaid && this.hasSelectedRangeDate();
+        return this.isAuthenticated() && this.isPaid;
     }
 
     getCompletedLessonsCount() {
@@ -3831,8 +4101,8 @@ class SecurityCourseApp {
         // Non-blocking sync with backend API
         const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
             ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
-            : 'https://charlesyoung52-cloud-github-io.onrender.com';
-        fetch(apiBase + '/api/calendar').then(async (apiRes) => {
+            : '';
+        if (apiBase) fetch(apiBase + '/api/calendar').then(async (apiRes) => {
             if (apiRes.ok) {
                 const apiData = await apiRes.json();
                 if (apiData && Array.isArray(apiData.sessions) && (apiData.last_updated || '') > baseUpdated) {
@@ -4038,9 +4308,9 @@ class SecurityCourseApp {
 
             const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
                 ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
-                : 'https://charlesyoung52-cloud-github-io.onrender.com';
+                : '';
             let bookJson = null;
-            try {
+            if (apiBase) try {
                 const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
                 const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 4500) : null;
                 const bkResp = await fetch(apiBase + '/api/calendar/book', {
@@ -4120,18 +4390,49 @@ class SecurityCourseApp {
             if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
-        const input = prompt("Enter your $200 Armed Course Stripe Checkout Session ID (starts with cs_live_) or Instructor Authorization Code:");
-        if (!input) return;
-        const trimmed = input.trim();
-        if ((trimmed.startsWith('cs_live_') && trimmed.length > 20) || ptaVerifyAdminCredential(trimmed)) {
+
+        // Step 1: Automatically check Google Sheets by the student's logged-in email first (zero code needed)
+        const autoCheck = await this.verifyArmedPaymentInGoogleSheets(this.studentEmail);
+        if (autoCheck && autoCheck.verified) {
             await this.confirmAndSaveSelectedRangeDate();
-            this.recordVerifiedPayment(this.studentEmail, trimmed);
+            this.recordVerifiedPayment(this.studentEmail, autoCheck.confirmationId || 'google_sheets_armed_verified');
             this.saveState();
+            this.syncStudentToRegistry();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
             this.manualSaveProgress("Armed Course payment ($200.00) & Range Qualification Date verified! Full 20-Hour Online Course Unlocked.");
+            return;
+        }
+
+        // Step 2: Prompt for PTA Confirmation Number (from confirmation email) or Instructor Authorization Code
+        const input = prompt("Enter your PTA Confirmation Number (e.g., PTA-ARMED-...) or Instructor Authorization Code:");
+        if (!input) return;
+        const trimmed = input.trim();
+
+        if (ptaVerifyAdminCredential(trimmed)) {
+            await this.confirmAndSaveSelectedRangeDate();
+            this.recordVerifiedPayment(this.studentEmail, 'instructor_armed_authorized');
+            this.saveState();
+            this.syncStudentToRegistry();
+            this.updateHeaderProfileDisplay();
+            this.showView('overview');
+            this.manualSaveProgress("Instructor authorization & Range Qualification Date verified! Full 20-Hour Online Course Unlocked.");
+            return;
+        }
+
+        const ptaCheck = await this.verifyArmedPaymentInGoogleSheets(this.studentEmail, trimmed);
+        if (ptaCheck && ptaCheck.verified) {
+            await this.confirmAndSaveSelectedRangeDate();
+            this.recordVerifiedPayment(this.studentEmail, ptaCheck.confirmationId || trimmed.toUpperCase());
+            this.saveState();
+            this.syncStudentToRegistry();
+            this.updateHeaderProfileDisplay();
+            this.showView('overview');
+            this.manualSaveProgress("PTA Confirmation Number & Range Qualification Date verified! Full 20-Hour Online Course Unlocked.");
+        } else if (ptaCheck && ptaCheck.reason === 'email_mismatch') {
+            alert("This PTA Confirmation Number is registered to a different email address. Please sign in with the email address you used to register, or contact Instructor Charles Young at (773) 873-2591.");
         } else {
-            alert("Could not verify an active $200.00 Armed Stripe payment with that ID. Please complete payment via the button above or contact Instructor Charles Young at (773) 873-2591.");
+            alert("Could not verify an active $200.00 Armed payment for your email or PTA Confirmation Number. Please make sure you are signed in with the email address used at checkout, complete payment above, or contact Instructor Charles Young at (773) 873-2591.");
         }
     }
 
@@ -4675,6 +4976,30 @@ class SecurityCourseApp {
     }
 
     async syncWithBackend() {
+        const cleanEmail = (this.studentEmail || '').trim().toLowerCase();
+        if (cleanEmail && this.isAuthenticated() && !this.isPaid) {
+            try {
+                const gsCheck = await this.verifyArmedPaymentInGoogleSheets(cleanEmail);
+                if (gsCheck && gsCheck.verified) {
+                    this.recordVerifiedPayment(cleanEmail, gsCheck.confirmationId || 'google_sheets_armed_sync');
+                    if (gsCheck.certLocked) {
+                        this.isCertLocked = true;
+                        this.issuedCertId = gsCheck.certId || this.issuedCertId || 'PTA-IL-ARMED-SEALED';
+                        localStorage.setItem('platforms_armed_cert_locked_' + cleanEmail, 'true');
+                        localStorage.setItem('platforms_armed_cert_id_' + cleanEmail, this.issuedCertId);
+                    }
+                    this.saveState();
+                    this.updateHeaderProfileDisplay();
+                    const payGate = document.getElementById('view-payment-gate');
+                    if (payGate && payGate.classList.contains('active')) {
+                        this.showView('overview');
+                    }
+                }
+            } catch (e) {
+                console.warn("Google Sheets armed sync note:", e);
+            }
+        }
+
         const armedId = this.getArmedStudentId();
         if (!armedId) return;
 
