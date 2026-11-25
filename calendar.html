@@ -907,9 +907,14 @@
         const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
         function getApiBaseUrl() {
-            return (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
-                ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
-                : '';
+            if (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) {
+                return window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '');
+            }
+            const host = (window.location && window.location.hostname) || '';
+            if (host === 'localhost' || host === '127.0.0.1') {
+                return '';
+            }
+            return 'https://charlesyoung52-cloud-github-io.onrender.com';
         }
 
         function getTodayIsoLocal() {
@@ -918,6 +923,63 @@
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
             return `${yyyy}-${mm}-${dd}`;
+        }
+
+        async function syncCalendarStudentToGoogleSheets(opts) {
+            try {
+                const cleanStEmail = String((opts && opts.studentEmail) || '').trim().toLowerCase();
+                const stName = String((opts && opts.studentName) || 'Student Officer').trim();
+                const stPhone = String((opts && opts.studentPhone) || '').trim();
+                const skipList = ['student@platformstraining.com', 'test@platformstraining.com', 'charlesyoung52@gmail.com', 'charlesyoung@platformstraining.com'];
+                if (!cleanStEmail || skipList.includes(cleanStEmail) || cleanStEmail.endsWith('.test') || cleanStEmail.endsWith('@example.com') || cleanStEmail.includes('test@')) {
+                    return;
+                }
+                const gmailUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                    || localStorage.getItem('platforms_gmail_webhook_url')
+                    || 'https://script.google.com/macros/s/AKfycbxzEpjDZ07wPASas7X4hNyR0ThhuXYg4G2aigLE4_L_XzVBnP7-u1Z0e0dQXmdOC7lT/exec';
+                const gmailSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                    || localStorage.getItem('platforms_gmail_webhook_secret')
+                    || 'pta-7Kq2x9Lm4Rv8';
+                if (!gmailUrl) return;
+                const nowStr = new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const isPaid = Boolean(opts.isPaid);
+                const cId = String(opts.courseId || 'armed-28').trim();
+                const cTitle = String(opts.courseTitle || 'Scheduled Course').trim();
+                const priceStr = String(opts.price || '$200').trim();
+                const isArmedCourse = cId === 'armed-28' || cId === 'armed';
+                const studentRec = {
+                    id: cleanStEmail,
+                    name: stName,
+                    email: cleanStEmail,
+                    phone: stPhone,
+                    studentPhone: stPhone,
+                    agency: cTitle,
+                    course_type: isArmedCourse ? 'armed' : cId,
+                    course_title: cTitle,
+                    amount_paid_display: priceStr.replace(/\s*\(.*\)/, ''),
+                    is_paid: isPaid,
+                    payment_verified: isPaid,
+                    ...(isArmedCourse && isPaid ? { armed_is_paid: true, armed_payment_verified: true } : {}),
+                    payment_status: isPaid ? `Paid ${priceStr} - ${cTitle}` : `Reserved - ${cTitle}`,
+                    confirmation_id: opts.reservationId || '',
+                    range_qualification_date: opts.date || 'Scheduled Session',
+                    mfa_verified: true,
+                    confirmation_email_sent: isPaid,
+                    created_at: nowStr,
+                    last_active: nowStr
+                };
+                await fetch(gmailUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'upsert_student',
+                        secret: gmailSecret,
+                        student: studentRec
+                    })
+                });
+            } catch (e) {}
         }
 
         async function dispatchCalendarInstructorEmailJsFallback(dedupKey, opts) {
@@ -1048,19 +1110,33 @@
                 const paidSlot = document.getElementById('stripe-paid-banner-slot');
                 const cPaid = (calendarData.courses && calendarData.courses[activeCourseFilter]) || {};
                 const isArmedPaidFlow = activeCourseFilter === 'armed-28';
+                if (isArmedPaidFlow) {
+                    const armedStripeRef = params.get('session_id') || params.get('orderId') || ('stripe_armed_' + Date.now());
+                    localStorage.setItem('platforms_pending_armed_stripe_session', armedStripeRef);
+                    sessionStorage.setItem('platforms_pending_armed_stripe_session', armedStripeRef);
+                    const knownEmail = (params.get('email') || localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
+                    if (knownEmail) {
+                        localStorage.setItem('platforms_armed_stripe_paid_v1_' + knownEmail, 'true');
+                    }
+                }
                 if (paidSlot) {
                     paidSlot.innerHTML = `
                         <div style="background:#181c24; border:1px solid #d4af37; border-radius:8px; padding:18px 22px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-                            <div>
+                            <div style="flex:1; min-width:260px;">
                                 <div style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700; color:#ffffff; margin-bottom:4px;">
-                                    <i class="fas fa-check-circle" style="color:#d4af37; margin-right:6px;"></i> ${isArmedPaidFlow ? 'ONLINE ARMED TUITION PAID — SELECT YOUR INCLUDED RANGE DATE BELOW' : 'TUITION PAYMENT CONFIRMED'}
+                                    <i class="fas fa-check-circle" style="color:#d4af37; margin-right:6px;"></i> ${isArmedPaidFlow ? 'ONLINE ARMED TUITION PAID ($200) — START YOUR ONLINE COURSE NOW' : 'TUITION PAYMENT CONFIRMED'}
                                 </div>
                                 <p style="margin:0; font-size:0.96rem; color:#ffffff; line-height:1.5;">
                                     ${isArmedPaidFlow
-                                        ? 'Your $200 Online Armed Security tuition covers your 8-hour live-fire qualification at Eagle Sports Range (ammo, targets &amp; range fees included). Click <strong>Select Date</strong> on any range session below to reserve your seat with <strong>$0 additional payment</strong>.'
+                                        ? 'Your $200 Online Armed Security tuition is confirmed! Click <strong>Launch Online Armed Course</strong> to complete your 10 online lessons &amp; written exam first — once you complete the online portion, you will schedule your included 8-hour Eagle Sports Range qualification ($0 additional payment).'
                                         : `Thank you for enrolling${cPaid.title ? ' in <strong>' + cPaid.title + '</strong>' : ''}! Your Stripe payment receipt has been sent to your email. Instructor Charles Young has been notified and will confirm your class details, or you may call <a href="tel:7738732591" style="color:#d4af37; font-weight:700;">(773) 873-2591</a> anytime.`}
                                 </p>
                             </div>
+                            ${isArmedPaidFlow ? `
+                                <a href="./armed-course/index.html?paid=true" class="btn-book-clean" style="background:linear-gradient(135deg, #d4af37, #b5952f); color:#07090e; font-weight:800; padding:12px 20px; white-space:nowrap;">
+                                    <i class="fas fa-play"></i> Launch Online Armed Course &rarr;
+                                </a>
+                            ` : ''}
                         </div>
                     `;
                 }
@@ -1085,6 +1161,18 @@
                         const resId = (savedBk && savedBk.reservationId) || '';
                         const clsDate = (savedBk && savedBk.date) || '';
                         const clsLoc = (savedBk && savedBk.location) || cPaid.location || '';
+
+                        await syncCalendarStudentToGoogleSheets({
+                            studentName: stName,
+                            studentEmail: stEmail,
+                            studentPhone: stPhone,
+                            courseId: paidCourseId,
+                            courseTitle: cPaid.title || (savedBk && savedBk.courseTitle) || paidCourseId,
+                            price: cPaid.price || (savedBk && savedBk.price) || '$200',
+                            date: clsDate || 'Next Scheduled Session',
+                            reservationId: resId || stripeRef,
+                            isPaid: true
+                        });
 
                         let payApiJson = null;
                         try {
@@ -1115,15 +1203,15 @@
                             const cTitleFull = cPaid.title || (savedBk && savedBk.courseTitle) || paidCourseId;
                             const cPriceStr = cPaid.price || (savedBk && savedBk.price) || 'Paid';
                             await dispatchCalendarInstructorEmailJsFallback(paidDedupKey, {
-                                headline: 'Paid Course Enrollment',
+                                headline: 'Course Signup & Payment Confirmed',
                                 studentName: stName,
                                 studentEmail: stEmail,
                                 studentPhone: stPhone,
                                 courseTitle: `${cTitleFull} (${cPriceStr} Paid)`,
-                                subject: `Paid Course Signup: ${stName} — ${cTitleFull} (${cPriceStr})`,
-                                summaryBanner: `PAID ${cPriceStr} (${cTitleFull}): ${stName}${stPhone ? ' • ' + stPhone : ''}${stEmail ? ' • ' + stEmail : ''}`,
-                                message: `Stripe Tuition Payment Completed:
-Course: ${cTitleFull} (${cPriceStr})
+                                subject: `Course Signup & Payment Confirmed: ${stName} — ${cTitleFull} (${cPriceStr} Paid)`,
+                                summaryBanner: `SIGNUP & PAID ${cPriceStr} (${cTitleFull}): ${stName}${stPhone ? ' • ' + stPhone : ''}${stEmail ? ' • ' + stEmail : ''}`,
+                                message: `Course Signup & Tuition Payment Confirmed:
+Course: ${cTitleFull} (${cPriceStr} Paid)
 Student: ${stName}
 Email: ${stEmail || 'See Stripe receipt'}
 Phone: ${stPhone || 'Not provided'}
@@ -1718,6 +1806,7 @@ Location: ${clsLoc}`
                 time: session.time,
                 location: resolvedLocation,
                 price: isPaidOnlineArmed ? 'Included ($200 Paid Online)' : session.price,
+                alreadyPaid: Boolean(isPaidOnlineArmed),
                 studentName: name,
                 studentPhone: phone,
                 studentEmail: email,
@@ -1767,11 +1856,10 @@ Location: ${clsLoc}`
                 localStorage.setItem('platforms_armed_pending_range_session', JSON.stringify(rangeRecord));
             }
 
-            let bookApiRes = null;
             try {
                 const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
                 const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 4500) : null;
-                const bkResp = await fetch(getApiBaseUrl() + '/api/calendar/book', {
+                await fetch(getApiBaseUrl() + '/api/calendar/book', {
                     method: 'POST',
                     keepalive: true,
                     signal: bkCtrl ? bkCtrl.signal : undefined,
@@ -1779,36 +1867,22 @@ Location: ${clsLoc}`
                     body: JSON.stringify({ reservation, calendarData })
                 });
                 if (bkTimer) clearTimeout(bkTimer);
-                if (bkResp && bkResp.ok) {
-                    bookApiRes = await bkResp.json();
-                }
             } catch (err) {}
 
-            // Fallback browser EmailJS alert to Instructor Charles Young if backend did not already send
-            const dedupKey = 'pta_instr_alert_booking:' + reservation.id;
-            if (bookApiRes && bookApiRes.instructor_email_sent) {
-                localStorage.setItem(dedupKey, '1');
-            } else if (!(bookApiRes && bookApiRes.instructor_alert_skipped)) {
-                const dateLabel = formatDateSpan(session.date, session.endDate);
-                await dispatchCalendarInstructorEmailJsFallback(dedupKey, {
-                    headline: 'New Class Signup',
-                    studentName: name,
-                    studentEmail: email,
-                    studentPhone: phone,
-                    courseTitle: `${session.title} (${dateLabel})`,
-                    subject: `New Course Signup: ${name} — ${session.title} (${dateLabel})`,
-                    summaryBanner: `BOOKED ${session.date} (${session.title}): ${name} • ${phone} • ${email}`,
-                    message: `New Class/Range Reservation:
-Student: ${name}
-Email: ${email}
-Phone: ${phone}
-Course: ${session.title}
-Date: ${dateLabel} (${session.time})
-Location: ${resolvedLocation}
-Price: ${reservation.price}`
-                });
-            }
+            // Automatically upsert student into Google Sheets Students database so Admin Portal shows them immediately
+            await syncCalendarStudentToGoogleSheets({
+                studentName: name,
+                studentEmail: email,
+                studentPhone: phone,
+                courseId: session.courseId,
+                courseTitle: session.title,
+                price: reservation.price,
+                date: session.date,
+                reservationId: reservation.id,
+                isPaid: Boolean(isPaidOnlineArmed)
+            });
 
+            // Instructor signup & payment confirmation alerts are combined into a single email sent upon payment confirmation
             renderMonthlyCalendar();
             renderSessionsList();
 
@@ -1899,11 +1973,10 @@ Price: ${reservation.price}`
                 studentEmail: email
             }));
 
-            let bookApiRes = null;
             try {
                 const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
                 const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 5000) : null;
-                const bkResp = await fetch(getApiBaseUrl() + '/api/calendar/book', {
+                await fetch(getApiBaseUrl() + '/api/calendar/book', {
                     method: 'POST',
                     keepalive: true,
                     signal: bkCtrl ? bkCtrl.signal : undefined,
@@ -1911,34 +1984,23 @@ Price: ${reservation.price}`
                     body: JSON.stringify({ reservation, calendarData })
                 });
                 if (bkTimer) clearTimeout(bkTimer);
-                if (bkResp && bkResp.ok) {
-                    bookApiRes = await bkResp.json();
-                }
             } catch (err) {}
 
-            const dedupKey = 'pta_instr_alert_booking:' + reservation.id;
-            if (bookApiRes && bookApiRes.instructor_email_sent) {
-                localStorage.setItem(dedupKey, '1');
-            } else if (!(bookApiRes && bookApiRes.instructor_alert_skipped)) {
-                await dispatchCalendarInstructorEmailJsFallback(dedupKey, {
-                    headline: 'New Course Signup',
-                    studentName: name,
-                    studentEmail: email,
-                    studentPhone: phone,
-                    courseTitle: cObj.title,
-                    subject: `New Course Signup: ${name} — ${cObj.title}`,
-                    summaryBanner: `SIGNUP (${cObj.title}): ${name} • ${phone} • ${email}`,
-                    message: `New Course Signup:
-Course: ${cObj.title} (${cObj.price})
-Student: ${name}
-Email: ${email}
-Phone: ${phone}
-Notes: ${reservation.notes}
-Location: ${reservation.location}`
-                });
-            }
+            // Automatically upsert student into Google Sheets Students database so Admin Portal shows them immediately
+            await syncCalendarStudentToGoogleSheets({
+                studentName: name,
+                studentEmail: email,
+                studentPhone: phone,
+                courseId: activeCourseFilter,
+                courseTitle: cObj.title,
+                price: cObj.price,
+                date: reservation.date,
+                reservationId: reservation.id,
+                isPaid: false
+            });
 
-            if (proceedToPayment) {
+            // Instructor signup & payment confirmation alerts are combined into a single email sent upon payment confirmation
+            if (proceedToPayment !== false) {
                 const stripeUrl = getCourseStripeUrl(activeCourseFilter);
                 const finalStripeUrl = email
                     ? stripeUrl + (stripeUrl.includes('?') ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(email)

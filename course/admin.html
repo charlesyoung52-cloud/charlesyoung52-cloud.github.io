@@ -799,7 +799,7 @@
                             <i class="fas fa-paper-plane"></i> Test MFA Code
                         </button>
                         <button type="button" class="btn-action" style="background:rgba(212,175,55,0.16); border:1px solid #d4af37; color:#e5c158;" onclick="sendSampleInstructorAlerts()">
-                            <i class="fas fa-bell"></i> Send Sample Signup &amp; Completion Alerts
+                            <i class="fas fa-bell"></i> Send Sample Payment &amp; Completion Alerts
                         </button>
                     </div>
                 </div>
@@ -1693,14 +1693,25 @@ function ptaVerifyAdminCredential(inputVal) {
         h === 'a0c0a5571285ff739e2bd7008074797d56733f002ef75df4be54f342ff6cf889'
     );
 }
-        // Automatic Admin Authorization Header Injector for First-Party API Calls
+        // Automatic Admin Authorization Header Injector strictly for Backend API Calls (/api/...)
+        // Never inject custom headers onto Google Apps Script (script.google.com), EmailJS, or static files so CORS preflights never fail.
         (function installAdminFetchInterceptor() {
             const origFetch = window.fetch.bind(window);
             window.fetch = function(input, init) {
                 try {
                     const urlStr = (typeof input === 'string') ? input : (input && input.url ? input.url : '');
-                    const isExternalThirdParty = urlStr.includes('api.emailjs.com') || urlStr.includes('googleapis.com');
-                    if (!isExternalThirdParty) {
+                    const isThirdPartyOrStatic =
+                        urlStr.includes('script.google.com') ||
+                        urlStr.includes('googleusercontent.com') ||
+                        urlStr.includes('api.emailjs.com') ||
+                        urlStr.includes('googleapis.com');
+                    const isBackendApiCall = !isThirdPartyOrStatic && (
+                        urlStr.includes('/api/') ||
+                        urlStr.includes('onrender.com') ||
+                        urlStr.includes('localhost') ||
+                        urlStr.includes('127.0.0.1')
+                    );
+                    if (isBackendApiCall) {
                         init = init ? Object.assign({}, init) : {};
                         const hdrs = new Headers(init.headers || {});
                         if (!hdrs.has('X-Admin-Token')) {
@@ -1801,6 +1812,7 @@ function ptaVerifyAdminCredential(inputVal) {
             loadAdminCalendarData();
             loadGoogleReviewUrl();
             renderEmailStudioPreview();
+            startAutoStudentRosterSync();
             setTimeout(() => runAutoReminderCheck(true), 1200);
             const initialTab = new URLSearchParams(window.location.search).get('tab');
             if (initialTab && ['roster', 'calendar', 'emails', 'mfa'].includes(initialTab)) {
@@ -1809,7 +1821,14 @@ function ptaVerifyAdminCredential(inputVal) {
         }
 
         function getApiBaseUrl() {
-            return (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            if (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) {
+                return window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '');
+            }
+            const host = (window.location && window.location.hostname) || '';
+            if (host === 'localhost' || host === '127.0.0.1') {
+                return '';
+            }
+            return 'https://charlesyoung52-cloud-github-io.onrender.com';
         }
 
         async function loadEmailJsConfig() {
@@ -2462,95 +2481,344 @@ function ptaVerifyAdminCredential(inputVal) {
             recomputeMetricsFromRealStudents();
         }
 
-        async function fetchData() {
+        function inferCourseInfo(rawCourseType, rawTitle, rawId) {
+            const combined = `${rawCourseType || ''} ${rawTitle || ''} ${rawId || ''}`.toLowerCase();
+            if (combined.includes('ccl-16') || combined.includes('16 hr') || combined.includes('16-hr') || combined.includes('16-hour') || (combined.includes('concealed') && !combined.includes('8') && !combined.includes('3') && !combined.includes('military') && !combined.includes('refresh'))) {
+                return { code: 'ccl-16', title: '16-Hour IL Concealed Carry Course', shortTag: '16-HR IL CCL ($200)', price: '$200', isOnline: false, isArmed: false };
+            }
+            if (combined.includes('ccl-military') || combined.includes('military') || combined.includes('leo')) {
+                return { code: 'ccl-military', title: '8-Hour IL CCL (Military / LEO)', shortTag: '8-HR MIL/LEO CCL ($125)', price: '$125', isOnline: false, isArmed: false };
+            }
+            if (combined.includes('ccl-8') || combined.includes('8 hr') || combined.includes('8-hr') || combined.includes('8-hour')) {
+                return { code: 'ccl-8', title: '8-Hour IL Concealed Carry Course', shortTag: '8-HR IL CCL ($150)', price: '$150', isOnline: false, isArmed: false };
+            }
+            if (combined.includes('ccl-refresher') || combined.includes('refresher') || combined.includes('3 hr') || combined.includes('3-hr') || combined.includes('renewal')) {
+                return { code: 'ccl-refresher', title: '3-Hour IL CCL Refresher Course', shortTag: '3-HR CCL RENEWAL ($125)', price: '$125', isOnline: false, isArmed: false };
+            }
+            if (combined.includes('upgrade')) {
+                return { code: 'firearm-upgrade', title: 'Security Firearm Upgrade Qualification', shortTag: 'FIREARM UPGRADE ($125)', price: '$125', isOnline: false, isArmed: false };
+            }
+            if (combined.includes('requal')) {
+                return { code: 'firearm-requal', title: 'Security Firearm Requalification', shortTag: 'FIREARM REQUAL ($125)', price: '$125', isOnline: false, isArmed: false };
+            }
+            if ((combined.includes('armed') && !combined.includes('unarmed')) || String(rawId || '').toLowerCase().startsWith('armed::')) {
+                return { code: 'armed', title: '28-Hour Online Armed Security Course', shortTag: 'ARMED ($200 • #102-000398)', price: '$200', isOnline: true, isArmed: true };
+            }
+            return { code: 'unarmed', title: '20-Hour Online Unarmed Security Course', shortTag: 'UNARMED ($50)', price: '$50', isOnline: true, isArmed: false };
+        }
+
+        function normalizeStudentRecordForAdmin(s) {
+            if (!s || typeof s !== 'object') return s;
+            const rawId = String(s.id || '').trim();
+            const cleanEmail = String(s.email || s.studentEmail || (rawId.toLowerCase().startsWith('armed::') ? rawId.slice(7) : (rawId.includes('@') ? rawId : ''))).trim().toLowerCase();
+            const cInfo = inferCourseInfo(s.course_type || s.courseId, s.course_title || s.courseTitle || s.agency || s.payment_status, rawId);
+            const isArmed = cInfo.isArmed || Boolean(s.armed_range_session || s.armed_cert_data || s.armed_is_paid);
+            const rangeSess = s.armed_range_session || null;
+            const phoneVal = String(s.phone || s.studentPhone || (rangeSess && rangeSess.studentPhone) || '').trim();
+            const rangeDateVal = s.range_qualification_date || (rangeSess && (rangeSess.dateFormatted || rangeSess.date)) || '';
+            const isPaidVal = isArmed
+                ? Boolean(s.armed_is_paid || s.armed_payment_verified || s.is_paid || s.payment_verified || String(s.payment_status || '').toLowerCase().includes('paid'))
+                : Boolean(s.is_paid || s.payment_verified || String(s.payment_status || '').toLowerCase().includes('paid'));
+            const modsDone = isArmed
+                ? Number(s.armed_completed_modules !== undefined ? s.armed_completed_modules : (s.completed_modules || 0))
+                : Number(s.completed_modules || 0);
+            const totalMods = cInfo.isOnline
+                ? Number((isArmed ? s.armed_total_modules : s.total_modules) || 10)
+                : 0;
+            const examAtt = isArmed
+                ? Number(s.armed_exam_attempts !== undefined ? s.armed_exam_attempts : (s.exam_attempts || 0))
+                : Number(s.exam_attempts || 0);
+            const bestSc = isArmed
+                ? (s.armed_best_score !== undefined && s.armed_best_score !== null ? s.armed_best_score : s.best_score)
+                : s.best_score;
+            const latestSc = isArmed
+                ? (s.armed_latest_score !== undefined && s.armed_latest_score !== null ? s.armed_latest_score : s.latest_score)
+                : s.latest_score;
+            const hasPassed = isArmed
+                ? Boolean(s.armed_has_passed || s.has_passed)
+                : Boolean(s.has_passed);
+            const certIdVal = isArmed
+                ? (s.armed_cert_id || s.cert_id || (s.armed_cert_data && s.armed_cert_data.cert_id) || null)
+                : (s.cert_id || null);
+            const attemptsList = (isArmed && Array.isArray(s.armed_attempts) && s.armed_attempts.length > 0)
+                ? s.armed_attempts
+                : (Array.isArray(s.attempts) ? s.attempts : []);
+
+            return {
+                ...s,
+                id: rawId || cleanEmail,
+                name: String(s.name || s.studentName || 'Student Officer').replace(/\s+/g, ' ').trim(),
+                email: cleanEmail,
+                phone: phoneVal,
+                course_type: isArmed ? 'armed' : cInfo.code,
+                course_title: s.course_title || s.courseTitle || cInfo.title,
+                course_tag_label: isArmed ? 'ARMED ($200 • #102-000398)' : cInfo.shortTag,
+                amount_paid_display: s.amount_paid_display || cInfo.price,
+                is_online_course: cInfo.isOnline || isArmed,
+                is_paid: isPaidVal,
+                completed_modules: modsDone,
+                total_modules: totalMods,
+                exam_attempts: examAtt,
+                best_score: bestSc !== undefined ? bestSc : null,
+                latest_score: latestSc !== undefined ? latestSc : null,
+                latest_passed: Boolean(s.latest_passed || hasPassed),
+                has_passed: hasPassed,
+                cert_id: certIdVal,
+                range_qualification_date: rangeDateVal,
+                attempts: attemptsList
+            };
+        }
+
+        function parseNormalizedReservation(r) {
+            if (!r || typeof r !== 'object') return null;
+            const msg = String(r.message || '');
+            const extractLine = (label) => {
+                const m = msg.match(new RegExp('^' + label + ':\\s*(.+)$', 'mi'));
+                return m ? m[1].trim() : '';
+            };
+            const rawId = String(r.id || '').trim();
+            const cleanResId = rawId
+                .replace(/^pta_instr_alert_paid:[^:]+:(?:stripe_)?/i, '')
+                .replace(/^pta_instr_alert_booking:/i, '');
+            const courseTitle = String(r.courseTitle || extractLine('Course') || 'Scheduled Training Course').trim();
+            const cInfo = inferCourseInfo(r.courseId || '', courseTitle, rawId);
+            const isPaid = rawId.toLowerCase().includes('_paid:') ||
+                String(r.headline || '').toLowerCase().includes('paid') ||
+                courseTitle.toLowerCase().includes('paid') ||
+                msg.toLowerCase().includes('payment completed') ||
+                String(r.paymentStatus || r.price || '').toLowerCase().includes('paid');
+            const parsedDate = r.date || extractLine('Date') || 'Scheduled Session';
+            const parsedTime = r.time || (parsedDate.includes('(') ? '' : '9:00 AM – 5:00 PM');
+            const parsedLoc = r.location || extractLine('Location') || '';
+            const parsedNotes = r.notes || extractLine('Notes') || (isPaid ? 'Paid via Stripe Checkout' : '');
+            const studentEmail = String(r.studentEmail || r.email || extractLine('Email') || '').trim().toLowerCase();
+            const studentPhone = String(r.studentPhone || r.phone || extractLine('Phone') || '').trim();
+            const studentName = String(r.studentName || r.name || extractLine('Student') || 'Student Officer').replace(/\s+/g, ' ').trim();
+
+            return {
+                ...r,
+                id: cleanResId || rawId || ('RES-' + Date.now()),
+                rawId: rawId,
+                courseId: r.courseId || cInfo.code,
+                courseTitle: courseTitle,
+                studentName: studentName,
+                studentEmail: studentEmail,
+                studentPhone: studentPhone,
+                date: parsedDate,
+                time: parsedTime,
+                location: parsedLoc,
+                notes: parsedNotes,
+                price: r.price || (isPaid ? `${cInfo.price} (Paid)` : cInfo.price),
+                isPaid: isPaid,
+                createdAt: r.createdAt || 'Recent'
+            };
+        }
+
+        function deduplicateReservationsList(rawList) {
+            const byKey = new Map();
+            (rawList || []).forEach(item => {
+                const norm = parseNormalizedReservation(item);
+                if (!norm) return;
+                const em = String(norm.studentEmail || '').toLowerCase();
+                const nm = String(norm.studentName || '').toLowerCase();
+                if (FAKE_STUDENT_EMAILS.has(em) || FAKE_STUDENT_NAMES.has(nm)) return;
+                if (em.endsWith('.test') || em.endsWith('@example.com') || em.includes('test@') || em.includes('charlesyoung')) return;
+                const key = `${em || nm}::${norm.courseId || norm.id}`;
+                const existing = byKey.get(key);
+                if (!existing) {
+                    byKey.set(key, norm);
+                } else {
+                    byKey.set(key, {
+                        ...existing,
+                        ...norm,
+                        id: norm.id.startsWith('RES-') ? norm.id : existing.id,
+                        isPaid: Boolean(existing.isPaid || norm.isPaid),
+                        courseTitle: (norm.isPaid ? norm.courseTitle : existing.courseTitle) || norm.courseTitle,
+                        notes: existing.notes || norm.notes,
+                        date: (norm.date && norm.date !== 'Scheduled Session') ? norm.date : existing.date,
+                        location: norm.location || existing.location
+                    });
+                }
+            });
+            return Array.from(byKey.values());
+        }
+
+        function studentRosterMergeKey(s) {
+            const em = String(s.email || s.studentEmail || s.id || '').trim().toLowerCase().replace(/^armed::/, '');
+            const cInfo = inferCourseInfo(s.course_type || s.courseId, s.course_title || s.courseTitle || s.agency, s.id);
+            return `${em}::${cInfo.code}`;
+        }
+
+        let _autoStudentSyncInterval = null;
+        let _autoStudentSyncListenersBound = false;
+        let _fetchDataInFlight = false;
+        function startAutoStudentRosterSync() {
+            if (_autoStudentSyncInterval) clearInterval(_autoStudentSyncInterval);
+            _autoStudentSyncInterval = setInterval(() => {
+                if (document.hidden) return;
+                const modalOpen = ['armed-cert-modal', 'attempts-modal'].some(id => {
+                    const el = document.getElementById(id);
+                    return el && el.style.display === 'flex';
+                });
+                if (!modalOpen) {
+                    fetchData(true);
+                }
+            }, 15000);
+            if (!_autoStudentSyncListenersBound) {
+                _autoStudentSyncListenersBound = true;
+                window.addEventListener('focus', () => {
+                    fetchData(true);
+                });
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) fetchData(true);
+                });
+                window.addEventListener('storage', (ev) => {
+                    if (!ev || !ev.key || ev.key.startsWith('platforms_')) {
+                        fetchData(true);
+                    }
+                });
+            }
+        }
+
+        async function fetchData(silentBackground = false) {
+            if (_fetchDataInFlight && silentBackground) return;
+            _fetchDataInFlight = true;
+            try {
             purgeFakeLocalRecords();
             const baseUrl = getApiBaseUrl();
             const cloudBadge = document.getElementById('cloud-status-badge');
             let cloudServerOnline = false;
-            allStudents = [];
+            const byRosterKey = new Map();
 
-            // Step 1: Fetch static cloud roster fallback (filtered to real students only)
-            try {
-                const mirrorRes = await fetch('../data/students.json?t=' + Date.now());
-                if (mirrorRes.ok) {
-                    const mirrorData = await mirrorRes.json();
-                    if (Array.isArray(mirrorData.students)) {
-                        allStudents = mirrorData.students.filter(isRealStudentRecord);
-                    }
+            const addOrMergeStudent = (rawObj) => {
+                const norm = normalizeStudentRecordForAdmin(rawObj);
+                if (!isRealStudentRecord(norm)) return;
+                const key = studentRosterMergeKey(norm);
+                const prev = byRosterKey.get(key);
+                if (!prev) {
+                    byRosterKey.set(key, norm);
+                } else {
+                    byRosterKey.set(key, normalizeStudentRecordForAdmin({
+                        ...prev,
+                        ...norm,
+                        is_paid: Boolean(prev.is_paid || norm.is_paid),
+                        phone: norm.phone || prev.phone || '',
+                        completed_modules: Math.max(Number(prev.completed_modules || 0), Number(norm.completed_modules || 0)),
+                        exam_attempts: Math.max(Number(prev.exam_attempts || 0), Number(norm.exam_attempts || 0)),
+                        has_passed: Boolean(prev.has_passed || norm.has_passed),
+                        cert_id: norm.cert_id || prev.cert_id || null,
+                        armed_cert_data: norm.armed_cert_data || prev.armed_cert_data || null,
+                        armed_range_session: norm.armed_range_session || prev.armed_range_session || null,
+                        range_qualification_date: norm.range_qualification_date || prev.range_qualification_date || ''
+                    }));
                 }
-            } catch (e) {
-                console.log("Static cloud mirror notice:", e);
-            }
+            };
 
-            // Step 2: Fetch live permanent database from Google Sheets Apps Script (or optional backend)
             const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
                 || localStorage.getItem('platforms_gmail_webhook_url') || '';
             const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
                 || localStorage.getItem('platforms_gmail_webhook_secret') || '';
 
-            if (gwUrl) {
-                try {
-                    if (cloudBadge) {
-                        cloudBadge.className = 'badge badge-info';
-                        cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing Google Sheets...';
-                    }
-                    const gsRes = await fetch(`${gwUrl}?action=students&secret=${encodeURIComponent(gwSecret)}`);
-                    if (gsRes.ok) {
-                        const gsData = await gsRes.json();
-                        if (gsData && gsData.ok && Array.isArray(gsData.students)) {
-                            const byKey = new Map();
-                            allStudents.forEach(s => byKey.set(String(s.email || s.id || '').toLowerCase(), s));
-                            gsData.students.filter(isRealStudentRecord).forEach(s => {
-                                const k = String(s.email || s.id || '').toLowerCase();
-                                if (k) byKey.set(k, { ...(byKey.get(k) || {}), ...s });
-                            });
-                            allStudents = Array.from(byKey.values());
-                            cloudServerOnline = true;
-                        }
-                    }
-                } catch (err) {
-                    console.warn('Google Sheets fetch note:', err);
-                }
-            } else if (baseUrl) {
-                try {
-                    if (cloudBadge) {
-                        cloudBadge.className = 'badge badge-info';
-                        cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
-                    }
-
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-                    const studentsRes = await fetch(baseUrl + '/api/students', { signal: controller.signal });
-                    clearTimeout(timeoutId);
-
-                    if (studentsRes.ok) {
-                        const data = await studentsRes.json();
-                        if (Array.isArray(data.students)) {
-                            allStudents = data.students.filter(isRealStudentRecord);
-                        }
-                        cloudServerOnline = true;
-                    }
-                } catch (err) {
-                    console.warn('Live cloud server fetch note (using cloud mirror):', err);
-                }
+            if (!silentBackground && cloudBadge) {
+                cloudBadge.className = 'badge badge-info';
+                cloudBadge.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing All Students...';
             }
 
-            // Merge any real local student records
-            allStudents = mergeLocalStudentsAndArmedCerts(allStudents).filter(isRealStudentRecord);
+            const cacheBust = Date.now();
+            // Fetch all sources in parallel with strict cache-busting (no custom headers on script.google.com)
+            const tasks = [
+                fetch('../data/students.json?_t=' + cacheBust, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+                gwUrl ? fetch(`${gwUrl}?action=students&secret=${encodeURIComponent(gwSecret)}&_t=${cacheBust}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+                gwUrl ? fetch(`${gwUrl}?action=reservations&secret=${encodeURIComponent(gwSecret)}&_t=${cacheBust}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+                fetch((baseUrl || '') + '/api/students?_t=' + cacheBust, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
+            ];
+
+            const [mirrorData, gsStudentsData, gsReservationsData, apiStudentsData] = await Promise.all(tasks);
+
+            if (mirrorData && Array.isArray(mirrorData.students)) {
+                mirrorData.students.forEach(addOrMergeStudent);
+            }
+            if (apiStudentsData && Array.isArray(apiStudentsData.students)) {
+                apiStudentsData.students.forEach(addOrMergeStudent);
+                cloudServerOnline = true;
+            }
+            const gsStudentEmails = new Set();
+            if (gsStudentsData && gsStudentsData.ok && Array.isArray(gsStudentsData.students)) {
+                gsStudentsData.students.forEach(s => {
+                    const em = String(s.email || s.id || '').trim().toLowerCase().replace(/^armed::/, '');
+                    if (em) gsStudentEmails.add(em);
+                    addOrMergeStudent(s);
+                });
+                cloudServerOnline = true;
+            }
+
+            // Also merge students from Google Sheets Reservations (e.g. Concealed Carry, Requal, Upgrade, Armed Range bookings)
+            if (gsReservationsData && gsReservationsData.ok && Array.isArray(gsReservationsData.reservations)) {
+                const dedupedRes = deduplicateReservationsList(gsReservationsData.reservations);
+                adminCalendarData.reservations = dedupedRes;
+                renderAdminReservationsTable();
+                dedupedRes.forEach(r => {
+                    const cInfo = inferCourseInfo(r.courseId, r.courseTitle, r.id);
+                    const studentFromRes = {
+                        id: r.studentEmail || r.id,
+                        name: r.studentName,
+                        email: r.studentEmail,
+                        phone: r.studentPhone,
+                        agency: cInfo.title,
+                        course_type: cInfo.code,
+                        course_title: cInfo.title,
+                        amount_paid_display: cInfo.price,
+                        is_paid: Boolean(r.isPaid),
+                        payment_status: r.isPaid ? `Paid ${cInfo.price} - ${cInfo.title}` : `Reserved - ${cInfo.title}`,
+                        range_qualification_date: r.date || 'Scheduled Session',
+                        completed_modules: 0,
+                        total_modules: cInfo.isOnline ? 10 : 0,
+                        exam_attempts: 0,
+                        best_score: null,
+                        latest_score: null,
+                        latest_passed: false,
+                        has_passed: false,
+                        mfa_verified: true,
+                        confirmation_email_sent: Boolean(r.isPaid),
+                        created_at: r.createdAt || 'Recent',
+                        last_active: r.createdAt || 'Recent',
+                        attempts: []
+                    };
+                    addOrMergeStudent(studentFromRes);
+
+                    // Automatically backfill any reservation-only student into the Google Sheets Students tab
+                    const cleanEm = String(r.studentEmail || '').trim().toLowerCase();
+                    if (gwUrl && cleanEm && !gsStudentEmails.has(cleanEm) && isRealStudentRecord(studentFromRes)) {
+                        gsStudentEmails.add(cleanEm);
+                        fetch(gwUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            keepalive: true,
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'upsert_student', secret: gwSecret, student: normalizeStudentRecordForAdmin(studentFromRes) })
+                        }).catch(() => {});
+                    }
+                });
+                cloudServerOnline = true;
+            }
+
+            // Merge any real local browser student records
+            const mergedLocal = mergeLocalStudentsAndArmedCerts(Array.from(byRosterKey.values()));
+            byRosterKey.clear();
+            mergedLocal.forEach(addOrMergeStudent);
+            allStudents = Array.from(byRosterKey.values()).filter(isRealStudentRecord);
             recomputeMetricsFromRealStudents();
 
+            const syncTimeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
             if (cloudServerOnline) {
                 if (cloudBadge) {
                     cloudBadge.className = 'badge badge-success';
-                    cloudBadge.innerHTML = gwUrl
-                        ? '<i class="fas fa-table"></i> Google Sheets Online'
-                        : '<i class="fas fa-cloud-check"></i> Cloud Online';
+                    cloudBadge.innerHTML = `<i class="fas fa-bolt"></i> Live Auto-Sync (${allStudents.length} Students &bull; ${syncTimeStr})`;
                 }
             } else {
                 if (cloudBadge) {
                     cloudBadge.className = 'badge badge-info';
-                    cloudBadge.innerHTML = '<i class="fas fa-database"></i> Cloud Mirror';
+                    cloudBadge.innerHTML = `<i class="fas fa-database"></i> Cloud Mirror (${allStudents.length} Students &bull; ${syncTimeStr})`;
                 }
             }
 
@@ -2558,6 +2826,9 @@ function ptaVerifyAdminCredential(inputVal) {
             renderTable();
             loadInstructorCertificateDatabase();
             if (typeof renderAutomatedEmailStatusLog === 'function') renderAutomatedEmailStatusLog();
+            } finally {
+                _fetchDataInFlight = false;
+            }
         }
 
         function loadLocalStudentsRegistry() {
@@ -2651,19 +2922,9 @@ function ptaVerifyAdminCredential(inputVal) {
             const gwSecretCal = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
                 || localStorage.getItem('platforms_gmail_webhook_secret') || '';
 
-            if (gwUrlCal && loaded) {
+            if (getApiBaseUrl()) {
                 try {
-                    const gsRes = await fetch(`${gwUrlCal}?action=reservations&secret=${encodeURIComponent(gwSecretCal)}`);
-                    if (gsRes.ok) {
-                        const gsData = await gsRes.json();
-                        if (gsData && gsData.ok && Array.isArray(gsData.reservations)) {
-                            loaded.reservations = gsData.reservations;
-                        }
-                    }
-                } catch (e) {}
-            } else if (getApiBaseUrl()) {
-                try {
-                    const apiRes = await fetch(getApiBaseUrl() + '/api/calendar');
+                    const apiRes = await fetch(getApiBaseUrl() + '/api/calendar?_t=' + Date.now(), { cache: 'no-store' });
                     if (apiRes.ok) {
                         const apiData = await apiRes.json();
                         if (apiData && apiData.courses && Array.isArray(apiData.sessions) && (apiData.last_updated || '') >= baseUpdated) {
@@ -2673,16 +2934,24 @@ function ptaVerifyAdminCredential(inputVal) {
                 } catch (e) {}
             }
 
+            if (gwUrlCal && loaded) {
+                try {
+                    const gsRes = await fetch(`${gwUrlCal}?action=reservations&secret=${encodeURIComponent(gwSecretCal)}&_t=${Date.now()}`, { cache: 'no-store' });
+                    if (gsRes.ok) {
+                        const gsData = await gsRes.json();
+                        if (gsData && gsData.ok && Array.isArray(gsData.reservations)) {
+                            loaded.reservations = [
+                                ...(Array.isArray(loaded.reservations) ? loaded.reservations : []),
+                                ...gsData.reservations
+                            ];
+                        }
+                    }
+                } catch (e) {}
+            }
+
             if (loaded) {
                 if (Array.isArray(loaded.reservations)) {
-                    loaded.reservations = loaded.reservations.filter(r => {
-                        if (!r) return false;
-                        const em = String(r.studentEmail || '').trim().toLowerCase();
-                        const nm = String(r.studentName || '').trim().toLowerCase();
-                        if (FAKE_STUDENT_EMAILS.has(em) || FAKE_STUDENT_NAMES.has(nm)) return false;
-                        if (em.endsWith('.test') || em.endsWith('@example.com') || em.includes('test@')) return false;
-                        return true;
-                    });
+                    loaded.reservations = deduplicateReservationsList(loaded.reservations);
                 }
                 adminCalendarData = loaded;
             }
@@ -2841,7 +3110,7 @@ function ptaVerifyAdminCredential(inputVal) {
                         fb.style.background = 'rgba(16, 185, 129, 0.16)';
                         fb.style.border = '1px solid rgba(16, 185, 129, 0.5)';
                         fb.style.color = '#86efac';
-                        fb.innerHTML = `<i class="fas fa-check-circle"></i> Sent <strong>${data.sent_count} of ${data.total_samples}</strong> sample instructor alerts to <strong>${targetEmail}</strong>! Check your inbox for Online Signup, Range Requal/Upgrade Signup, CCL Signup, and Online Course Completion test emails.`;
+                        fb.innerHTML = `<i class="fas fa-check-circle"></i> Sent <strong>${data.sent_count} of ${data.total_samples}</strong> sample instructor alerts to <strong>${targetEmail}</strong>! Check your inbox for combined Course Signup &amp; Payment Confirmation and Online Course Completion test emails.`;
                     }
                 } else {
                     throw new Error((data && data.error) || 'Failed to dispatch sample alerts');
@@ -3148,10 +3417,21 @@ function ptaVerifyAdminCredential(inputVal) {
                 }
 
                 const isArmedRow = isArmedStudentRow(s);
+                const cInfo = inferCourseInfo(s.course_type, s.course_title || s.agency, s.id);
+                const isOnlineCourseRow = s.is_online_course !== undefined ? Boolean(s.is_online_course) : (cInfo.isOnline || isArmedRow);
                 const isPendingInstructor = isArmedPendingInstructorCompletion(s);
-                const courseTag = isArmedRow
-                    ? `<span class="badge badge-info" style="font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200 &bull; #102-000398)</span>`
-                    : `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($50)</span>`;
+                const chosenQualDate = (s.armed_range_session && (s.armed_range_session.dateFormatted || s.armed_range_session.date)) || s.range_qualification_date || '';
+                let courseTag = '';
+                if (isArmedRow) {
+                    courseTag = `<span class="badge badge-info" style="font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-crosshairs"></i> ARMED ($200 &bull; #102-000398)</span>`;
+                } else if (!isOnlineCourseRow) {
+                    courseTag = `<span class="badge badge-gold" style="background:rgba(212,175,55,0.16); color:#fde68a; border:1px solid rgba(212,175,55,0.45); font-size:0.82rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-bullseye"></i> ${s.course_tag_label || cInfo.shortTag}</span>`;
+                } else {
+                    courseTag = `<span class="badge" style="background:rgba(148,163,184,0.16); color:#e2e8f0; border:1px solid rgba(148,163,184,0.3); font-size:0.84rem; padding:1px 6px; margin-top:4px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-shield-halved"></i> UNARMED ($50)</span>`;
+                }
+                const rangeDateTag = chosenQualDate
+                    ? `<div style="margin-top:4px;"><span class="badge" style="background:rgba(56,189,248,0.14); color:#bae6fd; border:1px solid rgba(56,189,248,0.35); font-size:0.75rem;"><i class="fas fa-calendar-check"></i> Session: ${chosenQualDate}</span></div>`
+                    : '';
 
                 const pendingInstructorTag = isPendingInstructor
                     ? `<div style="margin-top:4px;"><span class="badge badge-danger" style="background:rgba(248,113,113,0.16); color:#fca5a5; border:1px solid rgba(248,113,113,0.55); font-size:0.72rem; cursor:pointer;" onclick="openArmedCertModal(${idx})" title="Click to open prefilled Form IL486-1138 and complete Instructor section"><i class="fas fa-circle-exclamation"></i> Pending Instructor Cert Completion</span></div>`
@@ -3159,7 +3439,9 @@ function ptaVerifyAdminCredential(inputVal) {
 
                 // Cert Badge (lives inside the Student Profile — click to open prefilled certificate or download saved DB copy)
                 let certBadge = `<span style="color:var(--text-sub); font-size:0.9rem;"><i class="fas fa-hourglass-half"></i> In Progress</span>`;
-                if (isArmedRow) {
+                if (!isOnlineCourseRow) {
+                    certBadge = `<span class="badge badge-info" style="font-size:0.8rem;"><i class="fas fa-id-card-clip"></i> In-Person Class / Range Cert</span>`;
+                } else if (isArmedRow) {
                     if (s.armed_cert_data && s.armed_cert_data.instructor_completed) {
                         certBadge = `
                             <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px; cursor:pointer;" onclick="openArmedCertModal(${idx})" title="Click to view or re-send completed Form IL486-1138">
@@ -3203,7 +3485,8 @@ function ptaVerifyAdminCredential(inputVal) {
                 }
 
                 // Payment pill + Automated Email Sent indicators
-                const paidLabel = s.amount_paid_display ? `${s.amount_paid_display} PAID` : (isArmedRow ? '$200 PAID' : '$50 PAID');
+                const defaultPriceStr = s.amount_paid_display || cInfo.price || (isArmedRow ? '$200' : '$50');
+                const paidLabel = `${defaultPriceStr} PAID`;
                 let paymentPill = `
                     <span class="badge badge-success" style="font-size:0.82rem; padding:2px 7px;">
                         <i class="fas fa-check-circle"></i> ${paidLabel}
@@ -3211,14 +3494,18 @@ function ptaVerifyAdminCredential(inputVal) {
                 `;
                 if (!s.is_paid) {
                     paymentPill = `
-                        <span class="badge badge-warning" style="font-size:0.82rem; padding:2px 7px;">
-                            <i class="fas fa-clock"></i> Pending (${isArmedRow ? '$200' : '$50'})
-                        </span>
+                        <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                            <span class="badge badge-warning" style="font-size:0.82rem; padding:2px 7px;">
+                                <i class="fas fa-clock"></i> Pending (${defaultPriceStr})
+                            </span>
+                            <button type="button" class="btn-action" style="padding:2px 7px; font-size:0.74rem; border-color:#10b981; color:#6ee7b7; background:rgba(16,185,129,0.14);" onclick="markStudentPaidAdmin(${idx})" title="Verify payment &amp; unlock course access for this student">
+                                <i class="fas fa-unlock"></i> Unlock / Mark Paid
+                            </button>
+                        </div>
                     `;
                 }
 
                 const confSent = Boolean(s.confirmation_email_sent || s.is_paid);
-                const chosenQualDate = (s.armed_range_session && (s.armed_range_session.dateFormatted || s.armed_range_session.date)) || s.range_qualification_date || '';
                 const remSent = Boolean(s.reminder_email_sent);
                 const tySent = Boolean(s.thank_you_email_sent || s.cert_id || (s.armed_cert_data && s.armed_cert_data.instructor_completed));
 
@@ -3252,11 +3539,26 @@ function ptaVerifyAdminCredential(inputVal) {
                            </button>`
                         : '');
 
+                const studentPhoneDisplay = s.phone || s.studentPhone || (s.armed_range_session && s.armed_range_session.studentPhone) || '';
+                const modulesColumnHtml = isOnlineCourseRow
+                    ? `
+                        <div style="font-weight:700; color:#fff; font-size:0.94rem;">${modulesDone} / ${totalMods} Modules</div>
+                        <div class="progress-bar-wrapper" style="margin-top:4px;">
+                            <div class="progress-bar-fill" style="width: ${pctModules}%;"></div>
+                        </div>
+                        <div style="font-size:0.84rem; color:var(--text-sub); margin-top:2px;">${pctModules}% Completed</div>
+                    `
+                    : `
+                        <div style="font-weight:700; color:#fde68a; font-size:0.9rem;"><i class="fas fa-chalkboard-user"></i> In-Person Class &amp; Range</div>
+                        <div style="font-size:0.82rem; color:var(--text-sub); margin-top:3px;">${chosenQualDate || 'Scheduled Session'}</div>
+                    `;
+
                 return `
                     <tr class="${isPendingInstructor ? 'armed-pending-instructor-row' : ''}">
                         <td>
                             <strong style="color:#fff; font-size:0.94rem; display:block;">${s.name}</strong>
                             ${courseTag}
+                            ${rangeDateTag}
                             ${pendingInstructorTag}
                             <div style="font-size:0.86rem; color:var(--text-sub); margin-top:3px;">
                                 <i class="fas fa-calendar-alt"></i> Enrolled: ${s.created_at || 'Recent'}
@@ -3264,7 +3566,8 @@ function ptaVerifyAdminCredential(inputVal) {
                         </td>
                         <td>
                             <div style="color:#e2e8f0; font-size:0.94rem;"><i class="fas fa-envelope" style="color:var(--text-sub); margin-right:4px;"></i>${s.email || 'N/A'}</div>
-                            <div style="font-size:0.86rem; color:var(--text-sub); margin-top:2px;">${s.agency || 'Platforms Student'}</div>
+                            ${studentPhoneDisplay ? `<div style="color:#e5c158; font-size:0.88rem; margin-top:2px;"><i class="fas fa-phone" style="margin-right:4px;"></i><a href="tel:${studentPhoneDisplay}" style="color:#e5c158; text-decoration:none; font-weight:600;">${studentPhoneDisplay}</a></div>` : ''}
+                            <div style="font-size:0.86rem; color:var(--text-sub); margin-top:2px;">${s.course_title || s.agency || 'Platforms Student'}</div>
                             <div style="display:flex; align-items:center; gap:5px; margin-top:4px; flex-wrap:wrap;">
                                 ${s.mfa_verified ? `
                                     <span class="badge badge-success" style="font-size:0.84rem; padding:1px 6px;" title="MFA Verified: ${s.mfa_verified_at || ''}">
@@ -3283,20 +3586,16 @@ function ptaVerifyAdminCredential(inputVal) {
                             ${autoEmailsIndicators}
                         </td>
                         <td>
-                            <div style="font-weight:700; color:#fff; font-size:0.94rem;">${modulesDone} / ${totalMods} Modules</div>
-                            <div class="progress-bar-wrapper" style="margin-top:4px;">
-                                <div class="progress-bar-fill" style="width: ${pctModules}%;"></div>
-                            </div>
-                            <div style="font-size:0.84rem; color:var(--text-sub); margin-top:2px;">${pctModules}% Completed</div>
+                            ${modulesColumnHtml}
                         </td>
                         <td>
-                            ${attemptsPill}
+                            ${isOnlineCourseRow ? attemptsPill : '<span style="color:var(--text-sub); font-size:0.86rem;">In-Person Qual</span>'}
                         </td>
                         <td>
-                            ${latestScoreBadge}
+                            ${isOnlineCourseRow ? latestScoreBadge : '<span style="color:var(--text-sub); font-size:0.86rem;">Range / Classroom</span>'}
                         </td>
                         <td>
-                            ${bestScoreBadge}
+                            ${isOnlineCourseRow ? bestScoreBadge : '<span style="color:var(--text-sub);">&mdash;</span>'}
                         </td>
                         <td>
                             ${certBadge}
@@ -3326,6 +3625,71 @@ function ptaVerifyAdminCredential(inputVal) {
             loadInstructorCertificateDatabase();
         }
 
+
+        async function markStudentPaidAdmin(filteredIndex) {
+            const filtered = getFilteredStudentsList();
+            const s = filtered[filteredIndex];
+            if (!s) return;
+            const isArmed = isArmedStudentRow(s);
+            const cInfo = inferCourseInfo(s.course_type, s.course_title || s.agency, s.id);
+            const priceLabel = s.amount_paid_display || cInfo.price || (isArmed ? '$200' : '$50');
+            if (!confirm(`Mark "${s.name}" (${s.email}) as PAID (${priceLabel}) and unlock their course access?`)) return;
+
+            const cleanEmail = String(s.email || '').trim().toLowerCase();
+            s.is_paid = true;
+            s.payment_verified = true;
+            if (isArmed) {
+                s.armed_is_paid = true;
+                s.armed_payment_verified = true;
+            }
+            s.payment_status = `Paid ${priceLabel} - ${cInfo.title}`;
+            recomputeMetricsFromRealStudents();
+            updateFilterCounts();
+            renderTable();
+
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrl && cleanEmail) {
+                try {
+                    await fetch(gwUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'upsert_student',
+                            secret: gwSecret,
+                            student: {
+                                id: cleanEmail,
+                                name: s.name,
+                                email: cleanEmail,
+                                course_type: isArmed ? 'armed' : cInfo.code,
+                                is_paid: true,
+                                payment_verified: true,
+                                ...(isArmed ? { armed_is_paid: true, armed_payment_verified: true } : { unarmed_is_paid: true }),
+                                amount_paid_display: priceLabel,
+                                payment_status: `Paid ${priceLabel} - ${cInfo.title}`
+                            }
+                        })
+                    });
+                } catch (e) {}
+            }
+            try {
+                await fetch((getApiBaseUrl() || '') + '/api/payment/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: isArmed ? ('armed::' + cleanEmail) : cleanEmail,
+                        email: cleanEmail,
+                        name: s.name,
+                        course_type: isArmed ? 'armed' : cInfo.code,
+                        is_admin_mode: true,
+                        session_id: 'admin_verified_paid'
+                    })
+                });
+            } catch (e) {}
+        }
 
         async function deleteStudentRecord(filteredIndex) {
             const filtered = getFilteredStudentsList();
@@ -3377,9 +3741,10 @@ function ptaVerifyAdminCredential(inputVal) {
                         body: JSON.stringify({ action: 'delete_student', secret: gwSecretDel, student_id: s.id, email: s.email })
                     });
                 } catch (e) {}
-            } else if (getApiBaseUrl()) {
+            }
+            if (getApiBaseUrl() !== undefined) {
                 try {
-                    await fetch(getApiBaseUrl() + '/api/admin/students/delete', {
+                    await fetch((getApiBaseUrl() || '') + '/api/admin/students/delete', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ student_id: s.id, email: s.email })
@@ -4144,8 +4509,8 @@ function ptaVerifyAdminCredential(inputVal) {
             if (cid === 'pta-il-2026-217004') return true;
             const name = String(obj.student_name || obj.trainee_name || obj.name || (obj.cert_data && obj.cert_data.name) || '').trim().toLowerCase();
             const email = String(obj.student_email || obj.email || obj.student_id || (obj.cert_data && obj.cert_data.email) || '').trim().toLowerCase().replace(/^armed::/, '');
-            if (FAKE_STUDENT_NAMES.includes(name) || name.includes('john doe') || name.includes('doe, john') || name.includes('john a. doe')) return true;
-            if (FAKE_STUDENT_EMAILS.includes(email) || email.includes('student@platformstraining.com')) return true;
+            if (FAKE_STUDENT_NAMES.has(name) || name.includes('john doe') || name.includes('doe, john') || name.includes('john a. doe')) return true;
+            if (FAKE_STUDENT_EMAILS.has(email) || email.includes('student@platformstraining.com')) return true;
             return false;
         }
 
@@ -4155,7 +4520,7 @@ function ptaVerifyAdminCredential(inputVal) {
             let records = [];
 
             try {
-                const res = await fetch(getApiBaseUrl() + '/api/admin/certificates');
+                const res = await fetch((getApiBaseUrl() || '') + '/api/admin/certificates?_t=' + Date.now(), { cache: 'no-store' });
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data.certificates)) {

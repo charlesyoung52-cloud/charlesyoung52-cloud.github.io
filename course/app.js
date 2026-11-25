@@ -210,10 +210,13 @@ class SecurityCourseApp {
         if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId') || urlParams.get('session_id')) {
             const stripeSessionId = urlParams.get('session_id') || urlParams.get('orderId') || ('stripe_live_' + Date.now());
             const activeEmail = (this.studentEmail || localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
-            this.recordVerifiedPayment(activeEmail, stripeSessionId);
             if (activeEmail) {
+                this.recordVerifiedPayment(activeEmail, stripeSessionId);
                 sessionStorage.setItem('platforms_officer_logged_in', 'true');
                 localStorage.setItem('platforms_officer_logged_in', 'true');
+            } else {
+                localStorage.setItem('platforms_pending_unarmed_stripe_session', stripeSessionId);
+                sessionStorage.setItem('platforms_pending_unarmed_stripe_session', stripeSessionId);
             }
             this.saveState();
             // Clean payment query params without page reload
@@ -224,9 +227,11 @@ class SecurityCourseApp {
             const cleanQuery = urlParams.toString() ? '?' + urlParams.toString() : '';
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
-            setTimeout(() => {
-                this.manualSaveProgress("Course enrollment confirmed ($50.00)! Full 20-hour curriculum unlocked.");
-            }, 500);
+            if (activeEmail) {
+                setTimeout(() => {
+                    this.manualSaveProgress("Course enrollment confirmed ($50.00)! Full 20-hour curriculum unlocked.");
+                }, 500);
+            }
         }
 
         const requestedView = urlParams.get('view');
@@ -377,14 +382,15 @@ class SecurityCourseApp {
         }
     }
 
-    syncToLocalRegistry() {
+    syncToLocalRegistry(immediate = false) {
         try {
             let registry = [];
             const saved = localStorage.getItem('platforms_student_registry');
             if (saved) {
                 try { registry = JSON.parse(saved); } catch (e) { registry = []; }
             }
-            const studentId = this.studentEmail || this.studentCertData.name;
+            const cleanEmail = (this.studentEmail || '').trim().toLowerCase();
+            const studentId = cleanEmail || this.studentCertData.name;
             if (!studentId || this.isAdmin || studentId === 'student@platformstraining.com' || studentId === 'DOE, JOHN A.' || String(studentId).toLowerCase().includes('charlesyoung') || String(this.studentName || '').toLowerCase() === 'charles young' || String(this.studentName || '').toLowerCase() === 'charles') return;
 
             const completedCount = this.getCompletedLessonsCount();
@@ -400,6 +406,9 @@ class SecurityCourseApp {
                 name: this.studentCertData.name || 'Student Officer',
                 email: this.studentEmail,
                 agency: this.studentAgency,
+                course_type: 'unarmed',
+                course_title: '20-Hour Online Unarmed Security Course',
+                amount_paid_display: '$50',
                 is_paid: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 payment_verified: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 confirmation_id: savedUnarmedConfId,
@@ -433,15 +442,18 @@ class SecurityCourseApp {
 
             localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
 
-            // Sync permanently to Google Sheets database (debounced to avoid spam)
+            // Sync permanently to Google Sheets database (immediate on milestones, debounced on rapid edits)
             const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
                 || localStorage.getItem('platforms_gmail_webhook_url') || '';
             const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
                 || localStorage.getItem('platforms_gmail_webhook_secret') || '';
             if (gwUrl) {
-                const mergedRec = existingIdx >= 0 ? registry[existingIdx] : studentRecord;
-                clearTimeout(this._gsheetSyncTimer);
-                this._gsheetSyncTimer = setTimeout(() => {
+                const mergedRec = { ...(existingIdx >= 0 ? registry[existingIdx] : studentRecord) };
+                if (!this.isPaid && !this.temporaryPaywallDisabled) {
+                    delete mergedRec.is_paid;
+                    delete mergedRec.payment_verified;
+                }
+                const flushToSheets = () => {
                     fetch(gwUrl, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -449,7 +461,13 @@ class SecurityCourseApp {
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action: 'upsert_student', secret: gwSecret, student: mergedRec })
                     }).catch(() => {});
-                }, 800);
+                };
+                clearTimeout(this._gsheetSyncTimer);
+                if (immediate) {
+                    flushToSheets();
+                } else {
+                    this._gsheetSyncTimer = setTimeout(flushToSheets, 600);
+                }
             }
         } catch (err) {
             console.warn("Local student registry sync warning:", err);
@@ -775,14 +793,6 @@ class SecurityCourseApp {
 
             if (res) {
                 if (res.success) {
-                    this.notifyInstructorIfNeeded(res, {
-                        eventKey: 'signup:unarmed:' + rawEmail,
-                        headline: 'New Student Course Signup',
-                        studentName: rawName,
-                        studentEmail: rawEmail,
-                        courseTitle: '20-Hour Online Unarmed Security Course ($50)',
-                        summaryCode: `NEW SIGNUP (UNARMED): ${rawName} • ${rawEmail}`
-                    });
                     await this.officerSignIn(rawName, rawEmail);
                     return;
                 } else if (res.error) {
@@ -833,14 +843,6 @@ class SecurityCourseApp {
             localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
         } catch (e) {}
 
-        this.notifyInstructorIfNeeded(null, {
-            eventKey: 'signup:unarmed:' + rawEmail,
-            headline: 'New Student Course Signup',
-            studentName: rawName,
-            studentEmail: rawEmail,
-            courseTitle: '20-Hour Online Unarmed Security Course ($50)',
-            summaryCode: `NEW SIGNUP (UNARMED): ${rawName} • ${rawEmail}`
-        });
         await this.officerSignIn(rawName, rawEmail);
     }
 
@@ -1652,6 +1654,38 @@ class SecurityCourseApp {
             } catch (e) {}
         }
         const payerName = (this.studentCertData && this.studentCertData.name) || this.pendingAuthName || '';
+        // Immediately sync Unarmed paid status to Google Sheets so Admin Portal and cross-device logins see it instantaneously
+        try {
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrl && cleanEmail && !this.isInstructorOrTestIdentity(cleanEmail, payerName)) {
+                fetch(gwUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'upsert_student',
+                        secret: gwSecret,
+                        student: {
+                            id: cleanEmail,
+                            name: payerName || 'Student Officer',
+                            email: cleanEmail,
+                            course_type: 'unarmed',
+                            course_title: '20-Hour Online Unarmed Security Course',
+                            unarmed_is_paid: true,
+                            is_paid: true,
+                            payment_verified: true,
+                            amount_paid_display: '$50',
+                            payment_status: 'Paid $50.00 - Online Unarmed Security (20-Hr PERC)',
+                            confirmation_id: confirmationId
+                        }
+                    })
+                }).catch(() => {});
+            }
+        } catch (e) {}
         this.apiCall('/api/payment/checkout', 'POST', {
             student_id: cleanEmail || payerName || 'student',
             email: cleanEmail,
@@ -1662,12 +1696,12 @@ class SecurityCourseApp {
             payment_token: token
         }).then(res => {
             this.notifyInstructorIfNeeded(res, {
-                eventKey: 'paid:unarmed:' + (cleanEmail || 'student'),
-                headline: 'Paid Course Enrollment ($50 Unarmed)',
+                eventKey: 'paid:unarmed-20:' + (cleanEmail || 'student'),
+                headline: 'Course Signup & Payment Confirmed ($50 Unarmed)',
                 studentName: payerName || cleanEmail,
                 studentEmail: cleanEmail,
                 courseTitle: '20-Hour Online Unarmed Security Course ($50.00 Paid)',
-                summaryCode: `PAID $50 UNARMED: ${payerName || cleanEmail} • ${cleanEmail}`
+                summaryCode: `SIGNUP & PAID $50 (UNARMED): ${payerName || cleanEmail} • ${cleanEmail}`
             });
         });
     }
@@ -1773,6 +1807,14 @@ class SecurityCourseApp {
         // Step 1 of Double-Check: Verify local per-email payment receipt + registry
         let localVerifiedPaid = this.hasLocalVerifiedPayment(rawEmail);
         let backendVerifiedPaid = false;
+
+        const pendingUnarmedStripe = localStorage.getItem('platforms_pending_unarmed_stripe_session') || sessionStorage.getItem('platforms_pending_unarmed_stripe_session') || '';
+        if (pendingUnarmedStripe) {
+            localStorage.removeItem('platforms_pending_unarmed_stripe_session');
+            sessionStorage.removeItem('platforms_pending_unarmed_stripe_session');
+            this.recordVerifiedPayment(rawEmail, pendingUnarmedStripe);
+            localVerifiedPaid = true;
+        }
 
         sessionStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_officer_logged_in', 'true');
@@ -1892,7 +1934,7 @@ class SecurityCourseApp {
         }
 
         this.saveState();
-        this.syncToLocalRegistry();
+        this.syncToLocalRegistry(true);
         this.updateHeaderProfileDisplay();
         this.renderLessonsSidebar();
         this.renderOverviewGrid();
@@ -3030,7 +3072,7 @@ class SecurityCourseApp {
         this.examHistory.push(attemptRecord);
 
         this.saveState();
-        this.syncToLocalRegistry();
+        this.syncToLocalRegistry(true);
 
         // Asynchronously sync results with backend & notify Instructor upon passing
         const examStudentName = (this.studentCertData && this.studentCertData.name) || this.pendingAuthName || '';
@@ -4539,7 +4581,10 @@ class SecurityCourseApp {
     // =========================================================================
     async apiCall(endpoint, method = 'GET', data = null) {
         try {
-            const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            let baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            if (!baseUrl && typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                baseUrl = 'https://charlesyoung52-cloud-github-io.onrender.com';
+            }
             const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
             const headers = { 'Content-Type': 'application/json' };
             if (this.isAdminMode || localStorage.getItem('pta_admin_auth') === 'authorized') {

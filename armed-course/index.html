@@ -350,66 +350,33 @@
              =============================================================== -->
         <section id="view-payment-gate" class="view-section">
             <div class="payment-gate-wrapper">
-                <div class="payment-gate-card" style="max-width:780px;">
+                <div class="payment-gate-card" style="max-width:740px;">
                     <div class="payment-gate-icon">
-                        <i class="fas fa-calendar-check"></i>
+                        <i class="fas fa-shield-alt"></i>
                     </div>
                     <span class="payment-gate-badge">
                         <i class="fas fa-crosshairs"></i> IDFPR Approved Curriculum #102-000398 &bull; 68 IAC 1240.510 &bull; 28-Hour Armed Enrollment
                     </span>
-                    <h2 class="payment-gate-title">Select In-Person Qualification Date &amp; Complete Enrollment</h2>
+                    <h2 class="payment-gate-title">Complete Enrollment &amp; Start Online Armed Course</h2>
                     <p class="payment-gate-desc">
                         Welcome, <strong id="payment-gate-officer-name">Student Officer</strong> (<span id="payment-gate-officer-email">Not signed in</span>).
-                        Per Academy &amp; IDFPR enrollment requirements (<strong>IDFPR Approved Curriculum #102-000398</strong>), you must first <strong>select your In-Person 8-Hour Live-Fire Qualification Date</strong> at Eagle Sports Range (<strong>Step 1</strong>) before completing your <strong>$200.00 all-inclusive tuition payment</strong> and unlocking access to the 20-Hour Online Armed Course (<strong>Step 2</strong>).
+                        Complete your <strong>$200.00 all-inclusive tuition payment</strong> below to immediately unlock all <strong>10 Online Armed Security Lessons (20 Hours)</strong> and the <strong>50-Question Written Examination</strong>. Once you complete the online portion, you will schedule your included <strong>8-Hour In-Person Range Qualification at Eagle Sports Range</strong> right inside the portal at <strong>$0 additional cost</strong>.
                     </p>
 
-                    <!-- STEP 1: Mandatory In-Person Range Qualification Date Selection -->
-                    <div class="armed-gate-step-box" id="armed-gate-step1-box">
-                        <div class="armed-gate-step-header">
-                            <span class="armed-gate-step-pill" id="armed-gate-step1-pill">
-                                <i class="fas fa-calendar-day"></i> STEP 1 OF 2 &bull; REQUIRED BEFORE PAYMENT
-                            </span>
-                            <h3><i class="fas fa-bullseye" style="color:#d4af37;"></i> Select Your In-Person 8-Hour Range Qualification Date</h3>
-                        </div>
-                        <p class="armed-gate-step-desc">
-                            Choose an available weekend live-fire qualification session at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong>. Range fees, targets, and 50 rounds of qualification ammunition are 100% included in your $200 tuition (10 seats max per class):
-                        </p>
-
-                        <div id="armed-gate-range-dates-grid" class="armed-gate-dates-grid">
-                            <!-- Dynamically populated from ../data/calendar.json -->
-                        </div>
-
-                        <div class="armed-gate-contact-row">
-                            <div class="armed-gate-input-group">
-                                <label for="armed-gate-student-phone"><i class="fas fa-phone-alt" style="color:#d4af37;"></i> Mobile Phone Number (Required for Range Roster):</label>
-                                <input type="tel" id="armed-gate-student-phone" class="armed-gate-input" placeholder="(773) 555-0199" oninput="app.updatePaymentGateActionUI()">
-                            </div>
-                            <div class="armed-gate-input-group">
-                                <label for="armed-gate-student-notes"><i class="fas fa-crosshairs" style="color:#d4af37;"></i> Handgun Platform Preference (Optional):</label>
-                                <input type="text" id="armed-gate-student-notes" class="armed-gate-input" placeholder="9mm Semi-Auto / .38 Revolver / Rental" oninput="app.updatePaymentGateActionUI()">
-                            </div>
-                        </div>
-
-                        <div id="armed-gate-selected-date-banner" class="armed-gate-selected-banner">
-                            <i class="fas fa-hand-pointer" style="color:#fbbf24; font-size:1.1rem;"></i>
-                            <span><strong>No Qualification Date Selected Yet:</strong> Click an open weekend date card above to reserve your range seat and unlock Step 2 payment.</span>
-                        </div>
-                    </div>
-
-                    <!-- STEP 2: Tuition Payment & Course Unlock -->
+                    <!-- All-Inclusive Tuition Payment & Instant Online Course Unlock -->
                     <div class="armed-gate-step-box" id="armed-gate-step2-box" style="margin-bottom:14px;">
                         <div class="armed-gate-step-header">
-                            <span class="armed-gate-step-pill pill-locked" id="armed-gate-step2-pill">
-                                <i class="fas fa-lock"></i> STEP 2 OF 2 &bull; LOCKED UNTIL RANGE DATE SELECTED
+                            <span class="armed-gate-step-pill pill-unlocked" id="armed-gate-step2-pill">
+                                <i class="fas fa-unlock"></i> INSTANT 24/7 ONLINE ACCESS + INCLUDED RANGE QUALIFICATION
                             </span>
-                            <h3 id="armed-gate-step2-heading"><i class="fas fa-credit-card" style="color:#d4af37;"></i> Complete All-Inclusive Tuition Payment ($200.00) &amp; Unlock Course</h3>
+                            <h3 id="armed-gate-step2-heading"><i class="fas fa-credit-card" style="color:#d4af37;"></i> All-Inclusive Tuition Payment ($200.00)</h3>
                         </div>
 
                         <!-- Price Card Callout -->
                         <div class="payment-gate-price-card" style="margin-top:10px;">
                             <div class="payment-gate-price-info">
                                 <span class="payment-gate-plan-name">Online Armed Security Course (20-Hr Online + 8-Hr Range)</span>
-                                <span class="payment-gate-plan-sub">Includes Eagle Sports Range Fee, Qualification Ammo &amp; Targets!</span>
+                                <span class="payment-gate-plan-sub">Includes Eagle Sports Range Fee, Qualification Ammo &amp; Targets — Schedule Range Date After Completing Online Portion!</span>
                             </div>
                             <div class="payment-gate-price-box">
                                 <span class="payment-gate-currency">$</span>
@@ -423,26 +390,26 @@
                             <div class="payment-gate-feature">
                                 <i class="fas fa-check-circle"></i>
                                 <div>
-                                    <strong>20-Hour Online Armed Classroom (10 Official Lessons)</strong>
-                                    <span>4 Rules for Safe Gun Handling, revolver &amp; semi-auto components, malfunctions, pistol shooting fundamentals &amp; 720 ILCS 5/7-1.</span>
+                                    <strong>Step 1: 20-Hour Online Armed Classroom (Start Now)</strong>
+                                    <span>Study all 10 official lessons &amp; pass the untimed 50-question written exam (unlimited attempts) 100% online 24/7.</span>
                                 </div>
                             </div>
                             <div class="payment-gate-feature">
                                 <i class="fas fa-check-circle"></i>
                                 <div>
-                                    <strong>8-Hr Eagle Sports Range Qualification Included</strong>
-                                    <span>Range fees, targets &amp; 50 rounds of qualification ammo on your selected date are 100% included!</span>
+                                    <strong>Step 2: Schedule Included 8-Hr Range Qualification at the End</strong>
+                                    <span>Upon finishing the online portion, pick your weekend live-fire date at Eagle Sports Range (ammo, targets &amp; range fees 100% included).</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Checkout Actions -->
                         <div class="payment-gate-actions" style="margin-top:14px;">
-                            <button id="btn-armed-gate-pay" class="btn-payment-gate-checkout btn-locked" disabled onclick="app.initiateCourseEnrollmentPayment()">
-                                <i class="fas fa-calendar-alt"></i> Select an In-Person Qualification Date in Step 1 to Unlock Payment ($200.00)
+                            <button id="btn-armed-gate-pay" class="btn-payment-gate-checkout" onclick="app.initiateCourseEnrollmentPayment()">
+                                <i class="fas fa-lock"></i> Pay $200.00 Tuition &amp; Unlock Online Armed Course
                             </button>
                             <div class="payment-gate-guarantee">
-                                <i class="fas fa-shield-alt"></i> Secure Stripe Checkout &bull; Reserves Your Selected Range Seat + Unlocks All 10 Online Lessons
+                                <i class="fas fa-shield-alt"></i> Secure Stripe Checkout &bull; Unlocks All 10 Online Lessons Immediately + Includes Eagle Sports Range Qualification
                             </div>
                         </div>
                     </div>
@@ -518,22 +485,19 @@
             <!-- Student Orientation & Course Navigation Banner -->
             <div class="orientation-banner-card">
                 <div class="orientation-banner-text">
-                    <h3><i class="fas fa-compass" style="color:var(--brand-green);"></i> Armed Candidate Orientation: Online Classroom &rarr; Eagle Sports Range</h3>
+                    <h3><i class="fas fa-compass" style="color:var(--brand-green);"></i> Armed Candidate Orientation: Online Classroom First &rarr; Schedule Range at Completion</h3>
                     <p>
-                        Master all 10 sequential armed lessons (Study Material, Tactical Scenario Simulator, and Check on Learning) to unlock the <strong>50-Question Written Examination (75% required, no time limit, unlimited attempts)</strong>. Upon passing, complete the Trainee section of <strong>IDFPR Form IL486-1138</strong>, which saves to your profile for Instructor Charles Young to sign off after your scheduled live-fire qualification at Eagle Sports Range!
+                        Master all 10 sequential armed lessons (Study Material, Tactical Scenario Simulator, and Check on Learning) to unlock the <strong>50-Question Written Examination (75% required, no time limit, unlimited attempts)</strong>. Once you complete the online portion and pass the exam, you will save Part 1 of <strong>IDFPR Form IL486-1138</strong> and <strong>schedule your included In-Person Range Qualification at Eagle Sports Range</strong>!
                     </p>
                     <div id="overview-confirmed-range-date" style="margin-top:10px; padding:8px 12px; border-radius:6px; background:rgba(16, 185, 129, 0.14); border:1px solid #10b981; color:#ffffff; font-size:0.94rem; display:inline-flex; align-items:center; gap:8px;">
                         <i class="fas fa-calendar-check" style="color:#34d399;"></i>
-                        <span><strong>Confirmed In-Person Range Qualification:</strong> <span id="overview-range-date-text">Scheduled at Eagle Sports Range</span></span>
+                        <span><strong>In-Person Range Qualification:</strong> <span id="overview-range-date-text">Schedule Upon Completing Online Portion ($0 Extra Due)</span></span>
                     </div>
                 </div>
                 <div style="display:flex; gap:12px; flex-wrap:wrap;">
                     <button class="btn-secondary" onclick="app.openNavigationGuide()">
                         <i class="fas fa-book-reader"></i> View Course Guide
                     </button>
-                    <a href="../calendar.html?course=armed-28&paid=true" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
-                        <i class="fas fa-calendar-check"></i> View Range Qualification Dates
-                    </a>
                 </div>
             </div>
 
@@ -754,11 +718,50 @@
                             <i class="fas fa-redo"></i> Retake Exam
                         </button>
                         <button class="btn-primary" id="btn-results-main-action" onclick="app.handleResultsCertificateAction()">
-                            <i class="fas fa-file-signature"></i> Complete &amp; Save Armed Certificate Info to Profile
+                            <i class="fas fa-file-signature"></i> Step 1: Complete &amp; Save Armed Certificate Info
                         </button>
-                        <a href="../calendar.html?course=armed-28&paid=true" id="btn-schedule-range-cta" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; border-color:#d4af37; color:#f3d06b;">
-                            <i class="fas fa-calendar-check"></i> View / Manage In-Person Range Date
-                        </a>
+                        <button type="button" id="btn-schedule-range-cta" class="btn-secondary" style="display:inline-flex; align-items:center; gap:8px; border-color:#d4af37; color:#f3d06b;" onclick="document.getElementById('results-range-scheduler-section')?.scrollIntoView({behavior:'smooth', block:'start'})">
+                            <i class="fas fa-calendar-check"></i> Step 2: Schedule In-Person Range Qualification
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive End-of-Course In-Person Range Qualification Scheduler (Shown on Exam Pass) -->
+                <div class="armed-gate-step-box" id="results-range-scheduler-section" style="margin:22px 0; border:2px solid #d4af37; background:linear-gradient(180deg, rgba(20,24,33,0.98) 0%, rgba(11,13,18,0.98) 100%);">
+                    <div class="armed-gate-step-header">
+                        <span class="armed-gate-step-pill pill-unlocked" id="results-range-step-pill">
+                            <i class="fas fa-calendar-check"></i> INCLUDED IN YOUR $200 TUITION &bull; $0 EXTRA DUE
+                        </span>
+                        <h3 style="font-size:1.3rem; color:#ffffff;"><i class="fas fa-bullseye" style="color:#d4af37;"></i> Schedule Your In-Person 8-Hour Live-Fire Range Qualification</h3>
+                    </div>
+                    <p class="armed-gate-step-desc" style="margin-bottom:14px;">
+                        Now that you have completed the 20-hour online armed classroom portion, select an open weekend session below at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong>. Range fees, targets, and 50 rounds of qualification ammunition are 100% included in your tuition:
+                    </p>
+
+                    <div id="armed-gate-range-dates-grid" class="armed-gate-dates-grid">
+                        <!-- Dynamically populated from ../data/calendar.json -->
+                    </div>
+
+                    <div class="armed-gate-contact-row" style="margin-top:14px;">
+                        <div class="armed-gate-input-group">
+                            <label for="armed-gate-student-phone"><i class="fas fa-phone-alt" style="color:#d4af37;"></i> Mobile Phone Number (Required for Range Roster) *:</label>
+                            <input type="tel" id="armed-gate-student-phone" class="armed-gate-input" placeholder="(773) 555-0199" oninput="app.updatePaymentGateActionUI()">
+                        </div>
+                        <div class="armed-gate-input-group">
+                            <label for="armed-gate-student-notes"><i class="fas fa-crosshairs" style="color:#d4af37;"></i> Handgun Platform Preference (Optional):</label>
+                            <input type="text" id="armed-gate-student-notes" class="armed-gate-input" placeholder="9mm Semi-Auto / .38 Revolver / Rental" oninput="app.updatePaymentGateActionUI()">
+                        </div>
+                    </div>
+
+                    <div id="armed-gate-selected-date-banner" class="armed-gate-selected-banner" style="margin-top:12px;">
+                        <i class="fas fa-hand-pointer" style="color:#fbbf24; font-size:1.1rem;"></i>
+                        <span><strong>Select Your Range Qualification Date:</strong> Click any open weekend date card above, enter your mobile phone number, and click Confirm below.</span>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; margin-top:16px;">
+                        <button type="button" id="btn-confirm-end-range-date" class="btn-primary" style="padding:13px 24px; font-size:1.02rem;" onclick="app.confirmEndOfCourseRangeSchedule()">
+                            <i class="fas fa-calendar-check"></i> Confirm My In-Person Range Qualification Date ($0 Due)
+                        </button>
                     </div>
                 </div>
 

@@ -59,8 +59,13 @@ def seed_from_cloud_json():
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         for s in students:
-            sid = s.get('id') or s.get('email')
-            cur.execute('SELECT id FROM students WHERE id = ?', (sid,))
+            raw_sid = str(s.get('id') or s.get('email') or '').strip()
+            raw_em = str(s.get('email') or raw_sid).strip().lower()
+            is_armed_seed = (str(s.get('course_type') or '').lower() == 'armed') or bool(s.get('armed_range_session')) or raw_sid.lower().startswith('armed::')
+            sid = (f"armed::{raw_em}" if not raw_sid.lower().startswith('armed::') else raw_sid) if is_armed_seed else raw_sid
+            if is_armed_seed and raw_em:
+                cur.execute('DELETE FROM students WHERE LOWER(id) = LOWER(?)', (raw_em,))
+            cur.execute('SELECT id FROM students WHERE LOWER(id) = LOWER(?)', (sid,))
             if not cur.fetchone():
                 cur.execute('''
                     INSERT INTO students (
@@ -413,10 +418,13 @@ def get_smtp_config():
         pass
     return config
 
+DEFAULT_GMAIL_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxzEpjDZ07wPASas7X4hNyR0ThhuXYg4G2aigLE4_L_XzVBnP7-u1Z0e0dQXmdOC7lT/exec"
+DEFAULT_GMAIL_WEBHOOK_SECRET = "pta-7Kq2x9Lm4Rv8"
+
 def get_gmail_webhook_config():
     cfg = {
-        'url': os.environ.get('GMAIL_WEBHOOK_URL', '').strip(),
-        'secret': os.environ.get('GMAIL_WEBHOOK_SECRET', '').strip(),
+        'url': os.environ.get('GMAIL_WEBHOOK_URL', DEFAULT_GMAIL_WEBHOOK_URL).strip(),
+        'secret': os.environ.get('GMAIL_WEBHOOK_SECRET', DEFAULT_GMAIL_WEBHOOK_SECRET).strip(),
     }
     try:
         db = get_db()
@@ -428,6 +436,85 @@ def get_gmail_webhook_config():
     except Exception:
         pass
     return cfg
+
+_LAST_GSHEETS_ROSTER_SYNC_TS = 0.0
+
+def sync_roster_from_google_sheets(force=False):
+    """Automatically pulls all students & reservations from Google Sheets into SQLite and data/students.json."""
+    global _LAST_GSHEETS_ROSTER_SYNC_TS
+    import time
+    import urllib.request
+    now_ts = time.time()
+    if not force and (now_ts - _LAST_GSHEETS_ROSTER_SYNC_TS) < 20.0:
+        return
+    if os.environ.get('PTA_DISABLE_LIVE_EMAILJS') == '1':
+        return
+    _LAST_GSHEETS_ROSTER_SYNC_TS = now_ts
+    cfg = get_gmail_webhook_config()
+    gw_url = cfg.get('url') or ''
+    gw_sec = cfg.get('secret') or ''
+    if not gw_url:
+        return
+    try:
+        now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        conn = sqlite3.connect(DB_PATH, factory=MongoSyncedConnection)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        # 1. Fetch Students sheet
+        with urllib.request.urlopen(f"{gw_url}?action=students&secret={gw_sec}", timeout=10) as resp:
+            s_data = json.loads(resp.read().decode('utf-8'))
+        for s in (s_data.get('students') or []):
+            em = str(s.get('email') or s.get('id') or '').strip().lower()
+            nm = str(s.get('name') or '').replace('  ', ' ').strip()
+            if not em or '@' not in em or is_fake_or_test_identity(em, nm):
+                continue
+            ctype = str(s.get('course_type') or 'unarmed').strip().lower()
+            is_armed_s = (ctype == 'armed') or bool(s.get('armed_range_session')) or str(s.get('id') or '').lower().startswith('armed::')
+            sid = f"armed::{em}" if is_armed_s else em
+            is_paid_val = 1 if (s.get('armed_is_paid') or s.get('is_paid') or s.get('payment_verified')) else 0
+            r_sess = s.get('armed_range_session') if isinstance(s.get('armed_range_session'), dict) else {}
+            r_date = str(s.get('range_qualification_date') or r_sess.get('date') or r_sess.get('dateFormatted') or '').strip()
+            agency_val = str(s.get('course_title') or s.get('agency') or 'Platforms Training Academy').strip()
+            existing = cur.execute('SELECT id, is_paid, range_qualification_date FROM students WHERE LOWER(id) = LOWER(?)', (sid,)).fetchone()
+            if existing:
+                cur.execute('''
+                    UPDATE students
+                    SET name = COALESCE(NULLIF(?, ''), name),
+                        email = ?,
+                        agency = COALESCE(NULLIF(?, ''), agency),
+                        is_paid = CASE WHEN is_paid = 1 OR ? = 1 THEN 1 ELSE 0 END,
+                        range_qualification_date = COALESCE(NULLIF(?, ''), range_qualification_date),
+                        last_active = COALESCE(NULLIF(?, ''), last_active)
+                    WHERE LOWER(id) = LOWER(?)
+                ''', (nm, em, agency_val, is_paid_val, r_date, s.get('last_active') or now_str, sid))
+            else:
+                cur.execute('''
+                    INSERT INTO students (
+                        id, name, email, student_id, agency, is_paid, is_admin,
+                        mfa_verified, confirmation_email_sent, range_qualification_date,
+                        created_at, last_active
+                    ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?)
+                ''', (
+                    sid, nm or 'Student Officer', em, sid, agency_val, is_paid_val,
+                    1 if s.get('mfa_verified') else 0,
+                    1 if (s.get('confirmation_email_sent') or is_paid_val) else 0,
+                    r_date,
+                    s.get('created_at') or now_str,
+                    s.get('last_active') or now_str
+                ))
+            if is_paid_val:
+                pay_chk = cur.execute("SELECT id FROM analytics_events WHERE event_type = 'payment_received' AND LOWER(student_id) = LOWER(?) LIMIT 1", (sid,)).fetchone()
+                if not pay_chk:
+                    cur.execute(
+                        "INSERT INTO analytics_events (event_type, student_id, details, timestamp) VALUES ('payment_received', ?, ?, ?)",
+                        (sid, s.get('payment_status') or 'Verified Course Payment (Google Sheets Sync)', s.get('created_at') or now_str)
+                    )
+        conn.commit()
+        conn.close()
+        sync_to_cloud_json()
+    except Exception as e:
+        print(f"[GSHEETS AUTO-SYNC NOTE] {e}")
 
 def send_email_via_gmail_webhook(to_emails, subject, html_body, text_body="", reply_to="", pdf_bytes=None, pdf_filename=None):
     cfg = get_gmail_webhook_config()
@@ -821,15 +908,17 @@ def build_instructor_notification_email(category, event_label, student_name, stu
     submitted_at = datetime.now().strftime('%B %d, %Y at %I:%M %p')
     is_completion = str(category).lower() == 'completion'
 
-    badge_text = highlight_badge or ("Online Course Completed" if is_completion else "New Student Course Signup")
+    badge_text = highlight_badge or ("Online Course Completed" if is_completion else "Course Signup & Payment Confirmed")
     badge_bg = "rgba(74,222,128,0.16)" if is_completion else "rgba(212,175,55,0.16)"
     badge_border = "#4ade80" if is_completion else "#d4af37"
     badge_color = "#4ade80" if is_completion else "#e5c158"
 
     if is_completion:
         subject = f"Online Course Completed: {student_name} — {course_title} | Platforms Training Academy"
+        header_title = "ONLINE COURSE COMPLETION ALERT"
     else:
-        subject = f"New Course Signup: {student_name} — {course_title} | Platforms Training Academy"
+        subject = f"Course Signup & Payment Confirmed: {student_name} — {course_title} | Platforms Training Academy"
+        header_title = "COURSE SIGNUP & PAYMENT CONFIRMATION"
 
     rows = [
         ("Notification Type", event_label),
@@ -851,7 +940,7 @@ def build_instructor_notification_email(category, event_label, student_name, stu
             val_html = f'<a href="mailto:{v}" style="color:#e5c158; text-decoration:none; font-weight:700;">{v}</a>'
         elif "Phone" in k and v and v != "Not provided":
             val_html = f'<a href="tel:{v}" style="color:#e5c158; text-decoration:none; font-weight:700;">{v}</a>'
-        elif k in ("Course", "Exam Score", "Tuition / Status"):
+        elif k in ("Course", "Exam Score", "Tuition / Status", "Tuition / Payment Status", "Tuition Paid"):
             val_html = f'<span style="color:#4ade80; font-weight:700;">{v}</span>'
         else:
             val_html = f'<span style="color:#ffffff; font-weight:600;">{v}</span>'
@@ -884,7 +973,7 @@ def build_instructor_notification_email(category, event_label, student_name, stu
             <div style="display:inline-block; background:{badge_bg}; color:{badge_color}; border:1px solid {badge_border}; padding:4px 12px; border-radius:999px; font-size:11.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;">
                 {badge_text}
             </div>
-            <h1 style="color:#ffffff; font-size:20px; font-weight:800; margin:4px 0 0 0; letter-spacing:0.5px; text-transform:uppercase;">NEW STUDENT ENROLLMENT ALERT</h1>
+            <h1 style="color:#ffffff; font-size:20px; font-weight:800; margin:4px 0 0 0; letter-spacing:0.5px; text-transform:uppercase;">{header_title}</h1>
             <p style="color:#cbd5e1; font-size:12.5px; margin:4px 0 0 0;">Platforms Training Academy &bull; {submitted_at}</p>
         </div>
         <div style="padding:24px 26px;">
@@ -1807,7 +1896,7 @@ def is_fake_or_test_identity(email_or_id='', name='', cert_id=''):
     n = str(name or '').strip().lower()
     if e in FAKE_TEST_EMAILS or raw_e in FAKE_TEST_EMAILS:
         return True
-    if raw_e.endswith('.test') or raw_e.endswith('@example.com') or 'test@' in raw_e or raw_e.startswith('cadet.test') or raw_e.startswith('marcus.test'):
+    if raw_e.endswith('.test') or raw_e.endswith('@example.com') or raw_e.endswith('@chicagoguard.org') or 'test@' in raw_e or raw_e.startswith('cadet.test') or raw_e.startswith('marcus.test') or raw_e.startswith('kenneth.cole'):
         return True
     if n in FAKE_TEST_NAMES or 'john doe' in n or 'doe, john' in n or 'john a. doe' in n:
         return True
@@ -2423,6 +2512,7 @@ def purge_test_and_fake_records(db):
             ('exam_results', 'student_id'),
             ('certificates', 'student_id'),
             ('certificates', 'student_email'),
+            ('calendar_reservations', 'student_email'),
             ('analytics_events', 'student_id'),
         ]:
             cur.execute(f"""
@@ -2432,11 +2522,13 @@ def purge_test_and_fake_records(db):
                     'test@platformstraining.com', 'armed::test@platformstraining.com',
                     'charlesyoung52@gmail.com', 'armed::charlesyoung52@gmail.com',
                     'charlesyoung@platformstraining.com', 'armed::charlesyoung@platformstraining.com',
+                    'kenneth.cole@chicagoguard.org', 'armed::kenneth.cole@chicagoguard.org',
                     'anonymous'
                 )
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%test@%'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%.test'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%@example.com'
+                   OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%@chicagoguard.org'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE 'cadet.test%'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE 'marcus.test%'
                    OR LOWER(TRIM(COALESCE({col}, ''))) LIKE '%charlesyoung%'
@@ -2690,36 +2782,12 @@ def register_student():
 
     db.commit()
 
-    instr_sent, instr_alert, instr_skipped = False, None, True
-    if not already_notified:
-        c_label = "28-Hour Online Armed Security Course ($200)" if is_armed_reg else "20-Hour Online Unarmed Security Course ($50)"
-        portal_name = "Online Armed Portal (/armed-course/)" if is_armed_reg else "Online Unarmed Portal (/course/)"
-        instr_sent, instr_alert, instr_skipped = notify_instructor_event(
-            category='signup',
-            event_key=f"signup:{'armed' if is_armed_reg else 'unarmed'}:{email}",
-            event_label="New Student Account Registered",
-            student_name=name,
-            student_email=email,
-            course_title=c_label,
-            details_rows=[
-                ("Portal", portal_name),
-                ("Enrollment Status", "Account Created (Pending Tuition Checkout / Course Progress)"),
-            ],
-            highlight_badge="New Student Course Signup",
-            summary_code=f"NEW SIGNUP ({'ARMED' if is_armed_reg else 'UNARMED'}): {name} • {email}",
-            action_note="A new student created an online course account. You will receive another notification when tuition is paid and when the student completes the course.",
-            is_admin_mode=bool(data.get('is_admin_mode'))
-        )
-        if not instr_skipped:
-            target_row_id = f"armed::{email}" if is_armed_reg else email
-            cur.execute("UPDATE students SET instructor_signup_notified = 1 WHERE LOWER(id) = LOWER(?)", (target_row_id,))
-            db.commit()
-
+    # Instructor signup & payment confirmation alerts are combined into a single email sent upon payment confirmation.
     # Enforce MFA immediately upon registration
     return send_mfa_internal(email, name, extra_fields={
-        'instructor_email_sent': instr_sent,
-        'instructor_alert': instr_alert,
-        'instructor_alert_skipped': instr_skipped
+        'instructor_email_sent': False,
+        'instructor_alert': None,
+        'instructor_alert_skipped': True
     })
 
 # Student Login (Password Verification + Enforced MFA Every Time)
@@ -2978,6 +3046,7 @@ def test_smtp_route():
 # 3. List All Students (for Admin Dashboard)
 @app.route('/api/students', methods=['GET'])
 def list_students():
+    sync_roster_from_google_sheets()
     db = get_db()
     purge_test_and_fake_records(db)
     rows = db.execute('''
@@ -3495,56 +3564,97 @@ def process_payment():
         except Exception as e:
             print("Payment confirmation email note:", e)
 
-    # Notify Instructor Charles Young of paid course enrollment (deduplicated per student/reservation + course)
+    # Combined Instructor Alert: Course Signup & Tuition Payment Confirmation (1 single email per paid enrollment)
     instr_sent, instr_alert, instr_skipped = False, None, True
     try:
+        matched_res_obj = {}
+        matched_res_id = reservation_id
+        res_notified_flag = False
+        try:
+            res_lookup = None
+            if matched_res_id:
+                res_lookup = cur.execute('SELECT id, raw_json, date, time, location, student_name, student_phone, instructor_booking_notified FROM calendar_reservations WHERE id = ?', (matched_res_id,)).fetchone()
+            elif email:
+                if is_armed:
+                    res_lookup = cur.execute(
+                        "SELECT id, raw_json, date, time, location, student_name, student_phone, instructor_booking_notified FROM calendar_reservations WHERE LOWER(student_email) = LOWER(?) AND course_id = 'armed-28' ORDER BY created_at DESC LIMIT 1",
+                        (email,)
+                    ).fetchone()
+                else:
+                    res_lookup = cur.execute(
+                        'SELECT id, raw_json, date, time, location, student_name, student_phone, instructor_booking_notified FROM calendar_reservations WHERE LOWER(student_email) = LOWER(?) AND course_id = ? ORDER BY created_at DESC LIMIT 1',
+                        (email, cid)
+                    ).fetchone()
+            if res_lookup:
+                matched_res_id = res_lookup['id'] or matched_res_id
+                res_notified_flag = bool(res_lookup['instructor_booking_notified'])
+                if res_lookup['raw_json']:
+                    try:
+                        matched_res_obj = json.loads(decrypt_sensitive(res_lookup['raw_json']))
+                    except Exception:
+                        matched_res_obj = {}
+        except Exception:
+            pass
+
+        dedup_setting_key = f"instr_paid_alert::{cid}::{(matched_res_id or email or target_id or session_id).lower()}"
+        dedup_row = cur.execute('SELECT value FROM app_settings WHERE key = ?', (dedup_setting_key,)).fetchone()
+        setting_notified = bool(dedup_row and dedup_row['value'] == '1')
+
         if is_other_course:
-            dedup_setting_key = f"instr_paid_alert::{cid}::{(reservation_id or email or session_id).lower()}"
-            dedup_row = cur.execute('SELECT value FROM app_settings WHERE key = ?', (dedup_setting_key,)).fetchone()
-            already_paid_notified = bool(dedup_row and dedup_row['value'] == '1')
-            st_name_val = (data.get('name') or 'Student Officer').strip()
-            st_email_val = email
-            r_date_info = chosen_range_date
+            already_paid_notified = setting_notified or res_notified_flag
+            st_name_val = (data.get('name') or matched_res_obj.get('studentName') or 'Student Officer').strip()
+            st_email_val = (email or matched_res_obj.get('studentEmail') or '').strip().lower()
+            r_date_info = chosen_range_date or (matched_res_obj.get('date') or '').strip()
         else:
             paid_row = cur.execute('SELECT name, email, range_qualification_date, instructor_paid_notified FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
-            already_paid_notified = bool(paid_row and paid_row['instructor_paid_notified'])
-            st_name_val = (data.get('name') or (paid_row['name'] if paid_row and paid_row['name'] else '') or 'Student Officer').strip()
-            st_email_val = (email or (paid_row['email'] if paid_row and paid_row['email'] else '')).strip().lower()
-            r_date_info = chosen_range_date or (paid_row['range_qualification_date'] if paid_row and paid_row['range_qualification_date'] else '')
-            dedup_setting_key = None
+            already_paid_notified = setting_notified or bool(paid_row and paid_row['instructor_paid_notified'])
+            st_name_val = (data.get('name') or (paid_row['name'] if paid_row and paid_row['name'] else '') or matched_res_obj.get('studentName') or 'Student Officer').strip()
+            st_email_val = (email or (paid_row['email'] if paid_row and paid_row['email'] else '') or matched_res_obj.get('studentEmail') or '').strip().lower()
+            r_date_info = chosen_range_date or (paid_row['range_qualification_date'] if paid_row and paid_row['range_qualification_date'] else '') or (matched_res_obj.get('date') or '').strip()
+
+        st_phone_val = (phone or matched_res_obj.get('studentPhone') or '').strip()
+        r_time_info = (data.get('class_time') or matched_res_obj.get('time') or ('Self-Paced 24/7 Online Access' if is_unarmed else '9:00 AM – 5:00 PM')).strip()
+        r_loc_info = (data.get('location') or matched_res_obj.get('location') or meta['location']).strip()
+        r_notes_info = (data.get('notes') or matched_res_obj.get('notes') or '').strip()
+        ref_display = matched_res_id or session_id
 
         if not already_paid_notified:
             c_title_paid = f"{meta['title']} ({meta['price']} Paid)"
             p_details = [
-                ("Tuition / Status", f"{meta['price']} Paid / Verified"),
-                ("Training Location", data.get('location') or meta['location']),
-                ("Payment Reference", reservation_id or session_id),
+                ("Tuition / Payment Status", f"{meta['price']} Paid & Verified"),
+                ("Scheduled Class / Range Date", r_date_info or ("24/7 Self-Paced Online Portal" if is_unarmed else "Scheduled Session")),
+                ("Session Hours", r_time_info),
+                ("Training Location", r_loc_info),
+                ("Confirmation / Payment Ref", ref_display),
             ]
-            if phone:
-                p_details.insert(0, ("Student Phone", phone))
-            if r_date_info:
-                p_details.insert(1 if phone else 0, ("Scheduled Date", r_date_info))
+            if st_phone_val and st_phone_val != 'Not provided':
+                p_details.insert(0, ("Student Phone", st_phone_val))
+            if r_notes_info:
+                p_details.append(("Student Notes", r_notes_info))
             instr_sent, instr_alert, instr_skipped = notify_instructor_event(
                 category='signup',
-                event_key=f"paid:{cid}:{(reservation_id or st_email_val or target_id).lower()}",
-                event_label="Course Tuition Paid & Student Enrolled",
+                event_key=f"paid:{cid}:{(matched_res_id or st_email_val or target_id).lower()}",
+                event_label="Course Signup & Tuition Payment Confirmed",
                 student_name=st_name_val,
                 student_email=st_email_val,
                 course_title=c_title_paid,
                 details_rows=p_details,
-                highlight_badge="Paid Course Enrollment",
-                summary_code=f"PAID {meta['short_price']} {meta['short_code']}: {st_name_val} • {st_email_val or phone or reservation_id}",
+                highlight_badge="Course Signup & Payment Confirmed",
+                summary_code=f"SIGNUP & PAID {meta['short_price']} ({meta['short_code']}): {st_name_val} • {st_email_val or st_phone_val or ref_display}",
                 action_note=(
-                    f"Student paid {meta['price']} tuition for {meta['title']}"
+                    f"Student signed up and completed {meta['price']} tuition payment for {meta['title']}"
                     + (f" (Scheduled Date: {r_date_info})." if r_date_info else ".")
                 ),
                 is_admin_mode=bool(data.get('is_admin_mode'))
             )
             if not instr_skipped:
-                if is_other_course and dedup_setting_key:
-                    cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_setting_key, '1'))
-                else:
-                    cur.execute('UPDATE students SET instructor_paid_notified = 1 WHERE LOWER(id) = LOWER(?)', (target_id,))
+                cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_setting_key, '1'))
+                if st_email_val:
+                    cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (f"instr_paid_alert::{cid}::{st_email_val.lower()}", '1'))
+                if not is_other_course:
+                    cur.execute('UPDATE students SET instructor_paid_notified = 1, instructor_signup_notified = 1 WHERE LOWER(id) = LOWER(?)', (target_id,))
+                if matched_res_id:
+                    cur.execute('UPDATE calendar_reservations SET instructor_booking_notified = 1 WHERE id = ?', (matched_res_id,))
                 db.commit()
     except Exception as e:
         print("Instructor payment notification note:", e)
@@ -3751,25 +3861,95 @@ def stripe_checkout_webhook():
         except Exception as wh_email_err:
             print("[STRIPE WEBHOOK STUDENT EMAIL NOTE]", wh_email_err)
 
-    sent, _, skipped = notify_instructor_event(
-        category='signup',
-        event_key=f"stripe_wh:{sess_id or st_email}",
-        event_label="Stripe Checkout Tuition Completed",
-        student_name=st_name,
-        student_email=st_email,
-        course_title=f"{matched_meta['title']} ({amount_str or matched_meta['price']} Paid)",
-        details_rows=[
+    # Combined Instructor Alert from Stripe Webhook (deduplicated with /api/payment/checkout so only 1 email is ever sent)
+    already_wh_notified = False
+    wh_res_obj = {}
+    try:
+        if not is_other_course:
+            st_chk = cur.execute('SELECT name, range_qualification_date, instructor_paid_notified FROM students WHERE LOWER(id) = LOWER(?)', (target_id,)).fetchone()
+            if st_chk:
+                if st_chk['instructor_paid_notified']:
+                    already_wh_notified = True
+                if (not st_name or st_name == 'Student Officer') and st_chk['name']:
+                    st_name = st_chk['name']
+                if not chosen_range_date and st_chk['range_qualification_date']:
+                    chosen_range_date = st_chk['range_qualification_date']
+        if reservation_id:
+            r_chk = cur.execute('SELECT raw_json, date, instructor_booking_notified FROM calendar_reservations WHERE id = ?', (reservation_id,)).fetchone()
+            if r_chk:
+                if r_chk['instructor_booking_notified']:
+                    already_wh_notified = True
+                if not chosen_range_date and r_chk['date']:
+                    chosen_range_date = r_chk['date']
+                if r_chk['raw_json']:
+                    try:
+                        wh_res_obj = json.loads(decrypt_sensitive(r_chk['raw_json']))
+                    except Exception:
+                        wh_res_obj = {}
+        elif st_email:
+            r_chk = cur.execute(
+                'SELECT id, raw_json, date, instructor_booking_notified FROM calendar_reservations WHERE LOWER(student_email) = LOWER(?) AND course_id = ? ORDER BY created_at DESC LIMIT 1',
+                (st_email, cid)
+            ).fetchone()
+            if r_chk:
+                reservation_id = r_chk['id'] or reservation_id
+                if r_chk['instructor_booking_notified'] and is_other_course:
+                    already_wh_notified = True
+                if not chosen_range_date and r_chk['date']:
+                    chosen_range_date = r_chk['date']
+                if r_chk['raw_json']:
+                    try:
+                        wh_res_obj = json.loads(decrypt_sensitive(r_chk['raw_json']))
+                    except Exception:
+                        wh_res_obj = {}
+        for d_k in filter(None, [
+            f"instr_paid_alert::{cid}::{(reservation_id or st_email or target_id or sess_id).lower()}",
+            f"instr_paid_alert::{cid}::{st_email.lower()}" if st_email else None,
+        ]):
+            d_row = cur.execute('SELECT value FROM app_settings WHERE key = ?', (d_k,)).fetchone()
+            if d_row and d_row['value'] == '1':
+                already_wh_notified = True
+    except Exception:
+        pass
+
+    if (not st_name or st_name == 'Student Officer') and wh_res_obj.get('studentName'):
+        st_name = wh_res_obj.get('studentName')
+    if not st_phone and wh_res_obj.get('studentPhone'):
+        st_phone = wh_res_obj.get('studentPhone')
+
+    sent, skipped = False, True
+    if not already_wh_notified:
+        wh_details = [
             ("Student Phone", st_phone or "Not provided"),
-            ("Tuition Paid", amount_str or matched_meta['price']),
-            ("Training Location", matched_meta['location']),
-            ("Stripe Session ID", sess_id or "Stripe Live"),
-        ],
-        highlight_badge="Stripe Tuition Payment Confirmed",
-        summary_code=f"STRIPE PAID {amount_str or matched_meta['short_price']} ({matched_meta['short_code']}): {st_name} • {st_email}",
-        action_note=f"Stripe Checkout completed for {matched_meta['title']}."
-    )
-    if sess_id and not skipped:
-        cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_key, '1'))
+            ("Tuition / Payment Status", f"{amount_str or matched_meta['price']} Paid & Verified"),
+            ("Scheduled Class / Range Date", chosen_range_date or ("24/7 Self-Paced Online Portal" if is_unarmed else "Scheduled Session")),
+            ("Training Location", wh_res_obj.get('location') or matched_meta['location']),
+            ("Confirmation / Stripe Ref", reservation_id or sess_id or "Stripe Live"),
+        ]
+        if wh_res_obj.get('notes'):
+            wh_details.append(("Student Notes", wh_res_obj.get('notes')))
+        sent, _, skipped = notify_instructor_event(
+            category='signup',
+            event_key=f"paid:{cid}:{(reservation_id or st_email or sess_id).lower()}",
+            event_label="Course Signup & Tuition Payment Confirmed",
+            student_name=st_name,
+            student_email=st_email,
+            course_title=f"{matched_meta['title']} ({amount_str or matched_meta['price']} Paid)",
+            details_rows=wh_details,
+            highlight_badge="Course Signup & Payment Confirmed",
+            summary_code=f"SIGNUP & PAID {amount_str or matched_meta['short_price']} ({matched_meta['short_code']}): {st_name} • {st_email}",
+            action_note=f"Student signed up and completed {amount_str or matched_meta['price']} tuition payment for {matched_meta['title']}" + (f" (Scheduled Date: {chosen_range_date})." if chosen_range_date else ".")
+        )
+    if not skipped:
+        if sess_id:
+            cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (dedup_key, '1'))
+        cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (f"instr_paid_alert::{cid}::{(reservation_id or st_email or target_id or sess_id).lower()}", '1'))
+        if st_email:
+            cur.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', (f"instr_paid_alert::{cid}::{st_email.lower()}", '1'))
+        if not is_other_course:
+            cur.execute('UPDATE students SET instructor_paid_notified = 1, instructor_signup_notified = 1 WHERE LOWER(id) = LOWER(?)', (target_id,))
+        if reservation_id:
+            cur.execute('UPDATE calendar_reservations SET instructor_booking_notified = 1 WHERE id = ?', (reservation_id,))
         db.commit()
     return jsonify({'received': True, 'fulfilled': True, 'course_id': cid, 'instructor_email_sent': sent})
 
@@ -3785,52 +3965,55 @@ def send_test_instructor_emails():
     samples = [
         {
             'category': 'signup',
-            'event_label': '[TEST] Online Course Registration & Enrollment',
-            'highlight_badge': '[TEST] New Online Course Signup',
+            'event_label': '[TEST] Course Signup & Tuition Payment Confirmed',
+            'highlight_badge': '[TEST] Course Signup & Payment Confirmed',
             'student_name': 'Marcus Vance (Sample Student)',
             'student_email': 'mvance.sample@chicagosecurity.org',
             'course_title': '28-Hour Online Armed Security Course ($200.00 Paid)',
-            'summary_code': '[TEST] SIGNUP $200 ARMED 28-HR: Marcus Vance • Sun, Nov 29, 2026 Range Date',
+            'summary_code': '[TEST] SIGNUP & PAID $200 (ARMED 28-HR): Marcus Vance • Sun, Nov 29, 2026 Range Date',
             'details_rows': [
                 ('Student Phone', '(312) 555-0148'),
-                ('Tuition / Status', '$200.00 Paid / Verified'),
-                ('Chosen Range Date', 'Sunday, November 29, 2026 (9:00 AM – 5:00 PM)'),
+                ('Tuition / Payment Status', '$200.00 Paid & Verified'),
+                ('Scheduled Class / Range Date', 'Sunday, November 29, 2026 (9:00 AM – 5:00 PM)'),
                 ('Training Location', 'Online LMS + Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'),
+                ('Confirmation / Payment Ref', 'PTA-ARMED-20261125'),
             ],
-            'action_note': 'TEST SAMPLE 1 of 4: Sent automatically whenever a student registers or pays for the 20-Hr Unarmed ($50) or 28-Hr Online Armed ($200) course.'
+            'action_note': 'TEST SAMPLE 1 of 4: Combined signup & payment confirmation email sent automatically whenever a student enrolls and pays for the 20-Hr Unarmed ($50) or 28-Hr Online Armed ($200) course.'
         },
         {
             'category': 'signup',
-            'event_label': '[TEST] In-Person Range Course Seat Reservation',
-            'highlight_badge': '[TEST] Requal / Upgrade Course Signup',
+            'event_label': '[TEST] Course Signup & Tuition Payment Confirmed',
+            'highlight_badge': '[TEST] Course Signup & Payment Confirmed',
             'student_name': 'Derrick Holloway (Sample Officer)',
             'student_email': 'dholloway.sample@metroguard-il.org',
-            'course_title': 'Security Firearm Requalification — In-Person Range Session ($125.00)',
-            'summary_code': '[TEST] BOOKED REQUAL ($125) Nov 29, 2026: Derrick Holloway • (773) 555-0192',
+            'course_title': 'Security Firearm Requalification — In-Person Range Session ($125.00 Paid)',
+            'summary_code': '[TEST] SIGNUP & PAID $125 (REQUAL) Nov 29, 2026: Derrick Holloway • (773) 555-0192',
             'details_rows': [
                 ('Student Phone', '(773) 555-0192'),
-                ('Scheduled Date', 'Sunday, November 29, 2026 (Same Day as Armed Range Qual)'),
+                ('Tuition / Payment Status', '$125.00 Paid & Verified'),
+                ('Scheduled Class / Range Date', 'Sunday, November 29, 2026 (Same Day as Armed Range Qual)'),
                 ('Session Hours', '9:00 AM – 5:00 PM (Range Qualification)'),
                 ('Training Location', 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'),
-                ('Tuition / Status', '$125.00 — Security Firearm Requalification'),
+                ('Confirmation / Payment Ref', 'RES-REQUAL-20261129'),
             ],
-            'action_note': 'TEST SAMPLE 2 of 4: Sent automatically whenever a student signs up for Security Firearm Requalification ($125) or Security Firearm Upgrade ($125).'
+            'action_note': 'TEST SAMPLE 2 of 4: Combined signup & payment confirmation email sent automatically whenever a student enrolls and pays for Security Firearm Requalification ($125) or Security Firearm Upgrade ($125).'
         },
         {
             'category': 'signup',
-            'event_label': '[TEST] Illinois Concealed Carry (CCL) Course Signup',
-            'highlight_badge': '[TEST] Concealed Carry Course Signup',
-            'student_name': 'brianna Carter (Sample Applicant)'.title(),
+            'event_label': '[TEST] Course Signup & Tuition Payment Confirmed',
+            'highlight_badge': '[TEST] Course Signup & Payment Confirmed',
+            'student_name': 'Brianna Carter (Sample Applicant)',
             'student_email': 'bcarter.sample@illinoisresident.org',
-            'course_title': '16-Hour Illinois Concealed Carry Course — Full CCL ($200.00)',
-            'summary_code': '[TEST] SIGNUP 16-HR IL CCL ($200): Brianna Carter • (708) 555-0164',
+            'course_title': '16-Hour Illinois Concealed Carry Course — Full CCL ($200.00 Paid)',
+            'summary_code': '[TEST] SIGNUP & PAID $200 (16-HR IL CCL): Brianna Carter • (708) 555-0164',
             'details_rows': [
                 ('Student Phone', '(708) 555-0164'),
-                ('Course Selected', '16-HR IL Concealed Carry Course ($200) — Also covers 8-HR CCL, Military/LEO & 3-HR Refresher'),
+                ('Tuition / Payment Status', '$200.00 Paid & Verified'),
+                ('Scheduled Class / Range Date', 'Upcoming Weekend Session'),
                 ('Training Location', 'Classroom: 200 E 75th St, Chicago, IL 60619 | Range: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)'),
-                ('Preferred Schedule', 'Next Available Weekend Session'),
+                ('Confirmation / Payment Ref', 'RES-CCL16-20261125'),
             ],
-            'action_note': 'TEST SAMPLE 3 of 4: Sent automatically whenever a student signs up for any Concealed Carry course (16-Hr CCL, 8-Hr CCL, Military/LEO CCL, or 3-Hr CCL Refresher).'
+            'action_note': 'TEST SAMPLE 3 of 4: Combined signup & payment confirmation email sent automatically whenever a student enrolls and pays for any Concealed Carry course (16-Hr CCL, 8-Hr CCL, Military/LEO CCL, or 3-Hr CCL Refresher).'
         },
         {
             'category': 'completion',
@@ -4769,10 +4952,11 @@ def api_calendar_book():
         ctitle = reservation.get('courseTitle') or (matched_session.get('title') if matched_session else 'Scheduled Training Class')
         raw_loc = reservation.get('location') or (matched_session.get('location') if matched_session else '')
         resolved_loc = resolve_course_location(course_id=cid, course_title=ctitle, raw_location=raw_loc)
+        is_already_paid_res = bool(reservation.get('alreadyPaid')) or ('paid' in str(reservation.get('price') or '').lower())
         reservation['courseId'] = cid
         reservation['location'] = resolved_loc
-        reservation['confirmationSent'] = True
-        reservation['confirmationSentAt'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        reservation['confirmationSent'] = is_already_paid_res
+        reservation['confirmationSentAt'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S') if is_already_paid_res else ''
         if 'reminderSent' not in reservation:
             reservation['reminderSent'] = False
         if 'thankYouSent' not in reservation:
@@ -4792,72 +4976,32 @@ def api_calendar_book():
                 db.commit()
         except Exception:
             pass
-        # Automatically dispatch Class Registration Confirmation Email with exact course location
-        try:
-            st_email = (reservation.get('studentEmail') or '').strip()
-            if st_email and '@' in st_email:
-                subj, h_body, t_body = build_class_payment_confirmation_email(
-                    reservation.get('studentName') or 'Student Officer',
-                    ctitle,
-                    reservation.get('date') or '',
-                    reservation.get('time') or '9:00 AM – 5:00 PM',
-                    resolved_loc,
-                    reservation.get('price') or 'Seat Reserved',
-                    reservation.get('id') or 'PTA-RES',
-                    course_id=cid
-                )
-                send_email_smtp(st_email, subj, h_body, t_body)
-        except Exception as e:
-            print("Calendar booking confirmation email note:", e)
+        # If the student already paid (e.g. $200 Online Armed student reserving their included $0 range seat), send their seat confirmation
+        if is_already_paid_res:
+            try:
+                st_email = (reservation.get('studentEmail') or '').strip()
+                if st_email and '@' in st_email:
+                    subj, h_body, t_body = build_class_payment_confirmation_email(
+                        reservation.get('studentName') or 'Student Officer',
+                        ctitle,
+                        reservation.get('date') or '',
+                        reservation.get('time') or '9:00 AM – 5:00 PM',
+                        resolved_loc,
+                        reservation.get('price') or 'Included ($200 Paid Online)',
+                        reservation.get('id') or 'PTA-RES',
+                        course_id=cid
+                    )
+                    send_email_smtp(st_email, subj, h_body, t_body)
+            except Exception as e:
+                print("Calendar booking confirmation email note:", e)
 
-        # Notify Instructor Charles Young of the new class / range seat signup
-        instr_sent, instr_alert, instr_skipped = False, None, True
-        try:
-            res_id_val = str(reservation.get('id') or '')
-            db_bk = get_db()
-            bk_row = db_bk.execute('SELECT instructor_booking_notified FROM calendar_reservations WHERE id = ?', (res_id_val,)).fetchone() if res_id_val else None
-            already_bk_notified = bool(bk_row and bk_row['instructor_booking_notified'])
-            if not already_bk_notified:
-                st_name_bk = (reservation.get('studentName') or 'Student Officer').strip()
-                st_email_bk = (reservation.get('studentEmail') or '').strip().lower()
-                st_phone_bk = (reservation.get('studentPhone') or 'Not provided').strip()
-                bk_date = (reservation.get('date') or 'Scheduled Session').strip()
-                bk_time = (reservation.get('time') or '9:00 AM – 5:00 PM').strip()
-                bk_price = (reservation.get('price') or 'Seat Reserved').strip()
-                bk_notes = (reservation.get('notes') or '').strip()
-                bk_details = [
-                    ("Student Phone", st_phone_bk),
-                    ("Scheduled Date", bk_date),
-                    ("Session Hours", bk_time),
-                    ("Training Location", resolved_loc),
-                    ("Tuition / Status", bk_price),
-                    ("Reservation ID", res_id_val or 'PTA-RES'),
-                ]
-                if bk_notes:
-                    bk_details.append(("Student Notes", bk_notes))
-                instr_sent, instr_alert, instr_skipped = notify_instructor_event(
-                    category='signup',
-                    event_key=f"booking:{res_id_val or (st_email_bk + ':' + bk_date)}",
-                    event_label="New Class / Range Seat Reservation",
-                    student_name=st_name_bk,
-                    student_email=st_email_bk,
-                    course_title=ctitle,
-                    details_rows=bk_details,
-                    highlight_badge="New Class / Range Signup",
-                    summary_code=f"BOOKED {bk_date}: {st_name_bk} • {st_phone_bk} • {st_email_bk}",
-                    action_note=f"Student reserved a seat for {ctitle} on {bk_date} ({bk_time})."
-                )
-                if not instr_skipped and res_id_val:
-                    db_bk.execute('UPDATE calendar_reservations SET instructor_booking_notified = 1 WHERE id = ?', (res_id_val,))
-                    db_bk.commit()
-        except Exception as e:
-            print("Instructor calendar booking notification note:", e)
+        # Instructor signup & payment confirmation alerts are combined into a single email sent upon payment confirmation (/api/payment/checkout or /api/stripe/webhook)
         return jsonify({
             'success': True,
             'calendar': cal,
-            'instructor_email_sent': instr_sent,
-            'instructor_alert': instr_alert,
-            'instructor_alert_skipped': instr_skipped
+            'instructor_email_sent': False,
+            'instructor_alert': None,
+            'instructor_alert_skipped': True
         })
     return jsonify({'success': True, 'calendar': cal, 'instructor_email_sent': False, 'instructor_alert': None, 'instructor_alert_skipped': True})
 

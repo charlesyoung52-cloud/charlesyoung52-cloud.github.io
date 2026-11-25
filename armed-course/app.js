@@ -224,16 +224,14 @@ class SecurityCourseApp {
         if (urlParams.get('payment_success') === 'true' || urlParams.get('paid') === 'true' || urlParams.get('orderId') || urlParams.get('session_id')) {
             const stripeSessionId = urlParams.get('session_id') || urlParams.get('orderId') || ('stripe_live_' + Date.now());
             const activeEmail = (this.studentEmail || localStorage.getItem('platforms_student_email') || '').trim().toLowerCase();
-            this.recordVerifiedPayment(activeEmail, stripeSessionId);
             if (activeEmail) {
+                this.recordVerifiedPayment(activeEmail, stripeSessionId);
                 sessionStorage.setItem('platforms_officer_logged_in', 'true');
                 localStorage.setItem('platforms_officer_logged_in', 'true');
-                try {
-                    const pendingRange = localStorage.getItem('platforms_armed_pending_range_session');
-                    if (pendingRange && !localStorage.getItem('platforms_armed_range_date_' + activeEmail)) {
-                        localStorage.setItem('platforms_armed_range_date_' + activeEmail, pendingRange);
-                    }
-                } catch (e) {}
+            } else {
+                // Student paid on Stripe before signing into the portal — preserve session receipt to auto-unlock immediately after login/registration
+                localStorage.setItem('platforms_pending_armed_stripe_session', stripeSessionId);
+                sessionStorage.setItem('platforms_pending_armed_stripe_session', stripeSessionId);
             }
             this.saveState();
             // Clean payment query params without page reload
@@ -244,9 +242,11 @@ class SecurityCourseApp {
             const cleanQuery = urlParams.toString() ? '?' + urlParams.toString() : '';
             const cleanUrl = window.location.pathname + cleanQuery + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
-            setTimeout(() => {
-                this.manualSaveProgress("Armed course tuition confirmed ($200.00)! All 10 armed lessons & Eagle Sports Range voucher unlocked.");
-            }, 500);
+            if (activeEmail) {
+                setTimeout(() => {
+                    this.manualSaveProgress("Armed course tuition confirmed ($200.00)! All 10 online armed lessons unlocked.");
+                }, 500);
+            }
         }
 
         const requestedView = urlParams.get('view');
@@ -416,7 +416,7 @@ class SecurityCourseApp {
         }
     }
 
-    syncToLocalRegistry() {
+    syncToLocalRegistry(immediate = false) {
         try {
             let registry = [];
             const saved = localStorage.getItem('platforms_student_registry');
@@ -450,6 +450,8 @@ class SecurityCourseApp {
                 email: this.studentEmail,
                 agency: this.studentAgency,
                 course_type: 'armed',
+                course_title: '28-Hour Online Armed Security Course',
+                amount_paid_display: '$200',
                 armed_is_paid: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 armed_payment_verified: this.temporaryPaywallDisabled ? true : Boolean(this.isPaid),
                 armed_confirmation_id: savedArmedConfId,
@@ -483,15 +485,21 @@ class SecurityCourseApp {
 
             localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
 
-            // Sync permanently to Google Sheets database (debounced to avoid spam)
+            // Sync permanently to Google Sheets database (immediate on milestones, debounced on rapid edits)
             const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
                 || localStorage.getItem('platforms_gmail_webhook_url') || '';
             const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
                 || localStorage.getItem('platforms_gmail_webhook_secret') || '';
             if (gwUrl) {
-                const mergedRec = existingIdx >= 0 ? registry[existingIdx] : armedPatch;
-                clearTimeout(this._gsheetSyncTimer);
-                this._gsheetSyncTimer = setTimeout(() => {
+                const mergedRec = { ...(existingIdx >= 0 ? registry[existingIdx] : armedPatch) };
+                // CRITICAL ANTI-CLOBBER GUARD: Never overwrite a cloud-verified paid status with false from an un-synced browser!
+                if (!this.isPaid && !this.temporaryPaywallDisabled) {
+                    delete mergedRec.armed_is_paid;
+                    delete mergedRec.armed_payment_verified;
+                    delete mergedRec.is_paid;
+                    delete mergedRec.payment_verified;
+                }
+                const flushToSheets = () => {
                     fetch(gwUrl, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -499,7 +507,13 @@ class SecurityCourseApp {
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action: 'upsert_student', secret: gwSecret, student: mergedRec })
                     }).catch(() => {});
-                }, 800);
+                };
+                clearTimeout(this._gsheetSyncTimer);
+                if (immediate) {
+                    flushToSheets();
+                } else {
+                    this._gsheetSyncTimer = setTimeout(flushToSheets, 600);
+                }
             }
         } catch (err) {
             console.warn("Local student registry sync warning:", err);
@@ -825,14 +839,6 @@ class SecurityCourseApp {
 
             if (res) {
                 if (res.success) {
-                    this.notifyInstructorIfNeeded(res, {
-                        eventKey: 'signup:armed:' + rawEmail,
-                        headline: 'New Student Course Signup',
-                        studentName: rawName,
-                        studentEmail: rawEmail,
-                        courseTitle: '28-Hour Online Armed Security Course ($200)',
-                        summaryCode: `NEW SIGNUP (ARMED): ${rawName} • ${rawEmail}`
-                    });
                     await this.officerSignIn(rawName, rawEmail);
                     return;
                 } else if (res.error) {
@@ -884,14 +890,6 @@ class SecurityCourseApp {
             localStorage.setItem('platforms_student_registry', JSON.stringify(registry));
         } catch (e) {}
 
-        this.notifyInstructorIfNeeded(null, {
-            eventKey: 'signup:armed:' + rawEmail,
-            headline: 'New Student Course Signup',
-            studentName: rawName,
-            studentEmail: rawEmail,
-            courseTitle: '28-Hour Online Armed Security Course ($200)',
-            summaryCode: `NEW SIGNUP (ARMED): ${rawName} • ${rawEmail}`
-        });
         await this.officerSignIn(rawName, rawEmail);
     }
 
@@ -1709,11 +1707,49 @@ class SecurityCourseApp {
         const armedId = this.getArmedStudentId(cleanEmail) || 'armed::student';
         const savedRange = this.getSavedRangeDateRecord(cleanEmail);
         const studentNameVal = (this.studentCertData && this.studentCertData.name) || (savedRange && (savedRange.studentName || savedRange.name)) || this.pendingAuthName || '';
+        const studentPhoneVal = (savedRange && savedRange.studentPhone) || '';
         const rangeDateStr = (savedRange && (savedRange.dateFormatted || savedRange.date)) || '';
+
+        // Persist paid status directly to Google Sheets immediately so any device unlocks automatically
+        try {
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrl && cleanEmail && !this.isInstructorOrTestIdentity(cleanEmail, studentNameVal)) {
+                fetch(gwUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'upsert_student',
+                        secret: gwSecret,
+                        student: {
+                            id: cleanEmail,
+                            name: studentNameVal || 'Student Officer',
+                            email: cleanEmail,
+                            course_type: 'armed',
+                            armed_is_paid: true,
+                            armed_payment_verified: true,
+                            is_paid: true,
+                            payment_verified: true,
+                            amount_paid_display: '$200',
+                            payment_status: 'Paid $200.00 - Online Armed Security (28-Hr Tan Card)',
+                            armed_confirmation_id: confirmationId,
+                            confirmation_id: confirmationId
+                        }
+                    })
+                }).catch(() => {});
+            }
+        } catch (e) {}
+
         this.apiCall('/api/payment/checkout', 'POST', {
             student_id: armedId,
             email: cleanEmail,
             name: studentNameVal,
+            phone: studentPhoneVal,
+            reservation_id: (savedRange && savedRange.reservationId) || '',
             course_type: 'armed',
             is_admin_mode: Boolean(this.isAdminMode),
             amount: 200,
@@ -1725,12 +1761,12 @@ class SecurityCourseApp {
             location: (savedRange && savedRange.location) || 'Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452) & Online Portal'
         }).then(res => {
             this.notifyInstructorIfNeeded(res, {
-                eventKey: 'paid:armed:' + (cleanEmail || 'student'),
-                headline: 'Paid Course Enrollment ($200 Armed)',
+                eventKey: 'paid:armed-28:' + (cleanEmail || 'student'),
+                headline: 'Course Signup & Payment Confirmed ($200 Armed)',
                 studentName: studentNameVal || cleanEmail,
                 studentEmail: cleanEmail,
                 courseTitle: '28-Hour Online Armed Security Course ($200.00 Paid)' + (rangeDateStr ? ` — Range: ${rangeDateStr}` : ''),
-                summaryCode: `PAID $200 ARMED: ${studentNameVal || cleanEmail} • ${cleanEmail}`
+                summaryCode: `SIGNUP & PAID $200 (ARMED): ${studentNameVal || cleanEmail} • ${cleanEmail}`
             });
         });
     }
@@ -1837,40 +1873,32 @@ class SecurityCourseApp {
         let localVerifiedPaid = this.hasLocalVerifiedPayment(rawEmail);
         let backendVerifiedPaid = false;
 
+        // If student completed Stripe checkout before signing in, consume the pending session receipt now
+        const pendingStripeSession = localStorage.getItem('platforms_pending_armed_stripe_session') || sessionStorage.getItem('platforms_pending_armed_stripe_session') || '';
+        if (pendingStripeSession) {
+            localStorage.removeItem('platforms_pending_armed_stripe_session');
+            sessionStorage.removeItem('platforms_pending_armed_stripe_session');
+            this.recordVerifiedPayment(rawEmail, pendingStripeSession);
+            localVerifiedPaid = true;
+        }
+
         sessionStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_officer_logged_in', 'true');
         localStorage.setItem('platforms_student_name', this.studentCertData.name);
         localStorage.setItem('platforms_student_email', this.studentEmail);
         localStorage.setItem('platforms_student_signature', this.studentCertData.signature);
 
-        // Check Google Sheets permanent Students database for verified Armed payment
+        // Check Google Sheets permanent Students & Reservations databases for verified Armed payment
         try {
-            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
-                || localStorage.getItem('platforms_gmail_webhook_url') || '';
-            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
-                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
-            if (gwUrl && rawEmail) {
-                const gsRes = await fetch(`${gwUrl}?action=students&secret=${encodeURIComponent(gwSecret)}`);
-                if (gsRes.ok) {
-                    const gsData = await gsRes.json();
-                    if (gsData && gsData.ok && Array.isArray(gsData.students)) {
-                        const match = gsData.students.find(s => {
-                            const em = String(s.email || '').trim().toLowerCase();
-                            const sid = String(s.id || '').trim().toLowerCase();
-                            return em === rawEmail || sid === rawEmail || sid === armedStudentId.toLowerCase();
-                        });
-                        if (match) {
-                            const isArmedPaid = match.armed_is_paid === true || match.armed_payment_verified === true ||
-                                (String(match.course_type || '').toLowerCase() === 'armed' && match.is_paid === true);
-                            if (isArmedPaid) {
-                                backendVerifiedPaid = true;
-                            }
-                            if (match.armed_cert_id || (String(match.course_type || '').toLowerCase() === 'armed' && match.cert_id)) {
-                                certLockedForUser = true;
-                                certIdForUser = match.armed_cert_id || match.cert_id || certIdForUser || 'PTA-IL-ARMED-SEALED';
-                            }
-                        }
-                    }
+            const gsVerify = await this.verifyArmedPaymentInGoogleSheets(rawEmail);
+            if (gsVerify && gsVerify.verified) {
+                backendVerifiedPaid = true;
+                if (gsVerify.certLocked) {
+                    certLockedForUser = true;
+                    certIdForUser = gsVerify.certId || certIdForUser || 'PTA-IL-ARMED-SEALED';
+                }
+                if (gsVerify.match && gsVerify.match.armed_range_session) {
+                    localStorage.setItem('platforms_armed_range_date_' + rawEmail, JSON.stringify(gsVerify.match.armed_range_session));
                 }
             }
         } catch (gsErr) {
@@ -1949,7 +1977,7 @@ class SecurityCourseApp {
         }
 
         this.saveState();
-        this.syncToLocalRegistry();
+        this.syncToLocalRegistry(true);
         this.updateHeaderProfileDisplay();
         this.renderLessonsSidebar();
         this.renderOverviewGrid();
@@ -3158,7 +3186,7 @@ class SecurityCourseApp {
         this.examHistory.push(attemptRecord);
 
         this.saveState();
-        this.syncToLocalRegistry();
+        this.syncToLocalRegistry(true);
 
         const armedId = this.getArmedStudentId() || this.studentCertData.name;
         const armedExamName = (this.studentCertData && this.studentCertData.name) || this.pendingAuthName || '';
@@ -3241,6 +3269,9 @@ class SecurityCourseApp {
             }
             if (rangeBannerEl) rangeBannerEl.style.display = 'block';
             if (scheduleCtaEl) scheduleCtaEl.style.display = 'inline-flex';
+            const resultsRangeSched = document.getElementById('results-range-scheduler-section');
+            if (resultsRangeSched) resultsRangeSched.style.display = 'block';
+            this.loadPaymentGateRangeSchedule();
             if (exhaustedBoxEl) exhaustedBoxEl.style.display = 'none';
             if (retakeBtnEl) retakeBtnEl.style.display = this.isCertLocked ? 'none' : 'inline-flex';
 
@@ -3337,6 +3368,8 @@ class SecurityCourseApp {
             }
             if (rangeBannerEl) rangeBannerEl.style.display = 'none';
             if (scheduleCtaEl) scheduleCtaEl.style.display = 'none';
+            const resultsRangeSched = document.getElementById('results-range-scheduler-section');
+            if (resultsRangeSched) resultsRangeSched.style.display = 'none';
             if (payGate) payGate.style.display = 'none';
             if (certForm) certForm.style.display = 'none';
             if (exhaustedBoxEl) exhaustedBoxEl.style.display = 'none';
@@ -3653,7 +3686,7 @@ class SecurityCourseApp {
         }
         localStorage.setItem('platforms_armed_cert_intake_latest', JSON.stringify(armedCertRecord));
         this.saveState();
-        this.syncToLocalRegistry();
+        this.syncToLocalRegistry(true);
 
         const certRes = await this.apiCall('/api/certificate/issue', 'POST', armedCertRecord);
         await this.notifyInstructorIfNeeded(certRes, {
@@ -4168,60 +4201,63 @@ class SecurityCourseApp {
             : (savedRecord ? (savedRecord.dateFormatted || this.formatRangeDateLabel(savedRecord.date, savedRecord.endDate)) : '');
 
         const banner = document.getElementById('armed-gate-selected-date-banner');
+        const confirmEndBtn = document.getElementById('btn-confirm-end-range-date');
         const step2Pill = document.getElementById('armed-gate-step2-pill');
         const step2Heading = document.getElementById('armed-gate-step2-heading');
         const payBtn = document.getElementById('btn-armed-gate-pay');
         const priceAmount = document.getElementById('armed-gate-price-amount');
 
         if (banner) {
-            if (hasSelection) {
+            if (savedRecord && (!selectedSession || selectedSession.id === savedRecord.sessionId)) {
                 banner.className = 'armed-gate-selected-banner confirmed';
                 banner.innerHTML = `
                     <i class="fas fa-check-circle" style="color:#34d399; font-size:1.15rem;"></i>
-                    <span><strong>Selected In-Person Qualification Date:</strong> ${dateLabel} &bull; 9:00 AM – 5:00 PM at Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452).</span>
+                    <span><strong>Confirmed In-Person Range Qualification:</strong> ${dateLabel} &bull; 9:00 AM – 5:00 PM at Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452). You may select another card above anytime if you need to reschedule.</span>
+                `;
+            } else if (selectedSession) {
+                banner.className = 'armed-gate-selected-banner confirmed';
+                banner.innerHTML = `
+                    <i class="fas fa-calendar-day" style="color:#d4af37; font-size:1.15rem;"></i>
+                    <span><strong>Selected Date:</strong> ${dateLabel} &bull; 9:00 AM – 5:00 PM at Eagle Sports Range. Enter your mobile phone number and click <strong>Confirm My In-Person Range Qualification Date</strong> below to reserve your seat.</span>
                 `;
             } else {
                 banner.className = 'armed-gate-selected-banner';
                 banner.innerHTML = `
                     <i class="fas fa-hand-pointer" style="color:#fbbf24; font-size:1.1rem;"></i>
-                    <span><strong>No Qualification Date Selected Yet:</strong> Click an open weekend date card above to reserve your range seat and unlock Step 2 payment.</span>
+                    <span><strong>Select Your Range Qualification Date:</strong> Click an open weekend date card above, enter your mobile phone number, and click Confirm below ($0 extra due).</span>
                 `;
             }
         }
 
+        if (confirmEndBtn) {
+            confirmEndBtn.innerHTML = savedRecord && (!selectedSession || selectedSession.id === savedRecord.sessionId)
+                ? `<i class="fas fa-check-double"></i> Range Seat Confirmed (${dateLabel}) — Click to Update`
+                : (selectedSession
+                    ? `<i class="fas fa-calendar-check"></i> Confirm ${dateLabel} Range Qualification ($0 Due)`
+                    : `<i class="fas fa-calendar-check"></i> Confirm My In-Person Range Qualification Date ($0 Due)`);
+        }
+
         if (step2Pill) {
-            if (this.isPaid) {
-                step2Pill.className = 'armed-gate-step-pill pill-unlocked';
-                step2Pill.innerHTML = `<i class="fas fa-check-circle"></i> STEP 2 OF 2 &bull; TUITION PAID ($200.00) — CONFIRM RANGE DATE`;
-            } else if (hasSelection) {
-                step2Pill.className = 'armed-gate-step-pill pill-unlocked';
-                step2Pill.innerHTML = `<i class="fas fa-unlock"></i> STEP 2 OF 2 &bull; RANGE DATE SELECTED — READY FOR PAYMENT`;
-            } else {
-                step2Pill.className = 'armed-gate-step-pill pill-locked';
-                step2Pill.innerHTML = `<i class="fas fa-lock"></i> STEP 2 OF 2 &bull; LOCKED UNTIL RANGE DATE SELECTED`;
-            }
+            step2Pill.className = 'armed-gate-step-pill pill-unlocked';
+            step2Pill.innerHTML = this.isPaid
+                ? `<i class="fas fa-check-circle"></i> TUITION VERIFIED ($200.00 PAID) — COURSE UNLOCKED`
+                : `<i class="fas fa-unlock"></i> INSTANT 24/7 ONLINE ACCESS + INCLUDED RANGE QUALIFICATION`;
         }
 
         if (step2Heading && this.isPaid) {
-            step2Heading.innerHTML = `<i class="fas fa-check-circle" style="color:#34d399;"></i> Tuition Verified ($200.00 Paid) — Confirm Range Date to Enter Course`;
+            step2Heading.innerHTML = `<i class="fas fa-check-circle" style="color:#34d399;"></i> Tuition Verified ($200.00 Paid) — Enter Online Course`;
         }
         if (priceAmount && this.isPaid) {
             priceAmount.textContent = '0';
         }
 
         if (payBtn) {
-            if (!hasSelection) {
-                payBtn.disabled = true;
-                payBtn.classList.add('btn-locked');
-                payBtn.innerHTML = `<i class="fas fa-calendar-alt"></i> Select an In-Person Qualification Date in Step 1 to Unlock Payment ($200.00)`;
+            payBtn.disabled = false;
+            payBtn.classList.remove('btn-locked');
+            if (this.isPaid) {
+                payBtn.innerHTML = `<i class="fas fa-play-circle"></i> Enter 20-Hour Online Armed Course`;
             } else {
-                payBtn.disabled = false;
-                payBtn.classList.remove('btn-locked');
-                if (this.isPaid) {
-                    payBtn.innerHTML = `<i class="fas fa-check-circle"></i> Confirm ${dateLabel} Range Date &amp; Unlock Armed Course ($0 Due)`;
-                } else {
-                    payBtn.innerHTML = `<i class="fas fa-lock"></i> Confirm ${dateLabel} Range Date &amp; Pay Tuition ($200.00)`;
-                }
+                payBtn.innerHTML = `<i class="fas fa-lock"></i> Pay $200.00 Tuition &amp; Unlock Online Armed Course`;
             }
         }
     }
@@ -4309,11 +4345,10 @@ class SecurityCourseApp {
             const apiBase = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl)
                 ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '')
                 : '';
-            let bookJson = null;
             if (apiBase) try {
                 const bkCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
                 const bkTimer = bkCtrl ? setTimeout(() => bkCtrl.abort(), 4500) : null;
-                const bkResp = await fetch(apiBase + '/api/calendar/book', {
+                await fetch(apiBase + '/api/calendar/book', {
                     method: 'POST',
                     keepalive: true,
                     signal: bkCtrl ? bkCtrl.signal : undefined,
@@ -4321,16 +4356,7 @@ class SecurityCourseApp {
                     body: JSON.stringify({ reservation, calendarData: this.rangeCalendarData })
                 });
                 if (bkTimer) clearTimeout(bkTimer);
-                if (bkResp && bkResp.ok) bookJson = await bkResp.json();
             } catch (e) {}
-            await this.notifyInstructorIfNeeded(bookJson, {
-                eventKey: 'booking:' + reservationId,
-                headline: 'New Armed Range Signup',
-                studentName: studentName,
-                studentEmail: cleanEmail,
-                courseTitle: `${sessionObj.title} (${sessionObj.date})`,
-                summaryCode: `BOOKED ${sessionObj.date}: ${studentName} • ${phoneVal || 'No phone'} • ${cleanEmail}`
-            });
         }
 
         this.syncToLocalRegistry();
@@ -4342,39 +4368,97 @@ class SecurityCourseApp {
         const rec = this.getSavedRangeDateRecord();
         const label = rec
             ? `${rec.dateFormatted || this.formatRangeDateLabel(rec.date, rec.endDate)} • ${rec.time || '9:00 AM – 5:00 PM'} (Eagle Sports Range)`
-            : 'Select Date on Enrollment Gate / Calendar';
+            : 'Schedule at End of Online Portion ($0 Extra Due)';
 
         const ovEl = document.getElementById('overview-range-date-text');
         if (ovEl) ovEl.textContent = label;
 
         const vchEl = document.getElementById('voucher-confirmed-range-date');
-        if (vchEl) vchEl.textContent = rec ? `${rec.dateFormatted || rec.date} (${rec.time || '9:00 AM – 5:00 PM'})` : 'Scheduled at Eagle Sports Range';
+        if (vchEl) vchEl.textContent = rec ? `${rec.dateFormatted || rec.date} (${rec.time || '9:00 AM – 5:00 PM'})` : 'Select Your Weekend Date Above ($0 Due)';
     }
 
-    async initiateCourseEnrollmentPayment() {
+    async confirmEndOfCourseRangeSchedule() {
         if (!this.selectedRangeSessionId && !this.hasSelectedRangeDate()) {
-            alert("STEP 1 REQUIRED: Please select your In-Person 8-Hour Live-Fire Qualification Date at Eagle Sports Range before proceeding to payment.");
+            alert("Please click an open weekend In-Person Range Qualification date card above first.");
             const grid = document.getElementById('armed-gate-range-dates-grid');
             if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
-
         const phoneInp = document.getElementById('armed-gate-student-phone');
         const existingSaved = this.getSavedRangeDateRecord();
         const phoneVal = (phoneInp && phoneInp.value.trim()) || (existingSaved && existingSaved.studentPhone) || '';
         if (!phoneVal) {
-            alert("Please enter your mobile phone number in Step 1 so Instructor Charles Young can confirm your Eagle Sports Range qualification roster.");
+            alert("Please enter your mobile phone number so Lead Instructor Charles Young can confirm your Eagle Sports Range qualification roster.");
             if (phoneInp) phoneInp.focus();
             return;
         }
 
-        await this.confirmAndSaveSelectedRangeDate();
+        const rangeRecord = await this.confirmAndSaveSelectedRangeDate();
+        if (!rangeRecord) return;
 
+        // Attach updated range session to saved Form IL486-1138 record if already saved
+        const cleanEmail = (this.studentEmail || '').trim().toLowerCase();
+        try {
+            if (cleanEmail) {
+                const rawCert = localStorage.getItem('platforms_armed_cert_intake_' + cleanEmail);
+                if (rawCert) {
+                    const parsedCert = JSON.parse(rawCert);
+                    parsedCert.range_session = rangeRecord;
+                    localStorage.setItem('platforms_armed_cert_intake_' + cleanEmail, JSON.stringify(parsedCert));
+                }
+            }
+        } catch (e) {}
+
+        // Sync confirmed range date & phone directly to Google Sheets Students & Reservations
+        try {
+            const gwUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.url)
+                || localStorage.getItem('platforms_gmail_webhook_url') || '';
+            const gwSecret = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.gmailWebhook && window.PLATFORMS_CONFIG.gmailWebhook.secret)
+                || localStorage.getItem('platforms_gmail_webhook_secret') || '';
+            if (gwUrl && cleanEmail && !this.isInstructorOrTestIdentity(cleanEmail, rangeRecord.studentName)) {
+                await fetch(gwUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    keepalive: true,
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'upsert_student',
+                        secret: gwSecret,
+                        student: {
+                            id: cleanEmail,
+                            name: rangeRecord.studentName || 'Student Officer',
+                            email: cleanEmail,
+                            phone: phoneVal,
+                            studentPhone: phoneVal,
+                            course_type: 'armed',
+                            armed_range_session: rangeRecord,
+                            range_qualification_date: rangeRecord.dateFormatted || rangeRecord.date
+                        }
+                    })
+                });
+            }
+        } catch (e) {}
+
+        this.saveState();
+        this.syncToLocalRegistry(true);
+        this.updatePaymentGateActionUI();
+        this.updateConfirmedRangeDateDisplays();
+        this.manualSaveProgress(`In-Person Range Qualification scheduled for ${rangeRecord.dateFormatted || rangeRecord.date} at Eagle Sports Range!`);
+        alert(
+            `✅ IN-PERSON RANGE QUALIFICATION CONFIRMED!\n\n` +
+            `Date: ${rangeRecord.dateFormatted || rangeRecord.date} (${rangeRecord.time || '9:00 AM – 5:00 PM'})\n` +
+            `Location: Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)\n` +
+            `Tuition: PAID IN FULL ($0 Due — Ammo, Targets & Range Fee Included)\n\n` +
+            `Make sure you also complete and save your Trainee Section of IDFPR Form IL486-1138 below prior to arriving at the range!`
+        );
+    }
+
+    async initiateCourseEnrollmentPayment() {
         if (this.isPaid) {
             this.saveState();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress("In-Person Range Qualification date confirmed! Armed Course unlocked.");
+            this.manualSaveProgress("Armed Course unlocked! Complete all 10 online modules & written exam, then schedule your included range day.");
             return;
         }
 
@@ -4384,23 +4468,15 @@ class SecurityCourseApp {
     }
 
     async checkExistingPaymentStatus() {
-        if (!this.selectedRangeSessionId && !this.hasSelectedRangeDate()) {
-            alert("STEP 1 REQUIRED: Please click an available In-Person Range Qualification Date in Step 1 above first, then click this button to verify your payment.");
-            const grid = document.getElementById('armed-gate-range-dates-grid');
-            if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-
         // Step 1: Automatically check Google Sheets by the student's logged-in email first (zero code needed)
         const autoCheck = await this.verifyArmedPaymentInGoogleSheets(this.studentEmail);
         if (autoCheck && autoCheck.verified) {
-            await this.confirmAndSaveSelectedRangeDate();
             this.recordVerifiedPayment(this.studentEmail, autoCheck.confirmationId || 'google_sheets_armed_verified');
             this.saveState();
-            this.syncStudentToRegistry();
+            this.syncToLocalRegistry();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress("Armed Course payment ($200.00) & Range Qualification Date verified! Full 20-Hour Online Course Unlocked.");
+            this.manualSaveProgress("Armed Course payment ($200.00) verified! Full 20-Hour Online Course Unlocked.");
             return;
         }
 
@@ -4410,25 +4486,23 @@ class SecurityCourseApp {
         const trimmed = input.trim();
 
         if (ptaVerifyAdminCredential(trimmed)) {
-            await this.confirmAndSaveSelectedRangeDate();
             this.recordVerifiedPayment(this.studentEmail, 'instructor_armed_authorized');
             this.saveState();
-            this.syncStudentToRegistry();
+            this.syncToLocalRegistry();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress("Instructor authorization & Range Qualification Date verified! Full 20-Hour Online Course Unlocked.");
+            this.manualSaveProgress("Instructor authorization verified! Full 20-Hour Online Course Unlocked.");
             return;
         }
 
         const ptaCheck = await this.verifyArmedPaymentInGoogleSheets(this.studentEmail, trimmed);
         if (ptaCheck && ptaCheck.verified) {
-            await this.confirmAndSaveSelectedRangeDate();
             this.recordVerifiedPayment(this.studentEmail, ptaCheck.confirmationId || trimmed.toUpperCase());
             this.saveState();
-            this.syncStudentToRegistry();
+            this.syncToLocalRegistry();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress("PTA Confirmation Number & Range Qualification Date verified! Full 20-Hour Online Course Unlocked.");
+            this.manualSaveProgress("PTA Confirmation Number verified! Full 20-Hour Online Course Unlocked.");
         } else if (ptaCheck && ptaCheck.reason === 'email_mismatch') {
             alert("This PTA Confirmation Number is registered to a different email address. Please sign in with the email address you used to register, or contact Instructor Charles Young at (773) 873-2591.");
         } else {
@@ -4437,22 +4511,16 @@ class SecurityCourseApp {
     }
 
     async promptVoucherCode() {
-        if (!this.selectedRangeSessionId && !this.hasSelectedRangeDate()) {
-            alert("STEP 1 REQUIRED: Please select your In-Person Range Qualification Date in Step 1 above first, then click Agency Voucher Code.");
-            const grid = document.getElementById('armed-gate-range-dates-grid');
-            if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
         const code = prompt("Enter Agency / Instructor Authorization Code:");
         if (!code) return;
         const clean = code.trim();
         if (ptaVerifyAdminCredential(clean)) {
-            await this.confirmAndSaveSelectedRangeDate();
             this.recordVerifiedPayment(this.studentEmail, 'instructor_armed_voucher_authorized');
             this.saveState();
+            this.syncToLocalRegistry();
             this.updateHeaderProfileDisplay();
             this.showView('overview');
-            this.manualSaveProgress("Instructor authorization code & Range Qualification Date confirmed! Armed Course unlocked.");
+            this.manualSaveProgress("Instructor authorization code confirmed! Armed Course unlocked.");
         } else {
             alert("Invalid authorization code. Armed course payment ($200.00) is required to access the course.");
         }
@@ -4950,7 +5018,10 @@ class SecurityCourseApp {
     // =========================================================================
     async apiCall(endpoint, method = 'GET', data = null) {
         try {
-            const baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            let baseUrl = (window.PLATFORMS_CONFIG && window.PLATFORMS_CONFIG.apiBaseUrl) ? window.PLATFORMS_CONFIG.apiBaseUrl.replace(/\/$/, '') : '';
+            if (!baseUrl && typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                baseUrl = 'https://charlesyoung52-cloud-github-io.onrender.com';
+            }
             const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
             const headers = { 'Content-Type': 'application/json' };
             if (this.isAdminMode || localStorage.getItem('pta_admin_auth') === 'authorized') {

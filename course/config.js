@@ -17,6 +17,8 @@ window.PLATFORMS_CONFIG = {
         secret: "pta-7Kq2x9Lm4Rv8"
     },
 
-    // 3. Optional Local/Self-Hosted Backend API URL (Render.com removed)
-    apiBaseUrl: ""
+    // 3. Cloud / Local Backend API URL (Render in production, relative locally)
+    apiBaseUrl: (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"))
+        ? ""
+        : "https://charlesyoung52-cloud-github-io.onrender.com"
 };
