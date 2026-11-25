@@ -28,7 +28,7 @@ const COURSE_DATABASE = {
             "No disqualifying felony convictions",
             "Internet-connected device (Smartphone, Tablet, or Computer)"
         ],
-        cancellation: "Instant digital access upon registration. Self-paced completion anytime 24/7 with immediate certificate issuance upon completion (no wait)."
+        cancellation: "Instant 24/7 online access upon registration. Self-paced completion anytime 24/7 with immediate certificate issuance upon completion (no wait)."
     },
     "armed-28": {
         title: "28 HR ONLINE ARMED SECURITY COURSE",
