@@ -3268,9 +3268,24 @@ class SecurityCourseApp {
                 statusTagEl.style.color = "var(--brand-green-bright)";
             }
             if (rangeBannerEl) rangeBannerEl.style.display = 'block';
-            if (scheduleCtaEl) scheduleCtaEl.style.display = 'inline-flex';
+            const part1Complete = Boolean(this.isCertLocked || this.isAdminMode);
+            if (scheduleCtaEl) {
+                scheduleCtaEl.style.display = 'inline-flex';
+                if (part1Complete) {
+                    scheduleCtaEl.innerHTML = `<i class="fas fa-calendar-check"></i> Step 2: Schedule In-Person Range Qualification`;
+                    scheduleCtaEl.style.opacity = '1';
+                    scheduleCtaEl.style.borderColor = '#34d399';
+                    scheduleCtaEl.style.color = '#6ee7b7';
+                } else {
+                    scheduleCtaEl.innerHTML = `<i class="fas fa-lock"></i> Step 2: Schedule Range Qual (Complete Part 1 First)`;
+                    scheduleCtaEl.style.opacity = '0.68';
+                    scheduleCtaEl.style.borderColor = '#d4af37';
+                    scheduleCtaEl.style.color = '#f3d06b';
+                }
+            }
             const resultsRangeSched = document.getElementById('results-range-scheduler-section');
             if (resultsRangeSched) resultsRangeSched.style.display = 'block';
+            this.updateRangeSchedulerPart1Gate();
             this.loadPaymentGateRangeSchedule();
             if (exhaustedBoxEl) exhaustedBoxEl.style.display = 'none';
             if (retakeBtnEl) retakeBtnEl.style.display = this.isCertLocked ? 'none' : 'inline-flex';
@@ -3341,14 +3356,14 @@ class SecurityCourseApp {
                     });
 
                     if (mainActionBtn) {
-                        mainActionBtn.innerHTML = `<i class="fas fa-file-signature"></i> Complete & Save Armed Certificate Info to Profile`;
+                        mainActionBtn.innerHTML = `<i class="fas fa-file-signature"></i> Step 1: Complete & Save Part 1 (Form IL486-1138)`;
                         mainActionBtn.disabled = false;
                         mainActionBtn.style.opacity = '1';
                         mainActionBtn.style.cursor = 'pointer';
                         mainActionBtn.onclick = () => this.handleResultsCertificateAction();
                     }
                     if (bottomSubmitBtn) {
-                        bottomSubmitBtn.innerHTML = `<i class="fas fa-save"></i> Save Certificate Information to My Profile for Instructor Range Sign-Off`;
+                        bottomSubmitBtn.innerHTML = `<i class="fas fa-save"></i> Save Part 1 Trainee Info & Unlock Step 2 (Range Scheduling)`;
                         bottomSubmitBtn.disabled = false;
                         bottomSubmitBtn.style.opacity = '1';
                         bottomSubmitBtn.style.cursor = 'pointer';
@@ -3699,15 +3714,53 @@ class SecurityCourseApp {
         });
 
         this.renderResults();
-        this.manualSaveProgress("Trainee Firearms Certification Record (Form IL486-1138) saved to your profile for Instructor range sign-off!");
+        this.manualSaveProgress("Step 1 Complete — Part 1 (Form IL486-1138) saved! Step 2 Range Qualification Scheduling is now unlocked below.");
 
         setTimeout(() => {
             alert(
-                "✅ TRAINEE CERTIFICATION RECORD SAVED TO YOUR PROFILE!\n\n" +
-                "Your Trainee section of IDFPR Form IL486-1138 and your Written Examination Score (" + effectivePct + "%) have been saved to your student profile and forwarded to the Instructor Admin Portal.\n\n" +
-                "Next Step: Attend your scheduled In-Person Range Qualification at Eagle Sports Range (5900 W 159th St, Oak Forest, IL). Upon completion of your live-fire qualification, Instructor Charles Young will enter your range scores and email your completed certificate to you and to IDFPR (FPR.SafetyUnit@illinois.gov)."
+                "✅ STEP 1 COMPLETE — PART 1 (TRAINEE SECTION) SAVED!\n\n" +
+                "Your Part 1 Trainee information of IDFPR Form IL486-1138 and your Written Examination Score (" + effectivePct + "%) have been saved to your student profile for Instructor Charles Young.\n\n" +
+                "Next Step (Step 2 Unlocked Below): Select your weekend In-Person Range Qualification date at Eagle Sports Range (5900 W 159th St, Oak Forest, IL) at $0 extra cost."
             );
+            const rangeSec = document.getElementById('results-range-scheduler-section');
+            if (rangeSec) rangeSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 250);
+    }
+
+    updateRangeSchedulerPart1Gate() {
+        const part1Complete = Boolean(this.isCertLocked || this.isAdminMode);
+        const pill = document.getElementById('results-range-step-pill');
+        const lockNotice = document.getElementById('results-range-part1-lock-notice');
+        const schedBody = document.getElementById('results-range-scheduler-body');
+        const confirmBtn = document.getElementById('btn-confirm-end-range-date');
+
+        if (pill) {
+            if (part1Complete) {
+                pill.className = 'armed-gate-step-pill pill-unlocked';
+                pill.innerHTML = `<i class="fas fa-unlock"></i> STEP 2 OF 2 &bull; UNLOCKED &bull; INCLUDED IN YOUR $200 TUITION ($0 EXTRA DUE)`;
+            } else {
+                pill.className = 'armed-gate-step-pill';
+                pill.innerHTML = `<i class="fas fa-lock"></i> STEP 2 OF 2 &bull; LOCKED UNTIL PART 1 IS SAVED ABOVE`;
+            }
+        }
+        if (lockNotice) lockNotice.style.display = part1Complete ? 'none' : 'flex';
+        if (schedBody) {
+            schedBody.style.opacity = part1Complete ? '1' : '0.42';
+            schedBody.style.pointerEvents = part1Complete ? 'auto' : 'none';
+            schedBody.setAttribute('aria-disabled', part1Complete ? 'false' : 'true');
+        }
+        if (confirmBtn) {
+            confirmBtn.disabled = !part1Complete;
+        }
+    }
+
+    handleScheduleRangeCtaClick() {
+        if (!this.isCertLocked && !this.isAdminMode) {
+            alert("Please complete and save Step 1 (Part 1: Trainee Section of IDFPR Form IL486-1138) first. As soon as Part 1 is saved, Step 2 (In-Person Range Qualification Scheduling) will unlock automatically.");
+            this.handleResultsCertificateAction();
+            return;
+        }
+        document.getElementById('results-range-scheduler-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     async downloadOfficialPdfCertificate() {
@@ -4186,6 +4239,11 @@ class SecurityCourseApp {
     }
 
     selectPaymentGateRangeDate(sessionId) {
+        if (!this.isCertLocked && !this.isAdminMode) {
+            alert("Please complete and save Step 1 (Part 1: Trainee Section of IDFPR Form IL486-1138) before selecting your In-Person Range Qualification date.");
+            this.handleResultsCertificateAction();
+            return;
+        }
         this.selectedRangeSessionId = sessionId;
         this.renderPaymentGateRangeDates();
         this.updatePaymentGateActionUI();
@@ -4378,6 +4436,11 @@ class SecurityCourseApp {
     }
 
     async confirmEndOfCourseRangeSchedule() {
+        if (!this.isCertLocked && !this.isAdminMode) {
+            alert("Please complete and save Step 1 (Part 1: Trainee Section of IDFPR Form IL486-1138) first before confirming your In-Person Range Qualification date.");
+            this.handleResultsCertificateAction();
+            return;
+        }
         if (!this.selectedRangeSessionId && !this.hasSelectedRangeDate()) {
             alert("Please click an open weekend In-Person Range Qualification date card above first.");
             const grid = document.getElementById('armed-gate-range-dates-grid');

@@ -718,80 +718,11 @@
                             <i class="fas fa-redo"></i> Retake Exam
                         </button>
                         <button class="btn-primary" id="btn-results-main-action" onclick="app.handleResultsCertificateAction()">
-                            <i class="fas fa-file-signature"></i> Step 1: Complete &amp; Save Armed Certificate Info
+                            <i class="fas fa-file-signature"></i> Step 1: Complete &amp; Save Part 1 (Form IL486-1138)
                         </button>
-                        <button type="button" id="btn-schedule-range-cta" class="btn-secondary" style="display:inline-flex; align-items:center; gap:8px; border-color:#d4af37; color:#f3d06b;" onclick="document.getElementById('results-range-scheduler-section')?.scrollIntoView({behavior:'smooth', block:'start'})">
-                            <i class="fas fa-calendar-check"></i> Step 2: Schedule In-Person Range Qualification
+                        <button type="button" id="btn-schedule-range-cta" class="btn-secondary" style="display:inline-flex; align-items:center; gap:8px; border-color:#d4af37; color:#f3d06b;" onclick="app.handleScheduleRangeCtaClick()">
+                            <i class="fas fa-lock"></i> Step 2: Schedule Range Qual (Complete Part 1 First)
                         </button>
-                    </div>
-                </div>
-
-                <!-- Interactive End-of-Course In-Person Range Qualification Scheduler (Shown on Exam Pass) -->
-                <div class="armed-gate-step-box" id="results-range-scheduler-section" style="margin:22px 0; border:2px solid #d4af37; background:linear-gradient(180deg, rgba(20,24,33,0.98) 0%, rgba(11,13,18,0.98) 100%);">
-                    <div class="armed-gate-step-header">
-                        <span class="armed-gate-step-pill pill-unlocked" id="results-range-step-pill">
-                            <i class="fas fa-calendar-check"></i> INCLUDED IN YOUR $200 TUITION &bull; $0 EXTRA DUE
-                        </span>
-                        <h3 style="font-size:1.3rem; color:#ffffff;"><i class="fas fa-bullseye" style="color:#d4af37;"></i> Schedule Your In-Person 8-Hour Live-Fire Range Qualification</h3>
-                    </div>
-                    <p class="armed-gate-step-desc" style="margin-bottom:14px;">
-                        Now that you have completed the 20-hour online armed classroom portion, select an open weekend session below at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong>. Range fees, targets, and 50 rounds of qualification ammunition are 100% included in your tuition:
-                    </p>
-
-                    <div id="armed-gate-range-dates-grid" class="armed-gate-dates-grid">
-                        <!-- Dynamically populated from ../data/calendar.json -->
-                    </div>
-
-                    <div class="armed-gate-contact-row" style="margin-top:14px;">
-                        <div class="armed-gate-input-group">
-                            <label for="armed-gate-student-phone"><i class="fas fa-phone-alt" style="color:#d4af37;"></i> Mobile Phone Number (Required for Range Roster) *:</label>
-                            <input type="tel" id="armed-gate-student-phone" class="armed-gate-input" placeholder="(773) 555-0199" oninput="app.updatePaymentGateActionUI()">
-                        </div>
-                        <div class="armed-gate-input-group">
-                            <label for="armed-gate-student-notes"><i class="fas fa-crosshairs" style="color:#d4af37;"></i> Handgun Platform Preference (Optional):</label>
-                            <input type="text" id="armed-gate-student-notes" class="armed-gate-input" placeholder="9mm Semi-Auto / .38 Revolver / Rental" oninput="app.updatePaymentGateActionUI()">
-                        </div>
-                    </div>
-
-                    <div id="armed-gate-selected-date-banner" class="armed-gate-selected-banner" style="margin-top:12px;">
-                        <i class="fas fa-hand-pointer" style="color:#fbbf24; font-size:1.1rem;"></i>
-                        <span><strong>Select Your Range Qualification Date:</strong> Click any open weekend date card above, enter your mobile phone number, and click Confirm below.</span>
-                    </div>
-
-                    <div style="display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; margin-top:16px;">
-                        <button type="button" id="btn-confirm-end-range-date" class="btn-primary" style="padding:13px 24px; font-size:1.02rem;" onclick="app.confirmEndOfCourseRangeSchedule()">
-                            <i class="fas fa-calendar-check"></i> Confirm My In-Person Range Qualification Date ($0 Due)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- In-Person Range Qualification Callout (Shown on Pass) -->
-                <div class="range-voucher-banner" id="range-voucher-banner">
-                    <h3><i class="fas fa-bullseye"></i> Next Step: In-Person Live-Fire Range Qualification &amp; Instructor Certificate Issuance</h3>
-                    <p style="color:#d1d5db; font-size:0.95rem; line-height:1.6; margin:0;">
-                        Under <strong>225 ILCS 447</strong>, <strong>68 Ill. Adm. Code 1240.510</strong>, and <strong>IDFPR Approved Curriculum #102-000398</strong>, passing this 20-hour online armed classroom course satisfies Phase 1 of your 28-Hour Illinois Firearm Control Card ("Tan Card") certification. Complete your <strong>Trainee Section of IDFPR Form IL486-1138</strong> below—it saves directly to your student profile along with your Written Examination Score so that <strong>Lead Instructor Charles Young (Registered Firearm Instructor #263-000693)</strong> can enter your in-person live-fire qualification scores at Eagle Sports Range and send your official completed certificate to your email and to IDFPR (<strong>FPR.SafetyUnit@illinois.gov</strong>).
-                    </p>
-                    <div class="range-voucher-grid">
-                        <div class="range-voucher-item">
-                            <strong>Confirmed Qualification Date</strong>
-                            <span id="voucher-confirmed-range-date" style="color:#34d399; font-weight:700;">Scheduled Range Session</span>
-                        </div>
-                        <div class="range-voucher-item">
-                            <strong>Range Facility</strong>
-                            Eagle Sports Range &bull; 5900 W 159th St, Oak Forest, IL 60452
-                        </div>
-                        <div class="range-voucher-item">
-                            <strong>Tuition &amp; Gear Status</strong>
-                            PAID IN FULL ($200) &bull; Ammo, Targets &amp; Range Fee Included
-                        </div>
-                        <div class="range-voucher-item">
-                            <strong>Qualification Standard</strong>
-                            50 Rounds (5, 7 &amp; 10 Yards) &bull; Min 35/50 (70%)
-                        </div>
-                        <div class="range-voucher-item">
-                            <strong>Required Dress &amp; ID</strong>
-                            Gov Photo ID, FOID Card, Closed-Toe Shoes &amp; Crew-Neck Shirt
-                        </div>
                     </div>
                 </div>
 
@@ -814,27 +745,30 @@
                     </button>
                 </div>
 
-                <!-- Official IDFPR Form IL486-1138 Trainee Intake Form (Saves to Student Profile for Instructor Range Sign-Off) -->
+                <!-- STEP 1: Official IDFPR Form IL486-1138 Part 1 Trainee Intake Form (MUST Be Completed Before Scheduling Range Qual) -->
                 <div class="cert-intake-card" id="results-certificate-form-section">
                     <div class="cert-sealed-banner" id="cert-sealed-banner" style="display:none;">
                         <div class="cert-sealed-icon">
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="cert-sealed-content">
-                            <h4><i class="fas fa-shield-alt"></i> TRAINEE FIREARMS CERTIFICATION RECORD SAVED TO PROFILE (FORM IL486-1138)</h4>
+                            <h4><i class="fas fa-shield-alt"></i> STEP 1 COMPLETE — PART 1 TRAINEE RECORD SAVED TO PROFILE (FORM IL486-1138)</h4>
                             <p>
-                                Your completed Trainee Certification Information and Written Examination Score (<strong id="sealed-cert-id-tag">PTA-IL-ARMED</strong>) have been saved to your student profile and forwarded to the Instructor Admin Portal.
+                                Your completed Part 1 Trainee Certification Information and Written Examination Score (<strong id="sealed-cert-id-tag">PTA-IL-ARMED</strong>) have been saved to your student profile and forwarded to the Instructor Admin Portal.
                             </p>
-                            <p style="margin-top:6px; color:#fbbf24; font-weight:600;">
-                                <i class="fas fa-user-check"></i> INSTRUCTOR SIGN-OFF &amp; DISPATCH: Following your In-Person Live-Fire Qualification at Eagle Sports Range, Lead Instructor Charles Young will enter your range qualification scores and send your completed IDFPR Form IL486-1138 certificate to your email and to IDFPR (<strong>FPR.SafetyUnit@illinois.gov</strong>).
+                            <p style="margin-top:6px; color:#34d399; font-weight:700;">
+                                <i class="fas fa-unlock"></i> NEXT: Scroll down to Step 2 below to schedule your included In-Person 8-Hour Live-Fire Range Qualification at Eagle Sports Range ($0 extra due).
                             </p>
                         </div>
                     </div>
 
                     <div class="cert-intake-header">
-                        <h3><i class="fas fa-id-card" style="color:var(--brand-green);"></i> Application for Certification of Completion of Firearms Training (IDFPR Form IL486-1138)</h3>
+                        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(212,175,55,0.16); border:1px solid rgba(212,175,55,0.45); color:#f3d06b; font-size:0.78rem; font-weight:800; letter-spacing:0.6px; text-transform:uppercase; padding:5px 12px; border-radius:999px; margin-bottom:10px;">
+                            <i class="fas fa-file-signature"></i> Step 1 of 2 &bull; Required Before Scheduling Range Qualification
+                        </div>
+                        <h3><i class="fas fa-id-card" style="color:var(--brand-green);"></i> Part 1: Trainee Section — IDFPR Form IL486-1138</h3>
                         <p>
-                            <strong>TRAINEE SECTION:</strong> Fill in this section of the form below and save it to your profile to forward it to Lead Instructor Charles Young for completion after your In-Person Range Qualification (<strong>225 ILCS 447 &bull; 68 Ill. Adm. Code 1240.510 &bull; IDFPR Approved Curriculum #102-000398</strong>).
+                            <strong>REQUIRED FIRST STEP:</strong> Complete and save Part 1 (Trainee Section) below to unlock your In-Person Range Qualification scheduler. Your information saves directly to your profile so Lead Instructor Charles Young only needs to add your live-fire qualification scores after range day (<strong>225 ILCS 447 &bull; 68 Ill. Adm. Code 1240.510 &bull; Curriculum #102-000398</strong>).
                         </p>
                     </div>
 
@@ -844,10 +778,10 @@
                         </div>
                         <div class="cert-security-warning-text" style="color: #713f12;">
                             <strong style="color: #713f12; font-size: 1.08rem; display: block; margin-bottom: 6px; font-weight: 800;">
-                                <i class="fas fa-clipboard-check" style="color: #854d0e;"></i> VERIFY ALL TRAINEE FIELDS — SAVES TO YOUR PROFILE FOR INSTRUCTOR RANGE COMPLETION
+                                <i class="fas fa-clipboard-check" style="color: #854d0e;"></i> COMPLETE ALL PART 1 TRAINEE FIELDS TO UNLOCK RANGE QUALIFICATION SCHEDULING
                             </strong>
                             <p style="color: #854d0e; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0; font-weight: 700;">
-                                Verify that your legal name, SSN/ITIN, address, PERC number (if applicable), email, physical description, and signature are 100% accurate. When you click Save below, your record and Written Examination Score save directly to your profile so your Instructor can add your in-person qualification results and send your official certificate to you and to IDFPR (<strong>FPR.SafetyUnit@illinois.gov</strong>).
+                                Verify that your legal name, SSN/ITIN, address, PERC number (if applicable), email, physical description, and electronic signature are 100% accurate. When you click Save below, Part 1 saves to your profile for Instructor Charles Young and immediately unlocks Step 2 to select your Eagle Sports Range qualification date.
                             </p>
                         </div>
                     </div>
@@ -973,8 +907,98 @@
 
                     <div style="display:flex; justify-content:flex-end; gap:16px; flex-wrap:wrap; margin-top:16px;">
                         <button class="btn-primary" id="btn-download-cert-main" onclick="app.submitArmedCertToProfile()" style="padding:14px 28px; font-size:1.05rem;">
-                            <i class="fas fa-save"></i> Save Certificate Information to My Profile for Instructor Range Sign-Off
+                            <i class="fas fa-save"></i> Save Part 1 Trainee Info &amp; Unlock Step 2 (Range Scheduling)
                         </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Interactive End-of-Course In-Person Range Qualification Scheduler (Unlocked After Part 1 Saved) -->
+                <div class="armed-gate-step-box" id="results-range-scheduler-section" style="margin:22px 0; border:2px solid #d4af37; background:linear-gradient(180deg, rgba(20,24,33,0.98) 0%, rgba(11,13,18,0.98) 100%);">
+                    <div class="armed-gate-step-header">
+                        <span class="armed-gate-step-pill pill-unlocked" id="results-range-step-pill">
+                            <i class="fas fa-lock"></i> STEP 2 OF 2 &bull; COMPLETE &amp; SAVE PART 1 ABOVE TO UNLOCK
+                        </span>
+                        <h3 style="font-size:1.3rem; color:#ffffff;"><i class="fas fa-bullseye" style="color:#d4af37;"></i> Step 2: Schedule Your In-Person 8-Hour Live-Fire Range Qualification</h3>
+                    </div>
+
+                    <!-- Gate Notice Shown Until Part 1 Is Completed & Saved -->
+                    <div id="results-range-part1-lock-notice" style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; background:rgba(245,158,11,0.12); border:1.5px solid #f59e0b; border-radius:8px; padding:16px 18px; margin-bottom:16px;">
+                        <div style="display:flex; align-items:flex-start; gap:12px; flex:1; min-width:240px;">
+                            <i class="fas fa-lock" style="color:#fbbf24; font-size:1.35rem; margin-top:2px;"></i>
+                            <div>
+                                <div style="font-weight:800; color:#fde68a; font-size:0.98rem; margin-bottom:4px;">
+                                    COMPLETE PART 1 (TRAINEE SECTION) ABOVE BEFORE SCHEDULING YOUR RANGE DATE
+                                </div>
+                                <div style="font-size:0.9rem; color:#e2e8f0; line-height:1.5;">
+                                    Please fill in and save all required Part 1 fields of <strong>IDFPR Form IL486-1138</strong> (Name, SSN/ITIN, Address, DOB, Physical Description, and Electronic Signature) first. As soon as you click <strong>Save Part 1</strong> above, this scheduler unlocks automatically so you can reserve your included range date ($0 extra due).
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-primary" style="white-space:nowrap;" onclick="app.handleResultsCertificateAction()">
+                            <i class="fas fa-arrow-up"></i> Go to Step 1 (Part 1 Form)
+                        </button>
+                    </div>
+
+                    <div id="results-range-scheduler-body">
+                        <p class="armed-gate-step-desc" style="margin-bottom:14px;">
+                            Now that you have completed the 20-hour online armed classroom portion and saved Part 1 of Form IL486-1138, select an open weekend session below at <strong>Eagle Sports Range (5900 W 159th St, Oak Forest, IL 60452)</strong>. Range fees, targets, and 50 rounds of qualification ammunition are 100% included in your tuition:
+                        </p>
+
+                        <div id="armed-gate-range-dates-grid" class="armed-gate-dates-grid">
+                            <!-- Dynamically populated from ../data/calendar.json -->
+                        </div>
+
+                        <div class="armed-gate-contact-row" style="margin-top:14px;">
+                            <div class="armed-gate-input-group">
+                                <label for="armed-gate-student-phone"><i class="fas fa-phone-alt" style="color:#d4af37;"></i> Mobile Phone Number (Required for Range Roster) *:</label>
+                                <input type="tel" id="armed-gate-student-phone" class="armed-gate-input" placeholder="(773) 555-0199" oninput="app.updatePaymentGateActionUI()">
+                            </div>
+                            <div class="armed-gate-input-group">
+                                <label for="armed-gate-student-notes"><i class="fas fa-crosshairs" style="color:#d4af37;"></i> Handgun Platform Preference (Optional):</label>
+                                <input type="text" id="armed-gate-student-notes" class="armed-gate-input" placeholder="9mm Semi-Auto / .38 Revolver / Rental" oninput="app.updatePaymentGateActionUI()">
+                            </div>
+                        </div>
+
+                        <div id="armed-gate-selected-date-banner" class="armed-gate-selected-banner" style="margin-top:12px;">
+                            <i class="fas fa-hand-pointer" style="color:#fbbf24; font-size:1.1rem;"></i>
+                            <span><strong>Select Your Range Qualification Date:</strong> Click any open weekend date card above, enter your mobile phone number, and click Confirm below.</span>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; margin-top:16px;">
+                            <button type="button" id="btn-confirm-end-range-date" class="btn-primary" style="padding:13px 24px; font-size:1.02rem;" onclick="app.confirmEndOfCourseRangeSchedule()">
+                                <i class="fas fa-calendar-check"></i> Confirm My In-Person Range Qualification Date ($0 Due)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In-Person Range Qualification Callout (Shown on Pass) -->
+                <div class="range-voucher-banner" id="range-voucher-banner">
+                    <h3><i class="fas fa-bullseye"></i> Next Step: In-Person Live-Fire Range Qualification &amp; Instructor Certificate Issuance</h3>
+                    <p style="color:#d1d5db; font-size:0.95rem; line-height:1.6; margin:0;">
+                        Under <strong>225 ILCS 447</strong>, <strong>68 Ill. Adm. Code 1240.510</strong>, and <strong>IDFPR Approved Curriculum #102-000398</strong>, passing this 20-hour online armed classroom course satisfies Phase 1 of your 28-Hour Illinois Firearm Control Card ("Tan Card") certification. Complete your <strong>Part 1 Trainee Section of IDFPR Form IL486-1138</strong> above first—it saves directly to your student profile along with your Written Examination Score and unlocks Step 2 to schedule your range day, so <strong>Lead Instructor Charles Young (Registered Firearm Instructor #263-000693)</strong> can enter your in-person live-fire qualification scores at Eagle Sports Range and send your official completed certificate to your email and to IDFPR (<strong>FPR.SafetyUnit@illinois.gov</strong>).
+                    </p>
+                    <div class="range-voucher-grid">
+                        <div class="range-voucher-item">
+                            <strong>Confirmed Qualification Date</strong>
+                            <span id="voucher-confirmed-range-date" style="color:#34d399; font-weight:700;">Scheduled Range Session</span>
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Range Facility</strong>
+                            Eagle Sports Range &bull; 5900 W 159th St, Oak Forest, IL 60452
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Tuition &amp; Gear Status</strong>
+                            PAID IN FULL ($200) &bull; Ammo, Targets &amp; Range Fee Included
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Qualification Standard</strong>
+                            50 Rounds (5, 7 &amp; 10 Yards) &bull; Min 35/50 (70%)
+                        </div>
+                        <div class="range-voucher-item">
+                            <strong>Required Dress &amp; ID</strong>
+                            Gov Photo ID, FOID Card, Closed-Toe Shoes &amp; Crew-Neck Shirt
+                        </div>
                     </div>
                 </div>
 
@@ -1262,6 +1286,6 @@
     <!-- Standalone Armed Academy Scripts -->
     <script src="config.js?v=2.0"></script>
     <script src="data.js?v=8.0"></script>
-    <script src="app.js?v=9.9"></script>
+    <script src="app.js?v=10.0"></script>
 </body>
 </html>
