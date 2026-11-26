@@ -3434,7 +3434,7 @@ function ptaVerifyAdminCredential(inputVal) {
                     : '';
 
                 const pendingInstructorTag = isPendingInstructor
-                    ? `<div style="margin-top:4px;"><span class="badge badge-danger" style="background:rgba(248,113,113,0.16); color:#fca5a5; border:1px solid rgba(248,113,113,0.55); font-size:0.72rem; cursor:pointer;" onclick="openArmedCertModal(${idx})" title="Click to open prefilled Form IL486-1138 and complete Instructor section"><i class="fas fa-circle-exclamation"></i> Pending Instructor Cert Completion</span></div>`
+                    ? `<div style="margin-top:4px;"><span class="badge badge-danger" style="background:rgba(248,113,113,0.16); color:#fca5a5; border:1px solid rgba(248,113,113,0.55); font-size:0.72rem;"><i class="fas fa-circle-exclamation"></i> Pending Instructor Cert Completion</span></div>`
                     : '';
 
                 // Cert Badge (lives inside the Student Profile — click to open prefilled certificate or download saved DB copy)
@@ -3444,7 +3444,7 @@ function ptaVerifyAdminCredential(inputVal) {
                 } else if (isArmedRow) {
                     if (s.armed_cert_data && s.armed_cert_data.instructor_completed) {
                         certBadge = `
-                            <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px; cursor:pointer;" onclick="openArmedCertModal(${idx})" title="Click to view or re-send completed Form IL486-1138">
+                            <span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px;">
                                 <i class="fas fa-file-shield"></i> IL486-1138 Completed
                             </span>
                             <div style="font-size:0.78rem; color:#4ade80; margin-top:2px;">
@@ -3453,18 +3453,18 @@ function ptaVerifyAdminCredential(inputVal) {
                         `;
                     } else if (s.armed_cert_data || s.cert_id) {
                         certBadge = `
-                            <button type="button" class="btn-action" style="background:rgba(248,113,113,0.16); border:1px solid rgba(248,113,113,0.65); color:#fecaca; padding:4px 8px; font-size:0.78rem; font-weight:700;" onclick="openArmedCertModal(${idx})" title="Student completed online portion &amp; Part 1 — click to open prefilled Form IL486-1138 and fill out missing Instructor fields">
-                                <i class="fas fa-file-signature"></i> Open Prefilled IL486-1138
-                            </button>
+                            <span class="badge badge-warning" style="display:inline-flex; align-items:center; gap:4px; background:rgba(248,113,113,0.16); border:1px solid rgba(248,113,113,0.55); color:#fecaca;">
+                                <i class="fas fa-file-signature"></i> Part 1 Saved (IL486-1138)
+                            </span>
                             <div style="font-size:0.76rem; color:#fca5a5; margin-top:3px;">
-                                Trainee Part 1 Saved &bull; Click to Complete
+                                Ready for Instructor Sign-Off
                             </div>
                         `;
                     } else {
                         certBadge = `
-                            <button type="button" class="btn-action" style="border-color:rgba(248,113,113,0.45); color:#fca5a5; padding:4px 8px; font-size:0.76rem;" onclick="openArmedCertModal(${idx})" title="Open Form IL486-1138 in Student Profile">
-                                <i class="fas fa-hourglass-half"></i> Awaiting Trainee Part 1 (IL486-1138)
-                            </button>
+                            <span style="color:var(--text-sub); font-size:0.86rem; display:inline-flex; align-items:center; gap:5px;">
+                                <i class="fas fa-hourglass-half"></i> Awaiting Trainee Part 1
+                            </span>
                         `;
                     }
                 } else if (s.cert_id) {
